@@ -1,0 +1,63 @@
+Design a modern mobile application UI called “HomeU” – Smart Rental Platform for Tenants & Property Owners.
+
+HomeU is a mobile app that allows users to rent rooms, houses, condos, or apartments. Users can register as either Tenant or Owner.
+
+Target audience: young adults, working professionals, students, and families.
+
+Platform: Mobile app (Android & iOS)
+
+Current development/testing device:
+Pixel 3a emulator
+
+Design goal:
+The UI must not be fixed to only one phone size. It must be responsive and adaptive across different mobile screen sizes while still looking polished on Pixel 3a, iPhone-sized screens, and other common Android devices.
+
+Style:
+- Clean
+- Minimal
+- Professional
+- Production-ready
+- Light mode
+- Rounded cards (16px radius)
+- Soft shadows
+- Modern icon set
+- Clean typography (Poppins or Inter)
+- Consistent spacing
+- Reusable components
+- Auto layout
+- Safe area support
+
+Colors:
+- Primary color: Deep Blue (#1E3A8A)
+- Secondary color: Soft Green (#10B981)
+- Background: light grey / white
+
+Responsive UI requirements:
+- Do not create a rigid fixed-size layout
+- Design should adapt proportionally to different phone widths and heights
+- Preserve spacing, padding, and hierarchy across small and medium phone screens
+- Prevent overflow, clipping, and content truncation
+- Use scrollable layouts where needed for long content
+- Respect SafeArea for top and bottom system areas
+- Bottom navigation, buttons, cards, and forms must remain usable on smaller devices
+- Images, banners, map previews, and carousels should scale proportionally
+- Text should remain readable without crowding
+- Keep touch targets comfortable and mobile-friendly
+- Maintain visual balance across Android and iOS screen sizes
+- Use reusable responsive components
+- Prioritize a natural mobile layout instead of stretching content awkwardly
+
+Important:
+- Optimize first for a realistic mobile experience on Pixel 3a emulator
+- Also ensure the design scales properly on other common phone sizes
+- Keep the UI elegant, realistic, and suitable for a real startup rental platform
+- Use the updated HomeU logo consistently where needed
+
+Responsive behavior:
+- This screen must be mobile-responsive, not designed for only one fixed frame
+- It should look correct on Pixel 3a and also adapt well to slightly smaller or larger phones
+- Avoid cramped layouts, overflow, and cutoff content
+- Use flexible spacing and proportional sizing
+- Use scrollable layout if the content is long
+- Maintain proper safe area padding
+- Ensure buttons, forms, cards, and navigation remain accessible and visually balanced across screen sizes
