@@ -8,23 +8,558 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:homeu/main.dart';
+import 'package:homeu/app/homeu_app.dart';
+import 'package:homeu/app/auth/homeu_session.dart';
+import 'package:homeu/pages/auth/login_screen.dart';
+import 'package:homeu/pages/auth/register_screen.dart';
+import 'package:homeu/pages/home/booking_history_screen.dart';
+import 'package:homeu/pages/home/home_page.dart';
+import 'package:homeu/pages/home/owner_add_property_screen.dart';
+import 'package:homeu/pages/home/owner_booking_requests_screen.dart';
+import 'package:homeu/pages/home/owner_analytics_screen.dart';
+import 'package:homeu/pages/home/owner_dashboard_screen.dart';
+import 'package:homeu/pages/home/profile_screen.dart';
+import 'package:homeu/pages/home/review_rating_screen.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('Splash routes through onboarding screens and ends at login on Get Started', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const HomeUApp());
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    expect(find.text('HomeU'), findsOneWidget);
+    expect(find.text('Find Your Perfect Home'), findsOneWidget);
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pumpAndSettle();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    expect(find.text('Browse Rental Properties'), findsOneWidget);
+    expect(find.text('1 of 3'), findsOneWidget);
+
+    await tester.tap(find.text('Next'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('List Your Property Easily'), findsOneWidget);
+    expect(find.text('2 of 3'), findsOneWidget);
+
+    await tester.tap(find.text('Next'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Secure Booking & Payment'), findsOneWidget);
+    expect(
+      find.text(
+        'Book viewings, confirm rentals, and complete payment through a safe and simple process.',
+      ),
+      findsOneWidget,
+    );
+    expect(find.text('Get Started'), findsOneWidget);
+    expect(find.text('3 of 3'), findsOneWidget);
+
+    await tester.tap(find.text('Get Started'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Welcome Back'), findsOneWidget);
+  });
+
+  testWidgets('Skip from onboarding screen 1 goes directly to login', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const HomeUApp());
+
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Skip'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Welcome Back'), findsOneWidget);
+  });
+
+  testWidgets('Skip from onboarding screen 2 goes directly to login', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const HomeUApp());
+
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Next'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('List Your Property Easily'), findsOneWidget);
+
+    await tester.tap(find.text('Skip'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Welcome Back'), findsOneWidget);
+  });
+
+  testWidgets('Skip from onboarding screen 3 goes directly to login', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const HomeUApp());
+
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Next'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Next'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Secure Booking & Payment'), findsOneWidget);
+    expect(
+      find.text(
+        'Book viewings, confirm rentals, and complete payment through a safe and simple process.',
+      ),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.text('Skip'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Welcome Back'), findsOneWidget);
+  });
+
+  testWidgets('Login screen renders authentication controls', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(home: HomeULoginScreen()));
+
+    expect(find.text('Welcome Back'), findsOneWidget);
+    expect(find.text('Login to continue your HomeU journey.'), findsOneWidget);
+    expect(find.text('Email'), findsOneWidget);
+    expect(find.text('Password'), findsOneWidget);
+    expect(find.text('Forgot password?'), findsOneWidget);
+    expect(find.text('Login'), findsOneWidget);
+    expect(find.text('Register'), findsOneWidget);
+    expect(find.text('Use Fingerprint'), findsOneWidget);
+  });
+
+  testWidgets('Register screen renders form and role guidance', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(home: HomeURegisterScreen()));
+
+    expect(find.text('Create Your Account'), findsOneWidget);
+    expect(find.text('Name'), findsOneWidget);
+    expect(find.text('Email'), findsOneWidget);
+    expect(find.text('Phone Number'), findsOneWidget);
+    expect(find.text('Password'), findsOneWidget);
+    expect(find.text('Tenant'), findsOneWidget);
+    expect(find.text('Owner'), findsOneWidget);
+    expect(
+      find.textContaining('selected role controls accessible features and navigation'),
+      findsOneWidget,
+    );
+    expect(find.text('Register'), findsOneWidget);
+    expect(find.text('Back to Login'), findsOneWidget);
+  });
+
+  testWidgets('Register role toggle updates selection and back link returns to login', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const MaterialApp(home: HomeULoginScreen()));
+
+    final Finder registerLink = find.widgetWithText(TextButton, 'Register');
+    await tester.ensureVisible(registerLink);
+    await tester.tap(registerLink);
+    await tester.pumpAndSettle();
+
+    ChoiceChip ownerChipBefore = tester.widget<ChoiceChip>(find.byKey(const Key('role_owner_chip')));
+    ChoiceChip tenantChipBefore = tester.widget<ChoiceChip>(find.byKey(const Key('role_tenant_chip')));
+    expect(ownerChipBefore.selected, isFalse);
+    expect(tenantChipBefore.selected, isTrue);
+
+    final Finder ownerChipFinder = find.byKey(const Key('role_owner_chip'));
+    await tester.ensureVisible(ownerChipFinder);
+    await tester.tap(ownerChipFinder);
+    await tester.pumpAndSettle();
+
+    ChoiceChip ownerChipAfter = tester.widget<ChoiceChip>(find.byKey(const Key('role_owner_chip')));
+    ChoiceChip tenantChipAfter = tester.widget<ChoiceChip>(find.byKey(const Key('role_tenant_chip')));
+    expect(ownerChipAfter.selected, isTrue);
+    expect(tenantChipAfter.selected, isFalse);
+
+    final Finder backToLoginFinder = find.text('Back to Login');
+    await tester.ensureVisible(backToLoginFinder);
+    await tester.tap(backToLoginFinder);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Welcome Back'), findsOneWidget);
+  });
+
+  testWidgets('Tenant home dashboard renders tenant-only browsing UI', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const MaterialApp(home: HomeUHomePage(tenantName: 'Aisyah')));
+
+    expect(find.text('Hello, Aisyah'), findsOneWidget);
+    expect(find.text('Search location, condo, house'), findsOneWidget);
+
+    expect(find.text('Room'), findsOneWidget);
+    expect(find.text('Whole Unit'), findsOneWidget);
+    expect(find.text('Condo'), findsOneWidget);
+    expect(find.text('Landed'), findsOneWidget);
+    expect(find.text('Apartment'), findsOneWidget);
+
+    expect(find.text('Skyline Condo Suite'), findsOneWidget);
+    expect(find.text('Mont Kiara, Kuala Lumpur'), findsOneWidget);
+    expect(find.text('RM 2,100 / month'), findsOneWidget);
+    expect(find.byIcon(Icons.favorite_border_rounded), findsWidgets);
+    expect(find.byIcon(Icons.qr_code_scanner_rounded), findsOneWidget);
+
+    expect(find.text('Home'), findsOneWidget);
+    expect(find.text('Favorites'), findsOneWidget);
+    expect(find.text('Bookings'), findsOneWidget);
+    expect(find.text('Profile'), findsOneWidget);
+    expect(find.text('Map'), findsNothing);
+    expect(find.text('Owner'), findsNothing);
+  });
+
+  testWidgets('Property details screen shows premium listing sections', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const MaterialApp(home: HomeUHomePage(tenantName: 'Aisyah')));
+
+    await tester.tap(find.byKey(const Key('property_card_Skyline Condo Suite')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('property_image_carousel')), findsOneWidget);
+    expect(find.text('Skyline Condo Suite'), findsOneWidget);
+    expect(find.text('RM 2,100 / month'), findsOneWidget);
+    expect(find.byKey(const Key('location_info_section')), findsOneWidget);
+    expect(find.text('Description'), findsOneWidget);
+    expect(find.byKey(const Key('facilities_row')), findsOneWidget);
+    expect(find.text('WiFi'), findsOneWidget);
+    expect(find.text('Parking'), findsOneWidget);
+    expect(find.text('Aircond'), findsOneWidget);
+    expect(find.byKey(const Key('owner_contact_shortcut')), findsOneWidget);
+    expect(find.byKey(const Key('book_now_button')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('book_now_button')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Booking'), findsOneWidget);
+    expect(find.byKey(const Key('selected_property_summary_card')), findsOneWidget);
+    expect(find.byKey(const Key('rental_duration_selector')), findsOneWidget);
+    expect(find.byKey(const Key('start_date_picker_field')), findsOneWidget);
+    expect(find.text('Total Price Calculation'), findsOneWidget);
+    expect(find.byKey(const Key('total_price_text')), findsOneWidget);
+    expect(find.byKey(const Key('confirm_booking_button')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('confirm_booking_button')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Payment'), findsOneWidget);
+    expect(find.text('Credit / Debit Card'), findsOneWidget);
+    expect(find.text('Online Banking'), findsOneWidget);
+    expect(find.text('E-wallet'), findsOneWidget);
+    expect(find.byKey(const Key('credit_card_visual')), findsOneWidget);
+    expect(find.byKey(const Key('payment_summary_section')), findsOneWidget);
+    expect(find.byKey(const Key('pay_now_button')), findsOneWidget);
+
+    expect(find.byKey(const Key('card_front_side')), findsOneWidget);
+    await tester.ensureVisible(find.byKey(const Key('cvv_field')));
+    await tester.tap(find.byKey(const Key('cvv_field')));
+    await tester.pump(const Duration(milliseconds: 420));
+
+    expect(find.byKey(const Key('card_back_side')), findsOneWidget);
+    expect(find.byKey(const Key('cvv_highlight_area')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('card_number_field')));
+    await tester.pump(const Duration(milliseconds: 420));
+
+    expect(find.byKey(const Key('card_front_side')), findsOneWidget);
+  });
+
+  testWidgets('Booking history screen shows filters, cards, and tenant-only nav items', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const MaterialApp(home: HomeUBookingHistoryScreen()));
+
+    expect(find.text('Booking History'), findsOneWidget);
+    expect(find.byKey(const Key('status_filter_pending')), findsOneWidget);
+    expect(find.byKey(const Key('status_filter_approved')), findsOneWidget);
+    expect(find.byKey(const Key('status_filter_rejected')), findsOneWidget);
+    expect(find.byKey(const Key('status_filter_completed')), findsOneWidget);
+
+    expect(find.text('Skyline Condo Suite'), findsOneWidget);
+    expect(find.text('Booking Date: '), findsOneWidget);
+    expect(find.text('Rental Period: '), findsOneWidget);
+    expect(find.byKey(const Key('status_badge_pending')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('status_filter_approved')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('status_badge_approved')), findsOneWidget);
+    expect(find.text('Cozy Student Room'), findsOneWidget);
+
+    expect(find.text('Home'), findsOneWidget);
+    expect(find.text('Map'), findsNothing);
+    expect(find.text('Favorites'), findsOneWidget);
+    expect(find.text('Bookings'), findsOneWidget);
+    expect(find.text('Profile'), findsOneWidget);
+    expect(find.text('Owner'), findsNothing);
+  });
+
+  testWidgets('Tenant home Bookings nav opens booking history screen', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const MaterialApp(home: HomeUHomePage(tenantName: 'Aisyah')));
+
+    await tester.tap(find.text('Bookings'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Booking History'), findsOneWidget);
+  });
+
+  testWidgets('Review and rating screen renders all feedback sections', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(home: HomeUReviewRatingScreen(propertyName: 'Skyline Condo Suite')),
+    );
+
+    expect(find.text('Review & Rating'), findsOneWidget);
+    expect(find.byKey(const Key('average_rating_summary')), findsOneWidget);
+    expect(find.byKey(const Key('rating_distribution_section')), findsOneWidget);
+    expect(find.byKey(const Key('star_rating_selector')), findsOneWidget);
+    expect(find.byKey(const Key('review_comment_field')), findsOneWidget);
+    expect(find.byKey(const Key('submit_review_button')), findsOneWidget);
+  });
+
+  testWidgets('Completed booking can open review screen', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(home: HomeUBookingHistoryScreen()));
+
+    await tester.tap(find.byKey(const Key('status_filter_completed')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('leave_review_button')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('leave_review_button')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Review & Rating'), findsOneWidget);
+    expect(find.text('Lakefront Residence'), findsOneWidget);
+  });
+
+  testWidgets('Owner dashboard renders owner-only navigation and sections', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const MaterialApp(home: HomeUOwnerDashboardScreen()));
+
+    expect(find.byKey(const Key('owner_greeting_text')), findsOneWidget);
+    expect(find.byKey(const Key('add_property_button')), findsOneWidget);
+    expect(find.byKey(const Key('earnings_summary_card')), findsOneWidget);
+    expect(find.text('My Properties'), findsWidgets);
+    expect(find.text('Booking Requests'), findsOneWidget);
+    expect(find.text('Quick Stats'), findsOneWidget);
+
+    expect(find.text('Dashboard'), findsOneWidget);
+    expect(find.text('My Properties'), findsWidgets);
+    expect(find.text('Requests'), findsWidgets);
+    expect(find.text('Analytics'), findsOneWidget);
+    expect(find.text('Profile'), findsOneWidget);
+
+    expect(find.text('Favorites'), findsNothing);
+    expect(find.text('Bookings'), findsNothing);
+    expect(find.text('Home'), findsNothing);
+  });
+
+  testWidgets('Register with owner role routes to owner dashboard', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const MaterialApp(home: HomeURegisterScreen()));
+
+    final Finder ownerChipFinder = find.byKey(const Key('role_owner_chip'));
+    await tester.ensureVisible(ownerChipFinder);
+    await tester.tap(ownerChipFinder);
+    await tester.pumpAndSettle();
+
+    final Finder registerButtonFinder = find.widgetWithText(ElevatedButton, 'Register');
+    await tester.ensureVisible(registerButtonFinder);
+    await tester.tap(registerButtonFinder);
+    await tester.pumpAndSettle();
+
+    expect(find.byType(HomeUOwnerDashboardScreen), findsOneWidget);
+    expect(find.text('Dashboard'), findsOneWidget);
+    expect(find.text('Requests'), findsWidgets);
+  });
+
+  testWidgets('Owner add property screen renders complete structured form', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const MaterialApp(home: HomeUOwnerAddPropertyScreen()));
+
+    expect(find.text('Add Property'), findsOneWidget);
+    expect(find.byKey(const Key('property_name_field')), findsOneWidget);
+    expect(find.byKey(const Key('rental_type_dropdown')), findsOneWidget);
+    expect(find.byKey(const Key('price_field')), findsOneWidget);
+    expect(find.byKey(const Key('address_field')), findsOneWidget);
+    expect(find.byKey(const Key('description_field')), findsOneWidget);
+    expect(find.byKey(const Key('facilities_checklist')), findsOneWidget);
+    expect(find.byKey(const Key('upload_images_section')), findsOneWidget);
+    expect(find.byKey(const Key('select_location_section')), findsOneWidget);
+    expect(find.byKey(const Key('availability_calendar_section')), findsOneWidget);
+    expect(find.byKey(const Key('submit_property_button')), findsOneWidget);
+  });
+
+  testWidgets('Owner dashboard Add Property opens owner add property form', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const MaterialApp(home: HomeUOwnerDashboardScreen()));
+
+    await tester.tap(find.byKey(const Key('add_property_button')));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(HomeUOwnerAddPropertyScreen), findsOneWidget);
+    expect(find.text('Add Property'), findsOneWidget);
+  });
+
+  testWidgets('Owner booking request management screen renders details and owner-only nav', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const MaterialApp(home: HomeUOwnerBookingRequestsScreen()));
+
+    expect(find.byKey(const Key('tenant_information_card')), findsOneWidget);
+    expect(find.byKey(const Key('booking_details_card')), findsOneWidget);
+    expect(find.byKey(const Key('request_summary_card')), findsOneWidget);
+    expect(find.byKey(const Key('decision_action_area')), findsOneWidget);
+    expect(find.byKey(const Key('approve_request_button')), findsOneWidget);
+    expect(find.byKey(const Key('reject_request_button')), findsOneWidget);
+
+    expect(find.text('Dashboard'), findsOneWidget);
+    expect(find.text('My Properties'), findsOneWidget);
+    expect(find.text('Requests'), findsOneWidget);
+    expect(find.text('Analytics'), findsOneWidget);
+    expect(find.text('Profile'), findsOneWidget);
+
+    expect(find.text('Home'), findsNothing);
+    expect(find.text('Favorites'), findsNothing);
+    expect(find.text('Bookings'), findsNothing);
+  });
+
+  testWidgets('Owner request decision buttons update summary state', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const MaterialApp(home: HomeUOwnerBookingRequestsScreen()));
+
+    expect(find.text('Pending Decision'), findsOneWidget);
+
+    final Finder approveButton = find.byKey(const Key('approve_request_button'));
+    await tester.ensureVisible(approveButton);
+    await tester.tap(approveButton);
+    await tester.pumpAndSettle();
+    expect(find.text('Approved'), findsOneWidget);
+
+    final Finder rejectButton = find.byKey(const Key('reject_request_button'));
+    await tester.ensureVisible(rejectButton);
+    await tester.tap(rejectButton);
+    await tester.pumpAndSettle();
+    expect(find.text('Rejected'), findsOneWidget);
+  });
+
+  testWidgets('Owner dashboard Requests nav opens request management screen', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const MaterialApp(home: HomeUOwnerDashboardScreen()));
+
+    await tester.tap(find.text('Requests'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(HomeUOwnerBookingRequestsScreen), findsOneWidget);
+  });
+
+  testWidgets('Owner analytics screen renders charts and owner-only navigation', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const MaterialApp(home: HomeUOwnerAnalyticsScreen()));
+
+    expect(find.byKey(const Key('monthly_earnings_bar_chart')), findsOneWidget);
+    expect(find.byKey(const Key('rental_type_pie_chart')), findsOneWidget);
+    expect(find.byKey(const Key('occupancy_rate_progress')), findsOneWidget);
+    expect(find.byKey(const Key('owner_stat_net_earnings')), findsOneWidget);
+    expect(find.byKey(const Key('owner_stat_occupancy')), findsOneWidget);
+    expect(find.byKey(const Key('owner_stat_requests')), findsOneWidget);
+
+    expect(find.text('Dashboard'), findsOneWidget);
+    expect(find.text('My Properties'), findsOneWidget);
+    expect(find.text('Requests'), findsWidgets);
+    expect(find.text('Analytics'), findsOneWidget);
+    expect(find.text('Profile'), findsOneWidget);
+
+    expect(find.text('Home'), findsNothing);
+    expect(find.text('Favorites'), findsNothing);
+    expect(find.text('Bookings'), findsNothing);
+  });
+
+  testWidgets('Owner dashboard Analytics nav opens owner analytics screen', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const MaterialApp(home: HomeUOwnerDashboardScreen()));
+
+    await tester.tap(find.text('Analytics'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(HomeUOwnerAnalyticsScreen), findsOneWidget);
+    expect(find.byKey(const Key('monthly_earnings_bar_chart')), findsOneWidget);
+  });
+
+  testWidgets('Profile screen renders full user details and actions', (
+    WidgetTester tester,
+  ) async {
+    HomeUSession.register(HomeURole.tenant);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: HomeUProfileScreen(
+          role: HomeURole.tenant,
+          name: 'Aisyah Rahman',
+          email: 'aisyah@email.com',
+          phone: '+60 12 998 1123',
+        ),
+      ),
+    );
+
+    expect(find.byKey(const Key('profile_photo')), findsOneWidget);
+    expect(find.byKey(const Key('profile_name')), findsOneWidget);
+    expect(find.text('Aisyah Rahman'), findsWidgets);
+    expect(find.text('aisyah@email.com'), findsOneWidget);
+    expect(find.text('+60 12 998 1123'), findsOneWidget);
+    expect(find.byKey(const Key('profile_role')), findsOneWidget);
+    expect(find.byKey(const Key('edit_profile_button')), findsOneWidget);
+    expect(find.byKey(const Key('logout_button')), findsOneWidget);
+  });
+
+  testWidgets('Profile logout clears session and routes back to login', (
+    WidgetTester tester,
+  ) async {
+    HomeUSession.register(HomeURole.owner);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: HomeUProfileScreen(
+          role: HomeURole.owner,
+          name: 'Nurul Huda',
+          email: 'owner@homeu.app',
+          phone: '+60 13 882 5560',
+        ),
+      ),
+    );
+
+    await tester.tap(find.byKey(const Key('logout_button')));
+    await tester.pumpAndSettle();
+
+    expect(HomeUSession.loggedInRole, isNull);
+    expect(find.byType(HomeULoginScreen), findsOneWidget);
+  });
+
+  testWidgets('Tenant profile nav opens profile screen', (
+    WidgetTester tester,
+  ) async {
+    HomeUSession.register(HomeURole.tenant);
+    await tester.pumpWidget(const MaterialApp(home: HomeUHomePage(tenantName: 'Aisyah')));
+
+    final Finder tenantProfileTab = find.text('Profile').first;
+    await tester.ensureVisible(tenantProfileTab);
+    await tester.tap(tenantProfileTab);
+    await tester.pumpAndSettle();
+    expect(find.byType(HomeUProfileScreen), findsOneWidget);
   });
 }
