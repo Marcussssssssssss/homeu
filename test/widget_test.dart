@@ -362,6 +362,23 @@ void main() {
     expect(find.text('Home'), findsNothing);
   });
 
+  testWidgets('Owner dashboard keeps compact owner nav alignment and larger request cards', (
+    WidgetTester tester,
+  ) async {
+    tester.view.physicalSize = const Size(393 * 2.75, 851 * 2.75);
+    tester.view.devicePixelRatio = 2.75;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(const MaterialApp(home: HomeUOwnerDashboardScreen()));
+    await tester.pumpAndSettle();
+
+    expect(find.text('My\nProperties'), findsOneWidget);
+    expect(find.byKey(const Key('owner_request_card_aisyah')), findsOneWidget);
+    expect(find.byKey(const Key('owner_request_card_daniel')), findsOneWidget);
+    expect(find.text('Tap to review request'), findsNWidgets(2));
+  });
+
   testWidgets('Register with owner role routes to owner dashboard', (
     WidgetTester tester,
   ) async {

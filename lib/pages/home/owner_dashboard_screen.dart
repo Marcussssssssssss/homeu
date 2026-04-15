@@ -4,6 +4,7 @@ import 'package:homeu/app/auth/role_access_widget.dart';
 import 'package:homeu/pages/home/owner_add_property_screen.dart';
 import 'package:homeu/pages/home/owner_booking_requests_screen.dart';
 import 'package:homeu/pages/home/owner_analytics_screen.dart';
+import 'package:homeu/pages/home/owner_bottom_navigation_bar.dart';
 import 'package:homeu/pages/home/profile_screen.dart';
 
 class HomeUOwnerDashboardScreen extends StatefulWidget {
@@ -26,8 +27,7 @@ class _HomeUOwnerDashboardScreenState extends State<HomeUOwnerDashboardScreen> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF6F8FC),
-      bottomNavigationBar: NavigationBar(
-        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+      bottomNavigationBar: HomeUOwnerBottomNavigationBar(
         selectedIndex: _selectedNavIndex,
         onDestinationSelected: (index) {
           if (index == 2) {
@@ -66,33 +66,6 @@ class _HomeUOwnerDashboardScreenState extends State<HomeUOwnerDashboardScreen> {
             _selectedNavIndex = index;
           });
         },
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.dashboard_outlined),
-            selectedIcon: Icon(Icons.dashboard_rounded),
-            label: 'Dashboard',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.home_work_outlined),
-            selectedIcon: Icon(Icons.home_work_rounded),
-            label: 'My Properties',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.inbox_outlined),
-            selectedIcon: Icon(Icons.inbox_rounded),
-            label: 'Requests',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.analytics_outlined),
-            selectedIcon: Icon(Icons.analytics_rounded),
-            label: 'Analytics',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline_rounded),
-            selectedIcon: Icon(Icons.person_rounded),
-            label: 'Profile',
-          ),
-        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -235,6 +208,7 @@ class _HomeUOwnerDashboardScreenState extends State<HomeUOwnerDashboardScreen> {
               ),
               const SizedBox(height: 10),
               _RequestCard(
+                requestKey: const Key('owner_request_card_aisyah'),
                 tenantName: 'Aisyah Rahman',
                 propertyName: 'Skyline Condo Suite',
                 status: 'Awaiting Response',
@@ -247,6 +221,7 @@ class _HomeUOwnerDashboardScreenState extends State<HomeUOwnerDashboardScreen> {
                 },
               ),
               _RequestCard(
+                requestKey: const Key('owner_request_card_daniel'),
                 tenantName: 'Daniel Lee',
                 propertyName: 'Greenview Apartment',
                 status: 'New Request',
@@ -390,12 +365,14 @@ class _OwnerPropertyCard extends StatelessWidget {
 
 class _RequestCard extends StatelessWidget {
   const _RequestCard({
+    required this.requestKey,
     required this.tenantName,
     required this.propertyName,
     required this.status,
     required this.onTap,
   });
 
+  final Key requestKey;
   final String tenantName;
   final String propertyName;
   final String status;
@@ -403,45 +380,98 @@ class _RequestCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isAwaiting = status == 'Awaiting Response';
+    final Color badgeColor = isAwaiting ? const Color(0xFFE8F5EF) : const Color(0xFFEAF0FA);
+    final Color textColor = isAwaiting ? const Color(0xFF0F8A5F) : const Color(0xFF1E3A8A);
+
     return InkWell(
+      key: requestKey,
       onTap: onTap,
       borderRadius: BorderRadius.circular(14),
       child: Container(
-        margin: const EdgeInsets.only(bottom: 10),
-        padding: const EdgeInsets.all(12),
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: const Color(0x1F1E3A8A)),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x141E3A8A),
+              blurRadius: 10,
+              offset: Offset(0, 4),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Row(
+              children: [
+                const CircleAvatar(
+                  radius: 18,
+                  backgroundColor: Color(0x1F1E3A8A),
+                  child: Icon(Icons.person_rounded, color: Color(0xFF1E3A8A), size: 20),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    tenantName,
+                    style: const TextStyle(
+                      color: Color(0xFF1F314F),
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: badgeColor,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    status,
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'Property',
+              style: TextStyle(
+                color: Color(0xFF667896),
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 2),
             Text(
-              tenantName,
+              propertyName,
               style: const TextStyle(
                 color: Color(0xFF1F314F),
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
               ),
             ),
-            const SizedBox(height: 3),
-            Text(
-              propertyName,
-              style: const TextStyle(
-                color: Color(0xFF667896),
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              status,
-              style: const TextStyle(
-                color: Color(0xFF1E3A8A),
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-              ),
+            const SizedBox(height: 10),
+            const Row(
+              children: [
+                Icon(Icons.chevron_right_rounded, color: Color(0xFF1E3A8A), size: 20),
+                SizedBox(width: 2),
+                Text(
+                  'Tap to review request',
+                  style: TextStyle(
+                    color: Color(0xFF1E3A8A),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
             ),
           ],
         ),

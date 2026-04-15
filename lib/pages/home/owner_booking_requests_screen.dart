@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
 import 'package:homeu/pages/home/owner_analytics_screen.dart';
+import 'package:homeu/pages/home/owner_bottom_navigation_bar.dart';
 import 'package:homeu/pages/home/profile_screen.dart';
 
 class HomeUOwnerBookingRequestsScreen extends StatefulWidget {
@@ -28,8 +29,7 @@ class _HomeUOwnerBookingRequestsScreenState extends State<HomeUOwnerBookingReque
         backgroundColor: const Color(0xFFF6F8FC),
         elevation: 0,
       ),
-      bottomNavigationBar: NavigationBar(
-        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+      bottomNavigationBar: HomeUOwnerBottomNavigationBar(
         selectedIndex: _selectedNavIndex,
         onDestinationSelected: (index) {
           setState(() {
@@ -58,33 +58,6 @@ class _HomeUOwnerBookingRequestsScreenState extends State<HomeUOwnerBookingReque
             );
           }
         },
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.dashboard_outlined),
-            selectedIcon: Icon(Icons.dashboard_rounded),
-            label: 'Dashboard',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.home_work_outlined),
-            selectedIcon: Icon(Icons.home_work_rounded),
-            label: 'My Properties',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.inbox_outlined),
-            selectedIcon: Icon(Icons.inbox_rounded),
-            label: 'Requests',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.analytics_outlined),
-            selectedIcon: Icon(Icons.analytics_rounded),
-            label: 'Analytics',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline_rounded),
-            selectedIcon: Icon(Icons.person_rounded),
-            label: 'Profile',
-          ),
-        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
