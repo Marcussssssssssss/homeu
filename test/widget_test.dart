@@ -20,6 +20,7 @@ import 'package:homeu/pages/home/owner_analytics_screen.dart';
 import 'package:homeu/pages/home/owner_dashboard_screen.dart';
 import 'package:homeu/pages/home/profile_screen.dart';
 import 'package:homeu/pages/home/review_rating_screen.dart';
+import 'package:homeu/pages/home/update_password_screen.dart';
 
 void main() {
   testWidgets('Splash routes through onboarding screens and ends at login on Get Started', (
@@ -142,6 +143,9 @@ void main() {
     expect(find.text('Email'), findsOneWidget);
     expect(find.text('Phone Number'), findsOneWidget);
     expect(find.text('Password'), findsOneWidget);
+    expect(find.text('Confirm Password'), findsOneWidget);
+    expect(find.byKey(const Key('register_password_field')), findsOneWidget);
+    expect(find.byKey(const Key('register_confirm_password_field')), findsOneWidget);
     expect(find.text('Tenant'), findsOneWidget);
     expect(find.text('Owner'), findsOneWidget);
     expect(
@@ -540,8 +544,47 @@ void main() {
     expect(find.text('aisyah@email.com'), findsOneWidget);
     expect(find.text('+60 12 998 1123'), findsOneWidget);
     expect(find.byKey(const Key('profile_role')), findsOneWidget);
+    expect(find.byKey(const Key('update_password_button')), findsOneWidget);
+    expect(find.text('Update Password'), findsOneWidget);
     expect(find.byKey(const Key('edit_profile_button')), findsOneWidget);
     expect(find.byKey(const Key('logout_button')), findsOneWidget);
+  });
+
+  testWidgets('Profile Update Password action opens update password screen', (
+    WidgetTester tester,
+  ) async {
+    HomeUSession.register(HomeURole.tenant);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: HomeUProfileScreen(
+          role: HomeURole.tenant,
+          name: 'Aisyah Rahman',
+          email: 'aisyah@email.com',
+          phone: '+60 12 998 1123',
+        ),
+      ),
+    );
+
+    await tester.tap(find.byKey(const Key('update_password_button')));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(HomeUUpdatePasswordScreen), findsOneWidget);
+    expect(find.text('Update Password'), findsWidgets);
+  });
+
+  testWidgets('Update password screen renders secure fields and actions', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const MaterialApp(home: HomeUUpdatePasswordScreen()));
+
+    expect(find.text('Update Password'), findsWidgets);
+    expect(find.text('Change your password to keep your account secure.'), findsOneWidget);
+    expect(find.byKey(const Key('current_password_field')), findsOneWidget);
+    expect(find.byKey(const Key('new_password_field')), findsOneWidget);
+    expect(find.byKey(const Key('confirm_new_password_field')), findsOneWidget);
+    expect(find.byKey(const Key('update_password_submit_button')), findsOneWidget);
+    expect(find.byKey(const Key('cancel_update_password_button')), findsOneWidget);
   });
 
   testWidgets('Profile logout clears session and routes back to login', (

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
 import 'package:homeu/pages/auth/login_screen.dart';
+import 'package:homeu/pages/home/update_password_screen.dart';
 
 class HomeUProfileScreen extends StatelessWidget {
   const HomeUProfileScreen({
@@ -107,6 +108,73 @@ class HomeUProfileScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 18),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Color(0x141E3A8A),
+                            blurRadius: 12,
+                            offset: Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: InkWell(
+                        key: const Key('update_password_button'),
+                        borderRadius: BorderRadius.circular(16),
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => const HomeUUpdatePasswordScreen(),
+                            ),
+                          );
+                        },
+                        child: const Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                          child: Row(
+                            children: [
+                              CircleAvatar(
+                                radius: 18,
+                                backgroundColor: Color(0x1A22C55E),
+                                child: Icon(
+                                  Icons.lock_reset_rounded,
+                                  color: Color(0xFF1E3A8A),
+                                ),
+                              ),
+                              SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Update Password',
+                                      style: TextStyle(
+                                        color: Color(0xFF1F314F),
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                    SizedBox(height: 2),
+                                    Text(
+                                      'Change your password to keep your account secure.',
+                                      style: TextStyle(
+                                        color: Color(0xFF667896),
+                                        fontSize: 12.5,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(width: 8),
+                              Icon(Icons.chevron_right_rounded, color: Color(0xFF1E3A8A)),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
                     SizedBox(
                       height: 50,
                       child: OutlinedButton(
@@ -168,7 +236,7 @@ class _ProfileInfoRow extends StatelessWidget {
     return Row(
       children: [
         SizedBox(
-          width: 92,
+          width: 110,
           child: Text(
             label,
             style: const TextStyle(
@@ -178,6 +246,7 @@ class _ProfileInfoRow extends StatelessWidget {
             ),
           ),
         ),
+        const SizedBox(width: 14),
         Expanded(
           child: Text(
             value,

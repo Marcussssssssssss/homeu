@@ -102,6 +102,15 @@ class _HomeURegisterScreenState extends State<HomeURegisterScreen> {
                       hintText: 'Create a password',
                       obscureText: true,
                       prefixIcon: Icons.lock_outline_rounded,
+                      fieldKey: Key('register_password_field'),
+                    ),
+                    const SizedBox(height: 14),
+                    const _LabeledInput(
+                      label: 'Confirm Password',
+                      hintText: 'Re-enter your password',
+                      obscureText: true,
+                      prefixIcon: Icons.lock_outline_rounded,
+                      fieldKey: Key('register_confirm_password_field'),
                     ),
                     const SizedBox(height: 18),
                     const Text(
@@ -265,6 +274,7 @@ class _LabeledInput extends StatelessWidget {
     required this.label,
     required this.hintText,
     required this.prefixIcon,
+    this.fieldKey,
     this.keyboardType,
     this.obscureText = false,
   });
@@ -272,6 +282,7 @@ class _LabeledInput extends StatelessWidget {
   final String label;
   final String hintText;
   final IconData prefixIcon;
+  final Key? fieldKey;
   final TextInputType? keyboardType;
   final bool obscureText;
 
@@ -290,6 +301,7 @@ class _LabeledInput extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         TextField(
+          key: fieldKey,
           keyboardType: keyboardType,
           obscureText: obscureText,
           decoration: InputDecoration(
