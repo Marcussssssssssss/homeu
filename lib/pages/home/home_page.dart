@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
+import 'package:homeu/app/property/property_remote_datasource.dart';
+import 'package:homeu/core/supabase/app_supabase.dart';
 import 'package:homeu/pages/home/booking_history_screen.dart';
 import 'package:homeu/pages/home/property_details_screen.dart';
 import 'package:homeu/pages/home/property_item.dart';
@@ -24,6 +26,8 @@ class HomeUHomePage extends StatefulWidget {
 
 class _HomeUHomePageState extends State<HomeUHomePage> {
   int _selectedNavIndex = 0;
+  final PropertyRemoteDataSource _propertyRemoteDataSource = const PropertyRemoteDataSource();
+  late Future<List<PropertyItem>> _propertiesFuture;
 
   static const List<String> _categories = [
     'Room',
@@ -33,8 +37,10 @@ class _HomeUHomePageState extends State<HomeUHomePage> {
     'Apartment',
   ];
 
-  final List<PropertyItem> _properties = const [
+  static const List<PropertyItem> _properties = [
     PropertyItem(
+      id: '2861d5db-0b6f-44a2-85f2-865f99de2428',
+      ownerId: '59259006-029c-4a6a-9037-48c4f9972566',
       name: 'Skyline Condo Suite',
       location: 'Mont Kiara, Kuala Lumpur',
       pricePerMonth: 'RM 2,100 / month',
@@ -47,6 +53,8 @@ class _HomeUHomePageState extends State<HomeUHomePage> {
       photoColors: [Color(0xFF5D7FBF), Color(0xFF4A68A8), Color(0xFF2F4F8F)],
     ),
     PropertyItem(
+      id: 'demo-property-2',
+      ownerId: 'demo-owner-2',
       name: 'Cozy Student Room',
       location: 'SS15, Subang Jaya',
       pricePerMonth: 'RM 680 / month',
@@ -59,6 +67,8 @@ class _HomeUHomePageState extends State<HomeUHomePage> {
       photoColors: [Color(0xFF4FAF95), Color(0xFF3D9B83), Color(0xFF2B7F6B)],
     ),
     PropertyItem(
+      id: 'demo-property-3',
+      ownerId: 'demo-owner-3',
       name: 'Family Apartment',
       location: 'Setapak, Kuala Lumpur',
       pricePerMonth: 'RM 1,450 / month',
@@ -71,6 +81,14 @@ class _HomeUHomePageState extends State<HomeUHomePage> {
       photoColors: [Color(0xFF586476), Color(0xFF495567), Color(0xFF374151)],
     ),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _propertiesFuture = AppSupabase.isInitialized
+        ? _propertyRemoteDataSource.fetchPublishedProperties()
+        : Future<List<PropertyItem>>.value(_properties);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -260,17 +278,30 @@ class _HomeUHomePageState extends State<HomeUHomePage> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  ..._properties.map(
-                    (property) => _PropertyCard(
-                      property: property,
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute<void>(
-                            builder: (_) => HomeUPropertyDetailsScreen(property: property),
-                          ),
-                        );
-                      },
-                    ),
+                  FutureBuilder<List<PropertyItem>>(
+                    future: _propertiesFuture,
+                    builder: (context, snapshot) {
+                      final items = (snapshot.data == null || snapshot.data!.isEmpty)
+                          ? _properties
+                          : snapshot.data!;
+
+                      return Column(
+                        children: items
+                            .map(
+                              (property) => _PropertyCard(
+                                property: property,
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute<void>(
+                                      builder: (_) => HomeUPropertyDetailsScreen(property: property),
+                                    ),
+                                  );
+                                },
+                              ),
+                            )
+                            .toList(growable: false),
+                      );
+                    },
                   ),
                 ],
               ),
