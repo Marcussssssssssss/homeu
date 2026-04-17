@@ -1,17 +1,36 @@
-# homeu
+# HomeU
 
-HomeU
+HomeU is a Flutter mobile app for rental discovery and property management.
 
-## Getting Started
+## Backend Foundation (Supabase Setup)
 
-This project is a starting point for a Flutter application.
+This project now includes the Supabase initialization foundation only.
+Auth features and SQLite data layer are intentionally deferred to next steps.
 
-A few resources to get you started if this is your first Flutter project:
+### Added foundation
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+- Environment loading via `flutter_dotenv`
+- Supabase SDK setup via `supabase_flutter`
+- Centralized env config in `lib/core/config/app_env.dart`
+- Reusable Supabase client helper in `lib/core/supabase/app_supabase.dart`
+- Basic auth/session foundation in `lib/app/auth/homeu_auth_service.dart`
+- Startup session resolver scaffold in `lib/app/startup/startup_session_resolver.dart`
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### Configure environment
+
+1. Copy `.env.example` to `.env` (already scaffolded in this workspace).
+2. Set your real project values:
+
+```
+SUPABASE_URL=https://your-project-ref.supabase.co
+SUPABASE_ANON_KEY=your-supabase-anon-key
+```
+
+If values remain placeholders, app UI still starts, but Supabase is skipped safely.
+
+### Run
+
+```bash
+flutter pub get
+flutter run
+```

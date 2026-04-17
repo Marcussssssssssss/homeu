@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:homeu/app/homeu_app.dart';
+import 'package:homeu/app/startup/startup_session_resolver.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/pages/auth/login_screen.dart';
 import 'package:homeu/pages/auth/register_screen.dart';
@@ -76,6 +77,19 @@ void main() {
     expect(find.text('Welcome Back'), findsOneWidget);
   });
 
+  testWidgets('Startup destination ownerFlow opens owner dashboard entry', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      const HomeUApp(startupDestination: HomeUStartupDestination.ownerFlow),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(HomeUOwnerDashboardScreen), findsOneWidget);
+    expect(find.text('Dashboard'), findsOneWidget);
+    expect(find.text('Home'), findsNothing);
+  });
+
   testWidgets('Skip from onboarding screen 2 goes directly to login', (
     WidgetTester tester,
   ) async {
@@ -135,6 +149,104 @@ void main() {
     expect(find.text('Use Fingerprint'), findsOneWidget);
   });
 
+  testWidgets('Login screen validates required email and password fields', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const MaterialApp(home: HomeULoginScreen()));
+
+    final Finder loginButton = find.widgetWithText(ElevatedButton, 'Login');
+    await tester.ensureVisible(loginButton);
+    await tester.tap(loginButton);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Email is required'), findsOneWidget);
+    expect(find.text('Password is required'), findsOneWidget);
+  });
+
+  testWidgets('Login password field supports visibility toggle', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(home: HomeULoginScreen()));
+
+    final Finder passwordField = find.byKey(const Key('login_password_field'));
+    final Finder editableInPassword = find.descendant(
+      of: passwordField,
+      matching: find.byType(EditableText),
+    );
+    EditableText before = tester.widget<EditableText>(editableInPassword);
+    expect(before.obscureText, isTrue);
+
+    await tester.tap(find.byKey(const Key('login_password_visibility_toggle')));
+    await tester.pumpAndSettle();
+
+    EditableText after = tester.widget<EditableText>(editableInPassword);
+    expect(after.obscureText, isFalse);
+  });
+
+  testWidgets('Forgot password page renders complete recovery UI', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(home: HomeULoginScreen()));
+    await tester.tap(find.text('Forgot password?'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Forgot Password'), findsWidgets);
+    expect(
+      find.text(
+        'Enter your registered email address and we will send you a password reset link.',
+      ),
+      findsOneWidget,
+    );
+    expect(find.byKey(const Key('forgot_password_email_field')), findsOneWidget);
+    expect(find.byKey(const Key('send_reset_link_button')), findsOneWidget);
+    expect(find.byKey(const Key('back_to_login_link')), findsOneWidget);
+  });
+
+  testWidgets('Forgot password sends link success state and back link returns to login', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const MaterialApp(home: HomeULoginScreen()));
+
+    await tester.tap(find.text('Forgot password?'));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byKey(const Key('forgot_password_email_field')), 'aisyah@email.com');
+    await tester.tap(find.byKey(const Key('send_reset_link_button')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('forgot_password_success_message')), findsOneWidget);
+    expect(find.byKey(const Key('forgot_password_success_icon')), findsOneWidget);
+    expect(find.text('Check Your Email'), findsOneWidget);
+    expect(find.text('A password reset link has been sent to your email.'), findsOneWidget);
+    expect(
+      find.text('Didn\'t receive the email? Check your spam folder or try again.'),
+      findsOneWidget,
+    );
+
+    final Finder backToLoginLink = find.byKey(const Key('back_to_login_link'));
+    await tester.ensureVisible(backToLoginLink);
+    await tester.tap(backToLoginLink);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Welcome Back'), findsOneWidget);
+  });
+
+  testWidgets('Forgot password validates required and invalid email', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(home: HomeULoginScreen()));
+
+    await tester.tap(find.text('Forgot password?'));
+    await tester.pumpAndSettle();
+
+    final sendResetButton = find.byKey(const Key('send_reset_link_button'));
+    await tester.ensureVisible(sendResetButton);
+    await tester.tap(sendResetButton);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Email is required'), findsOneWidget);
+
+    await tester.enterText(find.byKey(const Key('forgot_password_email_field')), 'invalid-email');
+    await tester.tap(sendResetButton);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Please enter a valid email address'), findsOneWidget);
+  });
+
   testWidgets('Register screen renders form and role guidance', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(home: HomeURegisterScreen()));
 
@@ -154,6 +266,68 @@ void main() {
     );
     expect(find.text('Register'), findsOneWidget);
     expect(find.text('Back to Login'), findsOneWidget);
+  });
+
+  testWidgets('Register screen validates required fields, email format, and password match', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const MaterialApp(home: HomeURegisterScreen()));
+
+    final Finder registerButton = find.widgetWithText(ElevatedButton, 'Register');
+    await tester.ensureVisible(registerButton);
+    await tester.tap(registerButton);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Name is required'), findsOneWidget);
+    expect(find.text('Email is required'), findsOneWidget);
+    expect(find.text('Phone Number is required'), findsOneWidget);
+    expect(find.text('Password is required'), findsOneWidget);
+    expect(find.text('Confirm Password is required'), findsOneWidget);
+
+    await tester.enterText(find.byKey(const Key('register_name_field')), 'Aisyah');
+    await tester.enterText(find.byKey(const Key('register_email_field')), 'not-an-email');
+    await tester.enterText(find.byKey(const Key('register_phone_field')), '+60 12 123 4567');
+    await tester.enterText(find.byKey(const Key('register_password_field')), 'secret123');
+    await tester.enterText(find.byKey(const Key('register_confirm_password_field')), 'secret456');
+
+    await tester.ensureVisible(registerButton);
+    await tester.tap(registerButton);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Please enter a valid email address'), findsOneWidget);
+    expect(find.text('Password and confirm password do not match'), findsOneWidget);
+  });
+
+  testWidgets('Register password fields support visibility toggle', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(home: HomeURegisterScreen()));
+
+    final Finder passwordField = find.byKey(const Key('register_password_field'));
+    final Finder confirmField = find.byKey(const Key('register_confirm_password_field'));
+    final Finder editableInPassword = find.descendant(
+      of: passwordField,
+      matching: find.byType(EditableText),
+    );
+    final Finder editableInConfirm = find.descendant(
+      of: confirmField,
+      matching: find.byType(EditableText),
+    );
+
+    EditableText passwordBefore = tester.widget<EditableText>(editableInPassword);
+    EditableText confirmBefore = tester.widget<EditableText>(editableInConfirm);
+    expect(passwordBefore.obscureText, isTrue);
+    expect(confirmBefore.obscureText, isTrue);
+
+    await tester.tap(find.byKey(const Key('register_password_visibility_toggle')));
+    await tester.pumpAndSettle();
+    final Finder confirmToggle = find.byKey(const Key('register_confirm_password_visibility_toggle'));
+    await tester.ensureVisible(confirmToggle);
+    await tester.tap(confirmToggle);
+    await tester.pumpAndSettle();
+
+    EditableText passwordAfter = tester.widget<EditableText>(editableInPassword);
+    EditableText confirmAfter = tester.widget<EditableText>(editableInConfirm);
+    expect(passwordAfter.obscureText, isFalse);
+    expect(confirmAfter.obscureText, isFalse);
   });
 
   testWidgets('Register role toggle updates selection and back link returns to login', (
@@ -387,6 +561,12 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(const MaterialApp(home: HomeURegisterScreen()));
+
+    await tester.enterText(find.byKey(const Key('register_name_field')), 'Nurul Huda');
+    await tester.enterText(find.byKey(const Key('register_email_field')), 'owner@homeu.app');
+    await tester.enterText(find.byKey(const Key('register_phone_field')), '+60 13 882 5560');
+    await tester.enterText(find.byKey(const Key('register_password_field')), 'secret123');
+    await tester.enterText(find.byKey(const Key('register_confirm_password_field')), 'secret123');
 
     final Finder ownerChipFinder = find.byKey(const Key('role_owner_chip'));
     await tester.ensureVisible(ownerChipFinder);
