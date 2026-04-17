@@ -1,11 +1,97 @@
 import 'package:flutter/material.dart';
+import 'package:homeu/app/auth/login/login_controller.dart';
+import 'package:homeu/app/auth/login/login_models.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/pages/home/home_page.dart';
 import 'package:homeu/pages/auth/register_screen.dart';
 import 'package:homeu/pages/home/owner_dashboard_screen.dart';
 
-class HomeULoginScreen extends StatelessWidget {
-  const HomeULoginScreen({super.key});
+import 'forgot_password_screen.dart';
+
+class HomeULoginScreen extends StatefulWidget {
+  const HomeULoginScreen({super.key, this.loginController});
+
+  final LoginController? loginController;
+
+  @override
+  State<HomeULoginScreen> createState() => _HomeULoginScreenState();
+}
+
+class _HomeULoginScreenState extends State<HomeULoginScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  bool _isLoading = false;
+
+  late final LoginController _loginController;
+
+  @override
+  void initState() {
+    super.initState();
+    _loginController = widget.loginController ?? LoginController();
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleLogin() async {
+    if (_isLoading) {
+      return;
+    }
+
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    final result = await _loginController.submit(
+      LoginPayload(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+      ),
+    );
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _isLoading = false;
+    });
+
+    if (!result.isSuccess || result.role == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(result.message)),
+      );
+      return;
+    }
+
+    HomeUSession.register(result.role!);
+
+    final Widget destination = result.role == HomeURole.owner
+        ? const HomeUOwnerDashboardScreen()
+        : const HomeUHomePage();
+
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute<void>(
+        builder: (_) => destination,
+      ),
+    );
+  }
+
+  String? _validateRequired(String? value, {required String fieldName}) {
+    if (value == null || value.trim().isEmpty) {
+      return '$fieldName is required';
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,11 +109,13 @@ class HomeULoginScreen extends StatelessWidget {
                 horizontalPadding,
                 24,
               ),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: constraints.maxHeight - 44),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
+              child: Form(
+                key: _formKey,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight - 44),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
                     const SizedBox(height: 6),
                     Center(
                       child: Container(
@@ -76,19 +164,30 @@ class HomeULoginScreen extends StatelessWidget {
                       hintText: 'you@example.com',
                       keyboardType: TextInputType.emailAddress,
                       prefixIcon: Icons.mail_outline_rounded,
+                      fieldKey: const Key('login_email_field'),
+                      controller: _emailController,
+                      enabled: !_isLoading,
+                      validator: (value) => _validateRequired(value, fieldName: 'Email'),
                     ),
                     const SizedBox(height: 14),
-                    const _LabeledInput(
+                    _LabeledInput(
                       label: 'Password',
                       hintText: 'Enter your password',
                       obscureText: true,
                       prefixIcon: Icons.lock_outline_rounded,
+                      fieldKey: const Key('login_password_field'),
+                      visibilityToggleKey: const Key('login_password_visibility_toggle'),
+                      controller: _passwordController,
+                      enabled: !_isLoading,
+                      validator: (value) => _validateRequired(value, fieldName: 'Password'),
                     ),
                     const SizedBox(height: 8),
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
-                        onPressed: () {
+                        onPressed: _isLoading
+                            ? null
+                            : () {
                           Navigator.of(context).push(
                             MaterialPageRoute<void>(
                               builder: (_) => const HomeUForgotPasswordPage(),
@@ -102,28 +201,7 @@ class HomeULoginScreen extends StatelessWidget {
                     SizedBox(
                       height: 52,
                       child: ElevatedButton(
-                        onPressed: () {
-                          if (!HomeUSession.login()) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  'Please register first to set your account role.',
-                                ),
-                              ),
-                            );
-                            return;
-                          }
-
-                          final Widget destination = HomeUSession.loggedInRole == HomeURole.owner
-                              ? const HomeUOwnerDashboardScreen()
-                              : const HomeUHomePage();
-
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute<void>(
-                              builder: (_) => destination,
-                            ),
-                          );
-                        },
+                        onPressed: _isLoading ? null : _handleLogin,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF1E3A8A),
                           foregroundColor: Colors.white,
@@ -135,14 +213,25 @@ class HomeULoginScreen extends StatelessWidget {
                             fontWeight: FontWeight.w700,
                           ),
                         ),
-                        child: const Text('Login'),
+                        child: _isLoading
+                            ? const SizedBox(
+                                width: 22,
+                                height: 22,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.4,
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                ),
+                              )
+                            : const Text('Login'),
                       ),
                     ),
                     const SizedBox(height: 14),
                     SizedBox(
                       height: 50,
                       child: OutlinedButton.icon(
-                        onPressed: () {
+                        onPressed: _isLoading
+                            ? null
+                            : () {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                               content: Text('Biometric authentication coming soon.'),
@@ -177,7 +266,9 @@ class HomeULoginScreen extends StatelessWidget {
                           ),
                         ),
                         TextButton(
-                          onPressed: () {
+                          onPressed: _isLoading
+                              ? null
+                              : () {
                             Navigator.of(context).push(
                               MaterialPageRoute<void>(
                                 builder: (_) => const HomeURegisterScreen(),
@@ -188,7 +279,8 @@ class HomeULoginScreen extends StatelessWidget {
                         ),
                       ],
                     ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             );
@@ -199,11 +291,16 @@ class HomeULoginScreen extends StatelessWidget {
   }
 }
 
-class _LabeledInput extends StatelessWidget {
+class _LabeledInput extends StatefulWidget {
   const _LabeledInput({
     required this.label,
     required this.hintText,
     required this.prefixIcon,
+    required this.controller,
+    required this.enabled,
+    this.fieldKey,
+    this.visibilityToggleKey,
+    this.validator,
     this.keyboardType,
     this.obscureText = false,
   });
@@ -211,8 +308,26 @@ class _LabeledInput extends StatelessWidget {
   final String label;
   final String hintText;
   final IconData prefixIcon;
+  final TextEditingController controller;
+  final bool enabled;
+  final Key? fieldKey;
+  final Key? visibilityToggleKey;
+  final String? Function(String?)? validator;
   final TextInputType? keyboardType;
   final bool obscureText;
+
+  @override
+  State<_LabeledInput> createState() => _LabeledInputState();
+}
+
+class _LabeledInputState extends State<_LabeledInput> {
+  late bool _isObscured;
+
+  @override
+  void initState() {
+    super.initState();
+    _isObscured = widget.obscureText;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -220,7 +335,7 @@ class _LabeledInput extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          label,
+          widget.label,
           style: const TextStyle(
             color: Color(0xFF1F314F),
             fontSize: 14,
@@ -228,12 +343,30 @@ class _LabeledInput extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        TextField(
-          keyboardType: keyboardType,
-          obscureText: obscureText,
+        TextFormField(
+          key: widget.fieldKey,
+          controller: widget.controller,
+          keyboardType: widget.keyboardType,
+          obscureText: _isObscured,
+          validator: widget.validator,
+          enabled: widget.enabled,
           decoration: InputDecoration(
-            hintText: hintText,
-            prefixIcon: Icon(prefixIcon),
+            hintText: widget.hintText,
+            prefixIcon: Icon(widget.prefixIcon),
+            suffixIcon: widget.obscureText
+                ? IconButton(
+                    key: widget.visibilityToggleKey,
+                    onPressed: () {
+                      setState(() {
+                        _isObscured = !_isObscured;
+                      });
+                    },
+                    icon: Icon(
+                      _isObscured ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                    ),
+                    tooltip: _isObscured ? 'Show password' : 'Hide password',
+                  )
+                : null,
             filled: true,
             fillColor: Colors.white,
             contentPadding: const EdgeInsets.symmetric(vertical: 15),
@@ -256,40 +389,4 @@ class _LabeledInput extends StatelessWidget {
   }
 }
 
-class HomeUForgotPasswordPage extends StatelessWidget {
-  const HomeUForgotPasswordPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const _AuthPlaceholderPage(
-      title: 'Forgot Password',
-      message: 'Password reset flow can be added next.',
-    );
-  }
-}
-
-
-class _AuthPlaceholderPage extends StatelessWidget {
-  const _AuthPlaceholderPage({required this.title, required this.message});
-
-  final String title;
-  final String message;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Text(
-            message,
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 16, color: Color(0xFF50617F)),
-          ),
-        ),
-      ),
-    );
-  }
-}
 
