@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
 import 'package:homeu/pages/home/booking_screen.dart';
+import 'package:homeu/pages/home/chat_screen.dart';
 import 'package:homeu/pages/home/property_item.dart';
 
 class HomeUPropertyDetailsScreen extends StatefulWidget {
@@ -35,25 +36,57 @@ class _HomeUPropertyDetailsScreenState extends State<HomeUPropertyDetailsScreen>
       backgroundColor: const Color(0xFFF6F8FC),
       bottomNavigationBar: SafeArea(
         minimum: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-        child: SizedBox(
-          height: 52,
-          child: ElevatedButton(
-            key: const Key('book_now_button'),
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => HomeUBookingScreen(property: property),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: double.infinity,
+              height: 46,
+              child: OutlinedButton(
+                key: const Key('chat_with_owner_button'),
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => HomeUChatScreen.start(property: property),
+                    ),
+                  );
+                },
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Color(0xFF1E3A8A)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 ),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF1E3A8A),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                child: const Text(
+                  'Chat with Owner',
+                  style: TextStyle(
+                    color: Color(0xFF1E3A8A),
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
             ),
-            child: const Text('Book Now'),
-          ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: ElevatedButton(
+                key: const Key('book_now_button'),
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => HomeUBookingScreen(property: property),
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF1E3A8A),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                ),
+                child: const Text('Book Now'),
+              ),
+            ),
+          ],
         ),
       ),
       body: SafeArea(
@@ -319,7 +352,13 @@ class _HomeUPropertyDetailsScreenState extends State<HomeUPropertyDetailsScreen>
                     ),
                     IconButton(
                       key: const Key('owner_contact_shortcut'),
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => HomeUChatScreen.start(property: property),
+                          ),
+                        );
+                      },
                       icon: const Icon(Icons.chat_bubble_outline_rounded),
                       color: const Color(0xFF1E3A8A),
                     ),
