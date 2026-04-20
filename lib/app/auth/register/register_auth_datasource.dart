@@ -22,6 +22,7 @@ class RegisterAuthDataSource {
     );
   }
 
+
   Future<String?> fetchProfileRole(String userId) async {
     final dynamic row = await AppSupabase.client
         .from('profiles')

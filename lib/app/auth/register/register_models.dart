@@ -2,7 +2,6 @@ import 'package:homeu/app/auth/homeu_session.dart';
 
 enum RegisterSubmissionStatus {
   success,
-  emailVerificationRequired,
   failure,
 }
 
@@ -36,7 +35,5 @@ class RegisterSubmissionResult {
   final HomeURole resolvedRole;
 
   bool get isSuccess => status == RegisterSubmissionStatus.success;
-  bool get requiresEmailVerification =>
-      status == RegisterSubmissionStatus.emailVerificationRequired;
 }
 

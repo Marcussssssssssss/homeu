@@ -16,14 +16,6 @@ class HomeUAuthService {
 
   bool get hasActiveSession => currentSession != null;
 
-  bool get hasVerifiedSession {
-    final session = currentSession;
-    if (session == null) {
-      return false;
-    }
-    return isUserEmailVerified(session.user);
-  }
-
   Stream<AuthState> get onAuthStateChanged {
     if (!AppSupabase.isInitialized) {
       return const Stream<AuthState>.empty();
@@ -66,10 +58,6 @@ class HomeUAuthService {
     return null;
   }
 
-  bool isUserEmailVerified(User user) {
-    final confirmedAt = user.emailConfirmedAt;
-    return confirmedAt != null && confirmedAt.toString().trim().isNotEmpty;
-  }
 
   Future<void> signOut() async {
     if (!AppSupabase.isInitialized) {

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:homeu/core/localization/homeu_l10n.dart';
+import 'package:homeu/core/theme/homeu_app_theme.dart';
 import 'package:homeu/pages/auth/login_screen.dart';
 import 'package:homeu/pages/onboarding/onboarding_screen_3.dart';
 
@@ -10,7 +12,9 @@ class HomeUOnboardingScreen2 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.l10n;
     return Scaffold(
+      backgroundColor: context.colors.surface,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -25,7 +29,9 @@ class HomeUOnboardingScreen2 extends StatelessWidget {
                 24,
               ),
               child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: constraints.maxHeight - 44),
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight - 44,
+                ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -33,29 +39,32 @@ class HomeUOnboardingScreen2 extends StatelessWidget {
                     const SizedBox(height: 8),
                     const _OwnerListingIllustration(),
                     const SizedBox(height: 28),
-                    const Text(
-                      'List Your Property Easily',
+                    Text(
+                      t.onboardingStep2Title,
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: Color(0xFF1E3A8A),
+                        color: context.homeuPrimaryText,
                         fontSize: 30,
                         height: 1.2,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(height: 14),
-                    const Text(
-                      'Add your property, upload photos, and manage rental requests in one place.',
+                    Text(
+                      t.onboardingStep2Subtitle,
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: Color(0xFF50617F),
+                        color: context.homeuMutedText,
                         fontSize: 16,
                         height: 1.45,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                     const SizedBox(height: 28),
-                    const _OnboardingProgressIndicator(currentStep: 2, totalSteps: 3),
+                    const _OnboardingProgressIndicator(
+                      currentStep: 2,
+                      totalSteps: 3,
+                    ),
                     const SizedBox(height: 26),
                     Row(
                       children: [
@@ -72,14 +81,14 @@ class HomeUOnboardingScreen2 extends StatelessWidget {
                                   );
                                 },
                             style: TextButton.styleFrom(
-                              foregroundColor: const Color(0xFF50617F),
+                              foregroundColor: context.homeuMutedText,
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               textStyle: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
-                            child: const Text('Skip'),
+                            child: Text(t.onboardingSkip),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -90,12 +99,13 @@ class HomeUOnboardingScreen2 extends StatelessWidget {
                                 () {
                                   Navigator.of(context).push(
                                     MaterialPageRoute<void>(
-                                      builder: (_) => const HomeUOnboardingScreen3(),
+                                      builder: (_) =>
+                                          const HomeUOnboardingScreen3(),
                                     ),
                                   );
                                 },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF1E3A8A),
+                              backgroundColor: context.homeuAccent,
                               foregroundColor: Colors.white,
                               elevation: 0,
                               padding: const EdgeInsets.symmetric(vertical: 16),
@@ -107,7 +117,7 @@ class HomeUOnboardingScreen2 extends StatelessWidget {
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
-                            child: const Text('Next'),
+                            child: Text(t.onboardingNext),
                           ),
                         ),
                       ],
@@ -134,6 +144,8 @@ class _OnboardingProgressIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final muted = context.homeuMutedText;
+    final accent = context.homeuAccent;
     return Column(
       children: [
         Row(
@@ -146,7 +158,7 @@ class _OnboardingProgressIndicator extends StatelessWidget {
               width: isActive ? 26 : 10,
               height: 10,
               decoration: BoxDecoration(
-                color: isActive ? const Color(0xFF1E3A8A) : const Color(0x261E3A8A),
+                color: isActive ? accent : accent.withValues(alpha: 0.22),
                 borderRadius: BorderRadius.circular(20),
               ),
             );
@@ -154,9 +166,9 @@ class _OnboardingProgressIndicator extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         Text(
-          '$currentStep of $totalSteps',
-          style: const TextStyle(
-            color: Color(0xFF50617F),
+          context.l10n.onboardingStepProgress(currentStep, totalSteps),
+          style: TextStyle(
+            color: muted,
             fontSize: 13,
             fontWeight: FontWeight.w600,
           ),
@@ -171,18 +183,23 @@ class _OwnerListingIllustration extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDarkMode;
+    final card = context.homeuCard;
+    final accent = context.homeuAccent;
     return Container(
       height: 280,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(22),
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFFF4F8FF), Color(0xFFEAF8F2)],
+          colors: isDark
+              ? [const Color(0xFF1A263D), const Color(0xFF162B27)]
+              : [const Color(0xFFF4F8FF), const Color(0xFFEAF8F2)],
         ),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: Color(0x141E3A8A),
+            color: accent.withValues(alpha: 0.16),
             blurRadius: 20,
             offset: Offset(0, 8),
           ),
@@ -212,24 +229,24 @@ class _OwnerListingIllustration extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: card,
                 borderRadius: BorderRadius.circular(999),
-                boxShadow: const [
+                boxShadow: [
                   BoxShadow(
-                    color: Color(0x1A1E3A8A),
+                    color: accent.withValues(alpha: 0.18),
                     blurRadius: 10,
                     offset: Offset(0, 4),
                   ),
                 ],
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(Icons.add_home_work_rounded, size: 16, color: Color(0xFF1E3A8A)),
+                  Icon(Icons.add_home_work_rounded, size: 16, color: accent),
                   SizedBox(width: 6),
                   Text(
-                    'New Listing',
+                    context.l10n.ownerNewListing,
                     style: TextStyle(
-                      color: Color(0xFF1E3A8A),
+                      color: accent,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -248,14 +265,15 @@ class _ListingFormCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final card = context.homeuCard;
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: card,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: Color(0x141E3A8A),
+            color: context.homeuAccent.withValues(alpha: 0.16),
             blurRadius: 14,
             offset: Offset(0, 5),
           ),
@@ -263,35 +281,53 @@ class _ListingFormCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          _formRow(icon: Icons.home_work_rounded, label: 'Property Type'),
+          _formRow(
+            context,
+            icon: Icons.home_work_rounded,
+            label: context.l10n.ownerPropertyType,
+          ),
           const SizedBox(height: 8),
-          _formRow(icon: Icons.image_rounded, label: 'Upload Photos'),
+          _formRow(
+            context,
+            icon: Icons.image_rounded,
+            label: context.l10n.ownerUploadPhotos,
+          ),
           const SizedBox(height: 8),
-          _formRow(icon: Icons.location_on_rounded, label: 'Location & Price'),
+          _formRow(
+            context,
+            icon: Icons.location_on_rounded,
+            label: context.l10n.ownerLocationAndPrice,
+          ),
         ],
       ),
     );
   }
 
-  Widget _formRow({required IconData icon, required String label}) {
+  Widget _formRow(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+  }) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: const Color(0xFFF7F9FD),
+        color: context.isDarkMode
+            ? const Color(0xFF111A2A)
+            : const Color(0xFFF7F9FD),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: const Color(0xFF1E3A8A)),
+          Icon(icon, size: 18, color: context.homeuAccent),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               label,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF40526E),
+                color: context.homeuMutedText,
               ),
             ),
           ),
@@ -309,38 +345,41 @@ class _RequestCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.homeuCard,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: Color(0x141E3A8A),
+            color: context.homeuAccent.withValues(alpha: 0.16),
             blurRadius: 14,
             offset: Offset(0, 5),
           ),
         ],
       ),
-      child: const Row(
+      child: Row(
         children: [
           CircleAvatar(
             radius: 14,
-            backgroundColor: Color(0x1F10B981),
-            child: Icon(Icons.person_rounded, size: 16, color: Color(0xFF10B981)),
+            backgroundColor: context.homeuSuccess.withValues(alpha: 0.2),
+            child: Icon(
+              Icons.person_rounded,
+              size: 16,
+              color: context.homeuSuccess,
+            ),
           ),
           SizedBox(width: 10),
           Expanded(
             child: Text(
-              '3 New Rental Requests',
+              context.l10n.ownerNewRentalRequests,
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF1F314F),
+                color: context.homeuPrimaryText,
               ),
             ),
           ),
-          Icon(Icons.chevron_right_rounded, color: Color(0xFF1E3A8A)),
+          Icon(Icons.chevron_right_rounded, color: context.homeuAccent),
         ],
       ),
     );
   }
 }
-

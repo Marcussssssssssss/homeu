@@ -6,6 +6,14 @@ import 'package:homeu/core/supabase/app_supabase.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ForgotPasswordRepository {
+  static const String successResetEmailSent =
+      'forgot_password.success.reset_email_sent';
+
+  static const String errorNetwork = 'forgot_password.error.network';
+  static const String errorGeneric = 'forgot_password.error.generic';
+  static const String errorInvalidEmail = 'forgot_password.error.invalid_email';
+  static const String errorRateLimit = 'forgot_password.error.rate_limit';
+
   ForgotPasswordRepository({ForgotPasswordAuthDataSource? dataSource})
     : _dataSource = dataSource ?? const ForgotPasswordAuthDataSource();
 
@@ -15,7 +23,7 @@ class ForgotPasswordRepository {
     if (!AppSupabase.isInitialized) {
       return const ForgotPasswordSubmissionResult(
         status: ForgotPasswordSubmissionStatus.success,
-        message: 'A password reset link has been sent to your email.',
+        message: successResetEmailSent,
       );
     }
 
@@ -26,7 +34,7 @@ class ForgotPasswordRepository {
       );
       return const ForgotPasswordSubmissionResult(
         status: ForgotPasswordSubmissionStatus.success,
-        message: 'A password reset link has been sent to your email.',
+        message: successResetEmailSent,
       );
     } on AuthException catch (error) {
       return ForgotPasswordSubmissionResult(
@@ -36,12 +44,12 @@ class ForgotPasswordRepository {
     } on SocketException {
       return const ForgotPasswordSubmissionResult(
         status: ForgotPasswordSubmissionStatus.failure,
-        message: 'Network error. Please check your internet connection and try again.',
+        message: errorNetwork,
       );
     } catch (_) {
       return const ForgotPasswordSubmissionResult(
         status: ForgotPasswordSubmissionStatus.failure,
-        message: 'Unable to send reset link right now. Please try again.',
+        message: errorGeneric,
       );
     }
   }
@@ -51,14 +59,14 @@ class ForgotPasswordRepository {
     final lower = message.toLowerCase();
 
     if (lower.contains('invalid email')) {
-      return 'Please enter a valid email address.';
+      return errorInvalidEmail;
     }
 
     if (lower.contains('rate limit')) {
-      return 'Too many attempts. Please wait a while and try again.';
+      return errorRateLimit;
     }
 
-    return message.isEmpty ? 'Unable to send reset link right now. Please try again.' : message;
+    return errorGeneric;
   }
 }
 

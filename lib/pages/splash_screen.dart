@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:homeu/core/theme/homeu_app_theme.dart';
 import 'package:homeu/pages/onboarding/onboarding_screen_1.dart';
 
 class HomeUSplashScreen extends StatefulWidget {
@@ -34,6 +35,7 @@ class _HomeUSplashScreenState extends State<HomeUSplashScreen> {
     final logoSize = (size.width * 0.42).clamp(120.0, 190.0);
 
     return Scaffold(
+      backgroundColor: context.colors.surface,
       body: Stack(
         children: [
           const _SplashBackgroundAccents(),
@@ -52,11 +54,11 @@ class _HomeUSplashScreenState extends State<HomeUSplashScreen> {
                       Container(
                         padding: EdgeInsets.all(size.width * 0.03),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: context.homeuCard,
                           borderRadius: BorderRadius.circular(28),
-                          boxShadow: const [
+                          boxShadow: [
                             BoxShadow(
-                              color: Color(0x1A1E3A8A),
+                              color: context.colors.primary.withValues(alpha: 0.18),
                               blurRadius: 22,
                               offset: Offset(0, 10),
                             ),
@@ -70,22 +72,22 @@ class _HomeUSplashScreenState extends State<HomeUSplashScreen> {
                         ),
                       ),
                       SizedBox(height: size.height * 0.04),
-                      const Text(
+                      Text(
                         'HomeU',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: Color(0xFF1E3A8A),
+                          color: context.homeuAccent,
                           fontSize: 38,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 0.4,
                         ),
                       ),
                       SizedBox(height: size.height * 0.012),
-                      const Text(
+                      Text(
                         'Find Your Perfect Home',
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: Color(0xFF50617F),
+                          color: context.homeuMutedText,
                           fontSize: 17,
                           fontWeight: FontWeight.w500,
                         ),
@@ -109,6 +111,8 @@ class _SplashBackgroundAccents extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final accent = context.homeuAccent;
+    final secondary = context.homeuSuccess;
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
@@ -122,9 +126,9 @@ class _SplashBackgroundAccents extends StatelessWidget {
               child: Container(
                 width: width * 0.55,
                 height: width * 0.55,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Color(0x141E3A8A),
+                  color: accent.withValues(alpha: 0.12),
                 ),
               ),
             ),
@@ -134,9 +138,9 @@ class _SplashBackgroundAccents extends StatelessWidget {
               child: Container(
                 width: width * 0.58,
                 height: width * 0.58,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Color(0x1410B981),
+                  color: secondary.withValues(alpha: 0.12),
                 ),
               ),
             ),
@@ -152,17 +156,20 @@ class _HouseIllustration extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDarkMode;
     return Container(
       width: 240,
       height: 180,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [Color(0xFFF4F8FF), Color(0xFFE8F7F1)],
+          colors: isDark
+              ? [const Color(0xFF1A263D), const Color(0xFF162B27)]
+              : [const Color(0xFFF4F8FF), const Color(0xFFE8F7F1)],
         ),
-        border: Border.all(color: const Color(0x331E3A8A), width: 1),
+        border: Border.all(color: context.homeuSoftBorder, width: 1),
       ),
       child: Stack(
         alignment: Alignment.center,
@@ -173,11 +180,11 @@ class _HouseIllustration extends StatelessWidget {
               width: 150,
               height: 64,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: context.homeuCard,
                 borderRadius: BorderRadius.circular(16),
-                boxShadow: const [
+                boxShadow: [
                   BoxShadow(
-                    color: Color(0x1A1E3A8A),
+                    color: context.colors.primary.withValues(alpha: 0.18),
                     blurRadius: 14,
                     offset: Offset(0, 6),
                   ),
@@ -185,18 +192,18 @@ class _HouseIllustration extends StatelessWidget {
               ),
             ),
           ),
-          const Icon(
+          Icon(
             Icons.house_rounded,
             size: 88,
-            color: Color(0xFF1E3A8A),
+            color: context.homeuAccent,
           ),
-          const Positioned(
+          Positioned(
             right: 28,
             top: 28,
             child: Icon(
               Icons.eco_rounded,
               size: 22,
-              color: Color(0xFF10B981),
+              color: context.homeuSuccess,
             ),
           ),
         ],

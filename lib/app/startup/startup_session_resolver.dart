@@ -19,11 +19,6 @@ class HomeUStartupSessionResolver {
       return HomeUStartupDestination.authFlow;
     }
 
-    if (!authService.hasVerifiedSession) {
-      await authService.signOut();
-      return HomeUStartupDestination.authFlow;
-    }
-
     final role = await authService.fetchCurrentUserRole();
     return _destinationForRole(role);
   }
@@ -38,10 +33,6 @@ class HomeUStartupSessionResolver {
       case AuthChangeEvent.signedIn:
         final session = authState.session;
         if (session == null) {
-          return HomeUStartupDestination.authFlow;
-        }
-        if (!authService.isUserEmailVerified(session.user)) {
-          await authService.signOut();
           return HomeUStartupDestination.authFlow;
         }
         final role = await authService.fetchCurrentUserRole();

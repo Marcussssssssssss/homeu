@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:homeu/core/localization/homeu_l10n.dart';
+import 'package:homeu/core/theme/homeu_app_theme.dart';
 import 'package:homeu/pages/auth/login_screen.dart';
 
 class HomeUOnboardingScreen3 extends StatelessWidget {
@@ -9,7 +11,9 @@ class HomeUOnboardingScreen3 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.l10n;
     return Scaffold(
+      backgroundColor: context.colors.surface,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -24,7 +28,9 @@ class HomeUOnboardingScreen3 extends StatelessWidget {
                 24,
               ),
               child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: constraints.maxHeight - 44),
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight - 44,
+                ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -32,29 +38,32 @@ class HomeUOnboardingScreen3 extends StatelessWidget {
                     const SizedBox(height: 8),
                     const _SecurePaymentIllustration(),
                     const SizedBox(height: 28),
-                    const Text(
-                      'Secure Booking & Payment',
+                    Text(
+                      t.onboardingStep3Title,
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: Color(0xFF1E3A8A),
+                        color: context.homeuPrimaryText,
                         fontSize: 30,
                         height: 1.2,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(height: 14),
-                    const Text(
-                      'Book viewings, confirm rentals, and complete payment through a safe and simple process.',
+                    Text(
+                      t.onboardingStep3Subtitle,
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: Color(0xFF50617F),
+                        color: context.homeuMutedText,
                         fontSize: 16,
                         height: 1.45,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                     const SizedBox(height: 28),
-                    const _OnboardingProgressIndicator(currentStep: 3, totalSteps: 3),
+                    const _OnboardingProgressIndicator(
+                      currentStep: 3,
+                      totalSteps: 3,
+                    ),
                     const SizedBox(height: 26),
                     Row(
                       children: [
@@ -71,14 +80,14 @@ class HomeUOnboardingScreen3 extends StatelessWidget {
                                   );
                                 },
                             style: TextButton.styleFrom(
-                              foregroundColor: const Color(0xFF50617F),
+                              foregroundColor: context.homeuMutedText,
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               textStyle: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
-                            child: const Text('Skip'),
+                            child: Text(t.onboardingSkip),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -95,7 +104,7 @@ class HomeUOnboardingScreen3 extends StatelessWidget {
                                   );
                                 },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF1E3A8A),
+                              backgroundColor: context.homeuAccent,
                               foregroundColor: Colors.white,
                               elevation: 0,
                               padding: const EdgeInsets.symmetric(vertical: 16),
@@ -107,7 +116,7 @@ class HomeUOnboardingScreen3 extends StatelessWidget {
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
-                            child: const Text('Get Started'),
+                            child: Text(t.onboardingGetStarted),
                           ),
                         ),
                       ],
@@ -134,6 +143,8 @@ class _OnboardingProgressIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final muted = context.homeuMutedText;
+    final accent = context.homeuAccent;
     return Column(
       children: [
         Row(
@@ -146,7 +157,7 @@ class _OnboardingProgressIndicator extends StatelessWidget {
               width: isActive ? 26 : 10,
               height: 10,
               decoration: BoxDecoration(
-                color: isActive ? const Color(0xFF1E3A8A) : const Color(0x261E3A8A),
+                color: isActive ? accent : accent.withValues(alpha: 0.22),
                 borderRadius: BorderRadius.circular(20),
               ),
             );
@@ -154,9 +165,9 @@ class _OnboardingProgressIndicator extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         Text(
-          '$currentStep of $totalSteps',
-          style: const TextStyle(
-            color: Color(0xFF50617F),
+          context.l10n.onboardingStepProgress(currentStep, totalSteps),
+          style: TextStyle(
+            color: muted,
             fontSize: 13,
             fontWeight: FontWeight.w600,
           ),
@@ -171,18 +182,24 @@ class _SecurePaymentIllustration extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDarkMode;
+    final card = context.homeuCard;
+    final accent = context.homeuAccent;
+    final success = context.homeuSuccess;
     return Container(
       height: 280,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(22),
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFFF4F8FF), Color(0xFFEAF8F2)],
+          colors: isDark
+              ? [const Color(0xFF1A263D), const Color(0xFF162B27)]
+              : [const Color(0xFFF4F8FF), const Color(0xFFEAF8F2)],
         ),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: Color(0x141E3A8A),
+            color: accent.withValues(alpha: 0.16),
             blurRadius: 20,
             offset: Offset(0, 8),
           ),
@@ -197,35 +214,35 @@ class _SecurePaymentIllustration extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: card,
                   borderRadius: BorderRadius.circular(16),
-                  boxShadow: const [
+                  boxShadow: [
                     BoxShadow(
-                      color: Color(0x141E3A8A),
+                      color: accent.withValues(alpha: 0.16),
                       blurRadius: 14,
                       offset: Offset(0, 5),
                     ),
                   ],
                 ),
-                child: const Row(
+                child: Row(
                   children: [
                     CircleAvatar(
                       radius: 18,
-                      backgroundColor: Color(0x1F1E3A8A),
-                      child: Icon(Icons.calendar_month_rounded, color: Color(0xFF1E3A8A)),
+                      backgroundColor: accent.withValues(alpha: 0.2),
+                      child: Icon(Icons.calendar_month_rounded, color: accent),
                     ),
                     SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        'Viewing Confirmed',
+                        context.l10n.onboardingViewingConfirmed,
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFF1F314F),
+                          color: context.homeuPrimaryText,
                         ),
                       ),
                     ),
-                    Icon(Icons.check_circle_rounded, color: Color(0xFF10B981), size: 20),
+                    Icon(Icons.check_circle_rounded, color: success, size: 20),
                   ],
                 ),
               ),
@@ -233,40 +250,40 @@ class _SecurePaymentIllustration extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: card,
                   borderRadius: BorderRadius.circular(16),
-                  boxShadow: const [
+                  boxShadow: [
                     BoxShadow(
-                      color: Color(0x141E3A8A),
+                      color: accent.withValues(alpha: 0.16),
                       blurRadius: 14,
                       offset: Offset(0, 5),
                     ),
                   ],
                 ),
-                child: const Row(
+                child: Row(
                   children: [
                     CircleAvatar(
                       radius: 18,
-                      backgroundColor: Color(0x1F10B981),
-                      child: Icon(Icons.lock_rounded, color: Color(0xFF10B981)),
+                      backgroundColor: success.withValues(alpha: 0.2),
+                      child: Icon(Icons.lock_rounded, color: success),
                     ),
                     SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        'Secure Payment',
+                        context.l10n.onboardingSecurePayment,
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFF1F314F),
+                          color: context.homeuPrimaryText,
                         ),
                       ),
                     ),
                     Text(
-                      'Protected',
+                      context.l10n.onboardingProtected,
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFF10B981),
+                        color: success,
                       ),
                     ),
                   ],

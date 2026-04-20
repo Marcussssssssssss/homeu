@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:homeu/app/auth/register/register_controller.dart';
 import 'package:homeu/app/auth/register/register_models.dart';
+import 'package:homeu/app/auth/register/register_repository.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
+import 'package:homeu/core/localization/homeu_l10n.dart';
+import 'package:homeu/core/theme/homeu_app_theme.dart';
 import 'package:homeu/pages/home/home_page.dart';
 import 'package:homeu/pages/home/owner_dashboard_screen.dart';
 
@@ -75,32 +78,11 @@ class _HomeURegisterScreenState extends State<HomeURegisterScreen> {
     });
 
     if (result.status == RegisterSubmissionStatus.failure) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(result.message)),
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(
+        SnackBar(content: Text(_resolveRegisterMessage(result.message))),
       );
-      return;
-    }
-
-    if (result.requiresEmailVerification) {
-      await showDialog<void>(
-        context: context,
-        builder: (dialogContext) {
-          return AlertDialog(
-            title: const Text('Verify Your Email'),
-            content: Text(result.message),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(dialogContext).pop(),
-                child: const Text('Back to Login'),
-              ),
-            ],
-          );
-        },
-      );
-
-      if (mounted) {
-        Navigator.of(context).pop();
-      }
       return;
     }
 
@@ -109,26 +91,52 @@ class _HomeURegisterScreenState extends State<HomeURegisterScreen> {
         ? const HomeUOwnerDashboardScreen()
         : const HomeUHomePage();
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(result.message)),
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(
+      SnackBar(content: Text(_resolveRegisterMessage(result.message))),
     );
 
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute<void>(
-        builder: (_) => destination,
-      ),
-    );
+    Navigator.of(
+      context,
+    ).pushReplacement(MaterialPageRoute<void>(builder: (_) => destination));
+  }
+
+  String _resolveRegisterMessage(String message) {
+    switch (message) {
+      case RegisterRepository.successLocalMode:
+        return context.l10n.registerSuccessLocalMode;
+      case RegisterRepository.successAccountCreated:
+        return context.l10n.registerSuccessAccountCreated;
+      case RegisterRepository.errorSignUpIncomplete:
+        return context.l10n.registerErrorSignUpIncomplete;
+      case RegisterRepository.errorDuplicateEmail:
+        return context.l10n.registerErrorDuplicateEmail;
+      case RegisterRepository.errorProfileUnavailable:
+        return context.l10n.registerErrorProfileUnavailable;
+      case RegisterRepository.errorUnexpected:
+        return context.l10n.registerErrorUnexpected;
+      case RegisterRepository.errorNetwork:
+        return context.l10n.registerErrorNetwork;
+      case RegisterRepository.errorGeneric:
+        return context.l10n.registerErrorGeneric;
+      default:
+        return context.l10n.registerErrorGeneric;
+    }
   }
 
   String? _validateRequired(String? value, {required String fieldName}) {
     if (value == null || value.trim().isEmpty) {
-      return '$fieldName is required';
+      return context.l10n.formFieldRequired(fieldName);
     }
     return null;
   }
 
   String? _validateEmail(String? value) {
-    final required = _validateRequired(value, fieldName: 'Email');
+    final required = _validateRequired(
+      value,
+      fieldName: context.l10n.profileFieldEmail,
+    );
     if (required != null) {
       return required;
     }
@@ -136,38 +144,46 @@ class _HomeURegisterScreenState extends State<HomeURegisterScreen> {
     final email = value!.trim();
     final isEmail = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(email);
     if (!isEmail) {
-      return 'Please enter a valid email address';
+      return context.l10n.formEmailInvalid;
     }
     return null;
   }
 
   String? _validatePassword(String? value) {
-    final required = _validateRequired(value, fieldName: 'Password');
+    final required = _validateRequired(
+      value,
+      fieldName: context.l10n.authPassword,
+    );
     if (required != null) {
       return required;
     }
 
     if (value!.length < 6) {
-      return 'Password must be at least 6 characters';
+      return context.l10n.formPasswordMinLength;
     }
     return null;
   }
 
   String? _validateConfirmPassword(String? value) {
-    final required = _validateRequired(value, fieldName: 'Confirm Password');
+    final required = _validateRequired(
+      value,
+      fieldName: context.l10n.registerConfirmPassword,
+    );
     if (required != null) {
       return required;
     }
 
     if (value != _passwordController.text) {
-      return 'Password and confirm password do not match';
+      return context.l10n.formPasswordMismatch;
     }
     return null;
   }
 
   @override
   Widget build(BuildContext context) {
+    final t = context.l10n;
     return Scaffold(
+      backgroundColor: context.colors.surface,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -184,255 +200,283 @@ class _HomeURegisterScreenState extends State<HomeURegisterScreen> {
               child: Form(
                 key: _formKey,
                 child: ConstrainedBox(
-                  constraints: BoxConstraints(minHeight: constraints.maxHeight - 44),
+                  constraints: BoxConstraints(
+                    minHeight: constraints.maxHeight - 44,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                    const SizedBox(height: 6),
-                    Center(
-                      child: Container(
-                        width: 86,
-                        height: 86,
+                      const SizedBox(height: 6),
+                      Center(
+                        child: Container(
+                          width: 86,
+                          height: 86,
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: context.homeuCard,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: context.homeuAccent.withValues(
+                                  alpha: 0.16,
+                                ),
+                                blurRadius: 16,
+                                offset: Offset(0, 6),
+                              ),
+                            ],
+                          ),
+                          child: Image.asset('HomeU.png', fit: BoxFit.contain),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      Text(
+                        t.registerTitle,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: context.homeuPrimaryText,
+                          fontSize: 30,
+                          fontWeight: FontWeight.w700,
+                          height: 1.2,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        t.registerSubtitle,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: context.homeuMutedText,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          height: 1.4,
+                        ),
+                      ),
+                      const SizedBox(height: 26),
+                      _LabeledInput(
+                        label: t.profileFieldName,
+                        hintText: t.registerNameHint,
+                        prefixIcon: Icons.person_outline_rounded,
+                        fieldKey: const Key('register_name_field'),
+                        controller: _nameController,
+                        validator: (value) => _validateRequired(
+                          value,
+                          fieldName: t.profileFieldName,
+                        ),
+                        enabled: !_isLoading,
+                      ),
+                      const SizedBox(height: 14),
+                      _LabeledInput(
+                        label: t.profileFieldEmail,
+                        hintText: t.authEmailHint,
+                        keyboardType: TextInputType.emailAddress,
+                        prefixIcon: Icons.mail_outline_rounded,
+                        fieldKey: const Key('register_email_field'),
+                        controller: _emailController,
+                        validator: _validateEmail,
+                        enabled: !_isLoading,
+                      ),
+                      const SizedBox(height: 14),
+                      _LabeledInput(
+                        label: t.profileFieldPhone,
+                        hintText: '+60 12 345 6789',
+                        keyboardType: TextInputType.phone,
+                        prefixIcon: Icons.phone_outlined,
+                        fieldKey: const Key('register_phone_field'),
+                        controller: _phoneController,
+                        validator: (value) => _validateRequired(
+                          value,
+                          fieldName: t.profileFieldPhone,
+                        ),
+                        enabled: !_isLoading,
+                      ),
+                      const SizedBox(height: 14),
+                      _LabeledInput(
+                        label: t.authPassword,
+                        hintText: t.registerPasswordHint,
+                        obscureText: true,
+                        prefixIcon: Icons.lock_outline_rounded,
+                        fieldKey: Key('register_password_field'),
+                        visibilityToggleKey: const Key(
+                          'register_password_visibility_toggle',
+                        ),
+                        controller: _passwordController,
+                        validator: _validatePassword,
+                        enabled: !_isLoading,
+                      ),
+                      const SizedBox(height: 14),
+                      _LabeledInput(
+                        label: t.registerConfirmPassword,
+                        hintText: t.registerConfirmPasswordHint,
+                        obscureText: true,
+                        prefixIcon: Icons.lock_outline_rounded,
+                        fieldKey: Key('register_confirm_password_field'),
+                        visibilityToggleKey: const Key(
+                          'register_confirm_password_visibility_toggle',
+                        ),
+                        controller: _confirmPasswordController,
+                        validator: _validateConfirmPassword,
+                        enabled: !_isLoading,
+                      ),
+                      const SizedBox(height: 18),
+                      Text(
+                        t.registerSelectRole,
+                        style: TextStyle(
+                          color: context.homeuPrimaryText,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: const [
+                          color: context.homeuCard,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: context.homeuSoftBorder),
+                          boxShadow: [
                             BoxShadow(
-                              color: Color(0x141E3A8A),
-                              blurRadius: 16,
-                              offset: Offset(0, 6),
+                              color: context.homeuAccent.withValues(
+                                alpha: 0.10,
+                              ),
+                              blurRadius: 10,
+                              offset: Offset(0, 3),
                             ),
                           ],
                         ),
-                        child: Image.asset('HomeU.png', fit: BoxFit.contain),
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    const Text(
-                      'Create Your Account',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Color(0xFF1E3A8A),
-                        fontSize: 30,
-                        fontWeight: FontWeight.w700,
-                        height: 1.2,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      'Join HomeU and start your rental journey.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Color(0xFF50617F),
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        height: 1.4,
-                      ),
-                    ),
-                    const SizedBox(height: 26),
-                    _LabeledInput(
-                      label: 'Name',
-                      hintText: 'Your full name',
-                      prefixIcon: Icons.person_outline_rounded,
-                      fieldKey: const Key('register_name_field'),
-                      controller: _nameController,
-                      validator: (value) => _validateRequired(value, fieldName: 'Name'),
-                      enabled: !_isLoading,
-                    ),
-                    const SizedBox(height: 14),
-                    _LabeledInput(
-                      label: 'Email',
-                      hintText: 'you@example.com',
-                      keyboardType: TextInputType.emailAddress,
-                      prefixIcon: Icons.mail_outline_rounded,
-                      fieldKey: const Key('register_email_field'),
-                      controller: _emailController,
-                      validator: _validateEmail,
-                      enabled: !_isLoading,
-                    ),
-                    const SizedBox(height: 14),
-                    _LabeledInput(
-                      label: 'Phone Number',
-                      hintText: '+60 12 345 6789',
-                      keyboardType: TextInputType.phone,
-                      prefixIcon: Icons.phone_outlined,
-                      fieldKey: const Key('register_phone_field'),
-                      controller: _phoneController,
-                      validator: (value) => _validateRequired(value, fieldName: 'Phone Number'),
-                      enabled: !_isLoading,
-                    ),
-                    const SizedBox(height: 14),
-                    _LabeledInput(
-                      label: 'Password',
-                      hintText: 'Create a password',
-                      obscureText: true,
-                      prefixIcon: Icons.lock_outline_rounded,
-                      fieldKey: Key('register_password_field'),
-                      visibilityToggleKey: const Key('register_password_visibility_toggle'),
-                      controller: _passwordController,
-                      validator: _validatePassword,
-                      enabled: !_isLoading,
-                    ),
-                    const SizedBox(height: 14),
-                    _LabeledInput(
-                      label: 'Confirm Password',
-                      hintText: 'Re-enter your password',
-                      obscureText: true,
-                      prefixIcon: Icons.lock_outline_rounded,
-                      fieldKey: Key('register_confirm_password_field'),
-                      visibilityToggleKey: const Key('register_confirm_password_visibility_toggle'),
-                      controller: _confirmPasswordController,
-                      validator: _validateConfirmPassword,
-                      enabled: !_isLoading,
-                    ),
-                    const SizedBox(height: 18),
-                    const Text(
-                      'Select Account Role',
-                      style: TextStyle(
-                        color: Color(0xFF1F314F),
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: const Color(0x1F1E3A8A)),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Color(0x101E3A8A),
-                            blurRadius: 10,
-                            offset: Offset(0, 3),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: ChoiceChip(
-                              key: const Key('role_tenant_chip'),
-                              label: const Text('Tenant'),
-                              selected: _selectedRole == HomeURole.tenant,
-                              onSelected: _isLoading
-                                  ? null
-                                  : (_) {
-                                setState(() {
-                                  _selectedRole = HomeURole.tenant;
-                                });
-                              },
-                              selectedColor: const Color(0xFF1E3A8A),
-                              labelStyle: TextStyle(
-                                color: _selectedRole == HomeURole.tenant
-                                    ? Colors.white
-                                    : const Color(0xFF1E3A8A),
-                                fontWeight: FontWeight.w700,
-                              ),
-                              side: const BorderSide(color: Color(0x331E3A8A)),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              padding: const EdgeInsets.symmetric(vertical: 11),
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: ChoiceChip(
-                              key: const Key('role_owner_chip'),
-                              label: const Text('Owner'),
-                              selected: _selectedRole == HomeURole.owner,
-                              onSelected: _isLoading
-                                  ? null
-                                  : (_) {
-                                setState(() {
-                                  _selectedRole = HomeURole.owner;
-                                });
-                              },
-                              selectedColor: const Color(0xFF1E3A8A),
-                              labelStyle: TextStyle(
-                                color: _selectedRole == HomeURole.owner
-                                    ? Colors.white
-                                    : const Color(0xFF1E3A8A),
-                                fontWeight: FontWeight.w700,
-                              ),
-                              side: const BorderSide(color: Color(0x331E3A8A)),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              padding: const EdgeInsets.symmetric(vertical: 11),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF4F8FF),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Text(
-                        'Your selected role controls accessible features and navigation. To switch roles later, log out and register again under the other role.',
-                        style: TextStyle(
-                          color: Color(0xFF40526E),
-                          fontSize: 13,
-                          height: 1.35,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    SizedBox(
-                      height: 52,
-                      child: ElevatedButton(
-                        onPressed: _isLoading ? null : _handleRegister,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF1E3A8A),
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          textStyle: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        child: _isLoading
-                            ? const SizedBox(
-                                width: 22,
-                                height: 22,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2.4,
-                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: ChoiceChip(
+                                key: const Key('role_tenant_chip'),
+                                label: Text(t.profileRoleTenant),
+                                selected: _selectedRole == HomeURole.tenant,
+                                onSelected: _isLoading
+                                    ? null
+                                    : (_) {
+                                        setState(() {
+                                          _selectedRole = HomeURole.tenant;
+                                        });
+                                      },
+                                selectedColor: context.homeuAccent,
+                                labelStyle: TextStyle(
+                                  color: _selectedRole == HomeURole.tenant
+                                      ? Colors.white
+                                      : context.homeuAccent,
+                                  fontWeight: FontWeight.w700,
                                 ),
-                              )
-                            : const Text('Register'),
+                                side: BorderSide(
+                                  color: context.homeuSoftBorder,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 11,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: ChoiceChip(
+                                key: const Key('role_owner_chip'),
+                                label: Text(t.profileRoleOwner),
+                                selected: _selectedRole == HomeURole.owner,
+                                onSelected: _isLoading
+                                    ? null
+                                    : (_) {
+                                        setState(() {
+                                          _selectedRole = HomeURole.owner;
+                                        });
+                                      },
+                                selectedColor: context.homeuAccent,
+                                labelStyle: TextStyle(
+                                  color: _selectedRole == HomeURole.owner
+                                      ? Colors.white
+                                      : context.homeuAccent,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                                side: BorderSide(
+                                  color: context.homeuSoftBorder,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 11,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 18),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text(
-                          'Already have an account?',
+                      const SizedBox(height: 10),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: context.isDarkMode
+                              ? const Color(0xFF121C2B)
+                              : const Color(0xFFF4F8FF),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          t.registerRoleInfo,
                           style: TextStyle(
-                            color: Color(0xFF50617F),
-                            fontSize: 14,
+                            color: context.homeuMutedText,
+                            fontSize: 13,
+                            height: 1.35,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          child: const Text('Back to Login'),
+                      ),
+                      const SizedBox(height: 20),
+                      SizedBox(
+                        height: 52,
+                        child: ElevatedButton(
+                          onPressed: _isLoading ? null : _handleRegister,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: context.homeuAccent,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            textStyle: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          child: _isLoading
+                              ? const SizedBox(
+                                  width: 22,
+                                  height: 22,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.4,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white,
+                                    ),
+                                  ),
+                                )
+                              : Text(t.authRegister),
                         ),
-                      ],
-                    ),
+                      ),
+                      const SizedBox(height: 18),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            t.registerAlreadyHaveAccount,
+                            style: TextStyle(
+                              color: context.homeuMutedText,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: Text(t.registerBackToLogin),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
@@ -490,8 +534,8 @@ class _LabeledInputState extends State<_LabeledInput> {
       children: [
         Text(
           widget.label,
-          style: const TextStyle(
-            color: Color(0xFF1F314F),
+          style: TextStyle(
+            color: context.homeuPrimaryText,
             fontSize: 14,
             fontWeight: FontWeight.w600,
           ),
@@ -516,25 +560,29 @@ class _LabeledInputState extends State<_LabeledInput> {
                       });
                     },
                     icon: Icon(
-                      _isObscured ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                      _isObscured
+                          ? Icons.visibility_off_outlined
+                          : Icons.visibility_outlined,
                     ),
-                    tooltip: _isObscured ? 'Show password' : 'Hide password',
+                    tooltip: _isObscured
+                        ? context.l10n.authShowPassword
+                        : context.l10n.authHidePassword,
                   )
                 : null,
             filled: true,
-            fillColor: Colors.white,
+            fillColor: context.homeuCard,
             contentPadding: const EdgeInsets.symmetric(vertical: 15),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: Color(0x1F1E3A8A)),
+              borderSide: BorderSide(color: context.homeuSoftBorder),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: Color(0x1F1E3A8A)),
+              borderSide: BorderSide(color: context.homeuSoftBorder),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: Color(0xFF1E3A8A), width: 1.2),
+              borderSide: BorderSide(color: context.homeuAccent, width: 1.2),
             ),
           ),
         ),
@@ -542,4 +590,3 @@ class _LabeledInputState extends State<_LabeledInput> {
     );
   }
 }
-

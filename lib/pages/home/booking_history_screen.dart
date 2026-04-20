@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
+import 'package:homeu/core/localization/homeu_l10n.dart';
+import 'package:homeu/core/theme/homeu_app_theme.dart';
 import 'package:homeu/pages/home/profile_screen.dart';
 import 'package:homeu/pages/home/review_rating_screen.dart';
 
@@ -10,7 +12,8 @@ class HomeUBookingHistoryScreen extends StatefulWidget {
   const HomeUBookingHistoryScreen({super.key});
 
   @override
-  State<HomeUBookingHistoryScreen> createState() => _HomeUBookingHistoryScreenState();
+  State<HomeUBookingHistoryScreen> createState() =>
+      _HomeUBookingHistoryScreenState();
 }
 
 class _HomeUBookingHistoryScreenState extends State<HomeUBookingHistoryScreen> {
@@ -50,14 +53,16 @@ class _HomeUBookingHistoryScreenState extends State<HomeUBookingHistoryScreen> {
       return const HomeURoleBlockedScreen(requiredRole: HomeURole.tenant);
     }
 
-    final visibleBookings = _bookings.where((item) => item.status == _selectedStatus).toList();
+    final visibleBookings = _bookings
+        .where((item) => item.status == _selectedStatus)
+        .toList();
+    final t = context.l10n;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F8FC),
+      backgroundColor: context.colors.surface,
       appBar: AppBar(
-        title: const Text('Booking History'),
-        backgroundColor: const Color(0xFFF6F8FC),
-        elevation: 0,
+        title: Text(t.bookingHistoryTitle),
+        backgroundColor: context.colors.surface,
       ),
       bottomNavigationBar: NavigationBar(
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
@@ -72,36 +77,32 @@ class _HomeUBookingHistoryScreenState extends State<HomeUBookingHistoryScreen> {
           if (index == 3) {
             Navigator.of(context).push(
               MaterialPageRoute<void>(
-                builder: (_) => const HomeUProfileScreen(
-                  role: HomeURole.tenant,
-                  name: 'Aisyah Rahman',
-                  email: 'aisyah.r@email.com',
-                  phone: '+60 12 998 1123',
-                ),
+                builder: (_) =>
+                    const HomeUProfileScreen(role: HomeURole.tenant),
               ),
             );
           }
         },
-        destinations: const [
+        destinations: [
           NavigationDestination(
             icon: Icon(Icons.home_outlined),
             selectedIcon: Icon(Icons.home_rounded),
-            label: 'Home',
+            label: t.navHome,
           ),
           NavigationDestination(
             icon: Icon(Icons.favorite_border_rounded),
             selectedIcon: Icon(Icons.favorite_rounded),
-            label: 'Favorites',
+            label: t.navFavorites,
           ),
           NavigationDestination(
             icon: Icon(Icons.book_online_outlined),
             selectedIcon: Icon(Icons.book_online_rounded),
-            label: 'Bookings',
+            label: t.navBookings,
           ),
           NavigationDestination(
             icon: Icon(Icons.person_outline_rounded),
             selectedIcon: Icon(Icons.person_rounded),
-            label: 'Profile',
+            label: t.navProfile,
           ),
         ],
       ),
@@ -111,10 +112,10 @@ class _HomeUBookingHistoryScreenState extends State<HomeUBookingHistoryScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Track your latest rental booking updates quickly.',
+              Text(
+                t.bookingHistorySubtitle,
                 style: TextStyle(
-                  color: Color(0xFF50617F),
+                  color: context.homeuMutedText,
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
@@ -129,20 +130,24 @@ class _HomeUBookingHistoryScreenState extends State<HomeUBookingHistoryScreen> {
                       padding: const EdgeInsets.only(right: 8),
                       child: ChoiceChip(
                         key: Key('status_filter_${status.name}'),
-                        label: Text(_statusLabel(status)),
+                        label: Text(_statusLabel(context, status)),
                         selected: isSelected,
                         onSelected: (_) {
                           setState(() {
                             _selectedStatus = status;
                           });
                         },
-                        selectedColor: const Color(0xFF1E3A8A),
+                        selectedColor: context.homeuAccent,
                         labelStyle: TextStyle(
-                          color: isSelected ? Colors.white : const Color(0xFF1E3A8A),
+                          color: isSelected
+                              ? Colors.white
+                              : context.homeuAccent,
                           fontWeight: FontWeight.w700,
                         ),
-                        side: const BorderSide(color: Color(0x331E3A8A)),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        side: BorderSide(color: context.homeuSoftBorder),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                     );
                   }).toList(),
@@ -172,16 +177,17 @@ class _HomeUBookingHistoryScreenState extends State<HomeUBookingHistoryScreen> {
     );
   }
 
-  String _statusLabel(HomeUBookingStatus status) {
+  String _statusLabel(BuildContext context, HomeUBookingStatus status) {
+    final t = context.l10n;
     switch (status) {
       case HomeUBookingStatus.pending:
-        return 'Pending';
+        return t.statusPending;
       case HomeUBookingStatus.approved:
-        return 'Approved';
+        return t.statusApproved;
       case HomeUBookingStatus.rejected:
-        return 'Rejected';
+        return t.statusRejected;
       case HomeUBookingStatus.completed:
-        return 'Completed';
+        return t.statusCompleted;
     }
   }
 }
@@ -194,17 +200,17 @@ class _BookingHistoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final badge = _statusBadge(item.status);
+    final badge = _statusBadge(context, item.status);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.homeuCard,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: Color(0x141E3A8A),
+            color: context.homeuAccent.withValues(alpha: 0.14),
             blurRadius: 12,
             offset: Offset(0, 4),
           ),
@@ -215,16 +221,22 @@ class _BookingHistoryCard extends StatelessWidget {
         children: [
           Text(
             item.propertyName,
-            style: const TextStyle(
-              color: Color(0xFF1F314F),
+            style: TextStyle(
+              color: context.homeuPrimaryText,
               fontSize: 16,
               fontWeight: FontWeight.w700,
             ),
           ),
           const SizedBox(height: 8),
-          _InfoRow(label: 'Booking Date', value: item.bookingDate),
+          _InfoRow(
+            label: context.l10n.bookingDateLabel,
+            value: item.bookingDate,
+          ),
           const SizedBox(height: 4),
-          _InfoRow(label: 'Rental Period', value: item.rentalPeriod),
+          _InfoRow(
+            label: context.l10n.rentalPeriodLabel,
+            value: item.rentalPeriod,
+          ),
           const SizedBox(height: 8),
           Container(
             key: Key('status_badge_${item.status.name}'),
@@ -249,7 +261,7 @@ class _BookingHistoryCard extends StatelessWidget {
               child: TextButton(
                 key: const Key('leave_review_button'),
                 onPressed: onLeaveReview,
-                child: const Text('Leave Review'),
+                child: Text(context.l10n.leaveReview),
               ),
             ),
           ],
@@ -258,16 +270,32 @@ class _BookingHistoryCard extends StatelessWidget {
     );
   }
 
-  _BadgeStyle _statusBadge(HomeUBookingStatus status) {
+  _BadgeStyle _statusBadge(BuildContext context, HomeUBookingStatus status) {
     switch (status) {
       case HomeUBookingStatus.pending:
-        return const _BadgeStyle('Pending', Color(0xFFFFF4DB), Color(0xFFB7791F));
+        return _BadgeStyle(
+          context.l10n.statusPending,
+          Color(0xFFFFF4DB),
+          Color(0xFFB7791F),
+        );
       case HomeUBookingStatus.approved:
-        return const _BadgeStyle('Approved', Color(0xFFE6F7EF), Color(0xFF0F8A5F));
+        return _BadgeStyle(
+          context.l10n.statusApproved,
+          Color(0xFFE6F7EF),
+          Color(0xFF0F8A5F),
+        );
       case HomeUBookingStatus.rejected:
-        return const _BadgeStyle('Rejected', Color(0xFFFDECEC), Color(0xFFC53030));
+        return _BadgeStyle(
+          context.l10n.statusRejected,
+          Color(0xFFFDECEC),
+          Color(0xFFC53030),
+        );
       case HomeUBookingStatus.completed:
-        return const _BadgeStyle('Completed', Color(0xFFEAF2FF), Color(0xFF1E3A8A));
+        return _BadgeStyle(
+          context.l10n.statusCompleted,
+          Color(0xFFEAF2FF),
+          Color(0xFF1E3A8A),
+        );
     }
   }
 }
@@ -284,8 +312,8 @@ class _InfoRow extends StatelessWidget {
       children: [
         Text(
           '$label: ',
-          style: const TextStyle(
-            color: Color(0xFF667896),
+          style: TextStyle(
+            color: context.homeuMutedText,
             fontSize: 13,
             fontWeight: FontWeight.w500,
           ),
@@ -293,8 +321,8 @@ class _InfoRow extends StatelessWidget {
         Expanded(
           child: Text(
             value,
-            style: const TextStyle(
-              color: Color(0xFF1F314F),
+            style: TextStyle(
+              color: context.homeuPrimaryText,
               fontSize: 13,
               fontWeight: FontWeight.w600,
             ),
@@ -326,4 +354,3 @@ class _BadgeStyle {
   final Color background;
   final Color foreground;
 }
-

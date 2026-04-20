@@ -1,9 +1,14 @@
+import 'dart:io';
+
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/profile/profile_models.dart';
 import 'package:homeu/core/supabase/app_supabase.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class HomeUProfileRemoteDataSource {
   const HomeUProfileRemoteDataSource();
+
+  static const String _avatarBucket = 'avatars';
 
   Future<HomeUProfileData?> fetchProfile({
     required String userId,
@@ -53,6 +58,32 @@ class HomeUProfileRemoteDataSource {
     return row;
   }
 
+  Future<Map<String, dynamic>> upsertUserPreferences({
+    required String userId,
+    required Map<String, dynamic> preferences,
+  }) async {
+    if (!AppSupabase.isInitialized) {
+      return Map<String, dynamic>.from(preferences);
+    }
+
+    final payload = <String, dynamic>{
+      'user_id': userId,
+      ...preferences,
+    };
+
+    final dynamic row = await AppSupabase.client
+        .from('user_preferences')
+        .upsert(payload, onConflict: 'user_id')
+        .select('*')
+        .maybeSingle();
+
+    if (row is Map<String, dynamic>) {
+      return row;
+    }
+
+    return payload;
+  }
+
   Future<HomeUProfileData> updateProfile({
     required String userId,
     required String fullName,
@@ -85,6 +116,22 @@ class HomeUProfileRemoteDataSource {
       role: map['role'] == null ? fallbackRole : HomeUProfileData.mapRole(map['role'].toString()),
       profileImageUrl: map['profile_image_url']?.toString(),
     );
+  }
+
+  Future<String> uploadAvatarImage({
+    required String userId,
+    required String filePath,
+  }) async {
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final avatarStoragePath = '$userId/avatar_$timestamp.jpg';
+
+    await AppSupabase.client.storage.from(_avatarBucket).upload(
+          avatarStoragePath,
+          File(filePath),
+          fileOptions: const FileOptions(contentType: 'image/jpeg'),
+        );
+
+    return AppSupabase.client.storage.from(_avatarBucket).getPublicUrl(avatarStoragePath);
   }
 }
 

@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:homeu/app/auth/homeu_auth_service.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
+import 'package:homeu/app/profile/profile_controller.dart';
+import 'package:homeu/app/profile/profile_models.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
+import 'package:homeu/core/localization/homeu_l10n.dart';
+import 'package:homeu/core/theme/homeu_app_theme.dart';
 import 'package:homeu/pages/home/booking_history_screen.dart';
 import 'package:homeu/pages/home/property_details_screen.dart';
 import 'package:homeu/pages/home/property_item.dart';
@@ -9,12 +14,10 @@ import 'package:homeu/pages/home/profile_screen.dart';
 class HomeUHomePage extends StatefulWidget {
   const HomeUHomePage({
     super.key,
-    this.tenantName = 'Aisyah',
     this.showNotificationBadge = true,
     this.showQrScanFab = true,
   });
 
-  final String tenantName;
   final bool showNotificationBadge;
   final bool showQrScanFab;
 
@@ -24,6 +27,7 @@ class HomeUHomePage extends StatefulWidget {
 
 class _HomeUHomePageState extends State<HomeUHomePage> {
   int _selectedNavIndex = 0;
+  late final HomeUProfileController _profileController;
 
   static const List<String> _categories = [
     'Room',
@@ -73,211 +77,262 @@ class _HomeUHomePageState extends State<HomeUHomePage> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    final authService = HomeUAuthService.instance;
+    _profileController = HomeUProfileController(
+      initialProfile: HomeUProfileData(
+        userId: authService.currentUserId ?? '',
+        fullName: '',
+        email: authService.currentSession?.user.email ?? '',
+        phoneNumber: '',
+        role: HomeURole.tenant,
+      ),
+    );
+    _profileController.loadProfile();
+  }
+
+  @override
+  void dispose() {
+    _profileController.dispose();
+    super.dispose();
+  }
+
+  String _resolvedGreetingName(HomeUProfileData profile) {
+    final fullName = profile.fullName.trim();
+    if (fullName.isNotEmpty) {
+      return fullName;
+    }
+
+    final email = profile.email.trim();
+    if (email.contains('@')) {
+      return email.split('@').first;
+    }
+
+    return '';
+  }
+
+  @override
   Widget build(BuildContext context) {
     if (!HomeUSession.canAccess(HomeURole.tenant)) {
       return const HomeURoleBlockedScreen(requiredRole: HomeURole.tenant);
     }
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF6F8FC),
-      floatingActionButton: widget.showQrScanFab
-          ? FloatingActionButton.extended(
-              onPressed: () {},
-              backgroundColor: const Color(0xFF1E3A8A),
-              foregroundColor: Colors.white,
-              icon: const Icon(Icons.qr_code_scanner_rounded),
-              label: const Text('Scan QR'),
-            )
-          : null,
-      bottomNavigationBar: NavigationBar(
-        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-        selectedIndex: _selectedNavIndex,
-        onDestinationSelected: (index) {
-          if (index == 2) {
-            Navigator.of(context).push(
-              MaterialPageRoute<void>(builder: (_) => const HomeUBookingHistoryScreen()),
-            );
-            return;
-          }
+    return AnimatedBuilder(
+      animation: _profileController,
+      builder: (context, _) {
+        final greetingName = _resolvedGreetingName(_profileController.profile);
+        final t = context.l10n;
+        final greetingText = greetingName.isEmpty
+            ? t.homeGreetingAnonymous
+            : t.homeGreetingWithName(greetingName);
 
-          if (index == 3) {
-            Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => HomeUProfileScreen(
-                  role: HomeURole.tenant,
-                  name: widget.tenantName,
-                  email: 'tenant@homeu.app',
-                  phone: '+60 12 335 7788',
-                ),
+        return Scaffold(
+          backgroundColor: context.colors.surface,
+          floatingActionButton: widget.showQrScanFab
+              ? FloatingActionButton.extended(
+                  onPressed: () {},
+                  backgroundColor: context.homeuAccent,
+                  foregroundColor: Colors.white,
+                  icon: const Icon(Icons.qr_code_scanner_rounded),
+                  label: Text(t.homeScanQr),
+                )
+              : null,
+          bottomNavigationBar: NavigationBar(
+            labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+            selectedIndex: _selectedNavIndex,
+            onDestinationSelected: (index) {
+              if (index == 2) {
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const HomeUBookingHistoryScreen(),
+                  ),
+                );
+                return;
+              }
+
+              if (index == 3) {
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) =>
+                        const HomeUProfileScreen(role: HomeURole.tenant),
+                  ),
+                );
+                return;
+              }
+
+              setState(() {
+                _selectedNavIndex = index;
+              });
+            },
+            destinations: [
+              NavigationDestination(
+                icon: Icon(Icons.home_outlined),
+                selectedIcon: Icon(Icons.home_rounded),
+                label: t.navHome,
               ),
-            );
-            return;
-          }
-
-          setState(() {
-            _selectedNavIndex = index;
-          });
-        },
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home_rounded),
-            label: 'Home',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.favorite_border_rounded),
-            selectedIcon: Icon(Icons.favorite_rounded),
-            label: 'Favorites',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.book_online_outlined),
-            selectedIcon: Icon(Icons.book_online_rounded),
-            label: 'Bookings',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline_rounded),
-            selectedIcon: Icon(Icons.person_rounded),
-            label: 'Profile',
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final width = constraints.maxWidth;
-            final horizontalPadding = (width * 0.06).clamp(16.0, 24.0);
-
-            return SingleChildScrollView(
-              padding: EdgeInsets.fromLTRB(
-                horizontalPadding,
-                14,
-                horizontalPadding,
-                22,
+              NavigationDestination(
+                icon: Icon(Icons.favorite_border_rounded),
+                selectedIcon: Icon(Icons.favorite_rounded),
+                label: t.navFavorites,
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+              NavigationDestination(
+                icon: Icon(Icons.book_online_outlined),
+                selectedIcon: Icon(Icons.book_online_rounded),
+                label: t.navBookings,
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.person_outline_rounded),
+                selectedIcon: Icon(Icons.person_rounded),
+                label: t.navProfile,
+              ),
+            ],
+          ),
+          body: SafeArea(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final width = constraints.maxWidth;
+                final horizontalPadding = (width * 0.06).clamp(16.0, 24.0);
+
+                return SingleChildScrollView(
+                  padding: EdgeInsets.fromLTRB(
+                    horizontalPadding,
+                    14,
+                    horizontalPadding,
+                    22,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: Text(
-                          'Hello, ${widget.tenantName}',
-                          style: const TextStyle(
-                            color: Color(0xFF1E3A8A),
-                            fontSize: 28,
-                            fontWeight: FontWeight.w700,
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              greetingText,
+                              style: TextStyle(
+                                color: context.homeuPrimaryText,
+                                fontSize: 28,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                          Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              IconButton(
+                                onPressed: () {},
+                                icon: Icon(
+                                  Icons.notifications_none_rounded,
+                                  color: context.homeuAccent,
+                                ),
+                              ),
+                              if (widget.showNotificationBadge)
+                                const Positioned(
+                                  right: 8,
+                                  top: 9,
+                                  child: _NotificationDot(),
+                                ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        t.homeQuickSearchSubtitle,
+                        style: TextStyle(
+                          color: context.homeuMutedText,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      TextField(
+                        decoration: InputDecoration(
+                          hintText: t.homeSearchHint,
+                          hintStyle: TextStyle(color: context.homeuHelperText),
+                          filled: true,
+                          fillColor: context.homeuCard,
+                          prefixIcon: const Icon(Icons.search_rounded),
+                          suffixIcon: const Icon(Icons.tune_rounded),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide(
+                              color: context.homeuSoftBorder,
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide(
+                              color: context.homeuSoftBorder,
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide(
+                              color: context.homeuAccent,
+                              width: 1.2,
+                            ),
                           ),
                         ),
                       ),
-                      Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          IconButton(
-                            onPressed: () {},
-                            icon: const Icon(
-                              Icons.notifications_none_rounded,
-                              color: Color(0xFF1E3A8A),
-                            ),
-                          ),
-                          if (widget.showNotificationBadge)
-                            const Positioned(
-                              right: 8,
-                              top: 9,
-                              child: _NotificationDot(),
-                            ),
-                        ],
+                      const SizedBox(height: 18),
+                      Text(
+                        t.homeCategories,
+                        style: TextStyle(
+                          color: context.homeuPrimaryText,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: _categories
+                              .map(
+                                (item) => Padding(
+                                  padding: const EdgeInsets.only(right: 10),
+                                  child: _CategoryChip(
+                                    label: item,
+                                    isSelected: item == 'Room',
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        t.homeRecommendedProperties,
+                        style: TextStyle(
+                          color: context.homeuPrimaryText,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      ..._properties.map(
+                        (property) => _PropertyCard(
+                          property: property,
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute<void>(
+                                builder: (_) => HomeUPropertyDetailsScreen(
+                                  property: property,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 4),
-                  const Text(
-                    'Find your next rental with a quick search.',
-                    style: TextStyle(
-                      color: Color(0xFF50617F),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    decoration: InputDecoration(
-                      hintText: 'Search location, condo, house',
-                      hintStyle: const TextStyle(color: Color(0xFF7384A1)),
-                      filled: true,
-                      fillColor: Colors.white,
-                      prefixIcon: const Icon(Icons.search_rounded),
-                      suffixIcon: const Icon(Icons.tune_rounded),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(color: Color(0x1F1E3A8A)),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(color: Color(0x1F1E3A8A)),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(16),
-                        borderSide: const BorderSide(
-                          color: Color(0xFF1E3A8A),
-                          width: 1.2,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-                  const Text(
-                    'Categories',
-                    style: TextStyle(
-                      color: Color(0xFF1F314F),
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: _categories
-                          .map(
-                            (item) => Padding(
-                              padding: const EdgeInsets.only(right: 10),
-                              child: _CategoryChip(
-                                label: item,
-                                isSelected: item == 'Room',
-                              ),
-                            ),
-                          )
-                          .toList(),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  const Text(
-                    'Recommended Properties',
-                    style: TextStyle(
-                      color: Color(0xFF1F314F),
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  ..._properties.map(
-                    (property) => _PropertyCard(
-                      property: property,
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute<void>(
-                            builder: (_) => HomeUPropertyDetailsScreen(property: property),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            );
-            },
+                );
+              },
+            ),
           ),
-        ),
+        );
+      },
     );
   }
 }
@@ -291,9 +346,9 @@ class _NotificationDot extends StatelessWidget {
       width: 10,
       height: 10,
       decoration: BoxDecoration(
-        color: const Color(0xFF10B981),
+        color: context.homeuSuccess,
         shape: BoxShape.circle,
-        border: Border.all(color: Colors.white, width: 1.4),
+        border: Border.all(color: context.homeuCard, width: 1.4),
       ),
     );
   }
@@ -307,17 +362,18 @@ class _CategoryChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final accent = context.homeuAccent;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: isSelected ? const Color(0xFF1E3A8A) : Colors.white,
+        color: isSelected ? accent : context.homeuCard,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0x261E3A8A)),
+        border: Border.all(color: context.homeuSoftBorder),
       ),
       child: Text(
         label,
         style: TextStyle(
-          color: isSelected ? Colors.white : const Color(0xFF1E3A8A),
+          color: isSelected ? Colors.white : accent,
           fontSize: 13,
           fontWeight: FontWeight.w700,
         ),
@@ -337,11 +393,11 @@ class _PropertyCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.homeuCard,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: Color(0x141E3A8A),
+            color: context.homeuAccent.withValues(alpha: 0.14),
             blurRadius: 14,
             offset: Offset(0, 5),
           ),
@@ -359,13 +415,17 @@ class _PropertyCard extends StatelessWidget {
                 Container(
                   height: 148,
                   decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(16),
+                    ),
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        property.photoColors.first.withOpacity(0.9),
-                        const Color(0xFFF0F5FF),
+                        property.photoColors.first.withValues(alpha: 0.9),
+                        context.isDarkMode
+                            ? const Color(0xFF243047)
+                            : const Color(0xFFF0F5FF),
                       ],
                     ),
                   ),
@@ -382,7 +442,7 @@ class _PropertyCard extends StatelessWidget {
                   top: 10,
                   child: CircleAvatar(
                     radius: 16,
-                    backgroundColor: Colors.white,
+                    backgroundColor: context.homeuCard,
                     child: Icon(
                       Icons.favorite_border_rounded,
                       size: 18,
@@ -399,8 +459,8 @@ class _PropertyCard extends StatelessWidget {
                 children: [
                   Text(
                     property.name,
-                    style: const TextStyle(
-                      color: Color(0xFF1F314F),
+                    style: TextStyle(
+                      color: context.homeuPrimaryText,
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                     ),
@@ -408,17 +468,17 @@ class _PropertyCard extends StatelessWidget {
                   const SizedBox(height: 5),
                   Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.location_on_outlined,
                         size: 16,
-                        color: Color(0xFF667896),
+                        color: context.homeuMutedText,
                       ),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
                           property.location,
-                          style: const TextStyle(
-                            color: Color(0xFF667896),
+                          style: TextStyle(
+                            color: context.homeuSecondaryText,
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
                           ),
@@ -432,18 +492,22 @@ class _PropertyCard extends StatelessWidget {
                       Text(
                         property.pricePerMonth,
                         style: TextStyle(
-                          color: property.accentColor,
+                          color: context.homeuPrice,
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
                       const Spacer(),
-                      const Icon(Icons.star_rounded, size: 17, color: Color(0xFFF59E0B)),
+                      const Icon(
+                        Icons.star_rounded,
+                        size: 17,
+                        color: Color(0xFFF59E0B),
+                      ),
                       const SizedBox(width: 3),
                       Text(
                         property.rating.toStringAsFixed(1),
-                        style: const TextStyle(
-                          color: Color(0xFF1F314F),
+                        style: TextStyle(
+                          color: context.homeuPrimaryText,
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
                         ),
@@ -459,4 +523,3 @@ class _PropertyCard extends StatelessWidget {
     );
   }
 }
-
