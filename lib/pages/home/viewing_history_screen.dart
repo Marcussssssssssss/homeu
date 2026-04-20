@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
+import 'package:homeu/app/property/property_remote_datasource.dart';
 import 'package:homeu/app/viewing/viewing_models.dart';
 import 'package:homeu/app/viewing/viewing_remote_datasource.dart';
 import 'package:homeu/core/supabase/app_supabase.dart';
+import 'package:homeu/pages/home/property_details_screen.dart';
+import 'package:homeu/pages/home/property_item.dart';
 
 class HomeUViewingHistoryScreen extends StatefulWidget {
   const HomeUViewingHistoryScreen({super.key});
@@ -14,7 +17,9 @@ class HomeUViewingHistoryScreen extends StatefulWidget {
 
 class _HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
   final ViewingRemoteDataSource _viewingRemoteDataSource = const ViewingRemoteDataSource();
+  final PropertyRemoteDataSource _propertyRemoteDataSource = const PropertyRemoteDataSource();
   List<ViewingRequest> _viewings = const <ViewingRequest>[];
+  Map<String, PropertyItem> _propertiesById = const <String, PropertyItem>{};
   bool _isLoading = true;
   String? _tenantId;
 
@@ -60,6 +65,10 @@ class _HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
                       ),
                     ..._viewings.map((viewing) => _ViewingCard(
                           viewing: viewing,
+                          property: _propertiesById[viewing.propertyId],
+                          onTap: _propertiesById[viewing.propertyId] == null
+                              ? null
+                              : () => _openPropertyDetails(_propertiesById[viewing.propertyId]),
                           onReschedule: _tenantId == null
                               ? null
                               : () => _handleReschedule(viewing, _tenantId!),
@@ -82,6 +91,7 @@ class _HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
       setState(() {
         _tenantId = null;
         _viewings = const <ViewingRequest>[];
+        _propertiesById = const <String, PropertyItem>{};
         _isLoading = false;
       });
       return;
@@ -89,12 +99,16 @@ class _HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
 
     try {
       final rows = await _viewingRemoteDataSource.getTenantViewingRequests(tenantId);
+      final propertyMap = await _propertyRemoteDataSource.fetchPropertiesByIds(
+        rows.map((viewing) => viewing.propertyId).toList(growable: false),
+      );
       if (!mounted) {
         return;
       }
       setState(() {
         _tenantId = tenantId;
         _viewings = rows;
+        _propertiesById = propertyMap;
         _isLoading = false;
       });
     } catch (_) {
@@ -104,6 +118,7 @@ class _HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
       setState(() {
         _tenantId = tenantId;
         _viewings = const <ViewingRequest>[];
+        _propertiesById = const <String, PropertyItem>{};
         _isLoading = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
@@ -223,70 +238,91 @@ class _HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
       );
     }
   }
+
+  void _openPropertyDetails(PropertyItem? property) {
+    if (property == null) {
+      return;
+    }
+
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => HomeUPropertyDetailsScreen(property: property),
+      ),
+    );
+  }
 }
 
 class _ViewingCard extends StatelessWidget {
   const _ViewingCard({
     required this.viewing,
+    required this.property,
+    required this.onTap,
     required this.onReschedule,
     required this.onCancel,
   });
 
   final ViewingRequest viewing;
+  final PropertyItem? property;
+  final VoidCallback? onTap;
   final VoidCallback? onReschedule;
   final VoidCallback? onCancel;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x141E3A8A),
-            blurRadius: 12,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            viewing.propertyId,
-            style: const TextStyle(
-              color: Color(0xFF1F314F),
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
+    final propertyName = property?.name.trim();
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x141E3A8A),
+              blurRadius: 12,
+              offset: Offset(0, 4),
             ),
-          ),
-          const SizedBox(height: 8),
-          _InfoRow(label: 'Scheduled At', value: _formatDateTime(viewing.scheduledAt.toLocal())),
-          const SizedBox(height: 4),
-          _InfoRow(label: 'Status', value: viewing.status),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: onReschedule,
-                  child: const Text('Reschedule'),
-                ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              propertyName == null || propertyName.isEmpty ? 'Unknown Property' : propertyName,
+              style: const TextStyle(
+                color: Color(0xFF1F314F),
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
               ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: onCancel,
-                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFC53030)),
-                  child: const Text('Cancel'),
+            ),
+            const SizedBox(height: 8),
+            _InfoRow(label: 'Scheduled At', value: _formatDateTime(viewing.scheduledAt.toLocal())),
+            const SizedBox(height: 4),
+            _InfoRow(label: 'Status', value: viewing.status),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: onReschedule,
+                    child: const Text('Reschedule'),
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ],
+                const SizedBox(width: 10),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: onCancel,
+                    style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFC53030)),
+                    child: const Text('Cancel'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -346,5 +382,3 @@ class _InfoRow extends StatelessWidget {
     );
   }
 }
-
-

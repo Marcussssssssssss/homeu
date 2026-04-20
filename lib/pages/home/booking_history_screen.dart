@@ -3,10 +3,13 @@ import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
 import 'package:homeu/app/booking/booking_models.dart';
 import 'package:homeu/app/booking/booking_remote_datasource.dart';
+import 'package:homeu/app/property/property_remote_datasource.dart';
 import 'package:homeu/core/supabase/app_supabase.dart';
+import 'package:homeu/pages/home/conversation_list_screen.dart';
+import 'package:homeu/pages/home/property_details_screen.dart';
+import 'package:homeu/pages/home/property_item.dart';
 import 'package:homeu/pages/home/profile_screen.dart';
 import 'package:homeu/pages/home/review_rating_screen.dart';
-import 'package:homeu/pages/home/viewing_history_screen.dart';
 
 enum HomeUBookingStatus { pending, approved, rejected, completed }
 
@@ -19,6 +22,7 @@ class HomeUBookingHistoryScreen extends StatefulWidget {
 
 class _HomeUBookingHistoryScreenState extends State<HomeUBookingHistoryScreen> {
   final BookingRemoteDataSource _bookingRemoteDataSource = const BookingRemoteDataSource();
+  final PropertyRemoteDataSource _propertyRemoteDataSource = const PropertyRemoteDataSource();
   HomeUBookingStatus _selectedStatus = HomeUBookingStatus.pending;
   int _selectedNavIndex = 2;
   List<_BookingHistoryItem> _bookings = const <_BookingHistoryItem>[];
@@ -45,18 +49,6 @@ class _HomeUBookingHistoryScreenState extends State<HomeUBookingHistoryScreen> {
         title: const Text('Booking History'),
         backgroundColor: const Color(0xFFF6F8FC),
         elevation: 0,
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => const HomeUViewingHistoryScreen(),
-                ),
-              );
-            },
-            child: const Text('Viewing History'),
-          ),
-        ],
       ),
       bottomNavigationBar: NavigationBar(
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
@@ -69,6 +61,11 @@ class _HomeUBookingHistoryScreenState extends State<HomeUBookingHistoryScreen> {
             Navigator.of(context).pop();
           }
           if (index == 3) {
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const HomeUConversationListScreen()),
+            );
+          }
+          if (index == 4) {
             Navigator.of(context).push(
               MaterialPageRoute<void>(
                 builder: (_) => const HomeUProfileScreen(
@@ -96,6 +93,11 @@ class _HomeUBookingHistoryScreenState extends State<HomeUBookingHistoryScreen> {
             icon: Icon(Icons.book_online_outlined),
             selectedIcon: Icon(Icons.book_online_rounded),
             label: 'Bookings',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.chat_bubble_outline_rounded),
+            selectedIcon: Icon(Icons.chat_bubble_rounded),
+            label: 'Chats',
           ),
           NavigationDestination(
             icon: Icon(Icons.person_outline_rounded),
@@ -180,6 +182,7 @@ class _HomeUBookingHistoryScreenState extends State<HomeUBookingHistoryScreen> {
               ...visibleBookings.map(
                 (booking) => _BookingHistoryCard(
                   item: booking,
+                  onTap: booking.property == null ? null : () => _openPropertyDetails(booking.property),
                   onLeaveReview: booking.status == HomeUBookingStatus.completed
                       ? () {
                           Navigator.of(context).push(
@@ -241,12 +244,17 @@ class _HomeUBookingHistoryScreenState extends State<HomeUBookingHistoryScreen> {
 
     try {
       final bookings = await _bookingRemoteDataSource.getUserBookings(tenantId);
+      final propertyMap = await _propertyRemoteDataSource.fetchPropertiesByIds(
+        bookings.map((booking) => booking.propertyId).toList(growable: false),
+      );
       if (!mounted) {
         return;
       }
 
       setState(() {
-        _bookings = bookings.map(_mapBookingItem).toList(growable: false);
+        _bookings = bookings
+            .map((booking) => _mapBookingItem(booking, propertyMap[booking.propertyId]))
+            .toList(growable: false);
         _isLoading = false;
         _loadError = null;
       });
@@ -262,12 +270,26 @@ class _HomeUBookingHistoryScreenState extends State<HomeUBookingHistoryScreen> {
     }
   }
 
-  _BookingHistoryItem _mapBookingItem(BookingRequest booking) {
+  _BookingHistoryItem _mapBookingItem(BookingRequest booking, PropertyItem? property) {
+    final propertyName = property?.name.trim();
     return _BookingHistoryItem(
-      propertyName: booking.propertyId,
+      propertyName: propertyName == null || propertyName.isEmpty ? 'Unknown Property' : propertyName,
       bookingDate: _formatDate(booking.createdAt),
       rentalPeriod: 'N/A',
       status: _mapStatus(booking.status),
+      property: property,
+    );
+  }
+
+  void _openPropertyDetails(PropertyItem? property) {
+    if (property == null) {
+      return;
+    }
+
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => HomeUPropertyDetailsScreen(property: property),
+      ),
     );
   }
 
@@ -306,73 +328,82 @@ class _HomeUBookingHistoryScreenState extends State<HomeUBookingHistoryScreen> {
 }
 
 class _BookingHistoryCard extends StatelessWidget {
-  const _BookingHistoryCard({required this.item, this.onLeaveReview});
+  const _BookingHistoryCard({
+    required this.item,
+    required this.onTap,
+    this.onLeaveReview,
+  });
 
   final _BookingHistoryItem item;
+  final VoidCallback? onTap;
   final VoidCallback? onLeaveReview;
 
   @override
   Widget build(BuildContext context) {
     final badge = _statusBadge(item.status);
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x141E3A8A),
-            blurRadius: 12,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            item.propertyName,
-            style: const TextStyle(
-              color: Color(0xFF1F314F),
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x141E3A8A),
+              blurRadius: 12,
+              offset: Offset(0, 4),
             ),
-          ),
-          const SizedBox(height: 8),
-          _InfoRow(label: 'Booking Date', value: item.bookingDate),
-          const SizedBox(height: 4),
-          _InfoRow(label: 'Rental Period', value: item.rentalPeriod),
-          const SizedBox(height: 8),
-          Container(
-            key: Key('status_badge_${item.status.name}'),
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: badge.background,
-              borderRadius: BorderRadius.circular(999),
-            ),
-            child: Text(
-              badge.label,
-              style: TextStyle(
-                color: badge.foreground,
-                fontSize: 12,
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              item.propertyName,
+              style: const TextStyle(
+                color: Color(0xFF1F314F),
+                fontSize: 16,
                 fontWeight: FontWeight.w700,
               ),
             ),
-          ),
-          if (onLeaveReview != null) ...[
-            const SizedBox(height: 10),
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
-                key: const Key('leave_review_button'),
-                onPressed: onLeaveReview,
-                child: const Text('Leave Review'),
+            const SizedBox(height: 8),
+            _InfoRow(label: 'Booking Date', value: item.bookingDate),
+            const SizedBox(height: 4),
+            _InfoRow(label: 'Rental Period', value: item.rentalPeriod),
+            const SizedBox(height: 8),
+            Container(
+              key: Key('status_badge_${item.status.name}'),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: badge.background,
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Text(
+                badge.label,
+                style: TextStyle(
+                  color: badge.foreground,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
+            if (onLeaveReview != null) ...[
+              const SizedBox(height: 10),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  key: const Key('leave_review_button'),
+                  onPressed: onLeaveReview,
+                  child: const Text('Leave Review'),
+                ),
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
@@ -430,12 +461,14 @@ class _BookingHistoryItem {
     required this.bookingDate,
     required this.rentalPeriod,
     required this.status,
+    required this.property,
   });
 
   final String propertyName;
   final String bookingDate;
   final String rentalPeriod;
   final HomeUBookingStatus status;
+  final PropertyItem? property;
 }
 
 class _BadgeStyle {
@@ -445,4 +478,3 @@ class _BadgeStyle {
   final Color background;
   final Color foreground;
 }
-
