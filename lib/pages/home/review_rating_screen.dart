@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
+import 'package:homeu/core/theme/homeu_app_theme.dart';
 
 class HomeUReviewRatingScreen extends StatefulWidget {
   const HomeUReviewRatingScreen({super.key, required this.propertyName});
@@ -39,11 +40,10 @@ class _HomeUReviewRatingScreenState extends State<HomeUReviewRatingScreen> {
     final int maxCount = _ratingCounts.values.reduce((a, b) => a > b ? a : b);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F8FC),
+      backgroundColor: context.colors.surface,
       appBar: AppBar(
         title: const Text('Review & Rating'),
-        backgroundColor: const Color(0xFFF6F8FC),
-        elevation: 0,
+        backgroundColor: context.colors.surface,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -53,17 +53,17 @@ class _HomeUReviewRatingScreenState extends State<HomeUReviewRatingScreen> {
             children: [
               Text(
                 widget.propertyName,
-                style: const TextStyle(
-                  color: Color(0xFF1F314F),
+                style: TextStyle(
+                  color: context.homeuPrimaryText,
                   fontSize: 22,
                   fontWeight: FontWeight.w700,
                 ),
               ),
               const SizedBox(height: 8),
-              const Text(
+              Text(
                 'Share your experience to help future tenants make better decisions.',
                 style: TextStyle(
-                  color: Color(0xFF50617F),
+                  color: context.homeuMutedText,
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
@@ -73,11 +73,11 @@ class _HomeUReviewRatingScreenState extends State<HomeUReviewRatingScreen> {
                 key: const Key('average_rating_summary'),
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.homeuCard,
                   borderRadius: BorderRadius.circular(16),
-                  boxShadow: const [
+                  boxShadow: [
                     BoxShadow(
-                      color: Color(0x141E3A8A),
+                      color: context.homeuAccent.withValues(alpha: 0.14),
                       blurRadius: 12,
                       offset: Offset(0, 4),
                     ),
@@ -118,11 +118,11 @@ class _HomeUReviewRatingScreenState extends State<HomeUReviewRatingScreen> {
                 key: const Key('rating_distribution_section'),
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.homeuCard,
                   borderRadius: BorderRadius.circular(16),
-                  boxShadow: const [
+                  boxShadow: [
                     BoxShadow(
-                      color: Color(0x141E3A8A),
+                      color: context.homeuAccent.withValues(alpha: 0.14),
                       blurRadius: 12,
                       offset: Offset(0, 4),
                     ),
@@ -146,11 +146,11 @@ class _HomeUReviewRatingScreenState extends State<HomeUReviewRatingScreen> {
                 key: const Key('star_selector_section'),
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.homeuCard,
                   borderRadius: BorderRadius.circular(16),
-                  boxShadow: const [
+                  boxShadow: [
                     BoxShadow(
-                      color: Color(0x141E3A8A),
+                      color: context.homeuAccent.withValues(alpha: 0.14),
                       blurRadius: 12,
                       offset: Offset(0, 4),
                     ),
@@ -194,11 +194,11 @@ class _HomeUReviewRatingScreenState extends State<HomeUReviewRatingScreen> {
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.homeuCard,
                   borderRadius: BorderRadius.circular(16),
-                  boxShadow: const [
+                  boxShadow: [
                     BoxShadow(
-                      color: Color(0x141E3A8A),
+                      color: context.homeuAccent.withValues(alpha: 0.14),
                       blurRadius: 12,
                       offset: Offset(0, 4),
                     ),
@@ -240,7 +240,7 @@ class _HomeUReviewRatingScreenState extends State<HomeUReviewRatingScreen> {
                     Navigator.of(context).pop();
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF1E3A8A),
+                    backgroundColor: context.homeuAccent,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
@@ -292,7 +292,7 @@ class _RatingDistributionRow extends StatelessWidget {
               minHeight: 9,
               value: value,
               backgroundColor: const Color(0xFFEAF0FA),
-              valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF1E3A8A)),
+              valueColor: AlwaysStoppedAnimation<Color>(context.homeuAccent),
             ),
           ),
         ),

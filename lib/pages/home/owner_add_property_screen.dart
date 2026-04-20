@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
+import 'package:homeu/core/theme/homeu_app_theme.dart';
 
 class HomeUOwnerAddPropertyScreen extends StatefulWidget {
   const HomeUOwnerAddPropertyScreen({super.key});
@@ -30,11 +31,10 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F8FC),
+      backgroundColor: context.colors.surface,
       appBar: AppBar(
         title: const Text('Add Property'),
-        backgroundColor: const Color(0xFFF6F8FC),
-        elevation: 0,
+        backgroundColor: context.colors.surface,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -42,10 +42,10 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'List your property with complete details for faster approvals.',
                 style: TextStyle(
-                  color: Color(0xFF50617F),
+                  color: context.homeuMutedText,
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
@@ -118,13 +118,13 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
                               }
                             });
                           },
-                          selectedColor: const Color(0xFFEAF2FF),
-                          checkmarkColor: const Color(0xFF1E3A8A),
-                          labelStyle: const TextStyle(
-                            color: Color(0xFF1F314F),
+                          selectedColor: context.homeuAccent.withValues(alpha: 0.2),
+                          checkmarkColor: context.homeuAccent,
+                          labelStyle: TextStyle(
+                            color: context.homeuPrimaryText,
                             fontWeight: FontWeight.w600,
                           ),
-                          side: const BorderSide(color: Color(0x331E3A8A)),
+                          side: BorderSide(color: context.homeuSoftBorder),
                         ),
                       )
                       .toList(),
@@ -136,10 +136,10 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Add multiple images to improve listing visibility.',
                       style: TextStyle(
-                        color: Color(0xFF667896),
+                        color: context.homeuMutedText,
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),
@@ -168,9 +168,9 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
                     key: const Key('select_location_section'),
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF4F8FF),
+                    color: context.isDarkMode ? const Color(0xFF121C2B) : const Color(0xFFF4F8FF),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0x331E3A8A)),
+                    border: Border.all(color: context.homeuSoftBorder),
                   ),
                   child: Row(
                     children: [
@@ -236,7 +236,7 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
                     Navigator.of(context).pop();
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF1E3A8A),
+                    backgroundColor: context.homeuAccent,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
@@ -306,11 +306,11 @@ class _SectionCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.homeuCard,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: Color(0x141E3A8A),
+            color: context.homeuAccent.withValues(alpha: 0.14),
             blurRadius: 12,
             offset: Offset(0, 4),
           ),
@@ -321,8 +321,8 @@ class _SectionCard extends StatelessWidget {
         children: [
           Text(
             title,
-            style: const TextStyle(
-              color: Color(0xFF1F314F),
+            style: TextStyle(
+              color: context.homeuPrimaryText,
               fontSize: 15,
               fontWeight: FontWeight.w700,
             ),
@@ -357,8 +357,8 @@ class _LabeledTextField extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(
-            color: Color(0xFF40526E),
+          style: TextStyle(
+            color: context.homeuMutedText,
             fontSize: 13,
             fontWeight: FontWeight.w600,
           ),
@@ -371,18 +371,18 @@ class _LabeledTextField extends StatelessWidget {
           decoration: InputDecoration(
             hintText: hintText,
             filled: true,
-            fillColor: const Color(0xFFFBFCFF),
+            fillColor: context.homeuCard,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0x1F1E3A8A)),
+              borderSide: BorderSide(color: context.homeuSoftBorder),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0x1F1E3A8A)),
+              borderSide: BorderSide(color: context.homeuSoftBorder),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFF1E3A8A), width: 1.2),
+              borderSide: BorderSide(color: context.homeuAccent, width: 1.2),
             ),
           ),
         ),
@@ -413,8 +413,8 @@ class _LabeledDropdown extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(
-            color: Color(0xFF40526E),
+          style: TextStyle(
+            color: context.homeuMutedText,
             fontSize: 13,
             fontWeight: FontWeight.w600,
           ),
@@ -427,14 +427,14 @@ class _LabeledDropdown extends StatelessWidget {
           onChanged: onChanged,
           decoration: InputDecoration(
             filled: true,
-            fillColor: const Color(0xFFFBFCFF),
+            fillColor: context.homeuCard,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0x1F1E3A8A)),
+              borderSide: BorderSide(color: context.homeuSoftBorder),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0x1F1E3A8A)),
+              borderSide: BorderSide(color: context.homeuSoftBorder),
             ),
           ),
         ),
@@ -453,12 +453,14 @@ class _UploadTile extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
-        color: addMode ? const Color(0xFFF4F8FF) : const Color(0xFFEAF2FF),
-        border: Border.all(color: const Color(0x331E3A8A)),
+        color: addMode
+            ? (context.isDarkMode ? const Color(0xFF121C2B) : const Color(0xFFF4F8FF))
+            : context.homeuAccent.withValues(alpha: 0.16),
+        border: Border.all(color: context.homeuSoftBorder),
       ),
       child: Icon(
         addMode ? Icons.add_a_photo_rounded : Icons.image_rounded,
-        color: const Color(0xFF1E3A8A),
+        color: context.homeuAccent,
       ),
     );
   }
@@ -483,13 +485,13 @@ class _DateSelectorTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         decoration: BoxDecoration(
-          color: const Color(0xFFFBFCFF),
+          color: context.homeuCard,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0x1F1E3A8A)),
+          border: Border.all(color: context.homeuSoftBorder),
         ),
         child: Row(
           children: [
-            const Icon(Icons.event_rounded, color: Color(0xFF1E3A8A)),
+            Icon(Icons.event_rounded, color: context.homeuAccent),
             const SizedBox(width: 8),
             Expanded(
               child: Column(
@@ -506,8 +508,8 @@ class _DateSelectorTile extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     value,
-                    style: const TextStyle(
-                      color: Color(0xFF1F314F),
+                    style: TextStyle(
+                      color: context.homeuPrimaryText,
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
                     ),

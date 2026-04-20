@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:homeu/core/localization/homeu_l10n.dart';
+import 'package:homeu/core/theme/homeu_app_theme.dart';
 import 'package:homeu/pages/auth/login_screen.dart';
 import 'package:homeu/pages/onboarding/onboarding_screen_2.dart';
 
@@ -10,7 +12,9 @@ class HomeUOnboardingScreen1 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final t = context.l10n;
     return Scaffold(
+      backgroundColor: context.colors.surface,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -25,7 +29,9 @@ class HomeUOnboardingScreen1 extends StatelessWidget {
                 24,
               ),
               child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: constraints.maxHeight - 44),
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight - 44,
+                ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -33,29 +39,32 @@ class HomeUOnboardingScreen1 extends StatelessWidget {
                     const SizedBox(height: 8),
                     const _BrowseListingIllustration(),
                     const SizedBox(height: 28),
-                    const Text(
-                      'Browse Rental Properties',
+                    Text(
+                      t.onboardingStep1Title,
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: Color(0xFF1E3A8A),
+                        color: context.homeuPrimaryText,
                         fontSize: 30,
                         height: 1.2,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(height: 14),
-                    const Text(
-                      'Discover rooms, houses, condos, and apartments that match your lifestyle and budget.',
+                    Text(
+                      t.onboardingStep1Subtitle,
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        color: Color(0xFF50617F),
+                        color: context.homeuMutedText,
                         fontSize: 16,
                         height: 1.45,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                     const SizedBox(height: 28),
-                    const _OnboardingProgressIndicator(currentStep: 1, totalSteps: 3),
+                    const _OnboardingProgressIndicator(
+                      currentStep: 1,
+                      totalSteps: 3,
+                    ),
                     const SizedBox(height: 26),
                     Row(
                       children: [
@@ -72,14 +81,14 @@ class HomeUOnboardingScreen1 extends StatelessWidget {
                                   );
                                 },
                             style: TextButton.styleFrom(
-                              foregroundColor: const Color(0xFF50617F),
+                              foregroundColor: context.homeuMutedText,
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               textStyle: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
-                            child: const Text('Skip'),
+                            child: Text(t.onboardingSkip),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -90,12 +99,13 @@ class HomeUOnboardingScreen1 extends StatelessWidget {
                                 () {
                                   Navigator.of(context).push(
                                     MaterialPageRoute<void>(
-                                      builder: (_) => const HomeUOnboardingScreen2(),
+                                      builder: (_) =>
+                                          const HomeUOnboardingScreen2(),
                                     ),
                                   );
                                 },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF1E3A8A),
+                              backgroundColor: context.homeuAccent,
                               foregroundColor: Colors.white,
                               elevation: 0,
                               padding: const EdgeInsets.symmetric(vertical: 16),
@@ -107,7 +117,7 @@ class HomeUOnboardingScreen1 extends StatelessWidget {
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
-                            child: const Text('Next'),
+                            child: Text(t.onboardingNext),
                           ),
                         ),
                       ],
@@ -134,6 +144,8 @@ class _OnboardingProgressIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final muted = context.homeuMutedText;
+    final accent = context.homeuAccent;
     return Column(
       children: [
         Row(
@@ -146,7 +158,7 @@ class _OnboardingProgressIndicator extends StatelessWidget {
               width: isActive ? 26 : 10,
               height: 10,
               decoration: BoxDecoration(
-                color: isActive ? const Color(0xFF1E3A8A) : const Color(0x261E3A8A),
+                color: isActive ? accent : accent.withValues(alpha: 0.22),
                 borderRadius: BorderRadius.circular(20),
               ),
             );
@@ -154,9 +166,9 @@ class _OnboardingProgressIndicator extends StatelessWidget {
         ),
         const SizedBox(height: 10),
         Text(
-          '$currentStep of $totalSteps',
-          style: const TextStyle(
-            color: Color(0xFF50617F),
+          context.l10n.onboardingStepProgress(currentStep, totalSteps),
+          style: TextStyle(
+            color: muted,
             fontSize: 13,
             fontWeight: FontWeight.w600,
           ),
@@ -171,18 +183,23 @@ class _BrowseListingIllustration extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.isDarkMode;
+    final card = context.homeuCard;
+    final accent = context.homeuAccent;
     return Container(
       height: 280,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(22),
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFFF4F8FF), Color(0xFFEAF8F2)],
+          colors: isDark
+              ? [const Color(0xFF1A263D), const Color(0xFF162B27)]
+              : [const Color(0xFFF4F8FF), const Color(0xFFEAF8F2)],
         ),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: Color(0x141E3A8A),
+            color: accent.withValues(alpha: 0.16),
             blurRadius: 20,
             offset: Offset(0, 8),
           ),
@@ -196,24 +213,24 @@ class _BrowseListingIllustration extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: card,
                 borderRadius: BorderRadius.circular(999),
-                boxShadow: const [
+                boxShadow: [
                   BoxShadow(
-                    color: Color(0x1A1E3A8A),
+                    color: accent.withValues(alpha: 0.18),
                     blurRadius: 10,
                     offset: Offset(0, 4),
                   ),
                 ],
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(Icons.tune_rounded, size: 16, color: Color(0xFF1E3A8A)),
+                  Icon(Icons.tune_rounded, size: 16, color: accent),
                   SizedBox(width: 6),
                   Text(
-                    'Filters',
+                    context.l10n.onboardingFilters,
                     style: TextStyle(
-                      color: Color(0xFF1E3A8A),
+                      color: accent,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -228,19 +245,19 @@ class _BrowseListingIllustration extends StatelessWidget {
                 width: 230,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
-                  children: const [
+                  children: [
                     _ListingCard(
-                      title: 'City Condo',
-                      subtitle: '2 Beds • Downtown',
-                      price: '\$1,250/mo',
-                      accent: Color(0xFF1E3A8A),
+                      title: context.l10n.onboardingExampleListing1Title,
+                      subtitle: context.l10n.onboardingExampleListing1Subtitle,
+                      price: context.l10n.onboardingExampleListing1Price,
+                      accent: const Color(0xFF1E3A8A),
                     ),
-                    SizedBox(height: 12),
+                    const SizedBox(height: 12),
                     _ListingCard(
-                      title: 'Cozy Studio',
-                      subtitle: '1 Bed • Near Campus',
-                      price: '\$780/mo',
-                      accent: Color(0xFF10B981),
+                      title: context.l10n.onboardingExampleListing2Title,
+                      subtitle: context.l10n.onboardingExampleListing2Subtitle,
+                      price: context.l10n.onboardingExampleListing2Price,
+                      accent: const Color(0xFF10B981),
                     ),
                   ],
                 ),
@@ -268,14 +285,17 @@ class _ListingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final card = context.homeuCard;
+    final titleColor = context.homeuPrimaryText;
+    final subtitleColor = context.homeuMutedText;
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: card,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: Color(0x141E3A8A),
+            color: context.homeuAccent.withValues(alpha: 0.16),
             blurRadius: 14,
             offset: Offset(0, 5),
           ),
@@ -287,7 +307,7 @@ class _ListingCard extends StatelessWidget {
             width: 42,
             height: 42,
             decoration: BoxDecoration(
-              color: accent.withOpacity(0.15),
+              color: accent.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(Icons.home_work_rounded, color: accent),
@@ -299,19 +319,19 @@ class _ListingCard extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF1F314F),
+                    color: titleColor,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   subtitle,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
-                    color: Color(0xFF63738D),
+                    color: subtitleColor,
                   ),
                 ),
               ],
@@ -323,7 +343,7 @@ class _ListingCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w700,
-              color: accent,
+              color: context.homeuPrice,
             ),
           ),
         ],
@@ -331,4 +351,3 @@ class _ListingCard extends StatelessWidget {
     );
   }
 }
-

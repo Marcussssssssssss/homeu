@@ -3,9 +3,13 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
+<<<<<<< UserAuthentication
+import 'package:homeu/core/theme/homeu_app_theme.dart';
+=======
 import 'package:homeu/app/booking/payment_models.dart';
 import 'package:homeu/app/booking/payment_remote_datasource.dart';
 import 'package:homeu/core/supabase/app_supabase.dart';
+>>>>>>> main
 import 'package:homeu/pages/home/property_item.dart';
 
 enum HomeUPaymentMethod { card, banking, ewallet }
@@ -61,11 +65,10 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F8FC),
+      backgroundColor: context.colors.surface,
       appBar: AppBar(
         title: const Text('Payment'),
-        backgroundColor: const Color(0xFFF6F8FC),
-        elevation: 0,
+        backgroundColor: context.colors.surface,
       ),
       bottomNavigationBar: SafeArea(
         minimum: const EdgeInsets.fromLTRB(16, 8, 16, 12),
@@ -75,7 +78,7 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
             key: const Key('pay_now_button'),
             onPressed: _isSubmittingPayment ? null : _submitPayment,
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF1E3A8A),
+              backgroundColor: context.homeuAccent,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
@@ -96,10 +99,10 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'Payment Method',
                 style: TextStyle(
-                  color: Color(0xFF1F314F),
+                  color: context.homeuPrimaryText,
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                 ),
@@ -157,7 +160,7 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
                     }
                   },
                   keyboardType: TextInputType.number,
-                  decoration: _fieldDecoration('Card Number', '1234 5678 9012 3456'),
+                  decoration: _fieldDecoration(context, 'Card Number', '1234 5678 9012 3456'),
                 ),
                 const SizedBox(height: 10),
                 Row(
@@ -174,7 +177,7 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
                           }
                         },
                         keyboardType: TextInputType.datetime,
-                        decoration: _fieldDecoration('Expiry', 'MM/YY'),
+                        decoration: _fieldDecoration(context, 'Expiry', 'MM/YY'),
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -191,7 +194,7 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
                         },
                         keyboardType: TextInputType.number,
                         obscureText: true,
-                        decoration: _fieldDecoration('CVV', '***'),
+                        decoration: _fieldDecoration(context, 'CVV', '***'),
                       ),
                     ),
                   ],
@@ -202,11 +205,11 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
                 key: const Key('payment_summary_section'),
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.homeuCard,
                   borderRadius: BorderRadius.circular(16),
-                  boxShadow: const [
+                  boxShadow: [
                     BoxShadow(
-                      color: Color(0x141E3A8A),
+                      color: context.homeuAccent.withValues(alpha: 0.14),
                       blurRadius: 12,
                       offset: Offset(0, 4),
                     ),
@@ -215,10 +218,10 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Payment Summary',
                       style: TextStyle(
-                        color: Color(0xFF1F314F),
+                        color: context.homeuPrimaryText,
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
                       ),
@@ -241,23 +244,23 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
     );
   }
 
-  InputDecoration _fieldDecoration(String label, String hint) {
+  InputDecoration _fieldDecoration(BuildContext context, String label, String hint) {
     return InputDecoration(
       labelText: label,
       hintText: hint,
       filled: true,
-      fillColor: Colors.white,
+      fillColor: context.homeuCard,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: Color(0x1F1E3A8A)),
+        borderSide: BorderSide(color: context.homeuSoftBorder),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: Color(0x1F1E3A8A)),
+        borderSide: BorderSide(color: context.homeuSoftBorder),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: Color(0xFF1E3A8A), width: 1.2),
+        borderSide: BorderSide(color: context.homeuAccent, width: 1.2),
       ),
     );
   }
@@ -269,13 +272,13 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
         children: [
           Text(
             label,
-            style: const TextStyle(color: Color(0xFF667896), fontSize: 13),
+            style: TextStyle(color: context.homeuMutedText, fontSize: 13),
           ),
           const Spacer(),
           Text(
             value,
             style: TextStyle(
-              color: emphasize ? const Color(0xFF1E3A8A) : const Color(0xFF1F314F),
+              color: emphasize ? context.homeuPrice : context.homeuPrimaryText,
               fontSize: emphasize ? 16 : 13,
               fontWeight: FontWeight.w700,
             ),
@@ -437,22 +440,22 @@ class _PaymentMethodTile extends StatelessWidget {
         child: Ink(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: context.homeuCard,
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
-              color: selected ? const Color(0xFF1E3A8A) : const Color(0x1F1E3A8A),
+              color: selected ? context.homeuAccent : context.homeuSoftBorder,
               width: selected ? 1.2 : 1,
             ),
           ),
           child: Row(
             children: [
-              Icon(icon, color: const Color(0xFF1E3A8A)),
+              Icon(icon, color: context.homeuAccent),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   label,
-                  style: const TextStyle(
-                    color: Color(0xFF1F314F),
+                  style: TextStyle(
+                    color: context.homeuPrimaryText,
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
@@ -460,7 +463,7 @@ class _PaymentMethodTile extends StatelessWidget {
               ),
               Icon(
                 selected ? Icons.radio_button_checked_rounded : Icons.radio_button_off_rounded,
-                color: const Color(0xFF1E3A8A),
+                color: context.homeuAccent,
               ),
             ],
           ),

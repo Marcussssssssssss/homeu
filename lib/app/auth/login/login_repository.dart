@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:homeu/app/auth/homeu_auth_service.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/auth/login/login_auth_datasource.dart';
 import 'package:homeu/app/auth/login/login_models.dart';
@@ -8,6 +7,20 @@ import 'package:homeu/core/supabase/app_supabase.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class LoginRepository {
+  static const String successLogin = 'login.success.login';
+
+  static const String errorBackendNotInitialized =
+      'login.error.backend_not_initialized';
+  static const String errorLoginIncomplete = 'login.error.login_incomplete';
+  static const String errorProfileRoleMissing =
+      'login.error.profile_role_missing';
+  static const String errorNetwork = 'login.error.network';
+  static const String errorProfileRead = 'login.error.profile_read';
+  static const String errorUnexpected = 'login.error.unexpected';
+  static const String errorInvalidCredentials =
+      'login.error.invalid_credentials';
+  static const String errorGeneric = 'login.error.generic';
+
   LoginRepository({LoginAuthDataSource? dataSource})
     : _dataSource = dataSource ?? const LoginAuthDataSource();
 
@@ -17,7 +30,7 @@ class LoginRepository {
     if (!AppSupabase.isInitialized) {
       return const LoginSubmissionResult(
         status: LoginSubmissionStatus.failure,
-        message: 'Backend is not initialized. Please check your Supabase configuration.',
+        message: errorBackendNotInitialized,
       );
     }
 
@@ -32,15 +45,14 @@ class LoginRepository {
       if (user == null) {
         return const LoginSubmissionResult(
           status: LoginSubmissionStatus.failure,
-          message: 'Login could not be completed. Please try again.',
+          message: errorLoginIncomplete,
         );
       }
 
-      if (session == null || !HomeUAuthService.instance.isUserEmailVerified(user)) {
-        await HomeUAuthService.instance.signOut();
+      if (session == null) {
         return const LoginSubmissionResult(
           status: LoginSubmissionStatus.failure,
-          message: 'Please verify your email before logging in.',
+          message: errorLoginIncomplete,
         );
       }
 
@@ -49,13 +61,13 @@ class LoginRepository {
       if (resolvedRole == null) {
         return const LoginSubmissionResult(
           status: LoginSubmissionStatus.failure,
-          message: 'Your profile role is missing. Please contact support.',
+          message: errorProfileRoleMissing,
         );
       }
 
       return LoginSubmissionResult(
         status: LoginSubmissionStatus.success,
-        message: 'Login successful.',
+        message: successLogin,
         role: resolvedRole,
       );
     } on AuthException catch (error) {
@@ -66,20 +78,17 @@ class LoginRepository {
     } on SocketException {
       return const LoginSubmissionResult(
         status: LoginSubmissionStatus.failure,
-        message: 'Network error. Please check your internet connection and try again.',
+        message: errorNetwork,
       );
     } on PostgrestException catch (error) {
-      final message = error.message.trim();
       return LoginSubmissionResult(
         status: LoginSubmissionStatus.failure,
-        message: message.isEmpty
-            ? 'Unable to read your profile right now. Please try again.'
-            : message,
+        message: error.message.trim().isEmpty ? errorProfileRead : errorGeneric,
       );
     } catch (_) {
       return const LoginSubmissionResult(
         status: LoginSubmissionStatus.failure,
-        message: 'Unexpected error during login. Please try again.',
+        message: errorUnexpected,
       );
     }
   }
@@ -99,16 +108,13 @@ class LoginRepository {
     final lower = message.toLowerCase();
 
     if (lower.contains('invalid login credentials')) {
-      return 'Invalid email or password.';
-    }
-    if (lower.contains('email not confirmed') || lower.contains('email not verified')) {
-      return 'Please verify your email before logging in.';
+      return errorInvalidCredentials;
     }
     if (lower.contains('network')) {
-      return 'Network error. Please check your internet connection and try again.';
+      return errorNetwork;
     }
 
-    return message.isEmpty ? 'Unable to login right now. Please try again.' : message;
+    return errorGeneric;
   }
 }
 

@@ -1,3 +1,7 @@
+<<<<<<< UserAuthentication
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.CAMERA" />
+=======
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.homeu">
 
@@ -9,6 +13,7 @@
         </intent>
     </queries>
 
+>>>>>>> main
     <application
         android:name="${applicationName}"
         android:label="homeu"

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
+import 'package:homeu/core/theme/homeu_app_theme.dart';
 import 'package:homeu/pages/home/booking_screen.dart';
 import 'package:homeu/pages/home/chat_screen.dart';
 import 'package:homeu/pages/home/property_item.dart';
@@ -33,7 +34,7 @@ class _HomeUPropertyDetailsScreenState extends State<HomeUPropertyDetailsScreen>
     final property = widget.property;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F8FC),
+      backgroundColor: context.colors.surface,
       bottomNavigationBar: SafeArea(
         minimum: const EdgeInsets.fromLTRB(16, 8, 16, 12),
         child: Column(
@@ -102,10 +103,10 @@ class _HomeUPropertyDetailsScreenState extends State<HomeUPropertyDetailsScreen>
                     icon: const Icon(Icons.arrow_back_ios_new_rounded),
                   ),
                   const SizedBox(width: 4),
-                  const Text(
+                  Text(
                     'Property Details',
                     style: TextStyle(
-                      color: Color(0xFF1F314F),
+                      color: context.homeuPrimaryText,
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
                     ),
@@ -161,7 +162,9 @@ class _HomeUPropertyDetailsScreenState extends State<HomeUPropertyDetailsScreen>
                     width: isActive ? 20 : 8,
                     height: 8,
                     decoration: BoxDecoration(
-                      color: isActive ? const Color(0xFF1E3A8A) : const Color(0x331E3A8A),
+                      color: isActive
+                          ? context.homeuAccent
+                          : context.homeuAccent.withValues(alpha: 0.22),
                       borderRadius: BorderRadius.circular(999),
                     ),
                   );
@@ -170,8 +173,8 @@ class _HomeUPropertyDetailsScreenState extends State<HomeUPropertyDetailsScreen>
               const SizedBox(height: 16),
               Text(
                 property.name,
-                style: const TextStyle(
-                  color: Color(0xFF1F314F),
+                style: TextStyle(
+                  color: context.homeuPrimaryText,
                   fontSize: 26,
                   fontWeight: FontWeight.w700,
                   height: 1.2,
@@ -181,16 +184,16 @@ class _HomeUPropertyDetailsScreenState extends State<HomeUPropertyDetailsScreen>
               Text(
                 property.pricePerMonth,
                 style: TextStyle(
-                  color: property.accentColor,
+                  color: context.homeuPrice,
                   fontSize: 20,
                   fontWeight: FontWeight.w700,
                 ),
               ),
               const SizedBox(height: 18),
-              const Text(
+              Text(
                 'Location',
                 style: TextStyle(
-                  color: Color(0xFF1F314F),
+                  color: context.homeuPrimaryText,
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                 ),
@@ -200,11 +203,11 @@ class _HomeUPropertyDetailsScreenState extends State<HomeUPropertyDetailsScreen>
                 key: const Key('location_info_section'),
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.homeuCard,
                   borderRadius: BorderRadius.circular(16),
-                  boxShadow: const [
+                  boxShadow: [
                     BoxShadow(
-                      color: Color(0x141E3A8A),
+                      color: context.homeuAccent.withValues(alpha: 0.14),
                       blurRadius: 12,
                       offset: Offset(0, 4),
                     ),
@@ -235,17 +238,17 @@ class _HomeUPropertyDetailsScreenState extends State<HomeUPropertyDetailsScreen>
                         children: [
                           Text(
                             property.location,
-                            style: const TextStyle(
-                              color: Color(0xFF1F314F),
+                            style: TextStyle(
+                              color: context.homeuPrimaryText,
                               fontSize: 14,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
                           const SizedBox(height: 4),
-                          const Text(
+                          Text(
                             'Nearby: LRT station, groceries, and cafes',
                             style: TextStyle(
-                              color: Color(0xFF657793),
+                              color: context.homeuMutedText,
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
                             ),
@@ -257,10 +260,10 @@ class _HomeUPropertyDetailsScreenState extends State<HomeUPropertyDetailsScreen>
                 ),
               ),
               const SizedBox(height: 18),
-              const Text(
+              Text(
                 'Description',
                 style: TextStyle(
-                  color: Color(0xFF1F314F),
+                  color: context.homeuPrimaryText,
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                 ),
@@ -268,18 +271,18 @@ class _HomeUPropertyDetailsScreenState extends State<HomeUPropertyDetailsScreen>
               const SizedBox(height: 8),
               Text(
                 property.description,
-                style: const TextStyle(
-                  color: Color(0xFF566885),
+                style: TextStyle(
+                  color: context.homeuMutedText,
                   fontSize: 14,
                   height: 1.5,
                   fontWeight: FontWeight.w500,
                 ),
               ),
               const SizedBox(height: 18),
-              const Text(
+              Text(
                 'Facilities',
                 style: TextStyle(
-                  color: Color(0xFF1F314F),
+                  color: context.homeuPrimaryText,
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                 ),
@@ -296,10 +299,10 @@ class _HomeUPropertyDetailsScreenState extends State<HomeUPropertyDetailsScreen>
                 ],
               ),
               const SizedBox(height: 18),
-              const Text(
+              Text(
                 'Owner Information',
                 style: TextStyle(
-                  color: Color(0xFF1F314F),
+                  color: context.homeuPrimaryText,
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                 ),
@@ -308,11 +311,11 @@ class _HomeUPropertyDetailsScreenState extends State<HomeUPropertyDetailsScreen>
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.homeuCard,
                   borderRadius: BorderRadius.circular(16),
-                  boxShadow: const [
+                  boxShadow: [
                     BoxShadow(
-                      color: Color(0x141E3A8A),
+                      color: context.homeuAccent.withValues(alpha: 0.14),
                       blurRadius: 12,
                       offset: Offset(0, 4),
                     ),
@@ -332,8 +335,8 @@ class _HomeUPropertyDetailsScreenState extends State<HomeUPropertyDetailsScreen>
                         children: [
                           Text(
                             property.ownerName,
-                            style: const TextStyle(
-                              color: Color(0xFF1F314F),
+                             style: TextStyle(
+                                color: context.homeuPrimaryText,
                               fontSize: 15,
                               fontWeight: FontWeight.w700,
                             ),
@@ -341,8 +344,8 @@ class _HomeUPropertyDetailsScreenState extends State<HomeUPropertyDetailsScreen>
                           const SizedBox(height: 3),
                           Text(
                             property.ownerRole,
-                            style: const TextStyle(
-                              color: Color(0xFF667896),
+                             style: TextStyle(
+                                color: context.homeuMutedText,
                               fontSize: 13,
                               fontWeight: FontWeight.w500,
                             ),
@@ -360,7 +363,7 @@ class _HomeUPropertyDetailsScreenState extends State<HomeUPropertyDetailsScreen>
                         );
                       },
                       icon: const Icon(Icons.chat_bubble_outline_rounded),
-                      color: const Color(0xFF1E3A8A),
+                      color: context.homeuAccent,
                     ),
                   ],
                 ),
@@ -385,18 +388,18 @@ class _FacilityBadge extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 10),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.homeuCard,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0x1F1E3A8A)),
+          border: Border.all(color: context.homeuSoftBorder),
         ),
         child: Column(
           children: [
-            Icon(icon, color: const Color(0xFF1E3A8A), size: 20),
+            Icon(icon, color: context.homeuAccent, size: 20),
             const SizedBox(height: 4),
             Text(
               label,
-              style: const TextStyle(
-                color: Color(0xFF1F314F),
+              style: TextStyle(
+                color: context.homeuPrimaryText,
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
               ),

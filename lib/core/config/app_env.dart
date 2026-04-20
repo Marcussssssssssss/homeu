@@ -28,6 +28,7 @@ class AppEnv {
 
   static String get supabaseAnonKey => dotenv.maybeGet(EnvKeys.supabaseAnonKey)?.trim() ?? '';
 
+
   static String? get passwordResetRedirectUrl {
     String value = '';
     try {
@@ -36,7 +37,7 @@ class AppEnv {
       return null;
     }
     if (value.isEmpty) {
-      return null;
+      return 'homeu://auth/reset';
     }
     return value;
   }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:homeu/app/auth/homeu_auth_service.dart';
 import 'package:homeu/app/homeu_app.dart';
+import 'package:homeu/app/settings/homeu_language_controller.dart';
+import 'package:homeu/app/settings/homeu_theme_controller.dart';
 import 'package:homeu/app/startup/startup_session_resolver.dart';
 import 'package:homeu/core/config/app_env.dart';
 import 'package:homeu/core/supabase/app_supabase.dart';
@@ -11,10 +13,22 @@ Future<void> main() async {
   await AppEnv.load();
   await AppSupabase.initialize();
 
+  final languageController = HomeULanguageController.instance;
+  await languageController.loadInitialLanguage();
+
+  final themeController = HomeUThemeController.instance;
+  await themeController.loadInitialTheme();
+
   // Startup destination is prepared here for future guarded routing.
   final startupDestination = await _resolveStartupDestination();
 
-  runApp(HomeUApp(startupDestination: startupDestination));
+  runApp(
+    HomeUApp(
+      startupDestination: startupDestination,
+      languageController: languageController,
+      themeController: themeController,
+    ),
+  );
 }
 
 Future<HomeUStartupDestination> _resolveStartupDestination() async {

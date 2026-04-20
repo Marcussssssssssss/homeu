@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:homeu/core/localization/homeu_l10n.dart';
+import 'package:homeu/core/theme/homeu_app_theme.dart';
 
 class HomeUOwnerBottomNavigationBar extends StatelessWidget {
   const HomeUOwnerBottomNavigationBar({
@@ -13,16 +15,20 @@ class HomeUOwnerBottomNavigationBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool isCompact = MediaQuery.sizeOf(context).width <= 400;
+    final t = context.l10n;
 
     return NavigationBarTheme(
       data: NavigationBarThemeData(
         height: isCompact ? 72 : 76,
-        indicatorColor: const Color(0x1F1E3A8A),
+        backgroundColor: context.homeuCard,
+        indicatorColor: context.homeuAccent.withValues(
+          alpha: context.isDarkMode ? 0.34 : 0.18,
+        ),
         iconTheme: WidgetStateProperty.resolveWith<IconThemeData>((states) {
           final bool isSelected = states.contains(WidgetState.selected);
           return IconThemeData(
             size: isCompact ? 21 : 22,
-            color: isSelected ? const Color(0xFF1E3A8A) : const Color(0xFF5D6F8D),
+            color: isSelected ? context.homeuAccent : context.homeuMutedText,
           );
         }),
         labelTextStyle: WidgetStateProperty.resolveWith<TextStyle>((states) {
@@ -31,7 +37,7 @@ class HomeUOwnerBottomNavigationBar extends StatelessWidget {
             fontSize: isCompact ? 10 : 11,
             height: 1.15,
             fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-            color: isSelected ? const Color(0xFF1E3A8A) : const Color(0xFF5D6F8D),
+            color: isSelected ? context.homeuAccent : context.homeuMutedText,
           );
         }),
       ),
@@ -40,25 +46,25 @@ class HomeUOwnerBottomNavigationBar extends StatelessWidget {
         selectedIndex: selectedIndex,
         onDestinationSelected: onDestinationSelected,
         destinations: [
-          const NavigationDestination(
+          NavigationDestination(
             icon: Icon(Icons.dashboard_outlined),
             selectedIcon: Icon(Icons.dashboard_rounded),
-            label: 'Dashboard',
+            label: t.ownerNavDashboard,
           ),
           NavigationDestination(
             icon: const Icon(Icons.home_work_outlined),
             selectedIcon: const Icon(Icons.home_work_rounded),
             label: isCompact ? 'My Properties' : 'Properties',
           ),
-          const NavigationDestination(
+          NavigationDestination(
             icon: Icon(Icons.inbox_outlined),
             selectedIcon: Icon(Icons.inbox_rounded),
-            label: 'Requests',
+            label: t.ownerNavRequests,
           ),
-          const NavigationDestination(
+          NavigationDestination(
             icon: Icon(Icons.analytics_outlined),
             selectedIcon: Icon(Icons.analytics_rounded),
-            label: 'Analytics',
+            label: t.ownerNavAnalytics,
           ),
           const NavigationDestination(
             icon: Icon(Icons.chat_bubble_outline_rounded),
@@ -68,11 +74,10 @@ class HomeUOwnerBottomNavigationBar extends StatelessWidget {
           const NavigationDestination(
             icon: Icon(Icons.person_outline_rounded),
             selectedIcon: Icon(Icons.person_rounded),
-            label: 'Profile',
+            label: t.navProfile,
           ),
         ],
       ),
     );
   }
 }
-

@@ -2,19 +2,21 @@
 
 HomeU is a Flutter mobile app for rental discovery and property management.
 
-## Backend Foundation (Supabase Setup)
+## Backend and Auth
 
-This project now includes the Supabase initialization foundation only.
-Auth features and SQLite data layer are intentionally deferred to next steps.
+This project uses Supabase for authentication and profile-role lookup.
+Current flow is configured for direct email/password sign up and login (Confirm Email disabled).
 
-### Added foundation
+### Implemented
 
 - Environment loading via `flutter_dotenv`
 - Supabase SDK setup via `supabase_flutter`
 - Centralized env config in `lib/core/config/app_env.dart`
 - Reusable Supabase client helper in `lib/core/supabase/app_supabase.dart`
-- Basic auth/session foundation in `lib/app/auth/homeu_auth_service.dart`
-- Startup session resolver scaffold in `lib/app/startup/startup_session_resolver.dart`
+- Register flow with duplicate email handling (`This email is already in use.`)
+- Login flow with role-based routing (`tenant` / `owner`)
+- Session restore via `lib/app/startup/startup_session_resolver.dart`
+- Forgot password and update password flows
 
 ### Configure environment
 
@@ -24,6 +26,7 @@ Auth features and SQLite data layer are intentionally deferred to next steps.
 ```
 SUPABASE_URL=https://your-project-ref.supabase.co
 SUPABASE_ANON_KEY=your-supabase-anon-key
+SUPABASE_PASSWORD_RESET_REDIRECT_URL=homeu://auth/reset
 ```
 
 If values remain placeholders, app UI still starts, but Supabase is skipped safely.

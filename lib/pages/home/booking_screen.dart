@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
+<<<<<<< UserAuthentication
+import 'package:homeu/core/theme/homeu_app_theme.dart';
+=======
 import 'package:homeu/app/booking/booking_models.dart';
 import 'package:homeu/app/booking/booking_remote_datasource.dart';
 import 'package:homeu/core/supabase/app_supabase.dart';
+>>>>>>> main
 import 'package:homeu/pages/home/payment_screen.dart';
 import 'package:homeu/pages/home/property_item.dart';
 import 'package:homeu/pages/home/viewing_screen.dart';
@@ -34,11 +38,10 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F8FC),
+      backgroundColor: context.colors.surface,
       appBar: AppBar(
         title: const Text('Booking'),
-        backgroundColor: const Color(0xFFF6F8FC),
-        elevation: 0,
+        backgroundColor: context.colors.surface,
       ),
       bottomNavigationBar: SafeArea(
         minimum: const EdgeInsets.fromLTRB(16, 8, 16, 12),
@@ -68,7 +71,17 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
+<<<<<<< UserAuthentication
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: context.homeuAccent,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+=======
               ),
+>>>>>>> main
             ),
             const SizedBox(height: 8),
             SizedBox(
@@ -101,10 +114,10 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'Selected Property',
                 style: TextStyle(
-                  color: Color(0xFF1F314F),
+                  color: context.homeuPrimaryText,
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                 ),
@@ -114,11 +127,11 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
                 key: const Key('selected_property_summary_card'),
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.homeuCard,
                   borderRadius: BorderRadius.circular(16),
-                  boxShadow: const [
+                  boxShadow: [
                     BoxShadow(
-                      color: Color(0x141E3A8A),
+                      color: context.homeuAccent.withValues(alpha: 0.14),
                       blurRadius: 12,
                       offset: Offset(0, 4),
                     ),
@@ -153,8 +166,8 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
                         children: [
                           Text(
                             widget.property.name,
-                            style: const TextStyle(
-                              color: Color(0xFF1F314F),
+                            style: TextStyle(
+                              color: context.homeuPrimaryText,
                               fontSize: 15,
                               fontWeight: FontWeight.w700,
                             ),
@@ -162,8 +175,8 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
                           const SizedBox(height: 4),
                           Text(
                             widget.property.location,
-                            style: const TextStyle(
-                              color: Color(0xFF667896),
+                            style: TextStyle(
+                              color: context.homeuMutedText,
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
                             ),
@@ -172,7 +185,7 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
                           Text(
                             widget.property.pricePerMonth,
                             style: TextStyle(
-                              color: widget.property.accentColor,
+                              color: context.homeuPrice,
                               fontSize: 13,
                               fontWeight: FontWeight.w700,
                             ),
@@ -184,10 +197,10 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
                 ),
               ),
               const SizedBox(height: 18),
-              const Text(
+              Text(
                 'Rental Duration',
                 style: TextStyle(
-                  color: Color(0xFF1F314F),
+                  color: context.homeuPrimaryText,
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                 ),
@@ -207,22 +220,22 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
                         _selectedDurationMonths = months;
                       });
                     },
-                    selectedColor: const Color(0xFF1E3A8A),
+                    selectedColor: context.homeuAccent,
                     labelStyle: TextStyle(
-                      color: isSelected ? Colors.white : const Color(0xFF1E3A8A),
+                      color: isSelected ? Colors.white : context.homeuAccent,
                       fontWeight: FontWeight.w700,
                     ),
-                    side: const BorderSide(color: Color(0x331E3A8A)),
+                    side: BorderSide(color: context.homeuSoftBorder),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                   );
                 }).toList(),
               ),
               const SizedBox(height: 18),
-              const Text(
+              Text(
                 'Start Date',
                 style: TextStyle(
-                  color: Color(0xFF1F314F),
+                  color: context.homeuPrimaryText,
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                 ),
@@ -235,18 +248,18 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: context.homeuCard,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0x1F1E3A8A)),
+                    border: Border.all(color: context.homeuSoftBorder),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.calendar_month_rounded, color: Color(0xFF1E3A8A)),
+                      Icon(Icons.calendar_month_rounded, color: context.homeuAccent),
                       const SizedBox(width: 8),
                       Text(
                         _formatDate(_startDate),
-                        style: const TextStyle(
-                          color: Color(0xFF1F314F),
+                        style: TextStyle(
+                          color: context.homeuPrimaryText,
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                         ),
@@ -259,11 +272,11 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.homeuCard,
                   borderRadius: BorderRadius.circular(16),
-                  boxShadow: const [
+                  boxShadow: [
                     BoxShadow(
-                      color: Color(0x141E3A8A),
+                      color: context.homeuAccent.withValues(alpha: 0.14),
                       blurRadius: 12,
                       offset: Offset(0, 4),
                     ),
@@ -272,10 +285,10 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Total Price Calculation',
                       style: TextStyle(
-                        color: Color(0xFF1F314F),
+                        color: context.homeuPrimaryText,
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
                       ),
@@ -283,15 +296,15 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
                     const SizedBox(height: 10),
                     Row(
                       children: [
-                        const Text(
+                        Text(
                           'Monthly Price',
-                          style: TextStyle(color: Color(0xFF667896), fontSize: 13),
+                          style: TextStyle(color: context.homeuMutedText, fontSize: 13),
                         ),
                         const Spacer(),
                         Text(
                           'RM ${_formatCurrency(_monthlyPrice)}',
-                          style: const TextStyle(
-                            color: Color(0xFF1F314F),
+                          style: TextStyle(
+                            color: context.homeuPrice,
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
                           ),
@@ -303,13 +316,13 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
                       children: [
                         Text(
                           'Duration ($_selectedDurationMonths months)',
-                          style: const TextStyle(color: Color(0xFF667896), fontSize: 13),
+                          style: TextStyle(color: context.homeuMutedText, fontSize: 13),
                         ),
                         const Spacer(),
                         Text(
                           'x $_selectedDurationMonths',
-                          style: const TextStyle(
-                            color: Color(0xFF1F314F),
+                          style: TextStyle(
+                            color: context.homeuPrimaryText,
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
                           ),
@@ -322,10 +335,10 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
                     ),
                     Row(
                       children: [
-                        const Text(
+                        Text(
                           'Estimated Total',
                           style: TextStyle(
-                            color: Color(0xFF1F314F),
+                            color: context.homeuPrimaryText,
                             fontSize: 15,
                             fontWeight: FontWeight.w700,
                           ),
@@ -334,8 +347,8 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
                         Text(
                           'RM ${_formatCurrency(_totalPrice)}',
                           key: const Key('total_price_text'),
-                          style: const TextStyle(
-                            color: Color(0xFF1E3A8A),
+                          style: TextStyle(
+                            color: context.homeuPrice,
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
                           ),
