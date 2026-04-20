@@ -3,7 +3,13 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
+<<<<<<< UserAuthentication
 import 'package:homeu/core/theme/homeu_app_theme.dart';
+=======
+import 'package:homeu/app/booking/payment_models.dart';
+import 'package:homeu/app/booking/payment_remote_datasource.dart';
+import 'package:homeu/core/supabase/app_supabase.dart';
+>>>>>>> main
 import 'package:homeu/pages/home/property_item.dart';
 
 enum HomeUPaymentMethod { card, banking, ewallet }
@@ -11,12 +17,14 @@ enum HomeUPaymentMethod { card, banking, ewallet }
 class HomeUPaymentScreen extends StatefulWidget {
   const HomeUPaymentScreen({
     super.key,
+    required this.bookingId,
     required this.property,
     required this.durationMonths,
     required this.startDate,
     required this.totalPrice,
   });
 
+  final String bookingId;
   final PropertyItem property;
   final int durationMonths;
   final DateTime startDate;
@@ -27,15 +35,19 @@ class HomeUPaymentScreen extends StatefulWidget {
 }
 
 class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
+  final PaymentRemoteDataSource _paymentRemoteDataSource = const PaymentRemoteDataSource();
   HomeUPaymentMethod _selectedMethod = HomeUPaymentMethod.card;
   final FocusNode _cardNumberFocus = FocusNode();
   final FocusNode _expiryFocus = FocusNode();
   final FocusNode _cvvFocus = FocusNode();
   bool _showCardBack = false;
+  bool _isSubmittingPayment = false;
+  Payment? _latestPayment;
 
   @override
   void initState() {
     super.initState();
+    _loadLatestPayment();
   }
 
   @override
@@ -64,18 +76,20 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
           height: 52,
           child: ElevatedButton(
             key: const Key('pay_now_button'),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Payment completed successfully.')),
-              );
-            },
+            onPressed: _isSubmittingPayment ? null : _submitPayment,
             style: ElevatedButton.styleFrom(
               backgroundColor: context.homeuAccent,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
             ),
-            child: const Text('Pay Now'),
+            child: _isSubmittingPayment
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                  )
+                : const Text('Pay Now'),
           ),
         ),
       ),
@@ -216,6 +230,8 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
                     _summaryRow('Property', widget.property.name),
                     _summaryRow('Start Date', _formatDate(widget.startDate)),
                     _summaryRow('Duration', '${widget.durationMonths} months'),
+                    if (_latestPayment != null)
+                      _summaryRow('Payment Status', _latestPayment!.status),
                     const Divider(height: 18),
                     _summaryRow('Total Amount', 'RM ${_formatCurrency(widget.totalPrice)}', emphasize: true),
                   ],
@@ -305,6 +321,99 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
     ];
 
     return '${date.day} ${months[date.month - 1]} ${date.year}';
+  }
+
+  Future<void> _loadLatestPayment() async {
+    if (!AppSupabase.isInitialized) {
+      return;
+    }
+
+    final payment = await _paymentRemoteDataSource.getLatestPayment(widget.bookingId);
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _latestPayment = payment;
+    });
+  }
+
+  Future<void> _submitPayment() async {
+    if (!AppSupabase.isInitialized) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Supabase is not initialized. Please try again later.')),
+      );
+      return;
+    }
+
+    final payerId = AppSupabase.auth.currentUser?.id;
+    if (payerId == null || payerId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please log in to continue payment.')),
+      );
+      return;
+    }
+
+    setState(() {
+      _isSubmittingPayment = true;
+    });
+
+    try {
+      final payment = await _paymentRemoteDataSource.createPaymentSimulated(
+        bookingId: widget.bookingId,
+        payerId: payerId,
+        method: _methodLabel(_selectedMethod),
+        amount: widget.totalPrice,
+        simulateSuccess: true,
+      );
+
+      if (!mounted) {
+        return;
+      }
+
+      if (payment == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Payment failed. Please try again.')),
+        );
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            payment.status == 'Success'
+                ? 'Payment completed successfully.'
+                : 'Payment failed. Please try again.',
+          ),
+        ),
+      );
+
+      await _loadLatestPayment();
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Unable to process payment right now.')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmittingPayment = false;
+        });
+      }
+    }
+  }
+
+  String _methodLabel(HomeUPaymentMethod method) {
+    switch (method) {
+      case HomeUPaymentMethod.card:
+        return 'Card';
+      case HomeUPaymentMethod.banking:
+        return 'Online Banking';
+      case HomeUPaymentMethod.ewallet:
+        return 'E-Wallet';
+    }
   }
 }
 

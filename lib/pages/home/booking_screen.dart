@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
+<<<<<<< UserAuthentication
 import 'package:homeu/core/theme/homeu_app_theme.dart';
+=======
+import 'package:homeu/app/booking/booking_models.dart';
+import 'package:homeu/app/booking/booking_remote_datasource.dart';
+import 'package:homeu/core/supabase/app_supabase.dart';
+>>>>>>> main
 import 'package:homeu/pages/home/payment_screen.dart';
 import 'package:homeu/pages/home/property_item.dart';
+import 'package:homeu/pages/home/viewing_screen.dart';
 
 class HomeUBookingScreen extends StatefulWidget {
   const HomeUBookingScreen({super.key, required this.property});
@@ -16,8 +23,10 @@ class HomeUBookingScreen extends StatefulWidget {
 
 class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
   static const List<int> _durationOptions = [1, 3, 6, 12];
+  final BookingRemoteDataSource _bookingRemoteDataSource = const BookingRemoteDataSource();
   int _selectedDurationMonths = 6;
   DateTime _startDate = DateTime.now().add(const Duration(days: 3));
+  bool _isSubmitting = false;
 
   double get _monthlyPrice => _extractPrice(widget.property.pricePerMonth);
   double get _totalPrice => _monthlyPrice * _selectedDurationMonths;
@@ -36,20 +45,33 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
       ),
       bottomNavigationBar: SafeArea(
         minimum: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-        child: SizedBox(
-          height: 52,
-          child: ElevatedButton(
-            key: const Key('confirm_booking_button'),
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => HomeUPaymentScreen(
-                    property: widget.property,
-                    durationMonths: _selectedDurationMonths,
-                    startDate: _startDate,
-                    totalPrice: _totalPrice,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: double.infinity,
+              height: 46,
+              child: OutlinedButton(
+                key: const Key('schedule_viewing_button'),
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => HomeUViewingScreen(property: widget.property),
+                    ),
+                  );
+                },
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Color(0xFF1E3A8A)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+                child: const Text(
+                  'Schedule Viewing',
+                  style: TextStyle(
+                    color: Color(0xFF1E3A8A),
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
+<<<<<<< UserAuthentication
               );
             },
             style: ElevatedButton.styleFrom(
@@ -57,9 +79,33 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+=======
+              ),
+>>>>>>> main
             ),
-            child: const Text('Confirm Booking'),
-          ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: ElevatedButton(
+                key: const Key('confirm_booking_button'),
+                onPressed: _isSubmitting ? null : _confirmBooking,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF1E3A8A),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                ),
+                child: _isSubmitting
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      )
+                    : const Text('Confirm Booking'),
+              ),
+            ),
+          ],
         ),
       ),
       body: SafeArea(
@@ -341,14 +387,74 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
   }
 
   double _extractPrice(String value) {
-    final RegExp amountPattern = RegExp(r'[\d,]+');
-    final match = amountPattern.firstMatch(value);
-    if (match == null) {
-      return 0;
+    return widget.property.pricePerMonthValue;
+  }
+
+  Future<void> _confirmBooking() async {
+    if (!AppSupabase.isInitialized) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Supabase is not initialized. Please try again later.')),
+      );
+      return;
     }
 
-    final normalized = match.group(0)!.replaceAll(',', '');
-    return double.tryParse(normalized) ?? 0;
+    final tenantId = AppSupabase.auth.currentUser?.id;
+    if (tenantId == null || tenantId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please log in to continue booking.')),
+      );
+      return;
+    }
+
+    setState(() => _isSubmitting = true);
+
+    try {
+      final now = DateTime.now().toUtc();
+      final booking = BookingRequest(
+        id: '',
+        propertyId: widget.property.id,
+        ownerId: widget.property.ownerId,
+        tenantId: tenantId,
+        status: 'Pending',
+        createdAt: now,
+        updatedAt: now,
+        totalAmount: _totalPrice,
+        paymentStatus: 'Pending',
+      );
+
+      debugPrint('Booking submit: propertyId=${widget.property.id}, ownerId=${widget.property.ownerId}, tenantId=$tenantId');
+
+      final created = await _bookingRemoteDataSource.createBooking(booking);
+      if (!mounted) return;
+
+      if (created == null || created.id.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Unable to create booking. Please try again.')),
+        );
+        return;
+      }
+
+      await Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => HomeUPaymentScreen(
+            bookingId: created.id,
+            property: widget.property,
+            durationMonths: _selectedDurationMonths,
+            startDate: _startDate,
+            totalPrice: _totalPrice,
+          ),
+        ),
+      );
+    } catch (e, st) {
+      debugPrint('Create booking failed: $e');
+      debugPrint('$st');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Create booking failed: $e')),
+      );
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
   }
 
   String _formatCurrency(double amount) {

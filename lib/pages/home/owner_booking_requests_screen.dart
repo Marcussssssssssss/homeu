@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
+<<<<<<< UserAuthentication
 import 'package:homeu/core/localization/homeu_l10n.dart';
 import 'package:homeu/core/theme/homeu_app_theme.dart';
+=======
+import 'package:homeu/pages/home/conversation_list_screen.dart';
+>>>>>>> main
 import 'package:homeu/pages/home/owner_analytics_screen.dart';
 import 'package:homeu/pages/home/owner_bottom_navigation_bar.dart';
 import 'package:homeu/pages/home/profile_screen.dart';
@@ -63,7 +67,23 @@ class _HomeUOwnerBookingRequestsScreenState
           if (index == 4) {
             Navigator.of(context).push(
               MaterialPageRoute<void>(
+<<<<<<< UserAuthentication
                 builder: (_) => const HomeUProfileScreen(role: HomeURole.owner),
+=======
+                builder: (_) => const HomeUConversationListScreen(),
+              ),
+            );
+          }
+          if (index == 5) {
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const HomeUProfileScreen(
+                  role: HomeURole.owner,
+                  name: 'Nurul Huda',
+                  email: 'owner@homeu.app',
+                  phone: '+60 13 882 5560',
+                ),
+>>>>>>> main
               ),
             );
           }

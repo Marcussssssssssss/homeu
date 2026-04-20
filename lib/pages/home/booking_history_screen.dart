@@ -1,10 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
+<<<<<<< UserAuthentication
 import 'package:homeu/core/localization/homeu_l10n.dart';
 import 'package:homeu/core/theme/homeu_app_theme.dart';
+=======
+import 'package:homeu/app/booking/booking_models.dart';
+import 'package:homeu/app/booking/booking_remote_datasource.dart';
+import 'package:homeu/app/property/property_remote_datasource.dart';
+import 'package:homeu/core/supabase/app_supabase.dart';
+import 'package:homeu/pages/home/conversation_list_screen.dart';
+import 'package:homeu/pages/home/property_details_screen.dart';
+import 'package:homeu/pages/home/property_item.dart';
+>>>>>>> main
 import 'package:homeu/pages/home/profile_screen.dart';
 import 'package:homeu/pages/home/review_rating_screen.dart';
+import 'package:homeu/pages/home/viewing_history_screen.dart';
 
 enum HomeUBookingStatus { pending, approved, rejected, completed }
 
@@ -17,35 +28,19 @@ class HomeUBookingHistoryScreen extends StatefulWidget {
 }
 
 class _HomeUBookingHistoryScreenState extends State<HomeUBookingHistoryScreen> {
+  final BookingRemoteDataSource _bookingRemoteDataSource = const BookingRemoteDataSource();
+  final PropertyRemoteDataSource _propertyRemoteDataSource = const PropertyRemoteDataSource();
   HomeUBookingStatus _selectedStatus = HomeUBookingStatus.pending;
   int _selectedNavIndex = 2;
+  List<_BookingHistoryItem> _bookings = const <_BookingHistoryItem>[];
+  bool _isLoading = true;
+  String? _loadError;
 
-  static const List<_BookingHistoryItem> _bookings = [
-    _BookingHistoryItem(
-      propertyName: 'Skyline Condo Suite',
-      bookingDate: '14 Apr 2026',
-      rentalPeriod: 'May 2026 - Oct 2026',
-      status: HomeUBookingStatus.pending,
-    ),
-    _BookingHistoryItem(
-      propertyName: 'Cozy Student Room',
-      bookingDate: '11 Apr 2026',
-      rentalPeriod: 'Jun 2026 - May 2027',
-      status: HomeUBookingStatus.approved,
-    ),
-    _BookingHistoryItem(
-      propertyName: 'Greenview Apartment',
-      bookingDate: '06 Apr 2026',
-      rentalPeriod: 'Jul 2026 - Dec 2026',
-      status: HomeUBookingStatus.rejected,
-    ),
-    _BookingHistoryItem(
-      propertyName: 'Lakefront Residence',
-      bookingDate: '22 Mar 2026',
-      rentalPeriod: 'Apr 2025 - Mar 2026',
-      status: HomeUBookingStatus.completed,
-    ),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _loadBookings();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -77,8 +72,31 @@ class _HomeUBookingHistoryScreenState extends State<HomeUBookingHistoryScreen> {
           if (index == 3) {
             Navigator.of(context).push(
               MaterialPageRoute<void>(
+<<<<<<< UserAuthentication
                 builder: (_) =>
                     const HomeUProfileScreen(role: HomeURole.tenant),
+=======
+                builder: (_) => const HomeUViewingHistoryScreen(),
+              ),
+            );
+          }
+          if (index == 4) {
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const HomeUConversationListScreen(),
+              ),
+            );
+          }
+          if (index == 5) {
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const HomeUProfileScreen(
+                  role: HomeURole.tenant,
+                  name: 'Aisyah Rahman',
+                  email: 'aisyah.r@email.com',
+                  phone: '+60 12 998 1123',
+                ),
+>>>>>>> main
               ),
             );
           }
@@ -98,6 +116,16 @@ class _HomeUBookingHistoryScreenState extends State<HomeUBookingHistoryScreen> {
             icon: Icon(Icons.book_online_outlined),
             selectedIcon: Icon(Icons.book_online_rounded),
             label: t.navBookings,
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.visibility_outlined),
+            selectedIcon: Icon(Icons.visibility_rounded),
+            label: 'Viewings',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.chat_bubble_outline_rounded),
+            selectedIcon: Icon(Icons.chat_bubble_rounded),
+            label: 'Chat',
           ),
           NavigationDestination(
             icon: Icon(Icons.person_outline_rounded),
@@ -154,9 +182,45 @@ class _HomeUBookingHistoryScreenState extends State<HomeUBookingHistoryScreen> {
                 ),
               ),
               const SizedBox(height: 14),
+              if (_isLoading)
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 20),
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+              if (_loadError != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Text(
+                    _loadError!,
+                    style: const TextStyle(
+                      color: Color(0xFFC53030),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              if (!_isLoading && visibleBookings.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 12),
+                  child: Text(
+                    'No bookings found for this status.',
+                    style: TextStyle(
+                      color: Color(0xFF667896),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
               ...visibleBookings.map(
                 (booking) => _BookingHistoryCard(
                   item: booking,
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => HomeUPropertyDetailsScreen(property: booking.property),
+                      ),
+                    );
+                  },
                   onLeaveReview: booking.status == HomeUBookingStatus.completed
                       ? () {
                           Navigator.of(context).push(
@@ -190,12 +254,135 @@ class _HomeUBookingHistoryScreenState extends State<HomeUBookingHistoryScreen> {
         return t.statusCompleted;
     }
   }
+
+  Future<void> _loadBookings() async {
+    if (!AppSupabase.isInitialized) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _bookings = const <_BookingHistoryItem>[];
+        _isLoading = false;
+        _loadError = 'Supabase is not initialized.';
+      });
+      return;
+    }
+
+    final tenantId = AppSupabase.auth.currentUser?.id;
+    if (tenantId == null || tenantId.isEmpty) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _bookings = const <_BookingHistoryItem>[];
+        _isLoading = false;
+        _loadError = 'Please log in to view your booking history.';
+      });
+      return;
+    }
+
+    try {
+      final bookings = await _bookingRemoteDataSource.getUserBookings(tenantId);
+      final propertyById = await _propertyRemoteDataSource.fetchPropertiesByIds(
+        bookings.map((booking) => booking.propertyId),
+      );
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _bookings = bookings
+            .map((booking) => _mapBookingItem(booking, propertyById[booking.propertyId]))
+            .toList(growable: false);
+        _isLoading = false;
+        _loadError = null;
+      });
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _bookings = const <_BookingHistoryItem>[];
+        _isLoading = false;
+        _loadError = 'Unable to load booking history.';
+      });
+    }
+  }
+
+  _BookingHistoryItem _mapBookingItem(BookingRequest booking, PropertyItem? property) {
+    final resolvedProperty = property ?? _buildFallbackPropertyItem(booking);
+    final propertyName = resolvedProperty.name.trim().isEmpty ? booking.propertyId : resolvedProperty.name;
+
+    return _BookingHistoryItem(
+      property: resolvedProperty,
+      propertyName: propertyName,
+      location: resolvedProperty.location,
+      priceLabel: resolvedProperty.pricePerMonth,
+      bookingDate: _formatDate(booking.createdAt),
+      rentalPeriod: 'N/A',
+      status: _mapStatus(booking.status),
+    );
+  }
+
+  PropertyItem _buildFallbackPropertyItem(BookingRequest booking) {
+    return PropertyItem(
+      id: booking.propertyId,
+      ownerId: booking.ownerId,
+      name: booking.propertyId,
+      location: 'Location unavailable',
+      pricePerMonth: 'RM ${booking.totalAmount.toStringAsFixed(0)} / total',
+      rating: 4.5,
+      accentColor: const Color(0xFF1E3A8A),
+      description: 'Property details are currently unavailable.',
+      ownerName: booking.ownerId,
+      ownerRole: 'Host',
+      photoColors: const [
+        Color(0xFF5D7FBF),
+        Color(0xFF4A68A8),
+        Color(0xFF2F4F8F),
+      ],
+    );
+  }
+
+  HomeUBookingStatus _mapStatus(String status) {
+    switch (status.toLowerCase()) {
+      case 'approved':
+        return HomeUBookingStatus.approved;
+      case 'rejected':
+      case 'cancelled':
+        return HomeUBookingStatus.rejected;
+      case 'completed':
+        return HomeUBookingStatus.completed;
+      default:
+        return HomeUBookingStatus.pending;
+    }
+  }
+
+  String _formatDate(DateTime date) {
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+
+    return '${date.day} ${months[date.month - 1]} ${date.year}';
+  }
 }
 
 class _BookingHistoryCard extends StatelessWidget {
-  const _BookingHistoryCard({required this.item, this.onLeaveReview});
+  const _BookingHistoryCard({required this.item, required this.onTap, this.onLeaveReview});
 
   final _BookingHistoryItem item;
+  final VoidCallback onTap;
   final VoidCallback? onLeaveReview;
 
   @override
@@ -204,7 +391,6 @@ class _BookingHistoryCard extends StatelessWidget {
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: context.homeuCard,
         borderRadius: BorderRadius.circular(16),
@@ -216,6 +402,7 @@ class _BookingHistoryCard extends StatelessWidget {
           ),
         ],
       ),
+<<<<<<< UserAuthentication
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -266,6 +453,66 @@ class _BookingHistoryCard extends StatelessWidget {
             ),
           ],
         ],
+=======
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.propertyName,
+                  style: const TextStyle(
+                    color: Color(0xFF1F314F),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                _InfoRow(label: 'Location', value: item.location),
+                const SizedBox(height: 4),
+                _InfoRow(label: 'Price', value: item.priceLabel),
+                const SizedBox(height: 4),
+                _InfoRow(label: 'Booking Date', value: item.bookingDate),
+                const SizedBox(height: 4),
+                _InfoRow(label: 'Rental Period', value: item.rentalPeriod),
+                const SizedBox(height: 8),
+                Container(
+                  key: Key('status_badge_${item.status.name}'),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: badge.background,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    badge.label,
+                    style: TextStyle(
+                      color: badge.foreground,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                if (onLeaveReview != null) ...[
+                  const SizedBox(height: 10),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      key: const Key('leave_review_button'),
+                      onPressed: onLeaveReview,
+                      child: const Text('Leave Review'),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+>>>>>>> main
       ),
     );
   }
@@ -335,13 +582,19 @@ class _InfoRow extends StatelessWidget {
 
 class _BookingHistoryItem {
   const _BookingHistoryItem({
+    required this.property,
     required this.propertyName,
+    required this.location,
+    required this.priceLabel,
     required this.bookingDate,
     required this.rentalPeriod,
     required this.status,
   });
 
+  final PropertyItem property;
   final String propertyName;
+  final String location;
+  final String priceLabel;
   final String bookingDate;
   final String rentalPeriod;
   final HomeUBookingStatus status;
