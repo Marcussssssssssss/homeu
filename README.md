@@ -34,3 +34,26 @@ If values remain placeholders, app UI still starts, but Supabase is skipped safe
 flutter pub get
 flutter run
 ```
+
+## Grant Copilot access to scan this repo (main branch)
+
+If you want Copilot to scan `Marcussssssssssss/homeu` and locate where the chat button/navigation entry point is implemented:
+
+1. Make sure the repository is **public**  
+   **or** add `TiuKaiHann` as a collaborator with read access:
+   - GitHub repo → **Settings** → **Collaborators and teams** → **Add people** → `TiuKaiHann`
+2. Confirm the **GitHub Copilot/Copilot coding agent app** is installed and has access to this repository:
+   - GitHub → **Settings** → **Applications** → **Installed GitHub Apps** → Copilot-related app
+   - Ensure repository access includes `Marcussssssssssss/homeu`
+3. Ensure access is for the **main branch** (or share the exact branch/commit to scan).
+
+### If you cannot grant access
+
+Run this locally and paste the output:
+
+```bash
+cd /path/to/homeu
+git checkout main
+git pull
+rg -n "chat|message|conversation|bottomnavigationbar|navigation|nav" lib
+```
