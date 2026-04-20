@@ -4,9 +4,11 @@ import 'package:homeu/app/auth/role_access_widget.dart';
 import 'package:homeu/app/property/property_remote_datasource.dart';
 import 'package:homeu/core/supabase/app_supabase.dart';
 import 'package:homeu/pages/home/booking_history_screen.dart';
+import 'package:homeu/pages/home/conversation_list_screen.dart';
 import 'package:homeu/pages/home/property_details_screen.dart';
 import 'package:homeu/pages/home/property_item.dart';
 import 'package:homeu/pages/home/profile_screen.dart';
+import 'package:homeu/pages/home/viewing_history_screen.dart';
 
 class HomeUHomePage extends StatefulWidget {
   const HomeUHomePage({
@@ -120,6 +122,20 @@ class _HomeUHomePageState extends State<HomeUHomePage> {
 
           if (index == 3) {
             Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const HomeUViewingHistoryScreen()),
+            );
+            return;
+          }
+
+          if (index == 4) {
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const HomeUConversationListScreen()),
+            );
+            return;
+          }
+
+          if (index == 5) {
+            Navigator.of(context).push(
               MaterialPageRoute<void>(
                 builder: (_) => HomeUProfileScreen(
                   role: HomeURole.tenant,
@@ -151,6 +167,16 @@ class _HomeUHomePageState extends State<HomeUHomePage> {
             icon: Icon(Icons.book_online_outlined),
             selectedIcon: Icon(Icons.book_online_rounded),
             label: 'Bookings',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.visibility_outlined),
+            selectedIcon: Icon(Icons.visibility_rounded),
+            label: 'Viewings',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.chat_bubble_outline_rounded),
+            selectedIcon: Icon(Icons.chat_bubble_rounded),
+            label: 'Chat',
           ),
           NavigationDestination(
             icon: Icon(Icons.person_outline_rounded),
@@ -395,7 +421,7 @@ class _PropertyCard extends StatelessWidget {
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        property.photoColors.first.withOpacity(0.9),
+                        property.photoColors.first.withValues(alpha: 0.9),
                         const Color(0xFFF0F5FF),
                       ],
                     ),

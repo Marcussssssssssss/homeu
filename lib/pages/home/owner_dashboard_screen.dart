@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
+import 'package:homeu/pages/home/conversation_list_screen.dart';
 import 'package:homeu/pages/home/owner_add_property_screen.dart';
 import 'package:homeu/pages/home/owner_booking_requests_screen.dart';
 import 'package:homeu/pages/home/owner_analytics_screen.dart';
@@ -49,6 +50,15 @@ class _HomeUOwnerDashboardScreenState extends State<HomeUOwnerDashboardScreen> {
           }
 
           if (index == 4) {
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const HomeUConversationListScreen(),
+              ),
+            );
+            return;
+          }
+
+          if (index == 5) {
             Navigator.of(context).push(
               MaterialPageRoute<void>(
                 builder: (_) => HomeUProfileScreen(

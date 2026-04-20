@@ -48,7 +48,7 @@ class HomeUOwnerBottomNavigationBar extends StatelessWidget {
           NavigationDestination(
             icon: const Icon(Icons.home_work_outlined),
             selectedIcon: const Icon(Icons.home_work_rounded),
-            label: isCompact ? 'My Properties' : 'My Properties',
+            label: isCompact ? 'My Properties' : 'Properties',
           ),
           const NavigationDestination(
             icon: Icon(Icons.inbox_outlined),
@@ -59,6 +59,11 @@ class HomeUOwnerBottomNavigationBar extends StatelessWidget {
             icon: Icon(Icons.analytics_outlined),
             selectedIcon: Icon(Icons.analytics_rounded),
             label: 'Analytics',
+          ),
+          const NavigationDestination(
+            icon: Icon(Icons.chat_bubble_outline_rounded),
+            selectedIcon: Icon(Icons.chat_bubble_rounded),
+            label: 'Chat',
           ),
           const NavigationDestination(
             icon: Icon(Icons.person_outline_rounded),
