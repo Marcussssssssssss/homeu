@@ -1,12 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
+import 'package:homeu/app/property/property_remote_datasource.dart';
 import 'package:homeu/app/viewing/viewing_models.dart';
 import 'package:homeu/app/viewing/viewing_remote_datasource.dart';
 import 'package:homeu/core/supabase/app_supabase.dart';
+import 'package:homeu/pages/home/property_details_screen.dart';
+import 'package:homeu/pages/home/property_item.dart';
 
 class HomeUViewingHistoryScreen extends StatefulWidget {
-  const HomeUViewingHistoryScreen({super.key});
+  const HomeUViewingHistoryScreen({
+    super.key,
+    this.initialViewings,
+  });
+
+  final List<ViewingRequest>? initialViewings;
 
   @override
   State<HomeUViewingHistoryScreen> createState() => _HomeUViewingHistoryScreenState();
@@ -14,13 +22,25 @@ class HomeUViewingHistoryScreen extends StatefulWidget {
 
 class _HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
   final ViewingRemoteDataSource _viewingRemoteDataSource = const ViewingRemoteDataSource();
+  final PropertyRemoteDataSource _propertyRemoteDataSource = const PropertyRemoteDataSource();
   List<ViewingRequest> _viewings = const <ViewingRequest>[];
+  Map<String, PropertyItem> _propertyById = const <String, PropertyItem>{};
   bool _isLoading = true;
   String? _tenantId;
+  String? _loadError;
 
   @override
   void initState() {
     super.initState();
+    if (widget.initialViewings != null) {
+      _tenantId = 'preview-tenant';
+      _viewings = widget.initialViewings!;
+      _propertyById = {
+        for (final viewing in _viewings) viewing.propertyId: _buildFallbackPropertyItem(viewing),
+      };
+      _isLoading = false;
+      return;
+    }
     _loadViewings();
   }
 
@@ -45,6 +65,19 @@ class _HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
                   children: [
+                    if (_loadError != null)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Text(
+                          _loadError!,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: Color(0xFFC53030),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
                     if (_viewings.isEmpty)
                       const Padding(
                         padding: EdgeInsets.only(top: 24),
@@ -58,13 +91,24 @@ class _HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
                           ),
                         ),
                       ),
-                    ..._viewings.map((viewing) => _ViewingCard(
-                          viewing: viewing,
-                          onReschedule: _tenantId == null
-                              ? null
-                              : () => _handleReschedule(viewing, _tenantId!),
-                          onCancel: _tenantId == null ? null : () => _handleCancel(viewing, _tenantId!),
-                        )),
+                    ..._viewings.map((viewing) {
+                      final property = _propertyById[viewing.propertyId] ?? _buildFallbackPropertyItem(viewing);
+                      return _ViewingCard(
+                        viewing: viewing,
+                        property: property,
+                        onOpenProperty: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => HomeUPropertyDetailsScreen(property: property),
+                            ),
+                          );
+                        },
+                        onReschedule: _tenantId == null
+                            ? null
+                            : () => _handleReschedule(viewing, _tenantId!),
+                        onCancel: _tenantId == null ? null : () => _handleCancel(viewing, _tenantId!),
+                      );
+                    }),
                   ],
                 ),
               ),
@@ -73,7 +117,21 @@ class _HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
   }
 
   Future<void> _loadViewings() async {
-    final tenantId = AppSupabase.isInitialized ? AppSupabase.auth.currentUser?.id : null;
+    if (!AppSupabase.isInitialized) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _tenantId = null;
+        _viewings = const <ViewingRequest>[];
+        _propertyById = const <String, PropertyItem>{};
+        _loadError = 'Supabase is not initialized.';
+        _isLoading = false;
+      });
+      return;
+    }
+
+    final tenantId = AppSupabase.auth.currentUser?.id;
 
     if (tenantId == null || tenantId.isEmpty) {
       if (!mounted) {
@@ -82,6 +140,8 @@ class _HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
       setState(() {
         _tenantId = null;
         _viewings = const <ViewingRequest>[];
+        _propertyById = const <String, PropertyItem>{};
+        _loadError = 'Please log in to view your viewing history.';
         _isLoading = false;
       });
       return;
@@ -89,12 +149,17 @@ class _HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
 
     try {
       final rows = await _viewingRemoteDataSource.getTenantViewingRequests(tenantId);
+      final propertyById = await _propertyRemoteDataSource.fetchPropertiesByIds(
+        rows.map((viewing) => viewing.propertyId),
+      );
       if (!mounted) {
         return;
       }
       setState(() {
         _tenantId = tenantId;
         _viewings = rows;
+        _propertyById = propertyById;
+        _loadError = null;
         _isLoading = false;
       });
     } catch (_) {
@@ -104,12 +169,31 @@ class _HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
       setState(() {
         _tenantId = tenantId;
         _viewings = const <ViewingRequest>[];
+        _propertyById = const <String, PropertyItem>{};
+        _loadError = 'Unable to load viewing history.';
         _isLoading = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Unable to load viewing history.')),
-      );
     }
+  }
+
+  PropertyItem _buildFallbackPropertyItem(ViewingRequest viewing) {
+    return PropertyItem(
+      id: viewing.propertyId,
+      ownerId: viewing.ownerId,
+      name: viewing.propertyId,
+      location: 'Location unavailable',
+      pricePerMonth: 'Price unavailable',
+      rating: 4.5,
+      accentColor: const Color(0xFF1E3A8A),
+      description: 'Property details are currently unavailable.',
+      ownerName: viewing.ownerId,
+      ownerRole: 'Host',
+      photoColors: const [
+        Color(0xFF5D7FBF),
+        Color(0xFF4A68A8),
+        Color(0xFF2F4F8F),
+      ],
+    );
   }
 
   Future<void> _handleReschedule(ViewingRequest viewing, String tenantId) async {
@@ -228,19 +312,23 @@ class _HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
 class _ViewingCard extends StatelessWidget {
   const _ViewingCard({
     required this.viewing,
+    required this.property,
+    required this.onOpenProperty,
     required this.onReschedule,
     required this.onCancel,
   });
 
   final ViewingRequest viewing;
+  final PropertyItem property;
+  final VoidCallback onOpenProperty;
   final VoidCallback? onReschedule;
   final VoidCallback? onCancel;
 
   @override
   Widget build(BuildContext context) {
     return Container(
+      key: Key('viewing_card_${viewing.id}'),
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
@@ -252,41 +340,59 @@ class _ViewingCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            viewing.propertyId,
-            style: const TextStyle(
-              color: Color(0xFF1F314F),
-              fontSize: 15,
-              fontWeight: FontWeight.w700,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: onOpenProperty,
+          child: Padding(
+            padding: const EdgeInsets.all(14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  property.name,
+                  style: const TextStyle(
+                    color: Color(0xFF1F314F),
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                _InfoRow(label: 'Location', value: property.location),
+                const SizedBox(height: 4),
+                _InfoRow(label: 'Price', value: property.pricePerMonth),
+                const SizedBox(height: 4),
+                _InfoRow(label: 'Scheduled At', value: _formatDateTime(viewing.scheduledAt.toLocal())),
+                const SizedBox(height: 4),
+                _InfoRow(label: 'Status', value: viewing.status),
+                if (property.ownerName.trim().isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  _InfoRow(label: 'Agent/Host', value: property.ownerName),
+                ],
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: onReschedule,
+                        child: const Text('Reschedule'),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: onCancel,
+                        style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFC53030)),
+                        child: const Text('Cancel'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 8),
-          _InfoRow(label: 'Scheduled At', value: _formatDateTime(viewing.scheduledAt.toLocal())),
-          const SizedBox(height: 4),
-          _InfoRow(label: 'Status', value: viewing.status),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: onReschedule,
-                  child: const Text('Reschedule'),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: onCancel,
-                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFC53030)),
-                  child: const Text('Cancel'),
-                ),
-              ),
-            ],
-          ),
-        ],
+        ),
       ),
     );
   }

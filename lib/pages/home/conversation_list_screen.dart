@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:homeu/app/chat/chat_models.dart';
 import 'package:homeu/app/chat/chat_remote_datasource.dart';
+import 'package:homeu/app/property/property_remote_datasource.dart';
 import 'package:homeu/core/supabase/app_supabase.dart';
 import 'package:homeu/pages/home/chat_screen.dart';
+import 'package:homeu/pages/home/property_item.dart';
 
 class HomeUConversationListScreen extends StatefulWidget {
   const HomeUConversationListScreen({super.key});
@@ -13,10 +15,12 @@ class HomeUConversationListScreen extends StatefulWidget {
 
 class _HomeUConversationListScreenState extends State<HomeUConversationListScreen> {
   final ChatRemoteDataSource _chatRemoteDataSource = const ChatRemoteDataSource();
+  final PropertyRemoteDataSource _propertyRemoteDataSource = const PropertyRemoteDataSource();
 
   bool _isLoading = true;
   String? _loadError;
   List<Conversation> _conversations = const <Conversation>[];
+  Map<String, PropertyItem> _propertyById = const <String, PropertyItem>{};
 
   @override
   void initState() {
@@ -79,12 +83,22 @@ class _HomeUConversationListScreenState extends State<HomeUConversationListScree
                         itemCount: _conversations.length,
                         itemBuilder: (context, index) {
                           final conversation = _conversations[index];
+                          final property = _propertyById[conversation.propertyId];
                           final when = conversation.lastMessageAt ?? conversation.createdAt;
+                          final propertyTitle = (property?.name.trim().isNotEmpty ?? false)
+                              ? property!.name
+                              : conversation.propertyId;
+                          final subtitleParts = <String>[
+                            if (property?.location.trim().isNotEmpty ?? false) property!.location,
+                            if (property?.pricePerMonth.trim().isNotEmpty ?? false) property!.pricePerMonth,
+                            _formatDateTime(when.toLocal()),
+                          ];
+
                           return Card(
                             margin: const EdgeInsets.only(bottom: 10),
                             child: ListTile(
-                              title: Text('Property: ${conversation.propertyId}'),
-                              subtitle: Text('Tap to open\n${_formatDateTime(when.toLocal())}'),
+                              title: Text(propertyTitle),
+                              subtitle: Text('Tap to open\n${subtitleParts.join(' • ')}'),
                               isThreeLine: true,
                               onTap: () {
                                 Navigator.of(context).push(
@@ -113,6 +127,7 @@ class _HomeUConversationListScreenState extends State<HomeUConversationListScree
         _isLoading = false;
         _loadError = 'Supabase is not initialized.';
         _conversations = const <Conversation>[];
+        _propertyById = const <String, PropertyItem>{};
       });
       return;
     }
@@ -126,18 +141,23 @@ class _HomeUConversationListScreenState extends State<HomeUConversationListScree
         _isLoading = false;
         _loadError = 'Please log in to view conversations.';
         _conversations = const <Conversation>[];
+        _propertyById = const <String, PropertyItem>{};
       });
       return;
     }
 
     try {
       final rows = await _chatRemoteDataSource.listMyConversations(myUserId: userId);
+      final propertyById = await _propertyRemoteDataSource.fetchPropertiesByIds(
+        rows.map((conversation) => conversation.propertyId),
+      );
       if (!mounted) {
         return;
       }
 
       setState(() {
         _conversations = rows;
+        _propertyById = propertyById;
         _loadError = null;
         _isLoading = false;
       });
@@ -147,6 +167,7 @@ class _HomeUConversationListScreenState extends State<HomeUConversationListScree
       }
       setState(() {
         _conversations = const <Conversation>[];
+        _propertyById = const <String, PropertyItem>{};
         _loadError = 'Unable to load conversations right now.';
         _isLoading = false;
       });

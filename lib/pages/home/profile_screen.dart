@@ -4,9 +4,7 @@ import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/profile/profile_controller.dart';
 import 'package:homeu/app/profile/profile_models.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
-import 'package:homeu/core/supabase/app_supabase.dart';
 import 'package:homeu/pages/auth/login_screen.dart';
-import 'package:homeu/pages/home/conversation_list_screen.dart';
 import 'package:homeu/pages/home/update_password_screen.dart';
 
 class HomeUProfileScreen extends StatefulWidget {
@@ -398,52 +396,6 @@ class _HomeUProfileScreenState extends State<HomeUProfileScreen> {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    if (profile.role == HomeURole.owner)
-                      Column(
-                        children: [
-                          SizedBox(
-                            height: 50,
-                            child: OutlinedButton(
-                              key: const Key('open_chats_button'),
-                              onPressed: () {
-                                if (!AppSupabase.isInitialized) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Supabase is not initialized.')),
-                                  );
-                                  return;
-                                }
-
-                                final userId = AppSupabase.auth.currentUser?.id;
-                                if (userId == null || userId.isEmpty) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Please log in')),
-                                  );
-                                  return;
-                                }
-
-                                Navigator.of(context).push(
-                                  MaterialPageRoute<void>(
-                                    builder: (_) => const HomeUConversationListScreen(),
-                                  ),
-                                );
-                              },
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: const Color(0xFF1E3A8A),
-                                side: const BorderSide(color: Color(0x331E3A8A)),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(14),
-                                ),
-                                textStyle: const TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              child: const Text('Chats'),
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                        ],
-                      ),
                     SizedBox(
                       height: 52,
                       child: ElevatedButton(
