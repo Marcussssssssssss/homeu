@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
-<<<<<<< UserAuthentication
 import 'package:homeu/core/theme/homeu_app_theme.dart';
-=======
 import 'package:homeu/app/booking/booking_models.dart';
 import 'package:homeu/app/booking/booking_remote_datasource.dart';
 import 'package:homeu/core/supabase/app_supabase.dart';
->>>>>>> main
 import 'package:homeu/pages/home/payment_screen.dart';
 import 'package:homeu/pages/home/property_item.dart';
 import 'package:homeu/pages/home/viewing_screen.dart';
@@ -71,17 +68,7 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-<<<<<<< UserAuthentication
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: context.homeuAccent,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-=======
               ),
->>>>>>> main
             ),
             const SizedBox(height: 8),
             SizedBox(

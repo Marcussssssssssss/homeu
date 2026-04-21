@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
-<<<<<<< UserAuthentication
 import 'package:homeu/core/localization/homeu_l10n.dart';
 import 'package:homeu/core/theme/homeu_app_theme.dart';
-=======
 import 'package:homeu/app/booking/booking_models.dart';
 import 'package:homeu/app/booking/booking_remote_datasource.dart';
 import 'package:homeu/app/property/property_remote_datasource.dart';
@@ -12,7 +10,6 @@ import 'package:homeu/core/supabase/app_supabase.dart';
 import 'package:homeu/pages/home/conversation_list_screen.dart';
 import 'package:homeu/pages/home/property_details_screen.dart';
 import 'package:homeu/pages/home/property_item.dart';
->>>>>>> main
 import 'package:homeu/pages/home/profile_screen.dart';
 import 'package:homeu/pages/home/review_rating_screen.dart';
 import 'package:homeu/pages/home/viewing_history_screen.dart';
@@ -72,10 +69,6 @@ class _HomeUBookingHistoryScreenState extends State<HomeUBookingHistoryScreen> {
           if (index == 3) {
             Navigator.of(context).push(
               MaterialPageRoute<void>(
-<<<<<<< UserAuthentication
-                builder: (_) =>
-                    const HomeUProfileScreen(role: HomeURole.tenant),
-=======
                 builder: (_) => const HomeUViewingHistoryScreen(),
               ),
             );
@@ -90,13 +83,7 @@ class _HomeUBookingHistoryScreenState extends State<HomeUBookingHistoryScreen> {
           if (index == 5) {
             Navigator.of(context).push(
               MaterialPageRoute<void>(
-                builder: (_) => const HomeUProfileScreen(
-                  role: HomeURole.tenant,
-                  name: 'Aisyah Rahman',
-                  email: 'aisyah.r@email.com',
-                  phone: '+60 12 998 1123',
-                ),
->>>>>>> main
+                builder: (_) => const HomeUProfileScreen(role: HomeURole.tenant),
               ),
             );
           }
@@ -402,58 +389,6 @@ class _BookingHistoryCard extends StatelessWidget {
           ),
         ],
       ),
-<<<<<<< UserAuthentication
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            item.propertyName,
-            style: TextStyle(
-              color: context.homeuPrimaryText,
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 8),
-          _InfoRow(
-            label: context.l10n.bookingDateLabel,
-            value: item.bookingDate,
-          ),
-          const SizedBox(height: 4),
-          _InfoRow(
-            label: context.l10n.rentalPeriodLabel,
-            value: item.rentalPeriod,
-          ),
-          const SizedBox(height: 8),
-          Container(
-            key: Key('status_badge_${item.status.name}'),
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: badge.background,
-              borderRadius: BorderRadius.circular(999),
-            ),
-            child: Text(
-              badge.label,
-              style: TextStyle(
-                color: badge.foreground,
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-          if (onLeaveReview != null) ...[
-            const SizedBox(height: 10),
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
-                key: const Key('leave_review_button'),
-                onPressed: onLeaveReview,
-                child: Text(context.l10n.leaveReview),
-              ),
-            ),
-          ],
-        ],
-=======
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -466,8 +401,8 @@ class _BookingHistoryCard extends StatelessWidget {
               children: [
                 Text(
                   item.propertyName,
-                  style: const TextStyle(
-                    color: Color(0xFF1F314F),
+                  style: TextStyle(
+                    color: context.homeuPrimaryText,
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
                   ),
@@ -477,9 +412,9 @@ class _BookingHistoryCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 _InfoRow(label: 'Price', value: item.priceLabel),
                 const SizedBox(height: 4),
-                _InfoRow(label: 'Booking Date', value: item.bookingDate),
+                _InfoRow(label: context.l10n.bookingDateLabel, value: item.bookingDate),
                 const SizedBox(height: 4),
-                _InfoRow(label: 'Rental Period', value: item.rentalPeriod),
+                _InfoRow(label: context.l10n.rentalPeriodLabel, value: item.rentalPeriod),
                 const SizedBox(height: 8),
                 Container(
                   key: Key('status_badge_${item.status.name}'),
@@ -504,7 +439,7 @@ class _BookingHistoryCard extends StatelessWidget {
                     child: TextButton(
                       key: const Key('leave_review_button'),
                       onPressed: onLeaveReview,
-                      child: const Text('Leave Review'),
+                      child: Text(context.l10n.leaveReview),
                     ),
                   ),
                 ],
@@ -512,7 +447,6 @@ class _BookingHistoryCard extends StatelessWidget {
             ),
           ),
         ),
->>>>>>> main
       ),
     );
   }

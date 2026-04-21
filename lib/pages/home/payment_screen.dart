@@ -3,13 +3,10 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
-<<<<<<< UserAuthentication
 import 'package:homeu/core/theme/homeu_app_theme.dart';
-=======
 import 'package:homeu/app/booking/payment_models.dart';
 import 'package:homeu/app/booking/payment_remote_datasource.dart';
 import 'package:homeu/core/supabase/app_supabase.dart';
->>>>>>> main
 import 'package:homeu/pages/home/property_item.dart';
 
 enum HomeUPaymentMethod { card, banking, ewallet }

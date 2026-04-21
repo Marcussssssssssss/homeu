@@ -1,9 +1,7 @@
-<<<<<<< UserAuthentication
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <uses-permission android:name="android.permission.CAMERA" />
-=======
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.homeu">
+
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <!-- Required for ProcessText plugin -->
     <queries>
@@ -13,7 +11,6 @@
         </intent>
     </queries>
 
->>>>>>> main
     <application
         android:name="${applicationName}"
         android:label="homeu"

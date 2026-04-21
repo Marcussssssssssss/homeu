@@ -71,7 +71,7 @@ class HomeUOwnerBottomNavigationBar extends StatelessWidget {
             selectedIcon: Icon(Icons.chat_bubble_rounded),
             label: 'Chat',
           ),
-          const NavigationDestination(
+          NavigationDestination(
             icon: Icon(Icons.person_outline_rounded),
             selectedIcon: Icon(Icons.person_rounded),
             label: t.navProfile,
