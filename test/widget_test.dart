@@ -679,7 +679,7 @@ void main() {
     expect(find.text('Conversations'), findsOneWidget);
   });
 
-  testWidgets('Tenant home Viewings nav opens viewing history screen', (
+  testWidgets('Tenant home Viewing nav opens viewing history screen', (
     WidgetTester tester,
   ) async {
     HomeUSession.register(HomeURole.tenant);
@@ -687,7 +687,7 @@ void main() {
 
     await tester.pumpWidget(const MaterialApp(home: HomeUTenantShellScreen()));
 
-    await tester.tap(find.text('Viewings'));
+    await tester.tap(find.text('Viewing'));
     await tester.pumpAndSettle();
 
     expect(find.text('Viewing History'), findsOneWidget);
@@ -743,7 +743,7 @@ void main() {
     expect(find.text('Nurul Huda'), findsOneWidget);
   });
 
-  testWidgets('Tenant home Bookings nav opens booking history screen', (
+  testWidgets('Tenant home Booking nav opens booking history screen', (
     WidgetTester tester,
   ) async {
     HomeUSession.register(HomeURole.tenant);
@@ -751,7 +751,7 @@ void main() {
 
     await tester.pumpWidget(const MaterialApp(home: HomeUTenantShellScreen()));
 
-    await tester.tap(find.text('Bookings'));
+    await tester.tap(find.text('Booking'));
     await tester.pumpAndSettle();
 
     expect(find.text('Booking History'), findsOneWidget);
@@ -1085,7 +1085,7 @@ void main() {
     expect(find.byKey(const Key('profile_role')), findsOneWidget);
     expect(find.byKey(const Key('update_password_button')), findsOneWidget);
     expect(find.text('Update Password'), findsOneWidget);
-    expect(find.text('Favorites'), findsOneWidget);
+    expect(find.text('Favourite'), findsOneWidget);
     expect(find.byKey(const Key('edit_profile_button')), findsOneWidget);
     expect(find.byKey(const Key('logout_button')), findsOneWidget);
   });
@@ -1104,7 +1104,7 @@ void main() {
 
     expect(find.byKey(const Key('open_chats_button')), findsNothing);
     expect(find.text('Chats'), findsNothing);
-    expect(find.text('Favorites'), findsNothing);
+    expect(find.text('Favourite'), findsNothing);
   });
 
   testWidgets('Profile Update Password action opens update password screen', (

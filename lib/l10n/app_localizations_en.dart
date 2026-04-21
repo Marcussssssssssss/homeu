@@ -18,7 +18,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navFavorites => 'Favorites';
 
   @override
-  String get navBookings => 'Bookings';
+  String get navBookings => 'Booking';
 
   @override
   String get navProfile => 'Profile';

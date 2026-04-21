@@ -3,7 +3,7 @@
   "appTitle": "HomeU",
   "navHome": "Home",
   "navFavorites": "Favorites",
-  "navBookings": "Bookings",
+  "navBookings": "Booking",
   "navProfile": "Profile",
   "homeGreetingAnonymous": "Hello",
   "homeGreetingWithName": "Hello, {name}",
