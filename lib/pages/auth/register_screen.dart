@@ -5,7 +5,7 @@ import 'package:homeu/app/auth/register/register_repository.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/core/localization/homeu_l10n.dart';
 import 'package:homeu/core/theme/homeu_app_theme.dart';
-import 'package:homeu/pages/home/home_page.dart';
+import 'package:homeu/pages/home/home_tenant_shell_screen.dart';
 import 'package:homeu/pages/home/owner_dashboard_screen.dart';
 
 class HomeURegisterScreen extends StatefulWidget {
@@ -78,9 +78,7 @@ class _HomeURegisterScreenState extends State<HomeURegisterScreen> {
     });
 
     if (result.status == RegisterSubmissionStatus.failure) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(_resolveRegisterMessage(result.message))),
       );
       return;
@@ -89,11 +87,9 @@ class _HomeURegisterScreenState extends State<HomeURegisterScreen> {
     HomeUSession.register(result.resolvedRole);
     final Widget destination = result.resolvedRole == HomeURole.owner
         ? const HomeUOwnerDashboardScreen()
-        : const HomeUHomePage();
+        : const HomeUTenantShellScreen();
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(
+    ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(_resolveRegisterMessage(result.message))),
     );
 

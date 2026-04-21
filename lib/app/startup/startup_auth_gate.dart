@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/startup/startup_session_resolver.dart';
-import 'package:homeu/pages/home/home_page.dart';
+import 'package:homeu/pages/home/home_tenant_shell_screen.dart';
 import 'package:homeu/pages/home/owner_dashboard_screen.dart';
 import 'package:homeu/pages/home/update_password_screen.dart';
 import 'package:homeu/pages/splash_screen.dart';
@@ -34,7 +34,9 @@ class _HomeUStartupAuthGateState extends State<HomeUStartupAuthGate> {
     _destination = widget.initialDestination;
     _syncLocalSessionRole(_destination);
 
-    _authSubscription = widget.resolver.authService.onAuthStateChanged.listen((authState) async {
+    _authSubscription = widget.resolver.authService.onAuthStateChanged.listen((
+      authState,
+    ) async {
       if (authState.event == AuthChangeEvent.passwordRecovery) {
         if (mounted) {
           setState(() {
@@ -105,10 +107,8 @@ class _HomeUStartupAuthGateState extends State<HomeUStartupAuthGate> {
   Widget build(BuildContext context) {
     return switch (_destination) {
       HomeUStartupDestination.authFlow => const HomeUSplashScreen(),
-      HomeUStartupDestination.tenantFlow => const HomeUHomePage(),
+      HomeUStartupDestination.tenantFlow => const HomeUTenantShellScreen(),
       HomeUStartupDestination.ownerFlow => const HomeUOwnerDashboardScreen(),
     };
   }
 }
-
-

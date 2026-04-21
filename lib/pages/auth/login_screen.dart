@@ -5,7 +5,7 @@ import 'package:homeu/app/auth/login/login_repository.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/core/localization/homeu_l10n.dart';
 import 'package:homeu/core/theme/homeu_app_theme.dart';
-import 'package:homeu/pages/home/home_page.dart';
+import 'package:homeu/pages/home/home_tenant_shell_screen.dart';
 import 'package:homeu/pages/auth/register_screen.dart';
 import 'package:homeu/pages/home/owner_dashboard_screen.dart';
 
@@ -70,9 +70,9 @@ class _HomeULoginScreenState extends State<HomeULoginScreen> {
     });
 
     if (!result.isSuccess || result.role == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(_resolveLoginMessage(result.message))));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(_resolveLoginMessage(result.message))),
+      );
       return;
     }
 
@@ -80,7 +80,7 @@ class _HomeULoginScreenState extends State<HomeULoginScreen> {
 
     final Widget destination = result.role == HomeURole.owner
         ? const HomeUOwnerDashboardScreen()
-        : const HomeUHomePage();
+        : const HomeUTenantShellScreen();
 
     Navigator.of(
       context,
