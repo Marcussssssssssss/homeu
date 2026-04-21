@@ -1,28 +1,237 @@
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
-import 'package:homeu/core/theme/homeu_app_theme.dart';
+import 'package:homeu/app/property/add_property/add_property_controller.dart';
+import 'package:homeu/app/property/add_property/add_property_models.dart';
 
 class HomeUOwnerAddPropertyScreen extends StatefulWidget {
-  const HomeUOwnerAddPropertyScreen({super.key});
+  const HomeUOwnerAddPropertyScreen({super.key, this.propertyId});
+  final String? propertyId;
 
   @override
   State<HomeUOwnerAddPropertyScreen> createState() => _HomeUOwnerAddPropertyScreenState();
 }
 
 class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScreen> {
-  static const List<String> _rentalTypes = [
-    'Room',
-    'Whole Unit',
-    'Condo',
-    'Landed',
-    'Apartment',
+  static const List<String> _rentalTypes = ['Whole Unit', 'Room'];
+  static const List<String> _propertyTypes = ['Condo', 'Landed', 'Apartment', 'Studio'];
+  static const List<String> _furnishingTypes = ['Fully Furnished', 'Partially Furnished', 'Unfurnished'];
+  static const List<String> _allFacilities = [
+    'WiFi', 'Parking', 'Aircond', 'Lift', 'Gym',
+    'Swimming Pool', '24/7 Security', 'Balcony',
+    'Playground', 'Washing Machine', 'BBQ Pit'
   ];
 
+  final AddPropertyController _addPropertyController = AddPropertyController();
+
+  //controller
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _priceController = TextEditingController();
+  final TextEditingController _addressController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
+
+  bool _isLoading = false;
+
   final Set<String> _selectedFacilities = {'WiFi', 'Parking'};
-  String _selectedRentalType = 'Condo';
+  String _selectedRentalType = 'Whole Unit';
+  String _selectedPropertyType = 'Condo';
+  String _selectedFurnishing = 'Partially Furnished';
   DateTime _availableFrom = DateTime.now().add(const Duration(days: 7));
   DateTime _availableUntil = DateTime.now().add(const Duration(days: 180));
+
+  bool _publishImmediately = true;
+  DateTime? _scheduledPublishDate;
+
+  // image picker
+  final ImagePicker _imagePicker = ImagePicker();
+  final List<File> _selectedImages = <File>[];
+  final List<Map<String, dynamic>> _existingImages = [];
+  final List<String> _deletedImageIds = [];
+  static const int _maxImages = 20;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.propertyId != null) {
+      _loadExistingData();
+    }
+  }
+
+  Future<void> _loadExistingData() async {
+    setState(() => _isLoading = true);
+
+    final data = await _addPropertyController.getPropertyDetails(widget.propertyId!);
+    if (data != null && mounted) {
+      _titleController.text = data['title'] ?? '';
+      _priceController.text = data['monthly_price']?.toString() ?? '';
+      _addressController.text = data['location_area'] ?? '';
+      _descriptionController.text = data['description'] ?? '';
+
+      setState(() {
+        _selectedRentalType = data['room_type'] ?? 'Whole Unit';
+        _selectedPropertyType = data['property_type'] ?? 'Condo';
+        _selectedFurnishing = data['furnishing'] ?? 'Partially Furnished';
+
+        if (data['facilities'] != null) {
+          _selectedFacilities.clear();
+          _selectedFacilities.addAll(List<String>.from(data['facilities']));
+        }
+
+        if (data['publish_at'] != null) {
+          _publishImmediately = false;
+          _scheduledPublishDate = DateTime.tryParse(data['publish_at']);
+        }
+
+        if (data['property_image'] != null) {
+          _existingImages.clear();
+          _existingImages.addAll(List<Map<String, dynamic>>.from(data['property_image']));
+        }
+      });
+    }
+
+    if (mounted) setState(() => _isLoading = false);
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _priceController.dispose();
+    _addressController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickImages() async {
+    if (_isLoading) return;
+
+    final totalImages = _existingImages.length + _selectedImages.length;
+    final remaining = _maxImages - totalImages;
+    if (remaining <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Max $_maxImages images reached.')),
+      );
+      return;
+    }
+
+    final picked = await _imagePicker.pickMultiImage(imageQuality: 85);
+    if (picked.isEmpty) return;
+
+    setState(() {
+      final existingPaths = _selectedImages.map((f) => f.path).toSet();
+
+      for (final x in picked) {
+        if (_selectedImages.length >= _maxImages) break;
+
+        // avoid duplicates when user picks same image again
+        if (existingPaths.contains(x.path)) continue;
+
+        _selectedImages.add(File(x.path));
+        existingPaths.add(x.path);
+      }
+    });
+  }
+
+  void _removeImageAt(int index) {
+    setState(() {
+      _selectedImages.removeAt(index);
+    });
+  }
+
+  Future<void> _handleSubmit({required String status}) async {
+    if (_isLoading) return;
+
+    final title = _titleController.text.trim();
+    final locationArea = _addressController.text.trim();
+    final description = _descriptionController.text.trim();
+
+    // allow "1800" or "1,800"
+    final rawPrice = _priceController.text.trim().replaceAll(',', '');
+    final monthlyPrice = num.tryParse(rawPrice);
+
+    if (status == 'Active') {
+      if (title.isEmpty || locationArea.isEmpty || description.isEmpty ||
+          monthlyPrice == null || monthlyPrice <= 0) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please fill in all required fields to publish.')),
+        );
+        return;
+      }
+      if (_selectedImages.isEmpty && widget.propertyId == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please select at least 1 image to publish.')),
+        );
+        return;
+      }
+      if (!_publishImmediately && _scheduledPublishDate == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please select a date to schedule publication.')),
+        );
+        return;
+      }
+    } else {
+      // If saving as Draft, just require a title so we have something to save
+      if (title.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please enter at least a Property Name to save as draft.')),
+        );
+        return;
+      }
+    }
+
+    FocusScope.of(context).unfocus();
+    setState(() => _isLoading = true);
+
+    DateTime? finalPublishAt;
+    if (status == 'Active') {
+      finalPublishAt = _publishImmediately ? DateTime.now() : _scheduledPublishDate;
+    }
+
+    final result = await _addPropertyController.submit(
+      AddPropertyPayload(
+        title: title,
+        description: description,
+        locationArea: locationArea,
+        monthlyPrice: monthlyPrice ?? 0,
+        rentalType: _selectedRentalType,
+        propertyType: _selectedPropertyType,
+        furnishing: _selectedFurnishing,
+        facilities: _selectedFacilities.toList(),
+        images: List<File>.unmodifiable(_selectedImages),
+        status: status,
+        publishAt: finalPublishAt,
+        deletedImageIds: _deletedImageIds,
+      ),
+      propertyId: widget.propertyId,
+    );
+
+    if (!mounted) return;
+
+    setState(() => _isLoading = false);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(result.message)),
+    );
+
+    if (result.isSuccess) {
+      Navigator.of(context).pop(true);
+    }
+  }
+
+  Future<void> _pickScheduleDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now().add(const Duration(days: 1)),
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 90)),
+    );
+    if (picked != null) {
+      setState(() {
+        _scheduledPublishDate = picked;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,10 +240,11 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
     }
 
     return Scaffold(
-      backgroundColor: context.colors.surface,
+      backgroundColor: const Color(0xFFF6F8FC),
       appBar: AppBar(
-        title: const Text('Add Property'),
-        backgroundColor: context.colors.surface,
+        title: Text(widget.propertyId == null ? 'Add Property' : 'Edit Property'), // UPDATED
+        backgroundColor: const Color(0xFFF6F8FC),
+        elevation: 0,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -42,10 +252,10 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              const Text(
                 'List your property with complete details for faster approvals.',
                 style: TextStyle(
-                  color: context.homeuMutedText,
+                  color: Color(0xFF50617F),
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
@@ -55,44 +265,70 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
                 title: 'Property Information',
                 child: Column(
                   children: [
-                    const _LabeledTextField(
+                    // property name
+                    _LabeledTextField(
                       label: 'Property Name',
                       hintText: 'e.g. Skyline Condo Suite',
-                      keyValue: Key('property_name_field'),
+                      keyValue: const Key('property_name_field'),
+                      controller: _titleController,
                     ),
                     const SizedBox(height: 12),
+                    // rental type (whole unit / room)
                     _LabeledDropdown(
                       label: 'Rental Type',
                       value: _selectedRentalType,
                       keyValue: const Key('rental_type_dropdown'),
                       items: _rentalTypes,
-                      onChanged: (value) {
-                        if (value == null) return;
-                        setState(() {
-                          _selectedRentalType = value;
-                        });
+                      onChanged: _isLoading ? null : (value) {
+                        if (value != null) setState(() => _selectedRentalType = value);
                       },
                     ),
                     const SizedBox(height: 12),
-                    const _LabeledTextField(
-                      label: 'Price (Monthly)',
-                      hintText: 'e.g. RM 1800',
-                      keyValue: Key('price_field'),
-                      keyboardType: TextInputType.number,
+                    // Property Type (Condo/Landed/etc)
+                    _LabeledDropdown(
+                      label: 'Property Type',
+                      value: _selectedPropertyType,
+                      keyValue: const Key('property_type_dropdown'),
+                      items: _propertyTypes,
+                      onChanged: _isLoading ? null : (value) {
+                        if (value != null) setState(() => _selectedPropertyType = value);
+                      },
                     ),
                     const SizedBox(height: 12),
-                    const _LabeledTextField(
+                    // Furnishing (Fully/Partially/Unfurnished)
+                    _LabeledDropdown(
+                      label: 'Furnishing',
+                      value: _selectedFurnishing,
+                      keyValue: const Key('furnishing_dropdown'),
+                      items: _furnishingTypes,
+                      onChanged: _isLoading ? null : (value) {
+                        if (value != null) setState(() => _selectedFurnishing = value);
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    // Price
+                    _LabeledTextField(
+                      label: 'Price (Monthly)',
+                      hintText: 'e.g. 1800',
+                      keyValue: const Key('price_field'),
+                      keyboardType: TextInputType.number,
+                      controller: _priceController,
+                    ),
+                    const SizedBox(height: 12),
+                    _LabeledTextField(
                       label: 'Address',
                       hintText: 'Street, city, state',
-                      keyValue: Key('address_field'),
+                      keyValue: const Key('address_field'),
                       maxLines: 2,
+                      controller: _addressController,
                     ),
                     const SizedBox(height: 12),
-                    const _LabeledTextField(
+                    _LabeledTextField(
                       label: 'Description',
                       hintText: 'Describe highlights, nearby landmarks, and house rules.',
-                      keyValue: Key('description_field'),
+                      keyValue: const Key('description_field'),
                       maxLines: 4,
+                      controller: _descriptionController,
                     ),
                   ],
                 ),
@@ -104,30 +340,30 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
                   key: const Key('facilities_checklist'),
                   spacing: 8,
                   runSpacing: 8,
-                  children: ['WiFi', 'Parking', 'Aircond', 'Furnished', 'Lift', 'Gym']
-                      .map(
+                  children: _allFacilities.map(
                         (facility) => FilterChip(
-                          label: Text(facility),
-                          selected: _selectedFacilities.contains(facility),
-                          onSelected: (selected) {
-                            setState(() {
-                              if (selected) {
-                                _selectedFacilities.add(facility);
-                              } else {
-                                _selectedFacilities.remove(facility);
-                              }
-                            });
-                          },
-                          selectedColor: context.homeuAccent.withValues(alpha: 0.2),
-                          checkmarkColor: context.homeuAccent,
-                          labelStyle: TextStyle(
-                            color: context.homeuPrimaryText,
-                            fontWeight: FontWeight.w600,
-                          ),
-                          side: BorderSide(color: context.homeuSoftBorder),
-                        ),
-                      )
-                      .toList(),
+                      label: Text(facility),
+                      selected: _selectedFacilities.contains(facility),
+                      onSelected: _isLoading
+                          ? null
+                          : (selected) {
+                        setState(() {
+                          if (selected) {
+                            _selectedFacilities.add(facility);
+                          } else {
+                            _selectedFacilities.remove(facility);
+                          }
+                        });
+                      },
+                      selectedColor: const Color(0xFFEAF2FF),
+                      checkmarkColor: const Color(0xFF1E3A8A),
+                      labelStyle: const TextStyle(
+                        color: Color(0xFF1F314F),
+                        fontWeight: FontWeight.w600,
+                      ),
+                      side: const BorderSide(color: Color(0x331E3A8A)),
+                    ),
+                  ).toList(),
                 ),
               ),
               const SizedBox(height: 14),
@@ -136,10 +372,10 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       'Add multiple images to improve listing visibility.',
                       style: TextStyle(
-                        color: context.homeuMutedText,
+                        color: Color(0xFF667896),
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),
@@ -152,10 +388,83 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
                       crossAxisCount: 3,
                       crossAxisSpacing: 8,
                       mainAxisSpacing: 8,
-                      children: const [
-                        _UploadTile(addMode: true),
-                        _UploadTile(addMode: false),
-                        _UploadTile(addMode: false),
+                      children: [
+                        if ((_existingImages.length + _selectedImages.length) < _maxImages)
+                          GestureDetector(
+                            onTap: _isLoading ? null : _pickImages,
+                            child: const _UploadTile(addMode: true),
+                          ),
+
+                        // 1. Show EXISTING images from database
+                        ...List.generate(_existingImages.length, (index) {
+                          final img = _existingImages[index];
+                          return Stack(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: Image.network(
+                                  img['public_url'],
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              Positioned(
+                                top: 6,
+                                right: 6,
+                                child: InkWell(
+                                  onTap: _isLoading ? null : () {
+                                    setState(() {
+                                      _deletedImageIds.add(img['id'].toString());
+                                      _existingImages.removeAt(index);
+                                    });
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.all(4),
+                                    decoration: const BoxDecoration(
+                                      color: Color(0xAA000000),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(Icons.close, color: Colors.white, size: 16),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        }),
+
+                        // 2. Show NEW images picked from device
+                        ...List.generate(_selectedImages.length, (index) {
+                          final file = _selectedImages[index];
+                          return Stack(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: Image.file(
+                                  file,
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              Positioned(
+                                top: 6,
+                                right: 6,
+                                child: InkWell(
+                                  onTap: _isLoading ? null : () => _removeImageAt(index),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(4),
+                                    decoration: const BoxDecoration(
+                                      color: Color(0xAA000000),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(Icons.close, color: Colors.white, size: 16),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        }),
                       ],
                     ),
                   ],
@@ -165,12 +474,12 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
               _SectionCard(
                 title: 'Location',
                 child: Container(
-                    key: const Key('select_location_section'),
+                  key: const Key('select_location_section'),
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: context.isDarkMode ? const Color(0xFF121C2B) : const Color(0xFFF4F8FF),
+                    color: const Color(0xFFF4F8FF),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: context.homeuSoftBorder),
+                    border: Border.all(color: const Color(0x331E3A8A)),
                   ),
                   child: Row(
                     children: [
@@ -198,7 +507,7 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
                           ),
                         ),
                       ),
-                      TextButton(onPressed: () {}, child: const Text('Select')),
+                      TextButton(onPressed: _isLoading ? null : () {}, child: const Text('Select')),
                     ],
                   ),
                 ),
@@ -212,37 +521,95 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
                     _DateSelectorTile(
                       label: 'Available From',
                       value: _formatDate(_availableFrom),
-                      onTap: () => _pickDate(isStart: true),
+                      onTap: _isLoading ? () {} : () => _pickDate(isStart: true),
                     ),
                     const SizedBox(height: 10),
                     _DateSelectorTile(
                       label: 'Available Until',
                       value: _formatDate(_availableUntil),
-                      onTap: () => _pickDate(isStart: false),
+                      onTap: _isLoading ? () {} : () => _pickDate(isStart: false),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 18),
-              SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: ElevatedButton(
-                  key: const Key('submit_property_button'),
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Property submission sent successfully.')),
-                    );
-                    Navigator.of(context).pop();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: context.homeuAccent,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-                  ),
-                  child: const Text('Submit'),
+              const SizedBox(height: 14),
+              _SectionCard(
+                title: 'Publishing Settings',
+                child: Column(
+                  children: [
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text(
+                        'Publish Immediately',
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF1F314F)),
+                      ),
+                      subtitle: const Text(
+                        'Listing goes live as soon as it is submitted',
+                        style: TextStyle(fontSize: 12, color: Color(0xFF667896)),
+                      ),
+                      value: _publishImmediately,
+                      activeThumbColor: const Color(0xFF1E3A8A),
+                      onChanged: _isLoading ? null : (val) {
+                        setState(() => _publishImmediately = val);
+                      },
+                    ),
+                    if (!_publishImmediately) ...[
+                      const Divider(color: Color(0x1F1E3A8A)),
+                      _DateSelectorTile(
+                        label: 'Schedule Go-Live Date',
+                        value: _scheduledPublishDate != null
+                            ? _formatDate(_scheduledPublishDate!)
+                            : 'Select Date',
+                        onTap: _isLoading ? () {} : _pickScheduleDate,
+                      ),
+                    ],
+                  ],
                 ),
+              ),
+              const SizedBox(height: 18),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    flex: 1,
+                    child: SizedBox(
+                      height: 52,
+                      child: OutlinedButton(
+                        onPressed: _isLoading ? null : () => _handleSubmit(status: 'Draft'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFF1E3A8A),
+                          side: const BorderSide(color: Color(0xFF1E3A8A), width: 1.5),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                        ),
+                        child: const Text('Save Draft'),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    flex: 2,
+                    child: SizedBox(
+                      height: 52,
+                      child: ElevatedButton(
+                        onPressed: _isLoading ? null : () => _handleSubmit(status: 'Active'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF1E3A8A),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                        ),
+                        child: _isLoading
+                            ? const SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                        )
+                            : const Text('Publish Property'),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -250,6 +617,7 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
       ),
     );
   }
+
 
   Future<void> _pickDate({required bool isStart}) async {
     final currentValue = isStart ? _availableFrom : _availableUntil;
@@ -306,11 +674,11 @@ class _SectionCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: context.homeuCard,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
-            color: context.homeuAccent.withValues(alpha: 0.14),
+            color: Color(0x141E3A8A),
             blurRadius: 12,
             offset: Offset(0, 4),
           ),
@@ -321,8 +689,8 @@ class _SectionCard extends StatelessWidget {
         children: [
           Text(
             title,
-            style: TextStyle(
-              color: context.homeuPrimaryText,
+            style: const TextStyle(
+              color: Color(0xFF1F314F),
               fontSize: 15,
               fontWeight: FontWeight.w700,
             ),
@@ -340,6 +708,7 @@ class _LabeledTextField extends StatelessWidget {
     required this.label,
     required this.hintText,
     required this.keyValue,
+    this.controller,
     this.maxLines = 1,
     this.keyboardType,
   });
@@ -347,6 +716,7 @@ class _LabeledTextField extends StatelessWidget {
   final String label;
   final String hintText;
   final Key keyValue;
+  final TextEditingController? controller;
   final int maxLines;
   final TextInputType? keyboardType;
 
@@ -357,8 +727,8 @@ class _LabeledTextField extends StatelessWidget {
       children: [
         Text(
           label,
-          style: TextStyle(
-            color: context.homeuMutedText,
+          style: const TextStyle(
+            color: Color(0xFF40526E),
             fontSize: 13,
             fontWeight: FontWeight.w600,
           ),
@@ -366,23 +736,24 @@ class _LabeledTextField extends StatelessWidget {
         const SizedBox(height: 6),
         TextField(
           key: keyValue,
+          controller: controller,
           keyboardType: keyboardType,
           maxLines: maxLines,
           decoration: InputDecoration(
             hintText: hintText,
             filled: true,
-            fillColor: context.homeuCard,
+            fillColor: const Color(0xFFFBFCFF),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: context.homeuSoftBorder),
+              borderSide: const BorderSide(color: Color(0x1F1E3A8A)),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: context.homeuSoftBorder),
+              borderSide: const BorderSide(color: Color(0x1F1E3A8A)),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: context.homeuAccent, width: 1.2),
+              borderSide: const BorderSide(color: Color(0xFF1E3A8A), width: 1.2),
             ),
           ),
         ),
@@ -403,7 +774,7 @@ class _LabeledDropdown extends StatelessWidget {
   final String label;
   final String value;
   final List<String> items;
-  final ValueChanged<String?> onChanged;
+  final ValueChanged<String?>? onChanged;
   final Key keyValue;
 
   @override
@@ -413,8 +784,8 @@ class _LabeledDropdown extends StatelessWidget {
       children: [
         Text(
           label,
-          style: TextStyle(
-            color: context.homeuMutedText,
+          style: const TextStyle(
+            color: Color(0xFF40526E),
             fontSize: 13,
             fontWeight: FontWeight.w600,
           ),
@@ -427,14 +798,14 @@ class _LabeledDropdown extends StatelessWidget {
           onChanged: onChanged,
           decoration: InputDecoration(
             filled: true,
-            fillColor: context.homeuCard,
+            fillColor: const Color(0xFFFBFCFF),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: context.homeuSoftBorder),
+              borderSide: const BorderSide(color: Color(0x1F1E3A8A)),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: context.homeuSoftBorder),
+              borderSide: const BorderSide(color: Color(0x1F1E3A8A)),
             ),
           ),
         ),
@@ -453,14 +824,12 @@ class _UploadTile extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
-        color: addMode
-            ? (context.isDarkMode ? const Color(0xFF121C2B) : const Color(0xFFF4F8FF))
-            : context.homeuAccent.withValues(alpha: 0.16),
-        border: Border.all(color: context.homeuSoftBorder),
+        color: addMode ? const Color(0xFFF4F8FF) : const Color(0xFFEAF2FF),
+        border: Border.all(color: const Color(0x331E3A8A)),
       ),
       child: Icon(
         addMode ? Icons.add_a_photo_rounded : Icons.image_rounded,
-        color: context.homeuAccent,
+        color: const Color(0xFF1E3A8A),
       ),
     );
   }
@@ -485,13 +854,13 @@ class _DateSelectorTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         decoration: BoxDecoration(
-          color: context.homeuCard,
+          color: const Color(0xFFFBFCFF),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: context.homeuSoftBorder),
+          border: Border.all(color: const Color(0x1F1E3A8A)),
         ),
         child: Row(
           children: [
-            Icon(Icons.event_rounded, color: context.homeuAccent),
+            const Icon(Icons.event_rounded, color: Color(0xFF1E3A8A)),
             const SizedBox(width: 8),
             Expanded(
               child: Column(
@@ -508,8 +877,8 @@ class _DateSelectorTile extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     value,
-                    style: TextStyle(
-                      color: context.homeuPrimaryText,
+                    style: const TextStyle(
+                      color: Color(0xFF1F314F),
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
                     ),
@@ -523,5 +892,3 @@ class _DateSelectorTile extends StatelessWidget {
     );
   }
 }
-
-
