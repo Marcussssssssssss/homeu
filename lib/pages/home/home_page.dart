@@ -4,13 +4,10 @@ import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/profile/profile_controller.dart';
 import 'package:homeu/app/profile/profile_models.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
-<<<<<<< UserAuthentication
 import 'package:homeu/core/localization/homeu_l10n.dart';
 import 'package:homeu/core/theme/homeu_app_theme.dart';
-=======
 import 'package:homeu/app/property/property_remote_datasource.dart';
 import 'package:homeu/core/supabase/app_supabase.dart';
->>>>>>> main
 import 'package:homeu/pages/home/booking_history_screen.dart';
 import 'package:homeu/pages/home/conversation_list_screen.dart';
 import 'package:homeu/pages/home/property_details_screen.dart';
@@ -34,12 +31,9 @@ class HomeUHomePage extends StatefulWidget {
 
 class _HomeUHomePageState extends State<HomeUHomePage> {
   int _selectedNavIndex = 0;
-<<<<<<< UserAuthentication
   late final HomeUProfileController _profileController;
-=======
   final PropertyRemoteDataSource _propertyRemoteDataSource = const PropertyRemoteDataSource();
   late Future<List<PropertyItem>> _propertiesFuture;
->>>>>>> main
 
   static const List<String> _categories = [
     'Room',
@@ -97,7 +91,6 @@ class _HomeUHomePageState extends State<HomeUHomePage> {
   @override
   void initState() {
     super.initState();
-<<<<<<< UserAuthentication
     final authService = HomeUAuthService.instance;
     _profileController = HomeUProfileController(
       initialProfile: HomeUProfileData(
@@ -109,6 +102,9 @@ class _HomeUHomePageState extends State<HomeUHomePage> {
       ),
     );
     _profileController.loadProfile();
+    _propertiesFuture = AppSupabase.isInitialized
+        ? _propertyRemoteDataSource.fetchPublishedProperties()
+        : Future<List<PropertyItem>>.value(_properties);
   }
 
   @override
@@ -129,11 +125,6 @@ class _HomeUHomePageState extends State<HomeUHomePage> {
     }
 
     return '';
-=======
-    _propertiesFuture = AppSupabase.isInitialized
-        ? _propertyRemoteDataSource.fetchPublishedProperties()
-        : Future<List<PropertyItem>>.value(_properties);
->>>>>>> main
   }
 
   @override
@@ -151,7 +142,6 @@ class _HomeUHomePageState extends State<HomeUHomePage> {
             ? t.homeGreetingAnonymous
             : t.homeGreetingWithName(greetingName);
 
-<<<<<<< UserAuthentication
         return Scaffold(
           backgroundColor: context.colors.surface,
           floatingActionButton: widget.showQrScanFab
@@ -179,84 +169,30 @@ class _HomeUHomePageState extends State<HomeUHomePage> {
               if (index == 3) {
                 Navigator.of(context).push(
                   MaterialPageRoute<void>(
+                    builder: (_) => const HomeUViewingHistoryScreen(),
+                  ),
+                );
+                return;
+              }
+
+              if (index == 4) {
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const HomeUConversationListScreen(),
+                  ),
+                );
+                return;
+              }
+
+              if (index == 5) {
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
                     builder: (_) =>
                         const HomeUProfileScreen(role: HomeURole.tenant),
                   ),
                 );
                 return;
               }
-=======
-          if (index == 3) {
-            Navigator.of(context).push(
-              MaterialPageRoute<void>(builder: (_) => const HomeUViewingHistoryScreen()),
-            );
-            return;
-          }
-
-          if (index == 4) {
-            Navigator.of(context).push(
-              MaterialPageRoute<void>(builder: (_) => const HomeUConversationListScreen()),
-            );
-            return;
-          }
-
-          if (index == 5) {
-            Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => HomeUProfileScreen(
-                  role: HomeURole.tenant,
-                  name: widget.tenantName,
-                  email: 'tenant@homeu.app',
-                  phone: '+60 12 335 7788',
-                ),
-              ),
-            );
-            return;
-          }
-
-          setState(() {
-            _selectedNavIndex = index;
-          });
-        },
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home_rounded),
-            label: 'Home',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.favorite_border_rounded),
-            selectedIcon: Icon(Icons.favorite_rounded),
-            label: 'Favorites',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.book_online_outlined),
-            selectedIcon: Icon(Icons.book_online_rounded),
-            label: 'Bookings',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.visibility_outlined),
-            selectedIcon: Icon(Icons.visibility_rounded),
-            label: 'Viewings',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.chat_bubble_outline_rounded),
-            selectedIcon: Icon(Icons.chat_bubble_rounded),
-            label: 'Chat',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline_rounded),
-            selectedIcon: Icon(Icons.person_rounded),
-            label: 'Profile',
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final width = constraints.maxWidth;
-            final horizontalPadding = (width * 0.06).clamp(16.0, 24.0);
->>>>>>> main
 
               setState(() {
                 _selectedNavIndex = index;
@@ -277,6 +213,16 @@ class _HomeUHomePageState extends State<HomeUHomePage> {
                 icon: Icon(Icons.book_online_outlined),
                 selectedIcon: Icon(Icons.book_online_rounded),
                 label: t.navBookings,
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.visibility_outlined),
+                selectedIcon: Icon(Icons.visibility_rounded),
+                label: 'Viewings',
+              ),
+              const NavigationDestination(
+                icon: Icon(Icons.chat_bubble_outline_rounded),
+                selectedIcon: Icon(Icons.chat_bubble_rounded),
+                label: 'Chat',
               ),
               NavigationDestination(
                 icon: Icon(Icons.person_outline_rounded),
@@ -408,63 +354,34 @@ class _HomeUHomePageState extends State<HomeUHomePage> {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      ..._properties.map(
-                        (property) => _PropertyCard(
-                          property: property,
-                          onTap: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute<void>(
-                                builder: (_) => HomeUPropertyDetailsScreen(
-                                  property: property,
-                                ),
-                              ),
-<<<<<<< UserAuthentication
-                            );
-                          },
-                        ),
+                      FutureBuilder<List<PropertyItem>>(
+                        future: _propertiesFuture,
+                        builder: (context, snapshot) {
+                          final items = (snapshot.data == null || snapshot.data!.isEmpty)
+                              ? _properties
+                              : snapshot.data!;
+
+                          return Column(
+                            children: items
+                                .map(
+                                  (property) => _PropertyCard(
+                                    property: property,
+                                    onTap: () {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute<void>(
+                                          builder: (_) => HomeUPropertyDetailsScreen(
+                                            property: property,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                )
+                                .toList(growable: false),
+                          );
+                        },
                       ),
                     ],
-=======
-                            ),
-                          )
-                          .toList(),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  const Text(
-                    'Recommended Properties',
-                    style: TextStyle(
-                      color: Color(0xFF1F314F),
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  FutureBuilder<List<PropertyItem>>(
-                    future: _propertiesFuture,
-                    builder: (context, snapshot) {
-                      final items = (snapshot.data == null || snapshot.data!.isEmpty)
-                          ? _properties
-                          : snapshot.data!;
-
-                      return Column(
-                        children: items
-                            .map(
-                              (property) => _PropertyCard(
-                                property: property,
-                                onTap: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute<void>(
-                                      builder: (_) => HomeUPropertyDetailsScreen(property: property),
-                                    ),
-                                  );
-                                },
-                              ),
-                            )
-                            .toList(growable: false),
-                      );
-                    },
->>>>>>> main
                   ),
                 );
               },
@@ -562,13 +479,9 @@ class _PropertyCard extends StatelessWidget {
                       end: Alignment.bottomRight,
                       colors: [
                         property.photoColors.first.withValues(alpha: 0.9),
-<<<<<<< UserAuthentication
                         context.isDarkMode
                             ? const Color(0xFF243047)
                             : const Color(0xFFF0F5FF),
-=======
-                        const Color(0xFFF0F5FF),
->>>>>>> main
                       ],
                     ),
                   ),
