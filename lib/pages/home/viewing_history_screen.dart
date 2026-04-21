@@ -113,18 +113,18 @@ class _HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
         },
         destinations: [
           NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home_rounded),
+            icon: const Icon(Icons.home_outlined),
+            selectedIcon: const Icon(Icons.home_rounded),
             label: t.navHome,
           ),
           NavigationDestination(
-            icon: Icon(Icons.favorite_border_rounded),
-            selectedIcon: Icon(Icons.favorite_rounded),
+            icon: const Icon(Icons.favorite_border_rounded),
+            selectedIcon: const Icon(Icons.favorite_rounded),
             label: t.navFavorites,
           ),
           NavigationDestination(
-            icon: Icon(Icons.book_online_outlined),
-            selectedIcon: Icon(Icons.book_online_rounded),
+            icon: const Icon(Icons.book_online_outlined),
+            selectedIcon: const Icon(Icons.book_online_rounded),
             label: t.navBookings,
           ),
           const NavigationDestination(
@@ -138,8 +138,8 @@ class _HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
             label: 'Chat',
           ),
           NavigationDestination(
-            icon: Icon(Icons.person_outline_rounded),
-            selectedIcon: Icon(Icons.person_rounded),
+            icon: const Icon(Icons.person_outline_rounded),
+            selectedIcon: const Icon(Icons.person_rounded),
             label: t.navProfile,
           ),
         ],
@@ -150,10 +150,10 @@ class _HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
                   children: [
-                    const Text(
+                    Text(
                       'Track your viewing requests and updates.',
                       style: TextStyle(
-                        color: Color(0xFF667896),
+                        color: context.homeuMutedText,
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
                       ),
@@ -209,16 +209,12 @@ class _HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
                         ),
                       ),
                     if (!_isLoading && visibleViewings.isEmpty)
-                      const Padding(
+                      Padding(
                         padding: EdgeInsets.only(top: 24),
                         child: Text(
                           'No viewing requests found for this status.',
                           textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: Color(0xFF667896),
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: TextStyle(color: context.homeuMutedText, fontSize: 14, fontWeight: FontWeight.w600),
                         ),
                       ),
                     ...visibleViewings.map((viewing) {
@@ -629,4 +625,3 @@ class _InfoRow extends StatelessWidget {
     );
   }
 }
-
