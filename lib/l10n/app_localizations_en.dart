@@ -414,13 +414,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginForgotPassword => 'Forgot password?';
 
   @override
-  String get loginBiometricComingSoon =>
-      'Biometric authentication coming soon.';
-
-  @override
-  String get loginUseFingerprint => 'Use Fingerprint';
-
-  @override
   String get loginNewHere => 'New here?';
 
   @override

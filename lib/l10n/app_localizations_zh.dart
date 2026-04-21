@@ -397,12 +397,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get loginForgotPassword => '忘记密码？';
 
   @override
-  String get loginBiometricComingSoon => '生物识别登录即将上线。';
-
-  @override
-  String get loginUseFingerprint => '使用指纹';
-
-  @override
   String get loginNewHere => '新用户？';
 
   @override

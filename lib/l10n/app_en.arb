@@ -138,8 +138,6 @@
   "loginSubtitle": "Login to continue your HomeU journey.",
   "loginPasswordHint": "Enter your password",
   "loginForgotPassword": "Forgot password?",
-  "loginBiometricComingSoon": "Biometric authentication coming soon.",
-  "loginUseFingerprint": "Use Fingerprint",
   "loginNewHere": "New here?",
   "loginSuccess": "Login successful.",
   "loginErrorBackendNotInitialized": "Backend is not initialized. Please check your Supabase configuration.",
@@ -236,4 +234,3 @@
   "updatePasswordErrorNetwork": "Network error. Please check your internet connection and try again.",
   "updatePasswordErrorGeneric": "Unable to update password right now. Please try again."
 }
-

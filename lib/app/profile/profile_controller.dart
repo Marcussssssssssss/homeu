@@ -50,6 +50,7 @@ class HomeUProfileController extends ChangeNotifier {
         _preferences = cachedPreferences;
         _selectedLanguageCode = _extractLanguageCode(cachedPreferences);
       }
+
       _safeNotifyListeners();
 
       final latestProfile = await _repository.fetchLatestProfile();
@@ -100,9 +101,7 @@ class HomeUProfileController extends ChangeNotifier {
     }
   }
 
-  Future<bool> uploadAvatar({
-    required String imagePath,
-  }) async {
+  Future<bool> uploadAvatar({required String imagePath}) async {
     if (_isSaving) {
       return false;
     }
@@ -176,5 +175,3 @@ class HomeUProfileController extends ChangeNotifier {
     return _selectedLanguageCode;
   }
 }
-
-

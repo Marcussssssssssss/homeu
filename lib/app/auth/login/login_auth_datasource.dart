@@ -11,6 +11,12 @@ class LoginAuthDataSource {
     return AppSupabase.auth.signInWithPassword(email: email, password: password);
   }
 
+  Future<AuthResponse> restoreSessionWithRefreshToken(
+    String refreshToken,
+  ) {
+    return AppSupabase.auth.setSession(refreshToken);
+  }
+
   Future<String?> fetchProfileRole(String userId) async {
     final dynamic row = await AppSupabase.client
         .from('profiles')

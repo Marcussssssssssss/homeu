@@ -868,18 +868,6 @@ abstract class AppLocalizations {
   /// **'Forgot password?'**
   String get loginForgotPassword;
 
-  /// No description provided for @loginBiometricComingSoon.
-  ///
-  /// In en, this message translates to:
-  /// **'Biometric authentication coming soon.'**
-  String get loginBiometricComingSoon;
-
-  /// No description provided for @loginUseFingerprint.
-  ///
-  /// In en, this message translates to:
-  /// **'Use Fingerprint'**
-  String get loginUseFingerprint;
-
   /// No description provided for @loginNewHere.
   ///
   /// In en, this message translates to:

@@ -20,7 +20,9 @@ Future<void> main() async {
   await themeController.loadInitialTheme();
 
   // Startup destination is prepared here for future guarded routing.
-  final startupDestination = await _resolveStartupDestination();
+  final startupDestination = await _resolveStartupDestination(
+    languageController: languageController,
+  );
 
   runApp(
     HomeUApp(
@@ -31,8 +33,12 @@ Future<void> main() async {
   );
 }
 
-Future<HomeUStartupDestination> _resolveStartupDestination() async {
-  final resolver = HomeUStartupSessionResolver(authService: HomeUAuthService.instance);
+Future<HomeUStartupDestination> _resolveStartupDestination({
+  required HomeULanguageController languageController,
+}) async {
+  final resolver = HomeUStartupSessionResolver(
+    authService: HomeUAuthService.instance,
+  );
   try {
     final destination = await resolver.resolveInitialDestination();
     return destination;
@@ -40,4 +46,3 @@ Future<HomeUStartupDestination> _resolveStartupDestination() async {
     return HomeUStartupDestination.authFlow;
   }
 }
-

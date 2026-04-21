@@ -413,12 +413,6 @@ class AppLocalizationsMs extends AppLocalizations {
   String get loginForgotPassword => 'Lupa kata laluan?';
 
   @override
-  String get loginBiometricComingSoon => 'Pengesahan biometrik akan datang.';
-
-  @override
-  String get loginUseFingerprint => 'Guna Cap Jari';
-
-  @override
   String get loginNewHere => 'Baru di sini?';
 
   @override
@@ -461,7 +455,7 @@ class AppLocalizationsMs extends AppLocalizations {
 
   @override
   String get registerSubtitle =>
-      'Sertai HomeU dan mulakan perjalanan sewaan anda.';
+      'Sertai HomeU and mulakan perjalanan sewaan anda.';
 
   @override
   String get registerNameHint => 'Nama penuh anda';

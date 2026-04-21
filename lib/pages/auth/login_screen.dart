@@ -266,34 +266,6 @@ class _HomeULoginScreenState extends State<HomeULoginScreen> {
                               : Text(t.authLogin),
                         ),
                       ),
-                      const SizedBox(height: 14),
-                      SizedBox(
-                        height: 50,
-                        child: OutlinedButton.icon(
-                          onPressed: _isLoading
-                              ? null
-                              : () {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(t.loginBiometricComingSoon),
-                                    ),
-                                  );
-                                },
-                          icon: const Icon(Icons.fingerprint_rounded),
-                          label: Text(t.loginUseFingerprint),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: context.homeuAccent,
-                            side: BorderSide(color: context.homeuSoftBorder),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            textStyle: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                      ),
                       const SizedBox(height: 18),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
