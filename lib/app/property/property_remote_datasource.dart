@@ -12,7 +12,9 @@ class PropertyRemoteDataSource {
 
     final dynamic rows = await AppSupabase.client
         .from('properties')
-        .select('id, owner_id, title, description, location_area, monthly_price');
+        .select(
+          'id, owner_id, title, description, location_area, monthly_price, property_type, room_type, furnishing_status, nearby_landmarks, created_at',
+        );
 
     if (rows is! List) {
       return const <PropertyItem>[];
@@ -40,7 +42,9 @@ class PropertyRemoteDataSource {
 
     final dynamic rows = await AppSupabase.client
         .from('properties')
-        .select('id, owner_id, title, description, location_area, monthly_price')
+        .select(
+          'id, owner_id, title, description, location_area, monthly_price, property_type, room_type, furnishing_status, nearby_landmarks, created_at',
+        )
         .inFilter('id', ids);
 
     if (rows is! List) {
@@ -60,6 +64,7 @@ class PropertyRemoteDataSource {
   PropertyItem _mapRowToPropertyItem(Map<String, dynamic> row) {
     final monthlyPrice = row['monthly_price'];
     final priceText = monthlyPrice == null ? 'RM 0 / month' : 'RM ${monthlyPrice.toString()} / month';
+    final createdAt = DateTime.tryParse(row['created_at']?.toString() ?? '');
 
     return PropertyItem(
       id: row['id']?.toString() ?? '',
@@ -72,6 +77,11 @@ class PropertyRemoteDataSource {
       accentColor: const Color(0xFF1E3A8A),
       ownerName: 'Property Owner',
       ownerRole: 'Owner',
+      propertyType: row['property_type']?.toString() ?? 'Any',
+      roomType: row['room_type']?.toString() ?? 'Any',
+      furnishing: row['furnishing_status']?.toString() ?? 'Any',
+      nearbyLandmarks: row['nearby_landmarks']?.toString() ?? 'Nearby landmarks not available.',
+      createdAt: createdAt,
       photoColors: const [
         Color(0xFF5D7FBF),
         Color(0xFF4A68A8),

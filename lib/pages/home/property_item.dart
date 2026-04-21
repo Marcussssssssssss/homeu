@@ -13,6 +13,11 @@ class PropertyItem {
     required this.ownerName,
     required this.ownerRole,
     required this.photoColors,
+    this.propertyType = 'Any',
+    this.roomType = 'Any',
+    this.furnishing = 'Any',
+    this.nearbyLandmarks = 'Nearby landmarks not available.',
+    this.createdAt,
   });
 
   final String id;
@@ -26,6 +31,11 @@ class PropertyItem {
   final String ownerName;
   final String ownerRole;
   final List<Color> photoColors;
+  final String propertyType;
+  final String roomType;
+  final String furnishing;
+  final String nearbyLandmarks;
+  final DateTime? createdAt;
 
   double get pricePerMonthValue {
     final normalized = pricePerMonth.replaceAll(RegExp(r'[^0-9.]'), '');

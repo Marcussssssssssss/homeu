@@ -12,6 +12,7 @@ import 'package:homeu/app/auth/role_access_widget.dart';
 import 'package:homeu/core/localization/homeu_l10n.dart';
 import 'package:homeu/core/theme/homeu_app_theme.dart';
 import 'package:homeu/pages/auth/login_screen.dart';
+import 'package:homeu/pages/home/favorites_screen.dart';
 import 'package:homeu/pages/home/update_password_screen.dart';
 
 class HomeUProfileScreen extends StatefulWidget {
@@ -484,6 +485,25 @@ class _HomeUProfileScreenState extends State<HomeUProfileScreen> {
                         ),
                         child: Column(
                           children: [
+                            if (widget.role == HomeURole.tenant) ...[
+                              _ProfileActionTile(
+                                key: const Key('open_favorites_button'),
+                                icon: Icons.favorite_border_rounded,
+                                title: t.navFavorites,
+                                subtitle: 'View your saved properties',
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute<void>(
+                                      builder: (_) => const HomeUFavoritesScreen(),
+                                    ),
+                                  );
+                                },
+                              ),
+                              Divider(
+                                height: 1,
+                                color: context.homeuSectionDivider,
+                              ),
+                            ],
                             _ProfileActionTile(
                               icon: Icons.palette_outlined,
                               title: t.profileThemeTitle,

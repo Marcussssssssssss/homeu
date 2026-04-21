@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
+import 'package:homeu/app/favorites/homeu_favorites_controller.dart';
 import 'package:homeu/core/theme/homeu_app_theme.dart';
 import 'package:homeu/pages/home/booking_screen.dart';
 import 'package:homeu/pages/home/chat_screen.dart';
@@ -17,6 +18,7 @@ class HomeUPropertyDetailsScreen extends StatefulWidget {
 
 class _HomeUPropertyDetailsScreenState extends State<HomeUPropertyDetailsScreen> {
   final PageController _pageController = PageController();
+  final HomeUFavoritesController _favoritesController = HomeUFavoritesController.instance;
   int _activeImageIndex = 0;
 
   @override
@@ -33,8 +35,28 @@ class _HomeUPropertyDetailsScreenState extends State<HomeUPropertyDetailsScreen>
 
     final property = widget.property;
 
-    return Scaffold(
+    return AnimatedBuilder(
+      animation: _favoritesController,
+      builder: (context, _) {
+        final isFavorited = _favoritesController.isFavorited(property.id);
+
+        return Scaffold(
       backgroundColor: context.colors.surface,
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () => Navigator.of(context).pop(),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+        ),
+        title: Text(
+          'Property Details',
+          style: TextStyle(
+            color: context.homeuPrimaryText,
+            fontSize: 18,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        backgroundColor: context.colors.surface,
+      ),
       bottomNavigationBar: SafeArea(
         minimum: const EdgeInsets.fromLTRB(16, 8, 16, 12),
         child: Column(
@@ -92,28 +114,10 @@ class _HomeUPropertyDetailsScreenState extends State<HomeUPropertyDetailsScreen>
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(16, 10, 16, 20),
+          padding: const EdgeInsets.fromLTRB(16, 6, 16, 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.arrow_back_ios_new_rounded),
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    'Property Details',
-                    style: TextStyle(
-                      color: context.homeuPrimaryText,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 6),
               SizedBox(
                 height: 250,
                 child: ClipRRect(
@@ -171,14 +175,33 @@ class _HomeUPropertyDetailsScreenState extends State<HomeUPropertyDetailsScreen>
                 }),
               ),
               const SizedBox(height: 16),
-              Text(
-                property.name,
-                style: TextStyle(
-                  color: context.homeuPrimaryText,
-                  fontSize: 26,
-                  fontWeight: FontWeight.w700,
-                  height: 1.2,
-                ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Text(
+                      property.name,
+                      style: TextStyle(
+                        color: context.homeuPrimaryText,
+                        fontSize: 26,
+                        fontWeight: FontWeight.w700,
+                        height: 1.2,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    key: const Key('details_favorite_toggle'),
+                    onPressed: () {
+                      _favoritesController.toggle(property);
+                    },
+                    icon: Icon(
+                      isFavorited
+                          ? Icons.favorite_rounded
+                          : Icons.favorite_border_rounded,
+                      color: context.homeuAccent,
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 6),
               Text(
@@ -246,7 +269,7 @@ class _HomeUPropertyDetailsScreenState extends State<HomeUPropertyDetailsScreen>
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Nearby: LRT station, groceries, and cafes',
+                            'Nearby: ${property.nearbyLandmarks}',
                             style: TextStyle(
                               color: context.homeuMutedText,
                               fontSize: 12,
@@ -372,6 +395,8 @@ class _HomeUPropertyDetailsScreenState extends State<HomeUPropertyDetailsScreen>
           ),
         ),
       ),
+        );
+      },
     );
   }
 }
