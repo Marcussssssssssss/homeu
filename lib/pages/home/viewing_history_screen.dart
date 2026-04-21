@@ -1,12 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
+import 'package:homeu/core/localization/homeu_l10n.dart';
+import 'package:homeu/core/theme/homeu_app_theme.dart';
 import 'package:homeu/app/property/property_remote_datasource.dart';
 import 'package:homeu/app/viewing/viewing_models.dart';
 import 'package:homeu/app/viewing/viewing_remote_datasource.dart';
 import 'package:homeu/core/supabase/app_supabase.dart';
+import 'package:homeu/pages/home/booking_history_screen.dart';
+import 'package:homeu/pages/home/conversation_list_screen.dart';
 import 'package:homeu/pages/home/property_details_screen.dart';
 import 'package:homeu/pages/home/property_item.dart';
+import 'package:homeu/pages/home/profile_screen.dart';
+
+enum HomeUViewingStatusFilter {
+  all,
+  pending,
+  approved,
+  rejected,
+  completed,
+  cancelled,
+  rescheduleRequested,
+}
 
 class HomeUViewingHistoryScreen extends StatefulWidget {
   const HomeUViewingHistoryScreen({
@@ -25,6 +40,8 @@ class _HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
   final PropertyRemoteDataSource _propertyRemoteDataSource = const PropertyRemoteDataSource();
   List<ViewingRequest> _viewings = const <ViewingRequest>[];
   Map<String, PropertyItem> _propertyById = const <String, PropertyItem>{};
+  HomeUViewingStatusFilter _selectedStatus = HomeUViewingStatusFilter.all;
+  int _selectedNavIndex = 3;
   bool _isLoading = true;
   String? _tenantId;
   String? _loadError;
@@ -50,21 +67,134 @@ class _HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
       return const HomeURoleBlockedScreen(requiredRole: HomeURole.tenant);
     }
 
+    final t = context.l10n;
+    final visibleViewings = _viewings
+        .where((viewing) => _matchesSelectedStatus(viewing.status))
+        .toList(growable: false);
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F8FC),
+      backgroundColor: context.colors.surface,
       appBar: AppBar(
         title: const Text('Viewing History'),
-        backgroundColor: const Color(0xFFF6F8FC),
-        elevation: 0,
+        backgroundColor: context.colors.surface,
+      ),
+      bottomNavigationBar: NavigationBar(
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+        selectedIndex: _selectedNavIndex,
+        onDestinationSelected: (index) {
+          setState(() {
+            _selectedNavIndex = index;
+          });
+
+          if (index == 0) {
+            Navigator.of(context).pop();
+          }
+          if (index == 2) {
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const HomeUBookingHistoryScreen(),
+              ),
+            );
+          }
+          if (index == 4) {
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const HomeUConversationListScreen(),
+              ),
+            );
+          }
+          if (index == 5) {
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const HomeUProfileScreen(role: HomeURole.tenant),
+              ),
+            );
+          }
+        },
+        destinations: [
+          NavigationDestination(
+            icon: Icon(Icons.home_outlined),
+            selectedIcon: Icon(Icons.home_rounded),
+            label: t.navHome,
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.favorite_border_rounded),
+            selectedIcon: Icon(Icons.favorite_rounded),
+            label: t.navFavorites,
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.book_online_outlined),
+            selectedIcon: Icon(Icons.book_online_rounded),
+            label: t.navBookings,
+          ),
+          const NavigationDestination(
+            icon: Icon(Icons.visibility_outlined),
+            selectedIcon: Icon(Icons.visibility_rounded),
+            label: 'Viewings',
+          ),
+          const NavigationDestination(
+            icon: Icon(Icons.chat_bubble_outline_rounded),
+            selectedIcon: Icon(Icons.chat_bubble_rounded),
+            label: 'Chat',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.person_outline_rounded),
+            selectedIcon: Icon(Icons.person_rounded),
+            label: t.navProfile,
+          ),
+        ],
       ),
       body: SafeArea(
-        child: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : RefreshIndicator(
+        child: RefreshIndicator(
                 onRefresh: _loadViewings,
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
                   children: [
+                    const Text(
+                      'Track your viewing requests and updates.',
+                      style: TextStyle(
+                        color: Color(0xFF667896),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: HomeUViewingStatusFilter.values.map((status) {
+                          final bool isSelected = status == _selectedStatus;
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: ChoiceChip(
+                              key: Key('viewing_status_filter_${status.name}'),
+                              label: Text(_statusFilterLabel(status)),
+                              selected: isSelected,
+                              onSelected: (_) {
+                                setState(() {
+                                  _selectedStatus = status;
+                                });
+                              },
+                              selectedColor: context.homeuAccent,
+                              labelStyle: TextStyle(
+                                color: isSelected ? Colors.white : context.homeuAccent,
+                                fontWeight: FontWeight.w700,
+                              ),
+                              side: BorderSide(color: context.homeuSoftBorder),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          );
+                        }).toList(growable: false),
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    if (_isLoading)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 20),
+                        child: Center(child: CircularProgressIndicator()),
+                      ),
                     if (_loadError != null)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 12),
@@ -78,11 +208,11 @@ class _HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
                           ),
                         ),
                       ),
-                    if (_viewings.isEmpty)
+                    if (!_isLoading && visibleViewings.isEmpty)
                       const Padding(
                         padding: EdgeInsets.only(top: 24),
                         child: Text(
-                          'No viewing requests yet.',
+                          'No viewing requests found for this status.',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: Color(0xFF667896),
@@ -91,7 +221,7 @@ class _HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
                           ),
                         ),
                       ),
-                    ..._viewings.map((viewing) {
+                    ...visibleViewings.map((viewing) {
                       final property = _propertyById[viewing.propertyId] ?? _buildFallbackPropertyItem(viewing);
                       return _ViewingCard(
                         viewing: viewing,
@@ -108,12 +238,59 @@ class _HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
                             : () => _handleReschedule(viewing, _tenantId!),
                         onCancel: _tenantId == null ? null : () => _handleCancel(viewing, _tenantId!),
                       );
-                    }),
+                    }).toList(growable: false),
                   ],
                 ),
               ),
       ),
     );
+  }
+
+  bool _matchesSelectedStatus(String rawStatus) {
+    if (_selectedStatus == HomeUViewingStatusFilter.all) {
+      return true;
+    }
+    return _mapStatus(rawStatus) == _selectedStatus;
+  }
+
+  HomeUViewingStatusFilter _mapStatus(String rawStatus) {
+    final normalized = rawStatus.trim().toLowerCase().replaceAll(RegExp(r'[\s_-]+'), '');
+    switch (normalized) {
+      case 'pending':
+        return HomeUViewingStatusFilter.pending;
+      case 'approved':
+        return HomeUViewingStatusFilter.approved;
+      case 'rejected':
+        return HomeUViewingStatusFilter.rejected;
+      case 'completed':
+        return HomeUViewingStatusFilter.completed;
+      case 'cancelled':
+      case 'canceled':
+        return HomeUViewingStatusFilter.cancelled;
+      case 'reschedulerequested':
+        return HomeUViewingStatusFilter.rescheduleRequested;
+      default:
+        return HomeUViewingStatusFilter.all;
+    }
+  }
+
+  String _statusFilterLabel(HomeUViewingStatusFilter status) {
+    switch (status) {
+      case HomeUViewingStatusFilter.all:
+        return 'All';
+      case HomeUViewingStatusFilter.pending:
+        return 'Pending';
+      case HomeUViewingStatusFilter.approved:
+        return 'Approved';
+      case HomeUViewingStatusFilter.rejected:
+        return 'Rejected';
+      case HomeUViewingStatusFilter.completed:
+        return 'Completed';
+      case HomeUViewingStatusFilter.cancelled:
+        return 'Cancelled';
+      case HomeUViewingStatusFilter.rescheduleRequested:
+        return 'Rescheduled';
+    }
   }
 
   Future<void> _loadViewings() async {
@@ -452,5 +629,4 @@ class _InfoRow extends StatelessWidget {
     );
   }
 }
-
 

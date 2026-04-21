@@ -675,6 +675,14 @@ void main() {
     );
     await tester.pumpAndSettle();
 
+    expect(find.byKey(const Key('viewing_status_filter_all')), findsOneWidget);
+    expect(find.byKey(const Key('viewing_status_filter_pending')), findsOneWidget);
+    expect(find.byKey(const Key('viewing_status_filter_approved')), findsOneWidget);
+    expect(find.byKey(const Key('viewing_status_filter_rejected')), findsOneWidget);
+    expect(find.byKey(const Key('viewing_status_filter_completed')), findsOneWidget);
+    expect(find.byKey(const Key('viewing_status_filter_cancelled')), findsOneWidget);
+    expect(find.byKey(const Key('viewing_status_filter_rescheduleRequested')), findsOneWidget);
+
     expect(find.byKey(const Key('viewing_card_viewing-1')), findsOneWidget);
     expect(find.text('Skyline Condo Suite'), findsOneWidget);
     expect(find.text('Scheduled At: '), findsOneWidget);
@@ -683,6 +691,62 @@ void main() {
     expect(find.text('Approved'), findsOneWidget);
     expect(find.text('Agent/Host: '), findsOneWidget);
     expect(find.text('Nurul Huda'), findsOneWidget);
+    expect(find.text('Home'), findsOneWidget);
+    expect(find.text('Favorites'), findsOneWidget);
+    expect(find.text('Bookings'), findsOneWidget);
+    expect(find.text('Viewings'), findsOneWidget);
+    expect(find.text('Chat'), findsOneWidget);
+    expect(find.text('Profile'), findsOneWidget);
+  });
+
+  testWidgets('Viewing history status filter updates visible list', (
+    WidgetTester tester,
+  ) async {
+    HomeUSession.register(HomeURole.tenant);
+    addTearDown(HomeUSession.logout);
+
+    final pendingViewing = ViewingRequest(
+      id: 'viewing-pending',
+      propertyId: 'Property A',
+      ownerId: 'Owner A',
+      tenantId: 'tenant-1',
+      scheduledAt: DateTime(2026, 4, 21, 9, 0),
+      status: 'Pending',
+      rescheduleTo: null,
+      rescheduleReason: null,
+      createdAt: DateTime(2026, 4, 18, 10, 0),
+      updatedAt: DateTime(2026, 4, 18, 10, 0),
+    );
+    final approvedViewing = ViewingRequest(
+      id: 'viewing-approved',
+      propertyId: 'Property B',
+      ownerId: 'Owner B',
+      tenantId: 'tenant-1',
+      scheduledAt: DateTime(2026, 4, 22, 9, 0),
+      status: 'Approved',
+      rescheduleTo: null,
+      rescheduleReason: null,
+      createdAt: DateTime(2026, 4, 18, 10, 0),
+      updatedAt: DateTime(2026, 4, 18, 10, 0),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: HomeUViewingHistoryScreen(
+          initialViewings: <ViewingRequest>[pendingViewing, approvedViewing],
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('viewing_card_viewing-pending')), findsOneWidget);
+    expect(find.byKey(const Key('viewing_card_viewing-approved')), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('viewing_status_filter_approved')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('viewing_card_viewing-pending')), findsNothing);
+    expect(find.byKey(const Key('viewing_card_viewing-approved')), findsOneWidget);
   });
 
   testWidgets('Tenant home Bookings nav opens booking history screen', (
