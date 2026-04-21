@@ -1,65 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:homeu/app/auth/homeu_auth_service.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
-import 'package:homeu/app/profile/profile_controller.dart';
-import 'package:homeu/app/profile/profile_models.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
-import 'package:homeu/core/localization/homeu_l10n.dart';
-import 'package:homeu/core/theme/homeu_app_theme.dart';
-import 'package:homeu/pages/home/conversation_list_screen.dart';
 import 'package:homeu/pages/home/owner_add_property_screen.dart';
 import 'package:homeu/pages/home/owner_booking_requests_screen.dart';
 import 'package:homeu/pages/home/owner_analytics_screen.dart';
 import 'package:homeu/pages/home/owner_bottom_navigation_bar.dart';
 import 'package:homeu/pages/home/profile_screen.dart';
 
+import 'owner_my_properties_screen.dart';
+
 class HomeUOwnerDashboardScreen extends StatefulWidget {
-  const HomeUOwnerDashboardScreen({super.key});
+  const HomeUOwnerDashboardScreen({super.key, this.ownerName = 'Nurul'});
+
+  final String ownerName;
 
   @override
-  State<HomeUOwnerDashboardScreen> createState() =>
-      _HomeUOwnerDashboardScreenState();
+  State<HomeUOwnerDashboardScreen> createState() => _HomeUOwnerDashboardScreenState();
 }
 
 class _HomeUOwnerDashboardScreenState extends State<HomeUOwnerDashboardScreen> {
   int _selectedNavIndex = 0;
-  late final HomeUProfileController _profileController;
-
-  @override
-  void initState() {
-    super.initState();
-    final authService = HomeUAuthService.instance;
-    _profileController = HomeUProfileController(
-      initialProfile: HomeUProfileData(
-        userId: authService.currentUserId ?? '',
-        fullName: '',
-        email: authService.currentSession?.user.email ?? '',
-        phoneNumber: '',
-        role: HomeURole.owner,
-      ),
-    );
-    _profileController.loadProfile();
-  }
-
-  @override
-  void dispose() {
-    _profileController.dispose();
-    super.dispose();
-  }
-
-  String _resolvedGreetingName(HomeUProfileData profile) {
-    final fullName = profile.fullName.trim();
-    if (fullName.isNotEmpty) {
-      return fullName;
-    }
-
-    final email = profile.email.trim();
-    if (email.contains('@')) {
-      return email.split('@').first;
-    }
-
-    return '';
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,257 +27,223 @@ class _HomeUOwnerDashboardScreenState extends State<HomeUOwnerDashboardScreen> {
       return const HomeURoleBlockedScreen(requiredRole: HomeURole.owner);
     }
 
-    return AnimatedBuilder(
-      animation: _profileController,
-      builder: (context, _) {
-        final greetingName = _resolvedGreetingName(_profileController.profile);
-        final t = context.l10n;
-        final greetingText = greetingName.isEmpty
-            ? t.homeGreetingAnonymous
-            : t.homeGreetingWithName(greetingName);
+    return Scaffold(
+      backgroundColor: const Color(0xFFF6F8FC),
+      bottomNavigationBar: HomeUOwnerBottomNavigationBar(
+        selectedIndex: _selectedNavIndex,
+        onDestinationSelected: (index) {
+          if (index == 1) {
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const HomeUOwnerMyPropertiesScreen(),
+              ),
+            );
+            return;
+          }
+          if (index == 2) {
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const HomeUOwnerBookingRequestsScreen(),
+              ),
+            );
+            return;
+          }
 
-        return Scaffold(
-          backgroundColor: context.colors.surface,
-          bottomNavigationBar: HomeUOwnerBottomNavigationBar(
-            selectedIndex: _selectedNavIndex,
-            onDestinationSelected: (index) {
-              if (index == 2) {
-                Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => const HomeUOwnerBookingRequestsScreen(),
+          if (index == 3) {
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const HomeUOwnerAnalyticsScreen(),
+              ),
+            );
+            return;
+          }
+
+          if (index == 4) {
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => const HomeUProfileScreen(
+                  role: HomeURole.owner,
+                ),
+              ),
+            );
+            return;
+          }
+
+          setState(() {
+            _selectedNavIndex = index;
+          });
+        },
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Hello, ${widget.ownerName}',
+                key: const Key('owner_greeting_text'),
+                style: const TextStyle(
+                  color: Color(0xFF1E3A8A),
+                  fontSize: 28,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 6),
+              const Text(
+                'Manage listings, requests, and performance from one place.',
+                style: TextStyle(
+                  color: Color(0xFF50617F),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 14),
+              SizedBox(
+                height: 48,
+                child: ElevatedButton.icon(
+                  key: const Key('add_property_button'),
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const HomeUOwnerAddPropertyScreen(),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF1E3A8A),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    textStyle: const TextStyle(fontWeight: FontWeight.w700),
                   ),
-                );
-                return;
-              }
-
-              if (index == 3) {
-                Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => const HomeUOwnerAnalyticsScreen(),
-                  ),
-                );
-                return;
-              }
-
-              if (index == 4) {
-                Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => const HomeUConversationListScreen(),
-                  ),
-                );
-                return;
-              }
-
-              if (index == 5) {
-                Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) =>
-                        const HomeUProfileScreen(role: HomeURole.owner),
-                  ),
-                );
-                return;
-              }
-
-              setState(() {
-                _selectedNavIndex = index;
-              });
-            },
-          ),
-          body: SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                  icon: const Icon(Icons.add_business_rounded),
+                  label: const Text('Add Property'),
+                ),
+              ),
+              const SizedBox(height: 14),
+              Container(
+                key: const Key('earnings_summary_card'),
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x141E3A8A),
+                      blurRadius: 12,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: const [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Monthly Earnings',
+                            style: TextStyle(
+                              color: Color(0xFF667896),
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          SizedBox(height: 6),
+                          Text(
+                            'RM 12,480',
+                            style: TextStyle(
+                              color: Color(0xFF1E3A8A),
+                              fontSize: 30,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Icon(Icons.trending_up_rounded, color: Color(0xFF10B981), size: 34),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 14),
+              const Text(
+                'Quick Stats',
+                style: TextStyle(
+                  color: Color(0xFF1F314F),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 10),
+              const Row(
                 children: [
-                  Text(
-                    greetingText,
-                    key: const Key('owner_greeting_text'),
-                    style: TextStyle(
-                      color: context.homeuPrimaryText,
-                      fontSize: 28,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    t.ownerDashboardSubtitle,
-                    style: TextStyle(
-                      color: context.homeuMutedText,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  SizedBox(
-                    height: 48,
-                    child: ElevatedButton.icon(
-                      key: const Key('add_property_button'),
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute<void>(
-                            builder: (_) => const HomeUOwnerAddPropertyScreen(),
-                          ),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: context.homeuAccent,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        textStyle: const TextStyle(fontWeight: FontWeight.w700),
-                      ),
-                      icon: const Icon(Icons.add_business_rounded),
-                      label: Text(t.ownerAddProperty),
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  Container(
-                    key: const Key('earnings_summary_card'),
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: context.homeuCard,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: context.homeuAccent.withValues(alpha: 0.14),
-                          blurRadius: 12,
-                          offset: Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                t.ownerMonthlyEarnings,
-                                style: TextStyle(
-                                  color: Color(0xFF667896),
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              SizedBox(height: 6),
-                              Text(
-                                'RM 12,480',
-                                style: TextStyle(
-                                  color: Color(0xFF1E3A8A),
-                                  fontSize: 30,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Icon(
-                          Icons.trending_up_rounded,
-                          color: Color(0xFF10B981),
-                          size: 34,
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  Text(
-                    t.ownerQuickStats,
-                    style: TextStyle(
-                      color: context.homeuPrimaryText,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _OwnerStatCard(
-                          label: t.ownerActiveListings,
-                          value: '8',
-                        ),
-                      ),
-                      SizedBox(width: 8),
-                      Expanded(
-                        child: _OwnerStatCard(
-                          label: t.ownerPendingRequests,
-                          value: '5',
-                        ),
-                      ),
-                      SizedBox(width: 8),
-                      Expanded(
-                        child: _OwnerStatCard(
-                          label: t.ownerOccupancy,
-                          value: '91%',
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    t.ownerMyProperties,
-                    style: TextStyle(
-                      color: context.homeuPrimaryText,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  const _OwnerPropertyCard(
-                    propertyName: 'Skyline Condo Suite',
-                    location: 'Mont Kiara, Kuala Lumpur',
-                    isOccupied: true,
-                  ),
-                  const _OwnerPropertyCard(
-                    propertyName: 'Greenview Apartment',
-                    location: 'Setapak, Kuala Lumpur',
-                    isOccupied: false,
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    t.ownerBookingRequests,
-                    style: TextStyle(
-                      color: context.homeuPrimaryText,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  _RequestCard(
-                    requestKey: const Key('owner_request_card_aisyah'),
-                    tenantName: 'Aisyah Rahman',
-                    propertyName: 'Skyline Condo Suite',
-                    isAwaitingResponse: true,
-                    onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) =>
-                              const HomeUOwnerBookingRequestsScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                  _RequestCard(
-                    requestKey: const Key('owner_request_card_daniel'),
-                    tenantName: 'Daniel Lee',
-                    propertyName: 'Greenview Apartment',
-                    isAwaitingResponse: false,
-                    onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) =>
-                              const HomeUOwnerBookingRequestsScreen(),
-                        ),
-                      );
-                    },
-                  ),
+                  Expanded(child: _OwnerStatCard(label: 'Active Listings', value: '8')),
+                  SizedBox(width: 8),
+                  Expanded(child: _OwnerStatCard(label: 'Pending Requests', value: '5')),
+                  SizedBox(width: 8),
+                  Expanded(child: _OwnerStatCard(label: 'Occupancy', value: '91%')),
                 ],
               ),
-            ),
+              const SizedBox(height: 16),
+              const Text(
+                'My Properties',
+                style: TextStyle(
+                  color: Color(0xFF1F314F),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 10),
+              const _OwnerPropertyCard(
+                propertyName: 'Skyline Condo Suite',
+                location: 'Mont Kiara, Kuala Lumpur',
+                occupancy: 'Occupied',
+              ),
+              const _OwnerPropertyCard(
+                propertyName: 'Greenview Apartment',
+                location: 'Setapak, Kuala Lumpur',
+                occupancy: 'Vacant',
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                'Booking Requests',
+                style: TextStyle(
+                  color: Color(0xFF1F314F),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 10),
+              _RequestCard(
+                requestKey: const Key('owner_request_card_aisyah'),
+                tenantName: 'Aisyah Rahman',
+                propertyName: 'Skyline Condo Suite',
+                status: 'Awaiting Response',
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const HomeUOwnerBookingRequestsScreen(),
+                    ),
+                  );
+                },
+              ),
+              _RequestCard(
+                requestKey: const Key('owner_request_card_daniel'),
+                tenantName: 'Daniel Lee',
+                propertyName: 'Greenview Apartment',
+                status: 'New Request',
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const HomeUOwnerBookingRequestsScreen(),
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }
@@ -334,9 +260,9 @@ class _OwnerStatCard extends StatelessWidget {
       key: Key('owner_stat_$label'),
       padding: const EdgeInsets.symmetric(vertical: 12),
       decoration: BoxDecoration(
-        color: context.homeuCard,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: context.homeuSoftBorder),
+        border: Border.all(color: const Color(0x1F1E3A8A)),
       ),
       child: Column(
         children: [
@@ -368,12 +294,12 @@ class _OwnerPropertyCard extends StatelessWidget {
   const _OwnerPropertyCard({
     required this.propertyName,
     required this.location,
-    required this.isOccupied,
+    required this.occupancy,
   });
 
   final String propertyName;
   final String location;
-  final bool isOccupied;
+  final String occupancy;
 
   @override
   Widget build(BuildContext context) {
@@ -381,11 +307,11 @@ class _OwnerPropertyCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: context.homeuCard,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
-            color: context.homeuAccent.withValues(alpha: 0.14),
+            color: Color(0x141E3A8A),
             blurRadius: 10,
             offset: Offset(0, 3),
           ),
@@ -426,19 +352,13 @@ class _OwnerPropertyCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
-              color: isOccupied
-                  ? const Color(0xFFE6F7EF)
-                  : const Color(0xFFFFF4DB),
+              color: occupancy == 'Occupied' ? const Color(0xFFE6F7EF) : const Color(0xFFFFF4DB),
               borderRadius: BorderRadius.circular(999),
             ),
             child: Text(
-              isOccupied
-                  ? context.l10n.ownerOccupancyOccupied
-                  : context.l10n.ownerOccupancyVacant,
+              occupancy,
               style: TextStyle(
-                color: isOccupied
-                    ? const Color(0xFF0F8A5F)
-                    : const Color(0xFFB7791F),
+                color: occupancy == 'Occupied' ? const Color(0xFF0F8A5F) : const Color(0xFFB7791F),
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
               ),
@@ -455,24 +375,21 @@ class _RequestCard extends StatelessWidget {
     required this.requestKey,
     required this.tenantName,
     required this.propertyName,
-    required this.isAwaitingResponse,
+    required this.status,
     required this.onTap,
   });
 
   final Key requestKey;
   final String tenantName;
   final String propertyName;
-  final bool isAwaitingResponse;
+  final String status;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final Color badgeColor = isAwaitingResponse
-        ? const Color(0xFFE8F5EF)
-        : const Color(0xFFEAF0FA);
-    final Color textColor = isAwaitingResponse
-        ? context.homeuSuccess
-        : context.homeuAccent;
+    final bool isAwaiting = status == 'Awaiting Response';
+    final Color badgeColor = isAwaiting ? const Color(0xFFE8F5EF) : const Color(0xFFEAF0FA);
+    final Color textColor = isAwaiting ? const Color(0xFF0F8A5F) : const Color(0xFF1E3A8A);
 
     return InkWell(
       key: requestKey,
@@ -482,11 +399,11 @@ class _RequestCard extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
         decoration: BoxDecoration(
-          color: context.homeuCard,
+          color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [
+          boxShadow: const [
             BoxShadow(
-              color: context.homeuAccent.withValues(alpha: 0.14),
+              color: Color(0x141E3A8A),
               blurRadius: 10,
               offset: Offset(0, 4),
             ),
@@ -500,11 +417,7 @@ class _RequestCard extends StatelessWidget {
                 const CircleAvatar(
                   radius: 18,
                   backgroundColor: Color(0x1F1E3A8A),
-                  child: Icon(
-                    Icons.person_rounded,
-                    color: Color(0xFF1E3A8A),
-                    size: 20,
-                  ),
+                  child: Icon(Icons.person_rounded, color: Color(0xFF1E3A8A), size: 20),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
@@ -518,18 +431,13 @@ class _RequestCard extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 6,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
                     color: badgeColor,
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Text(
-                    isAwaitingResponse
-                        ? context.l10n.ownerRequestStatusAwaitingResponse
-                        : context.l10n.ownerRequestStatusNewRequest,
+                    status,
                     style: TextStyle(
                       color: textColor,
                       fontSize: 11,
@@ -540,8 +448,8 @@ class _RequestCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            Text(
-              context.l10n.ownerPropertyLabel,
+            const Text(
+              'Property',
               style: TextStyle(
                 color: Color(0xFF667896),
                 fontSize: 11,
@@ -558,17 +466,13 @@ class _RequestCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 10),
-            Row(
+            const Row(
               children: [
-                const Icon(
-                  Icons.chevron_right_rounded,
-                  color: Color(0xFF1E3A8A),
-                  size: 20,
-                ),
-                const SizedBox(width: 2),
+                Icon(Icons.chevron_right_rounded, color: Color(0xFF1E3A8A), size: 20),
+                SizedBox(width: 2),
                 Text(
-                  context.l10n.ownerTapToReviewRequest,
-                  style: const TextStyle(
+                  'Tap to review request',
+                  style: TextStyle(
                     color: Color(0xFF1E3A8A),
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
@@ -582,3 +486,4 @@ class _RequestCard extends StatelessWidget {
     );
   }
 }
+
