@@ -10,7 +10,8 @@ class HomeUProfileRepository {
     HomeUProfileRemoteDataSource? remoteDataSource,
     HomeUProfileLocalDataSource? localDataSource,
   }) : _authService = authService ?? HomeUAuthService.instance,
-       _remoteDataSource = remoteDataSource ?? const HomeUProfileRemoteDataSource(),
+       _remoteDataSource =
+           remoteDataSource ?? const HomeUProfileRemoteDataSource(),
        _localDataSource = localDataSource ?? HomeUProfileLocalDataSource();
 
   final HomeUAuthService _authService;
@@ -75,7 +76,10 @@ class HomeUProfileRepository {
 
     final preferences = await _remoteDataSource.fetchUserPreferences(userId);
     if (preferences != null) {
-      await _localDataSource.savePreferences(userId: userId, preferences: preferences);
+      await _localDataSource.savePreferences(
+        userId: userId,
+        preferences: preferences,
+      );
     }
 
     return preferences;
@@ -149,7 +153,9 @@ class HomeUProfileRepository {
     return readLanguageCode(latest, fallback: fallback);
   }
 
-  Future<Map<String, dynamic>> savePreferredLanguageCode(String languageCode) async {
+  Future<Map<String, dynamic>> savePreferredLanguageCode(
+    String languageCode,
+  ) async {
     final userId = currentUserId;
     if (userId == null || userId.isEmpty) {
       throw StateError('No authenticated user found.');
@@ -162,7 +168,11 @@ class HomeUProfileRepository {
       if (latest != null) ...latest,
     };
 
-    final languageKey = _detectKey(basePreferences, _languageKeys, 'language_code');
+    final languageKey = _detectKey(
+      basePreferences,
+      _languageKeys,
+      'language_code',
+    );
     return _savePreferencePatch(
       userId: userId,
       basePreferences: basePreferences,
@@ -206,7 +216,10 @@ class HomeUProfileRepository {
     );
   }
 
-  String readLanguageCode(Map<String, dynamic>? preferences, {String fallback = 'en'}) {
+  String readLanguageCode(
+    Map<String, dynamic>? preferences, {
+    String fallback = 'en',
+  }) {
     final value = _readString(preferences, _languageKeys);
     if (value == null || value.isEmpty) {
       return fallback;
@@ -214,7 +227,10 @@ class HomeUProfileRepository {
     return value;
   }
 
-  String readThemeMode(Map<String, dynamic>? preferences, {String fallback = 'system'}) {
+  String readThemeMode(
+    Map<String, dynamic>? preferences, {
+    String fallback = 'system',
+  }) {
     final value = _readString(preferences, _themeKeys);
     if (value == null || value.isEmpty) {
       return fallback;
@@ -227,7 +243,8 @@ class HomeUProfileRepository {
     required Map<String, dynamic> basePreferences,
     required Map<String, dynamic> patch,
   }) async {
-    final nextPreferences = Map<String, dynamic>.from(basePreferences)..addAll(patch);
+    final nextPreferences = Map<String, dynamic>.from(basePreferences)
+      ..addAll(patch);
 
     Map<String, dynamic> persistedPreferences = nextPreferences;
     try {
@@ -262,7 +279,11 @@ class HomeUProfileRepository {
     return null;
   }
 
-  String _detectKey(Map<String, dynamic> preferences, List<String> keys, String fallback) {
+  String _detectKey(
+    Map<String, dynamic> preferences,
+    List<String> keys,
+    String fallback,
+  ) {
     for (final key in keys) {
       if (preferences.containsKey(key)) {
         return key;
@@ -271,4 +292,3 @@ class HomeUProfileRepository {
     return fallback;
   }
 }
-

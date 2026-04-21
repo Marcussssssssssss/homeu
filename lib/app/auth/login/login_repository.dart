@@ -21,8 +21,9 @@ class LoginRepository {
       'login.error.invalid_credentials';
   static const String errorGeneric = 'login.error.generic';
 
-  LoginRepository({LoginAuthDataSource? dataSource})
-    : _dataSource = dataSource ?? const LoginAuthDataSource();
+  LoginRepository({
+    LoginAuthDataSource? dataSource,
+  }) : _dataSource = dataSource ?? const LoginAuthDataSource();
 
   final LoginAuthDataSource _dataSource;
 
@@ -117,4 +118,3 @@ class LoginRepository {
     return errorGeneric;
   }
 }
-

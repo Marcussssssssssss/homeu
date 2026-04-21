@@ -9,17 +9,24 @@ enum HomeUStartupDestination {
 }
 
 class HomeUStartupSessionResolver {
-  HomeUStartupSessionResolver({HomeUAuthService? authService})
-    : authService = authService ?? HomeUAuthService.instance;
+  HomeUStartupSessionResolver({
+    HomeUAuthService? authService,
+    Future<bool> Function()? hasActiveSession,
+    Future<HomeURole?> Function()? fetchCurrentUserRole,
+  }) : authService = authService ?? HomeUAuthService.instance,
+       _hasActiveSession = hasActiveSession,
+       _fetchCurrentUserRole = fetchCurrentUserRole;
 
   final HomeUAuthService authService;
+  final Future<bool> Function()? _hasActiveSession;
+  final Future<HomeURole?> Function()? _fetchCurrentUserRole;
 
   Future<HomeUStartupDestination> resolveInitialDestination() async {
-    if (!authService.hasActiveSession) {
+    if (!await _resolveHasActiveSession()) {
       return HomeUStartupDestination.authFlow;
     }
 
-    final role = await authService.fetchCurrentUserRole();
+    final role = await _resolveCurrentUserRole();
     return _destinationForRole(role);
   }
 
@@ -35,16 +42,32 @@ class HomeUStartupSessionResolver {
         if (session == null) {
           return HomeUStartupDestination.authFlow;
         }
-        final role = await authService.fetchCurrentUserRole();
+        final role = await _resolveCurrentUserRole();
         return _destinationForRole(role);
       default:
         final hasSession = authState.session != null;
         if (!hasSession) {
           return HomeUStartupDestination.authFlow;
         }
-        final role = await authService.fetchCurrentUserRole();
+        final role = await _resolveCurrentUserRole();
         return _destinationForRole(role);
     }
+  }
+
+  Future<bool> _resolveHasActiveSession() async {
+    final hasActiveSession = _hasActiveSession;
+    if (hasActiveSession != null) {
+      return hasActiveSession();
+    }
+    return authService.hasActiveSession;
+  }
+
+  Future<HomeURole?> _resolveCurrentUserRole() async {
+    final fetchCurrentUserRole = _fetchCurrentUserRole;
+    if (fetchCurrentUserRole != null) {
+      return fetchCurrentUserRole();
+    }
+    return authService.fetchCurrentUserRole();
   }
 
   HomeUStartupDestination _destinationForRole(HomeURole? role) {
@@ -57,5 +80,3 @@ class HomeUStartupSessionResolver {
     return HomeUStartupDestination.authFlow;
   }
 }
-
-
