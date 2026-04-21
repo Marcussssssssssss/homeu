@@ -9,6 +9,7 @@ class HomeUChatScreen extends StatefulWidget {
   const HomeUChatScreen.start({
     super.key,
     required PropertyItem property,
+    this.initialBotMessage,
   })  : _property = property,
         _conversation = null;
 
@@ -16,10 +17,12 @@ class HomeUChatScreen extends StatefulWidget {
     super.key,
     required Conversation conversation,
   })  : _conversation = conversation,
-        _property = null;
+        _property = null,
+        initialBotMessage = null;
 
   final PropertyItem? _property;
   final Conversation? _conversation;
+  final String? initialBotMessage;
 
   @override
   State<HomeUChatScreen> createState() => _HomeUChatScreenState();
@@ -106,7 +109,7 @@ class _HomeUChatScreenState extends State<HomeUChatScreen> {
       );
     }
 
-    if (_conversation == null) {
+    if (_conversation == null && _messages.isEmpty) {
       return const Center(
         child: Text(
           'Conversation not available.',
@@ -235,7 +238,27 @@ class _HomeUChatScreenState extends State<HomeUChatScreen> {
   }
 
   Future<void> _initializeChat() async {
+    final localBotNotice = widget.initialBotMessage?.trim() ?? '';
+
     if (!AppSupabase.isInitialized) {
+      if (localBotNotice.isNotEmpty) {
+        setState(() {
+          _isInitializing = false;
+          _loadError = null;
+          _messages = [
+            ChatMessage(
+              id: 'local-bot-${DateTime.now().millisecondsSinceEpoch}',
+              conversationId: '',
+              senderId: 'homeu-bot',
+              messageText: localBotNotice,
+              status: 'sent',
+              createdAt: DateTime.now(),
+            ),
+          ];
+        });
+        return;
+      }
+
       _showSnackBar('Supabase is not initialized.');
       setState(() {
         _isInitializing = false;
@@ -246,6 +269,24 @@ class _HomeUChatScreenState extends State<HomeUChatScreen> {
 
     final userId = AppSupabase.auth.currentUser?.id;
     if (userId == null || userId.isEmpty) {
+      if (localBotNotice.isNotEmpty) {
+        setState(() {
+          _isInitializing = false;
+          _loadError = null;
+          _messages = [
+            ChatMessage(
+              id: 'local-bot-${DateTime.now().millisecondsSinceEpoch}',
+              conversationId: '',
+              senderId: 'homeu-bot',
+              messageText: localBotNotice,
+              status: 'sent',
+              createdAt: DateTime.now(),
+            ),
+          ];
+        });
+        return;
+      }
+
       _showSnackBar('Please log in');
       setState(() {
         _isInitializing = false;
@@ -268,6 +309,24 @@ class _HomeUChatScreenState extends State<HomeUChatScreen> {
         }
 
         if (!_isUuid(property.id) || !_isUuid(property.ownerId)) {
+          if (localBotNotice.isNotEmpty) {
+            setState(() {
+              _isInitializing = false;
+              _loadError = null;
+              _messages = [
+                ChatMessage(
+                  id: 'local-bot-${DateTime.now().millisecondsSinceEpoch}',
+                  conversationId: '',
+                  senderId: 'homeu-bot',
+                  messageText: localBotNotice,
+                  status: 'sent',
+                  createdAt: DateTime.now(),
+                ),
+              ];
+            });
+            return;
+          }
+
           _showSnackBar('Demo property cannot start chat');
           setState(() {
             _isInitializing = false;
@@ -338,7 +397,24 @@ class _HomeUChatScreenState extends State<HomeUChatScreen> {
       }
 
       setState(() {
-        _messages = rows;
+        final withSystem = <ChatMessage>[...rows];
+        final botMessage = widget.initialBotMessage?.trim() ?? '';
+        if (botMessage.isNotEmpty) {
+          final hasSameNotice = withSystem.any((m) => m.messageText == botMessage);
+          if (!hasSameNotice) {
+            withSystem.add(
+              ChatMessage(
+                id: 'local-bot-${DateTime.now().millisecondsSinceEpoch}',
+                conversationId: conversationId,
+                senderId: 'homeu-bot',
+                messageText: botMessage,
+                status: 'sent',
+                createdAt: DateTime.now(),
+              ),
+            );
+          }
+        }
+        _messages = withSystem;
       });
     } on PostgrestException catch (e) {
       if (!mounted) {

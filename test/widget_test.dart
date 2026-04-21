@@ -13,6 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:homeu/app/auth/update_password/update_password_controller.dart';
 import 'package:homeu/app/auth/update_password/update_password_models.dart';
 import 'package:homeu/app/auth/update_password/update_password_repository.dart';
+import 'package:homeu/app/favorites/homeu_favorites_controller.dart';
 import 'package:homeu/app/homeu_app.dart';
 import 'package:homeu/app/profile/profile_controller.dart';
 import 'package:homeu/app/profile/profile_models.dart';
@@ -24,6 +25,7 @@ import 'package:homeu/pages/auth/login_screen.dart';
 import 'package:homeu/pages/auth/register_screen.dart';
 import 'package:homeu/pages/home/booking_history_screen.dart';
 import 'package:homeu/pages/home/conversation_list_screen.dart';
+import 'package:homeu/pages/home/favorites_screen.dart';
 import 'package:homeu/pages/home/home_page.dart';
 import 'package:homeu/pages/home/owner_add_property_screen.dart';
 import 'package:homeu/pages/home/owner_booking_requests_screen.dart';
@@ -489,8 +491,7 @@ void main() {
     expect(find.text('Hello'), findsOneWidget);
     expect(find.text('Search location, condo, house'), findsOneWidget);
 
-    expect(find.text('Room'), findsOneWidget);
-    expect(find.text('Whole Unit'), findsOneWidget);
+    expect(find.text('Any'), findsOneWidget);
     expect(find.text('Condo'), findsOneWidget);
     expect(find.text('Landed'), findsOneWidget);
     expect(find.text('Apartment'), findsOneWidget);
@@ -502,7 +503,7 @@ void main() {
     expect(find.byIcon(Icons.qr_code_scanner_rounded), findsOneWidget);
 
     expect(find.text('Home'), findsOneWidget);
-    expect(find.text('Favorites'), findsOneWidget);
+    expect(find.text('Favorites'), findsNothing);
     expect(find.text('Bookings'), findsOneWidget);
     expect(find.text('Viewings'), findsOneWidget);
     expect(find.text('Chat'), findsOneWidget);
@@ -516,9 +517,9 @@ void main() {
   ) async {
     await tester.pumpWidget(const MaterialApp(home: HomeUHomePage()));
 
-    await tester.tap(
-      find.byKey(const Key('property_card_Skyline Condo Suite')),
-    );
+    final skylineCard = find.byKey(const Key('property_card_Skyline Condo Suite'));
+    await tester.ensureVisible(skylineCard);
+    await tester.tap(skylineCard);
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('property_image_carousel')), findsOneWidget);
@@ -580,6 +581,7 @@ void main() {
     }
   });
 
+
   testWidgets('Booking history screen shows filters, cards, and tenant-only nav items', (
     WidgetTester tester,
   ) async {
@@ -604,7 +606,7 @@ void main() {
 
     expect(find.text('Home'), findsOneWidget);
     expect(find.text('Map'), findsNothing);
-    expect(find.text('Favorites'), findsOneWidget);
+    expect(find.text('Favorites'), findsNothing);
     expect(find.text('Bookings'), findsOneWidget);
     expect(find.text('Viewings'), findsOneWidget);
     expect(find.text('Chat'), findsOneWidget);
@@ -1024,6 +1026,7 @@ void main() {
     expect(find.byKey(const Key('profile_role')), findsOneWidget);
     expect(find.byKey(const Key('update_password_button')), findsOneWidget);
     expect(find.text('Update Password'), findsOneWidget);
+    expect(find.text('Favorites'), findsOneWidget);
     expect(find.byKey(const Key('edit_profile_button')), findsOneWidget);
     expect(find.byKey(const Key('logout_button')), findsOneWidget);
   });
@@ -1042,6 +1045,7 @@ void main() {
 
     expect(find.byKey(const Key('open_chats_button')), findsNothing);
     expect(find.text('Chats'), findsNothing);
+    expect(find.text('Favorites'), findsNothing);
   });
 
   testWidgets('Profile Update Password action opens update password screen', (
@@ -1360,6 +1364,51 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(HomeUProfileScreen), findsOneWidget);
   });
+
+  testWidgets(
+    'Tenant can favorite from listing and details, then review in Profile Favorites',
+    (WidgetTester tester) async {
+      final favoritesController = HomeUFavoritesController.instance;
+      favoritesController.clear();
+      addTearDown(favoritesController.clear);
+
+      await tester.pumpWidget(const MaterialApp(home: HomeUHomePage()));
+
+      await tester.tap(find.byKey(const Key('favorite_toggle_2861d5db-0b6f-44a2-85f2-865f99de2428')));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byIcon(Icons.favorite_rounded),
+        findsWidgets,
+      );
+
+      await tester.tap(find.byKey(const Key('property_card_Skyline Condo Suite')));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('details_favorite_toggle')));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('details_favorite_toggle')));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byIcon(Icons.arrow_back_ios_new_rounded));
+      await tester.pumpAndSettle();
+
+      final Finder tenantProfileTab = find.text('Profile').first;
+      await tester.ensureVisible(tenantProfileTab);
+      await tester.tap(tenantProfileTab);
+      await tester.pumpAndSettle();
+
+      final openFavoritesButton = find.byKey(const Key('open_favorites_button'));
+      await tester.ensureVisible(openFavoritesButton);
+      await tester.tap(openFavoritesButton);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(HomeUFavoritesScreen), findsOneWidget);
+      expect(find.byKey(const Key('favorites_list')), findsOneWidget);
+      expect(find.text('Skyline Condo Suite'), findsOneWidget);
+    },
+  );
 }
 
 class _FakeUpdatePasswordController extends UpdatePasswordController {
