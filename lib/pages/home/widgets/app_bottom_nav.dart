@@ -26,11 +26,6 @@ class HomeUAppBottomNav extends StatelessWidget {
           label: t.navHome,
         ),
         NavigationDestination(
-          icon: const Icon(Icons.favorite_border_rounded),
-          selectedIcon: const Icon(Icons.favorite_rounded),
-          label: t.navFavorites,
-        ),
-        NavigationDestination(
           icon: const Icon(Icons.book_online_outlined),
           selectedIcon: const Icon(Icons.book_online_rounded),
           label: t.navBookings,
@@ -38,7 +33,7 @@ class HomeUAppBottomNav extends StatelessWidget {
         const NavigationDestination(
           icon: Icon(Icons.visibility_outlined),
           selectedIcon: Icon(Icons.visibility_rounded),
-          label: 'Viewings',
+          label: 'Viewing',
         ),
         const NavigationDestination(
           icon: Icon(Icons.chat_bubble_outline_rounded),

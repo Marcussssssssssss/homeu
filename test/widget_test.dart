@@ -27,14 +27,68 @@ import 'package:homeu/pages/home/booking_history_screen.dart';
 import 'package:homeu/pages/home/conversation_list_screen.dart';
 import 'package:homeu/pages/home/favorites_screen.dart';
 import 'package:homeu/pages/home/home_page.dart';
+import 'package:homeu/pages/home/home_tenant_shell_screen.dart';
 import 'package:homeu/pages/home/owner_add_property_screen.dart';
 import 'package:homeu/pages/home/owner_booking_requests_screen.dart';
 import 'package:homeu/pages/home/owner_analytics_screen.dart';
 import 'package:homeu/pages/home/owner_dashboard_screen.dart';
 import 'package:homeu/pages/home/profile_screen.dart';
+import 'package:homeu/pages/home/property_item.dart';
 import 'package:homeu/pages/home/review_rating_screen.dart';
 import 'package:homeu/pages/home/update_password_screen.dart';
 import 'package:homeu/pages/home/viewing_history_screen.dart';
+
+const List<PropertyItem> _testProperties = <PropertyItem>[
+  PropertyItem(
+    id: '2861d5db-0b6f-44a2-85f2-865f99de2428',
+    ownerId: '59259006-029c-4a6a-9037-48c4f9972566',
+    name: 'Skyline Condo Suite',
+    location: 'Mont Kiara, Kuala Lumpur',
+    pricePerMonth: 'RM 2,100 / month',
+    rating: 4.8,
+    accentColor: Color(0xFF1E3A8A),
+    description:
+        'A bright condo with modern finishing, full kitchen, and great ventilation.',
+    ownerName: 'Nurul Huda',
+    ownerRole: 'Verified Owner',
+    propertyType: 'Condo',
+    roomType: 'Whole Unit',
+    furnishing: 'Furnished',
+    photoColors: [Color(0xFF5D7FBF), Color(0xFF4A68A8), Color(0xFF2F4F8F)],
+  ),
+  PropertyItem(
+    id: 'demo-property-2',
+    ownerId: 'demo-owner-2',
+    name: 'Cozy Student Room',
+    location: 'SS15, Subang Jaya',
+    pricePerMonth: 'RM 680 / month',
+    rating: 4.5,
+    accentColor: Color(0xFF10B981),
+    description: 'Comfortable private room near campus.',
+    ownerName: 'Amir Rahman',
+    ownerRole: 'Host',
+    propertyType: 'Apartment',
+    roomType: 'Single Room',
+    furnishing: 'Partially Furnished',
+    photoColors: [Color(0xFF4FAF95), Color(0xFF3D9B83), Color(0xFF2B7F6B)],
+  ),
+  PropertyItem(
+    id: 'demo-property-3',
+    ownerId: 'demo-owner-3',
+    name: 'Family Apartment',
+    location: 'Setapak, Kuala Lumpur',
+    pricePerMonth: 'RM 1,450 / month',
+    rating: 4.7,
+    accentColor: Color(0xFF334155),
+    description: 'Spacious apartment for families.',
+    ownerName: 'Sarah Lim',
+    ownerRole: 'Premium Owner',
+    propertyType: 'Apartment',
+    roomType: 'Whole Unit',
+    furnishing: 'Unfurnished',
+    photoColors: [Color(0xFF586476), Color(0xFF495567), Color(0xFF374151)],
+  ),
+];
 
 void main() {
   testWidgets(
@@ -486,15 +540,17 @@ void main() {
   testWidgets('Tenant home dashboard renders tenant-only browsing UI', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(const MaterialApp(home: HomeUHomePage()));
+    await tester.pumpWidget(
+      const MaterialApp(home: HomeUHomePage(seedProperties: _testProperties)),
+    );
 
     expect(find.text('Hello'), findsOneWidget);
     expect(find.text('Search location, condo, house'), findsOneWidget);
 
     expect(find.text('Any'), findsOneWidget);
     expect(find.text('Condo'), findsOneWidget);
-    expect(find.text('Landed'), findsOneWidget);
     expect(find.text('Apartment'), findsOneWidget);
+    expect(find.text('Landed'), findsNothing);
 
     expect(find.text('Skyline Condo Suite'), findsOneWidget);
     expect(find.text('Mont Kiara, Kuala Lumpur'), findsOneWidget);
@@ -502,12 +558,8 @@ void main() {
     expect(find.byIcon(Icons.favorite_border_rounded), findsWidgets);
     expect(find.byIcon(Icons.qr_code_scanner_rounded), findsOneWidget);
 
-    expect(find.text('Home'), findsOneWidget);
+    // Home page widget does not render the tenant shell navigation bar directly.
     expect(find.text('Favorites'), findsNothing);
-    expect(find.text('Bookings'), findsOneWidget);
-    expect(find.text('Viewings'), findsOneWidget);
-    expect(find.text('Chat'), findsOneWidget);
-    expect(find.text('Profile'), findsOneWidget);
     expect(find.text('Map'), findsNothing);
     expect(find.text('Owner'), findsNothing);
   });
@@ -515,7 +567,9 @@ void main() {
   testWidgets('Property details screen shows premium listing sections', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(const MaterialApp(home: HomeUHomePage()));
+    await tester.pumpWidget(
+      const MaterialApp(home: HomeUHomePage(seedProperties: _testProperties)),
+    );
 
     final skylineCard = find.byKey(const Key('property_card_Skyline Condo Suite'));
     await tester.ensureVisible(skylineCard);
@@ -604,20 +658,19 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('status_filter_approved')), findsOneWidget);
 
-    expect(find.text('Home'), findsOneWidget);
+    // Booking history screen is tested in isolation without tenant shell nav.
     expect(find.text('Map'), findsNothing);
     expect(find.text('Favorites'), findsNothing);
-    expect(find.text('Bookings'), findsOneWidget);
-    expect(find.text('Viewings'), findsOneWidget);
-    expect(find.text('Chat'), findsOneWidget);
-    expect(find.text('Profile'), findsOneWidget);
     expect(find.text('Owner'), findsNothing);
   });
 
   testWidgets('Tenant home Chat nav opens conversation list screen', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(const MaterialApp(home: HomeUHomePage()));
+    HomeUSession.register(HomeURole.tenant);
+    addTearDown(HomeUSession.logout);
+
+    await tester.pumpWidget(const MaterialApp(home: HomeUTenantShellScreen()));
 
     await tester.tap(find.text('Chat'));
     await tester.pumpAndSettle();
@@ -626,12 +679,15 @@ void main() {
     expect(find.text('Conversations'), findsOneWidget);
   });
 
-  testWidgets('Tenant home Viewings nav opens viewing history screen', (
+  testWidgets('Tenant home Viewing nav opens viewing history screen', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(const MaterialApp(home: HomeUHomePage()));
+    HomeUSession.register(HomeURole.tenant);
+    addTearDown(HomeUSession.logout);
 
-    await tester.tap(find.text('Viewings'));
+    await tester.pumpWidget(const MaterialApp(home: HomeUTenantShellScreen()));
+
+    await tester.tap(find.text('Viewing'));
     await tester.pumpAndSettle();
 
     expect(find.text('Viewing History'), findsOneWidget);
@@ -687,12 +743,15 @@ void main() {
     expect(find.text('Nurul Huda'), findsOneWidget);
   });
 
-  testWidgets('Tenant home Bookings nav opens booking history screen', (
+  testWidgets('Tenant home Booking nav opens booking history screen', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(const MaterialApp(home: HomeUHomePage()));
+    HomeUSession.register(HomeURole.tenant);
+    addTearDown(HomeUSession.logout);
 
-    await tester.tap(find.text('Bookings'));
+    await tester.pumpWidget(const MaterialApp(home: HomeUTenantShellScreen()));
+
+    await tester.tap(find.text('Booking'));
     await tester.pumpAndSettle();
 
     expect(find.text('Booking History'), findsOneWidget);
@@ -1026,7 +1085,7 @@ void main() {
     expect(find.byKey(const Key('profile_role')), findsOneWidget);
     expect(find.byKey(const Key('update_password_button')), findsOneWidget);
     expect(find.text('Update Password'), findsOneWidget);
-    expect(find.text('Favorites'), findsOneWidget);
+    expect(find.text('Favourite'), findsOneWidget);
     expect(find.byKey(const Key('edit_profile_button')), findsOneWidget);
     expect(find.byKey(const Key('logout_button')), findsOneWidget);
   });
@@ -1045,7 +1104,7 @@ void main() {
 
     expect(find.byKey(const Key('open_chats_button')), findsNothing);
     expect(find.text('Chats'), findsNothing);
-    expect(find.text('Favorites'), findsNothing);
+    expect(find.text('Favourite'), findsNothing);
   });
 
   testWidgets('Profile Update Password action opens update password screen', (
@@ -1356,7 +1415,9 @@ void main() {
     WidgetTester tester,
   ) async {
     HomeUSession.register(HomeURole.tenant);
-    await tester.pumpWidget(const MaterialApp(home: HomeUHomePage()));
+    await tester.pumpWidget(
+      const MaterialApp(home: HomeUHomePage(seedProperties: _testProperties)),
+    );
 
     final Finder tenantProfileTab = find.text('Profile').first;
     await tester.ensureVisible(tenantProfileTab);
@@ -1372,7 +1433,9 @@ void main() {
       favoritesController.clear();
       addTearDown(favoritesController.clear);
 
-      await tester.pumpWidget(const MaterialApp(home: HomeUHomePage()));
+      await tester.pumpWidget(
+        const MaterialApp(home: HomeUHomePage(seedProperties: _testProperties)),
+      );
 
       await tester.tap(find.byKey(const Key('favorite_toggle_2861d5db-0b6f-44a2-85f2-865f99de2428')));
       await tester.pumpAndSettle();

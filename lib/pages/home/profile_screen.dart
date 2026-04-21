@@ -489,7 +489,7 @@ class _HomeUProfileScreenState extends State<HomeUProfileScreen> {
                               _ProfileActionTile(
                                 key: const Key('open_favorites_button'),
                                 icon: Icons.favorite_border_rounded,
-                                title: t.navFavorites,
+                                title: 'Favourite',
                                 subtitle: 'View your saved properties',
                                 onTap: () {
                                   Navigator.of(context).push(

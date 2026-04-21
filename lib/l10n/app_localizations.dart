@@ -121,7 +121,7 @@ abstract class AppLocalizations {
   /// No description provided for @navBookings.
   ///
   /// In en, this message translates to:
-  /// **'Bookings'**
+  /// **'Booking'**
   String get navBookings;
 
   /// No description provided for @navProfile.
