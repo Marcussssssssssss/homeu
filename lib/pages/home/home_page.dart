@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:homeu/app/auth/homeu_auth_service.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
-import 'package:homeu/app/favorites/homeu_favorites_controller.dart';
 import 'package:homeu/app/profile/profile_controller.dart';
 import 'package:homeu/app/profile/profile_models.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
@@ -9,14 +8,8 @@ import 'package:homeu/core/localization/homeu_l10n.dart';
 import 'package:homeu/core/theme/homeu_app_theme.dart';
 import 'package:homeu/app/property/property_remote_datasource.dart';
 import 'package:homeu/core/supabase/app_supabase.dart';
-import 'package:homeu/pages/home/booking_history_screen.dart';
-import 'package:homeu/pages/home/conversation_list_screen.dart';
 import 'package:homeu/pages/home/property_details_screen.dart';
 import 'package:homeu/pages/home/property_item.dart';
-import 'package:homeu/pages/home/profile_screen.dart';
-import 'package:homeu/pages/home/viewing_history_screen.dart';
-
-enum HomeUPropertySort { newest, priceLowToHigh, priceHighToLow }
 
 class HomeUHomePage extends StatefulWidget {
   const HomeUHomePage({
@@ -33,26 +26,20 @@ class HomeUHomePage extends StatefulWidget {
 }
 
 class _HomeUHomePageState extends State<HomeUHomePage> {
-  int _selectedNavIndex = 0;
   late final HomeUProfileController _profileController;
-  final HomeUFavoritesController _favoritesController = HomeUFavoritesController.instance;
-  final PropertyRemoteDataSource _propertyRemoteDataSource = const PropertyRemoteDataSource();
+  final PropertyRemoteDataSource _propertyRemoteDataSource =
+      const PropertyRemoteDataSource();
   late Future<List<PropertyItem>> _propertiesFuture;
-  String _searchKeyword = '';
-  String _selectedPropertyType = 'Any';
-  String _selectedRoomType = 'Any';
-  String _selectedFurnishing = 'Any';
-  RangeValues _selectedPriceRange = const RangeValues(0, 3000);
-  HomeUPropertySort _sortBy = HomeUPropertySort.newest;
 
   static const List<String> _categories = [
-    'Any',
+    'Room',
+    'Whole Unit',
     'Condo',
     'Landed',
     'Apartment',
   ];
 
-  static final List<PropertyItem> _properties = [
+  static const List<PropertyItem> _properties = [
     PropertyItem(
       id: '2861d5db-0b6f-44a2-85f2-865f99de2428',
       ownerId: '59259006-029c-4a6a-9037-48c4f9972566',
@@ -66,11 +53,6 @@ class _HomeUHomePageState extends State<HomeUHomePage> {
       ownerName: 'Nurul Huda',
       ownerRole: 'Verified Owner',
       photoColors: [Color(0xFF5D7FBF), Color(0xFF4A68A8), Color(0xFF2F4F8F)],
-      propertyType: 'Condo',
-      roomType: 'Whole Unit',
-      furnishing: 'Furnished',
-      nearbyLandmarks: '1.2km to MRT Mont Kiara, 600m to Plaza Mont Kiara',
-      createdAt: DateTime(2026, 4, 19),
     ),
     PropertyItem(
       id: 'demo-property-2',
@@ -85,11 +67,6 @@ class _HomeUHomePageState extends State<HomeUHomePage> {
       ownerName: 'Amir Rahman',
       ownerRole: 'Host',
       photoColors: [Color(0xFF4FAF95), Color(0xFF3D9B83), Color(0xFF2B7F6B)],
-      propertyType: 'Apartment',
-      roomType: 'Room',
-      furnishing: 'Unfurnished',
-      nearbyLandmarks: '900m to Inti College, 400m to SS15 LRT',
-      createdAt: DateTime(2026, 4, 16),
     ),
     PropertyItem(
       id: 'demo-property-3',
@@ -104,11 +81,6 @@ class _HomeUHomePageState extends State<HomeUHomePage> {
       ownerName: 'Sarah Lim',
       ownerRole: 'Premium Owner',
       photoColors: [Color(0xFF586476), Color(0xFF495567), Color(0xFF374151)],
-      propertyType: 'Apartment',
-      roomType: 'Whole Unit',
-      furnishing: 'Furnished',
-      nearbyLandmarks: '1.5km to TAR UMT, 700m to Setapak Central',
-      createdAt: DateTime(2026, 4, 21),
     ),
   ];
 
@@ -151,177 +123,6 @@ class _HomeUHomePageState extends State<HomeUHomePage> {
     return '';
   }
 
-  List<PropertyItem> _applyListingFilters(List<PropertyItem> items) {
-    final keyword = _searchKeyword.trim().toLowerCase();
-
-    final filtered = items.where((property) {
-      final name = property.name.toLowerCase();
-      final description = property.description.toLowerCase();
-      final area = property.location.toLowerCase();
-      final type = property.propertyType.toLowerCase();
-      final room = property.roomType.toLowerCase();
-      final furnishing = property.furnishing.toLowerCase();
-      final price = property.pricePerMonthValue;
-
-      final matchesKeyword = keyword.isEmpty ||
-          name.contains(keyword) ||
-          description.contains(keyword) ||
-          area.contains(keyword);
-      final matchesType =
-          _selectedPropertyType == 'Any' || type == _selectedPropertyType.toLowerCase();
-      final matchesRoom = _selectedRoomType == 'Any' || room == _selectedRoomType.toLowerCase();
-      final matchesFurnishing =
-          _selectedFurnishing == 'Any' || furnishing == _selectedFurnishing.toLowerCase();
-      final matchesPrice =
-          price >= _selectedPriceRange.start && price <= _selectedPriceRange.end;
-
-      return matchesKeyword &&
-          matchesType &&
-          matchesRoom &&
-          matchesFurnishing &&
-          matchesPrice;
-    }).toList(growable: false);
-
-    filtered.sort((a, b) {
-      switch (_sortBy) {
-        case HomeUPropertySort.priceLowToHigh:
-          return a.pricePerMonthValue.compareTo(b.pricePerMonthValue);
-        case HomeUPropertySort.priceHighToLow:
-          return b.pricePerMonthValue.compareTo(a.pricePerMonthValue);
-        case HomeUPropertySort.newest:
-          final aDate = a.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
-          final bDate = b.createdAt ?? DateTime.fromMillisecondsSinceEpoch(0);
-          return bDate.compareTo(aDate);
-      }
-    });
-
-    return filtered;
-  }
-
-  Future<void> _openFilterSheet() async {
-    var selectedRoom = _selectedRoomType;
-    var selectedFurnishing = _selectedFurnishing;
-    var selectedRange = _selectedPriceRange;
-
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      showDragHandle: true,
-      builder: (sheetContext) {
-        return StatefulBuilder(
-          builder: (context, setSheetState) {
-            return Padding(
-              padding: EdgeInsets.fromLTRB(
-                16,
-                8,
-                16,
-                12 + MediaQuery.of(context).viewInsets.bottom,
-              ),
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Filter Properties',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
-                    ),
-                    const SizedBox(height: 12),
-                    const Text('Price range (RM)', style: TextStyle(fontWeight: FontWeight.w600)),
-                    RangeSlider(
-                      values: selectedRange,
-                      min: 0,
-                      max: 5000,
-                      divisions: 10,
-                      labels: RangeLabels(
-                        selectedRange.start.round().toString(),
-                        selectedRange.end.round().toString(),
-                      ),
-                      onChanged: (value) {
-                        setSheetState(() {
-                          selectedRange = value;
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    DropdownButtonFormField<String>(
-                      value: selectedRoom,
-                      decoration: const InputDecoration(
-                        labelText: 'Room type',
-                        border: OutlineInputBorder(),
-                      ),
-                      items: const ['Any', 'Room', 'Whole Unit']
-                          .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                          .toList(growable: false),
-                      onChanged: (value) {
-                        if (value == null) {
-                          return;
-                        }
-                        setSheetState(() {
-                          selectedRoom = value;
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    DropdownButtonFormField<String>(
-                      value: selectedFurnishing,
-                      decoration: const InputDecoration(
-                        labelText: 'Furnished / unfurnished',
-                        border: OutlineInputBorder(),
-                      ),
-                      items: const ['Any', 'Furnished', 'Unfurnished']
-                          .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                          .toList(growable: false),
-                      onChanged: (value) {
-                        if (value == null) {
-                          return;
-                        }
-                        setSheetState(() {
-                          selectedFurnishing = value;
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 14),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton(
-                            onPressed: () {
-                              setState(() {
-                                _selectedRoomType = 'Any';
-                                _selectedFurnishing = 'Any';
-                                _selectedPriceRange = const RangeValues(0, 5000);
-                              });
-                              Navigator.of(sheetContext).pop();
-                            },
-                            child: const Text('Reset'),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: () {
-                              setState(() {
-                                _selectedRoomType = selectedRoom;
-                                _selectedFurnishing = selectedFurnishing;
-                                _selectedPriceRange = selectedRange;
-                              });
-                              Navigator.of(sheetContext).pop();
-                            },
-                            child: const Text('Apply'),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     if (!HomeUSession.canAccess(HomeURole.tenant)) {
@@ -329,7 +130,7 @@ class _HomeUHomePageState extends State<HomeUHomePage> {
     }
 
     return AnimatedBuilder(
-      animation: Listenable.merge([_profileController, _favoritesController]),
+      animation: _profileController,
       builder: (context, _) {
         final greetingName = _resolvedGreetingName(_profileController.profile);
         final t = context.l10n;
@@ -348,79 +149,6 @@ class _HomeUHomePageState extends State<HomeUHomePage> {
                   label: Text(t.homeScanQr),
                 )
               : null,
-          bottomNavigationBar: NavigationBar(
-            labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-            selectedIndex: _selectedNavIndex,
-            onDestinationSelected: (index) {
-              if (index == 1) {
-                Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => const HomeUBookingHistoryScreen(),
-                  ),
-                );
-                return;
-              }
-
-              if (index == 2) {
-                Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => const HomeUViewingHistoryScreen(),
-                  ),
-                );
-                return;
-              }
-
-              if (index == 3) {
-                Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => const HomeUConversationListScreen(),
-                  ),
-                );
-                return;
-              }
-
-              if (index == 4) {
-                Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) =>
-                        const HomeUProfileScreen(role: HomeURole.tenant),
-                  ),
-                );
-                return;
-              }
-
-              setState(() {
-                _selectedNavIndex = index;
-              });
-            },
-            destinations: [
-              NavigationDestination(
-                icon: Icon(Icons.home_outlined),
-                selectedIcon: Icon(Icons.home_rounded),
-                label: t.navHome,
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.book_online_outlined),
-                selectedIcon: Icon(Icons.book_online_rounded),
-                label: t.navBookings,
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.visibility_outlined),
-                selectedIcon: Icon(Icons.visibility_rounded),
-                label: 'Viewings',
-              ),
-              const NavigationDestination(
-                icon: Icon(Icons.chat_bubble_outline_rounded),
-                selectedIcon: Icon(Icons.chat_bubble_rounded),
-                label: 'Chat',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.person_outline_rounded),
-                selectedIcon: Icon(Icons.person_rounded),
-                label: t.navProfile,
-              ),
-            ],
-          ),
           body: SafeArea(
             child: LayoutBuilder(
               builder: (context, constraints) {
@@ -486,6 +214,7 @@ class _HomeUHomePageState extends State<HomeUHomePage> {
                           filled: true,
                           fillColor: context.homeuCard,
                           prefixIcon: const Icon(Icons.search_rounded),
+                          suffixIcon: const Icon(Icons.tune_rounded),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),
                             borderSide: BorderSide(
@@ -506,11 +235,6 @@ class _HomeUHomePageState extends State<HomeUHomePage> {
                             ),
                           ),
                         ),
-                        onChanged: (value) {
-                          setState(() {
-                            _searchKeyword = value;
-                          });
-                        },
                       ),
                       const SizedBox(height: 18),
                       Text(
@@ -531,12 +255,7 @@ class _HomeUHomePageState extends State<HomeUHomePage> {
                                   padding: const EdgeInsets.only(right: 10),
                                   child: _CategoryChip(
                                     label: item,
-                                    isSelected: item == _selectedPropertyType,
-                                    onTap: () {
-                                      setState(() {
-                                        _selectedPropertyType = item;
-                                      });
-                                    },
+                                    isSelected: item == 'Room',
                                   ),
                                 ),
                               )
@@ -544,101 +263,35 @@ class _HomeUHomePageState extends State<HomeUHomePage> {
                         ),
                       ),
                       const SizedBox(height: 20),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              t.homeRecommendedProperties,
-                              style: TextStyle(
-                                color: context.homeuPrimaryText,
-                                fontSize: 17,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                          IconButton(
-                            key: const Key('open_listing_filters_button'),
-                            onPressed: _openFilterSheet,
-                            icon: const Icon(Icons.filter_alt_outlined),
-                            tooltip: 'Filter',
-                          ),
-                          PopupMenuButton<HomeUPropertySort>(
-                            key: const Key('listing_sort_button'),
-                            initialValue: _sortBy,
-                            onSelected: (value) {
-                              setState(() {
-                                _sortBy = value;
-                              });
-                            },
-                            itemBuilder: (context) => const [
-                              PopupMenuItem(
-                                value: HomeUPropertySort.priceLowToHigh,
-                                child: Text('Price low to high'),
-                              ),
-                              PopupMenuItem(
-                                value: HomeUPropertySort.priceHighToLow,
-                                child: Text('Price high to low'),
-                              ),
-                              PopupMenuItem(
-                                value: HomeUPropertySort.newest,
-                                child: Text('Newest listing'),
-                              ),
-                            ],
-                            icon: const Icon(Icons.sort_rounded),
-                          ),
-                        ],
+                      Text(
+                        t.homeRecommendedProperties,
+                        style: TextStyle(
+                          color: context.homeuPrimaryText,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                       const SizedBox(height: 12),
-                      if (_selectedPropertyType != 'Any' ||
-                          _selectedRoomType != 'Any' ||
-                          _selectedFurnishing != 'Any' ||
-                          _selectedPriceRange.start > 0 ||
-                          _selectedPriceRange.end < 5000)
-                        Text(
-                          'Filters active',
-                          style: TextStyle(
-                            color: context.homeuMutedText,
-                            fontSize: 12.5,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
                       FutureBuilder<List<PropertyItem>>(
                         future: _propertiesFuture,
                         builder: (context, snapshot) {
-                          final items = (snapshot.data == null || snapshot.data!.isEmpty)
+                          final items =
+                              (snapshot.data == null || snapshot.data!.isEmpty)
                               ? _properties
                               : snapshot.data!;
-                          final filteredItems = _applyListingFilters(items);
-
-                          if (filteredItems.isEmpty) {
-                            return Padding(
-                              padding: const EdgeInsets.only(top: 8),
-                              child: Text(
-                                'No properties match your search or filters.',
-                                style: TextStyle(
-                                  color: context.homeuMutedText,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            );
-                          }
 
                           return Column(
-                            children: filteredItems
+                            children: items
                                 .map(
                                   (property) => _PropertyCard(
                                     property: property,
-                                    isFavorited: _favoritesController.isFavorited(property.id),
-                                    onFavoriteToggle: () {
-                                      _favoritesController.toggle(property);
-                                    },
                                     onTap: () {
                                       Navigator.of(context).push(
                                         MaterialPageRoute<void>(
-                                          builder: (_) => HomeUPropertyDetailsScreen(
-                                            property: property,
-                                          ),
+                                          builder: (_) =>
+                                              HomeUPropertyDetailsScreen(
+                                                property: property,
+                                              ),
                                         ),
                                       );
                                     },
@@ -678,36 +331,27 @@ class _NotificationDot extends StatelessWidget {
 }
 
 class _CategoryChip extends StatelessWidget {
-  const _CategoryChip({
-    required this.label,
-    required this.isSelected,
-    this.onTap,
-  });
+  const _CategoryChip({required this.label, required this.isSelected});
 
   final String label;
   final bool isSelected;
-  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final accent = context.homeuAccent;
-    return InkWell(
-      borderRadius: BorderRadius.circular(12),
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        decoration: BoxDecoration(
-          color: isSelected ? accent : context.homeuCard,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: context.homeuSoftBorder),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: isSelected ? Colors.white : accent,
-            fontSize: 13,
-            fontWeight: FontWeight.w700,
-          ),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: isSelected ? accent : context.homeuCard,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: context.homeuSoftBorder),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: isSelected ? Colors.white : accent,
+          fontSize: 13,
+          fontWeight: FontWeight.w700,
         ),
       ),
     );
@@ -715,17 +359,10 @@ class _CategoryChip extends StatelessWidget {
 }
 
 class _PropertyCard extends StatelessWidget {
-  const _PropertyCard({
-    required this.property,
-    required this.onTap,
-    required this.isFavorited,
-    required this.onFavoriteToggle,
-  });
+  const _PropertyCard({required this.property, required this.onTap});
 
   final PropertyItem property;
   final VoidCallback onTap;
-  final bool isFavorited;
-  final VoidCallback onFavoriteToggle;
 
   @override
   Widget build(BuildContext context) {
@@ -782,19 +419,10 @@ class _PropertyCard extends StatelessWidget {
                   child: CircleAvatar(
                     radius: 16,
                     backgroundColor: context.homeuCard,
-                    child: IconButton(
-                      key: Key('favorite_toggle_${property.id}'),
-                      padding: EdgeInsets.zero,
-                      visualDensity: VisualDensity.compact,
-                      splashRadius: 18,
-                      onPressed: onFavoriteToggle,
-                      icon: Icon(
-                        isFavorited
-                            ? Icons.favorite_rounded
-                            : Icons.favorite_border_rounded,
-                        size: 18,
-                        color: property.accentColor,
-                      ),
+                    child: Icon(
+                      Icons.favorite_border_rounded,
+                      size: 18,
+                      color: property.accentColor,
                     ),
                   ),
                 ),
@@ -833,17 +461,6 @@ class _PropertyCard extends StatelessWidget {
                         ),
                       ),
                     ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    property.nearbyLandmarks,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: context.homeuMutedText,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                    ),
                   ),
                   const SizedBox(height: 8),
                   Row(
