@@ -58,12 +58,9 @@ class HomeUAuthService {
     return null;
   }
 
-
   Future<void> signOut() async {
-    if (!AppSupabase.isInitialized) {
-      return;
+    if (AppSupabase.isInitialized) {
+      await AppSupabase.auth.signOut(scope: SignOutScope.local);
     }
-    await AppSupabase.auth.signOut();
   }
 }
-

@@ -138,8 +138,6 @@
   "loginSubtitle": "Log masuk untuk meneruskan perjalanan HomeU anda.",
   "loginPasswordHint": "Masukkan kata laluan anda",
   "loginForgotPassword": "Lupa kata laluan?",
-  "loginBiometricComingSoon": "Pengesahan biometrik akan datang.",
-  "loginUseFingerprint": "Guna Cap Jari",
   "loginNewHere": "Baru di sini?",
   "loginSuccess": "Log masuk berjaya.",
   "loginErrorBackendNotInitialized": "Backend belum dimulakan. Sila semak konfigurasi Supabase anda.",
@@ -151,7 +149,7 @@
   "loginErrorInvalidCredentials": "E-mel atau kata laluan tidak sah.",
   "loginErrorGeneric": "Tidak dapat log masuk sekarang. Sila cuba lagi.",
   "registerTitle": "Cipta Akaun Anda",
-  "registerSubtitle": "Sertai HomeU dan mulakan perjalanan sewaan anda.",
+  "registerSubtitle": "Sertai HomeU and mulakan perjalanan sewaan anda.",
   "registerNameHint": "Nama penuh anda",
   "registerPasswordHint": "Cipta kata laluan",
   "registerConfirmPassword": "Sahkan Kata Laluan",
@@ -236,4 +234,3 @@
   "updatePasswordErrorNetwork": "Ralat rangkaian. Sila semak sambungan internet anda dan cuba lagi.",
   "updatePasswordErrorGeneric": "Tidak dapat mengemas kini kata laluan sekarang. Sila cuba lagi."
 }
-

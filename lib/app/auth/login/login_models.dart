@@ -25,4 +25,3 @@ class LoginSubmissionResult {
 
   bool get isSuccess => status == LoginSubmissionStatus.success;
 }
-
