@@ -8,12 +8,8 @@ import 'package:homeu/core/localization/homeu_l10n.dart';
 import 'package:homeu/core/theme/homeu_app_theme.dart';
 import 'package:homeu/app/property/property_remote_datasource.dart';
 import 'package:homeu/core/supabase/app_supabase.dart';
-import 'package:homeu/pages/home/booking_history_screen.dart';
-import 'package:homeu/pages/home/conversation_list_screen.dart';
 import 'package:homeu/pages/home/property_details_screen.dart';
 import 'package:homeu/pages/home/property_item.dart';
-import 'package:homeu/pages/home/profile_screen.dart';
-import 'package:homeu/pages/home/viewing_history_screen.dart';
 
 class HomeUHomePage extends StatefulWidget {
   const HomeUHomePage({
@@ -30,9 +26,9 @@ class HomeUHomePage extends StatefulWidget {
 }
 
 class _HomeUHomePageState extends State<HomeUHomePage> {
-  int _selectedNavIndex = 0;
   late final HomeUProfileController _profileController;
-  final PropertyRemoteDataSource _propertyRemoteDataSource = const PropertyRemoteDataSource();
+  final PropertyRemoteDataSource _propertyRemoteDataSource =
+      const PropertyRemoteDataSource();
   late Future<List<PropertyItem>> _propertiesFuture;
 
   static const List<String> _categories = [
@@ -153,84 +149,6 @@ class _HomeUHomePageState extends State<HomeUHomePage> {
                   label: Text(t.homeScanQr),
                 )
               : null,
-          bottomNavigationBar: NavigationBar(
-            labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-            selectedIndex: _selectedNavIndex,
-            onDestinationSelected: (index) {
-              if (index == 2) {
-                Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => const HomeUBookingHistoryScreen(),
-                  ),
-                );
-                return;
-              }
-
-              if (index == 3) {
-                Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => const HomeUViewingHistoryScreen(),
-                  ),
-                );
-                return;
-              }
-
-              if (index == 4) {
-                Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => const HomeUConversationListScreen(),
-                  ),
-                );
-                return;
-              }
-
-              if (index == 5) {
-                Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) =>
-                        const HomeUProfileScreen(role: HomeURole.tenant),
-                  ),
-                );
-                return;
-              }
-
-              setState(() {
-                _selectedNavIndex = index;
-              });
-            },
-            destinations: [
-              NavigationDestination(
-                icon: Icon(Icons.home_outlined),
-                selectedIcon: Icon(Icons.home_rounded),
-                label: t.navHome,
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.favorite_border_rounded),
-                selectedIcon: Icon(Icons.favorite_rounded),
-                label: t.navFavorites,
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.book_online_outlined),
-                selectedIcon: Icon(Icons.book_online_rounded),
-                label: t.navBookings,
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.visibility_outlined),
-                selectedIcon: Icon(Icons.visibility_rounded),
-                label: 'Viewings',
-              ),
-              const NavigationDestination(
-                icon: Icon(Icons.chat_bubble_outline_rounded),
-                selectedIcon: Icon(Icons.chat_bubble_rounded),
-                label: 'Chat',
-              ),
-              NavigationDestination(
-                icon: Icon(Icons.person_outline_rounded),
-                selectedIcon: Icon(Icons.person_rounded),
-                label: t.navProfile,
-              ),
-            ],
-          ),
           body: SafeArea(
             child: LayoutBuilder(
               builder: (context, constraints) {
@@ -357,7 +275,8 @@ class _HomeUHomePageState extends State<HomeUHomePage> {
                       FutureBuilder<List<PropertyItem>>(
                         future: _propertiesFuture,
                         builder: (context, snapshot) {
-                          final items = (snapshot.data == null || snapshot.data!.isEmpty)
+                          final items =
+                              (snapshot.data == null || snapshot.data!.isEmpty)
                               ? _properties
                               : snapshot.data!;
 
@@ -369,9 +288,10 @@ class _HomeUHomePageState extends State<HomeUHomePage> {
                                     onTap: () {
                                       Navigator.of(context).push(
                                         MaterialPageRoute<void>(
-                                          builder: (_) => HomeUPropertyDetailsScreen(
-                                            property: property,
-                                          ),
+                                          builder: (_) =>
+                                              HomeUPropertyDetailsScreen(
+                                                property: property,
+                                              ),
                                         ),
                                       );
                                     },
