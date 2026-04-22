@@ -232,5 +232,11 @@
   "updatePasswordErrorNewPasswordMustDiffer": "Kata laluan baharu mesti berbeza daripada kata laluan semasa anda.",
   "updatePasswordErrorWeakPassword": "Sila pilih kata laluan yang lebih kuat dengan sekurang-kurangnya 6 aksara.",
   "updatePasswordErrorNetwork": "Ralat rangkaian. Sila semak sambungan internet anda dan cuba lagi.",
-  "updatePasswordErrorGeneric": "Tidak dapat mengemas kini kata laluan sekarang. Sila cuba lagi."
+  "updatePasswordErrorGeneric": "Tidak dapat mengemas kini kata laluan sekarang. Sila cuba lagi.",
+  "chatTitle": "Mesej",
+  "chatSearchHint": "Cari mesej...",
+  "chatOnline": "Dalam Talian",
+  "chatOffline": "Luar Talian",
+  "chatTypeMessageHint": "Taip mesej...",
+  "chatYesterday": "Semalam"
 }

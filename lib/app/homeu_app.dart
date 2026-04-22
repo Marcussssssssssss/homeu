@@ -8,6 +8,8 @@ import 'package:homeu/core/localization/homeu_l10n.dart';
 import 'package:homeu/core/theme/homeu_app_theme.dart';
 import 'package:homeu/l10n/app_localizations.dart';
 
+final RouteObserver<ModalRoute<void>> routeObserver = RouteObserver<ModalRoute<void>>();
+
 class HomeUApp extends StatefulWidget {
   const HomeUApp({
     super.key,
@@ -74,6 +76,7 @@ class _HomeUAppState extends State<HomeUApp> {
           themeMode: _themeController.themeMode,
           theme: HomeUAppTheme.light(),
           darkTheme: HomeUAppTheme.dark(),
+          navigatorObservers: [routeObserver],
           home: HomeUStartupAuthGate(
             initialDestination: destination,
             resolver: resolver,

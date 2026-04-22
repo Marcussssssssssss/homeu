@@ -397,6 +397,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get loginForgotPassword => '忘记密码？';
 
   @override
+  String get loginBiometricComingSoon =>
+      'Biometric authentication coming soon.';
+
+  @override
+  String get loginUseFingerprint => 'Use Fingerprint';
+
+  @override
   String get loginNewHere => '新用户？';
 
   @override
@@ -654,4 +661,46 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get updatePasswordErrorGeneric => '暂时无法更新密码，请稍后再试。';
+
+  @override
+  String get chatTitle => '消息';
+
+  @override
+  String get chatSearchHint => '搜索消息...';
+
+  @override
+  String get chatOnline => '在线';
+
+  @override
+  String get chatOffline => '离线';
+
+  @override
+  String get chatTypeMessageHint => '输入消息...';
+
+  @override
+  String get chatYesterday => '昨天';
+
+  @override
+  String get chatFilterAll => 'All Messages';
+
+  @override
+  String get chatFilterUnread => 'Unread';
+
+  @override
+  String get chatFilterProperty => 'Property Related';
+
+  @override
+  String get chatFilterArchived => 'Archived';
+
+  @override
+  String get chatAttachImage => 'Image';
+
+  @override
+  String get chatAttachDocument => 'Document';
+
+  @override
+  String get chatAttachCamera => 'Camera';
+
+  @override
+  String get chatAttachmentTitle => 'Send Attachment';
 }

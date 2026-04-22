@@ -6,6 +6,7 @@ import 'package:homeu/core/theme/homeu_app_theme.dart';
 import 'package:homeu/pages/home/booking_screen.dart';
 import 'package:homeu/pages/home/chat_screen.dart';
 import 'package:homeu/pages/home/property_item.dart';
+import 'package:homeu/pages/home/viewing_screen.dart';
 
 class HomeUPropertyDetailsScreen extends StatefulWidget {
   const HomeUPropertyDetailsScreen({super.key, required this.property});
@@ -13,13 +14,23 @@ class HomeUPropertyDetailsScreen extends StatefulWidget {
   final PropertyItem property;
 
   @override
-  State<HomeUPropertyDetailsScreen> createState() => _HomeUPropertyDetailsScreenState();
+  State<HomeUPropertyDetailsScreen> createState() =>
+      _HomeUPropertyDetailsScreenState();
 }
 
-class _HomeUPropertyDetailsScreenState extends State<HomeUPropertyDetailsScreen> {
+class _HomeUPropertyDetailsScreenState
+    extends State<HomeUPropertyDetailsScreen> {
   final PageController _pageController = PageController();
   final HomeUFavoritesController _favoritesController = HomeUFavoritesController.instance;
   int _activeImageIndex = 0;
+
+  void _openChat(PropertyItem property) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => HomeUChatScreen.start(property: property),
+      ),
+    );
+  }
 
   @override
   void dispose() {
@@ -64,34 +75,42 @@ class _HomeUPropertyDetailsScreenState extends State<HomeUPropertyDetailsScreen>
           children: [
             SizedBox(
               width: double.infinity,
-              height: 46,
-              child: OutlinedButton(
-                key: const Key('chat_with_owner_button'),
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => HomeUChatScreen.start(property: property),
+              height: 52,
+              child: ElevatedButton(
+                key: const Key('schedule_viewing_button'),
+                onPressed: () async {
+                  final result = await Navigator.of(context).push<bool>(
+                    MaterialPageRoute<bool>(
+                      builder: (_) => HomeUViewingScreen(property: property),
                     ),
                   );
+
+                  if (result == true) {
+                    if (!context.mounted) return;
+                    // For now, if we are in the same flow, we might want to tell the parent to refresh.
+                    // But usually, the history screen is in another tab.
+                    // We can also just show a success message if needed, but it's already shown in HomeUViewingScreen.
+                  }
                 },
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Color(0xFF1E3A8A)),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                ),
-                child: const Text(
-                  'Chat with Owner',
-                  style: TextStyle(
-                    color: Color(0xFF1E3A8A),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF1E3A8A),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  textStyle: const TextStyle(
+                    fontSize: 16,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
+                child: const Text('Schedule Viewing'),
               ),
             ),
             const SizedBox(height: 8),
             SizedBox(
               width: double.infinity,
-              height: 52,
-              child: ElevatedButton(
+              height: 46,
+              child: OutlinedButton(
                 key: const Key('book_now_button'),
                 onPressed: () {
                   Navigator.of(context).push(
@@ -100,13 +119,19 @@ class _HomeUPropertyDetailsScreenState extends State<HomeUPropertyDetailsScreen>
                     ),
                   );
                 },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1E3A8A),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Color(0xFF1E3A8A)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
                 ),
-                child: const Text('Book Now'),
+                child: const Text(
+                  'Book Now',
+                  style: TextStyle(
+                    color: Color(0xFF1E3A8A),
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
             ),
           ],
@@ -138,7 +163,9 @@ class _HomeUPropertyDetailsScreenState extends State<HomeUPropertyDetailsScreen>
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                             colors: [
-                              property.photoColors[index].withValues(alpha: 0.95),
+                              property.photoColors[index].withValues(
+                                alpha: 0.95,
+                              ),
                               const Color(0xFFF2F6FF),
                             ],
                           ),
@@ -316,7 +343,10 @@ class _HomeUPropertyDetailsScreenState extends State<HomeUPropertyDetailsScreen>
                 children: [
                   _FacilityBadge(icon: Icons.wifi_rounded, label: 'WiFi'),
                   SizedBox(width: 8),
-                  _FacilityBadge(icon: Icons.local_parking_rounded, label: 'Parking'),
+                  _FacilityBadge(
+                    icon: Icons.local_parking_rounded,
+                    label: 'Parking',
+                  ),
                   SizedBox(width: 8),
                   _FacilityBadge(icon: Icons.ac_unit_rounded, label: 'Aircond'),
                 ],
@@ -331,64 +361,69 @@ class _HomeUPropertyDetailsScreenState extends State<HomeUPropertyDetailsScreen>
                 ),
               ),
               const SizedBox(height: 10),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: context.homeuCard,
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  key: const Key('owner_info_chat_tap_area'),
                   borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: context.homeuAccent.withValues(alpha: 0.14),
-                      blurRadius: 12,
-                      offset: Offset(0, 4),
+                  onTap: () => _openChat(property),
+                  child: Ink(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: context.homeuCard,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: context.homeuAccent.withValues(alpha: 0.14),
+                          blurRadius: 12,
+                          offset: Offset(0, 4),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    const CircleAvatar(
-                      radius: 22,
-                      backgroundColor: Color(0x1F1E3A8A),
-                      child: Icon(Icons.person_rounded, color: Color(0xFF1E3A8A)),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            property.ownerName,
-                             style: TextStyle(
-                                color: context.homeuPrimaryText,
-                              fontSize: 15,
-                              fontWeight: FontWeight.w700,
-                            ),
+                    child: Row(
+                      children: [
+                        const CircleAvatar(
+                          radius: 22,
+                          backgroundColor: Color(0x1F1E3A8A),
+                          child: Icon(
+                            Icons.person_rounded,
+                            color: Color(0xFF1E3A8A),
                           ),
-                          const SizedBox(height: 3),
-                          Text(
-                            property.ownerRole,
-                             style: TextStyle(
-                                color: context.homeuMutedText,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                            ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                property.ownerName,
+                                style: TextStyle(
+                                  color: context.homeuPrimaryText,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              const SizedBox(height: 3),
+                              Text(
+                                property.ownerRole,
+                                style: TextStyle(
+                                  color: context.homeuMutedText,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                        ),
+                        IconButton(
+                          key: const Key('owner_contact_shortcut'),
+                          onPressed: () => _openChat(property),
+                          icon: const Icon(Icons.chat_bubble_outline_rounded),
+                          color: context.homeuAccent,
+                        ),
+                      ],
                     ),
-                    IconButton(
-                      key: const Key('owner_contact_shortcut'),
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute<void>(
-                            builder: (_) => HomeUChatScreen.start(property: property),
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.chat_bubble_outline_rounded),
-                      color: context.homeuAccent,
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ],
@@ -435,5 +470,3 @@ class _FacilityBadge extends StatelessWidget {
     );
   }
 }
-
-
