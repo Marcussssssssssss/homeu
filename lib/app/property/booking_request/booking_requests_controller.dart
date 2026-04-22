@@ -12,6 +12,32 @@ class BookingRequestsController extends ChangeNotifier {
   bool isLoading = true;
   String? errorMessage;
 
+  String selectedFilter = 'All';
+
+  final List<String> availableFilters = [
+    'All',
+    'Pending',
+    'Approved',
+    'Rejected',
+    'Completed',
+    'Cancelled'
+  ];
+
+  List<BookingRequestModel> get filteredRequests {
+    if (selectedFilter == 'All') return requests;
+
+    if (selectedFilter == 'Pending') {
+      return requests.where((r) => r.status == 'Pending' || r.status == 'Pending Decision').toList();
+    }
+
+    return requests.where((r) => r.status == selectedFilter).toList();
+  }
+
+  void setFilter(String filter) {
+    selectedFilter = filter;
+    notifyListeners();
+  }
+
   Future<void> loadRequests() async {
     isLoading = true;
     errorMessage = null;
@@ -31,23 +57,8 @@ class BookingRequestsController extends ChangeNotifier {
   Future<bool> updateStatus(String bookingId, String newStatus) async {
     try {
       await _repository.updateBookingStatus(bookingId, newStatus);
-      // Update local list to avoid re-fetching everything immediately
-      final index = requests.indexWhere((r) => r.id == bookingId);
-      if (index != -1) {
-        final old = requests[index];
-        requests[index] = BookingRequestModel(
-          id: old.id,
-          propertyTitle: old.propertyTitle,
-          monthlyPrice: old.monthlyPrice,
-          tenantName: old.tenantName,
-          tenantPhone: old.tenantPhone,
-          tenantEmail: old.tenantEmail,
-          startDate: old.startDate,
-          durationMonths: old.durationMonths,
-          status: newStatus,
-        );
-        notifyListeners();
-      }
+
+      await loadRequests();
       return true;
     } catch (e) {
       debugPrint('Error updating status: $e');

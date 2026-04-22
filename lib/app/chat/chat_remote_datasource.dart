@@ -1,5 +1,6 @@
 import 'package:homeu/app/chat/chat_models.dart';
 import 'package:homeu/core/supabase/app_supabase.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ChatRemoteDataSource {
   const ChatRemoteDataSource();
@@ -13,12 +14,19 @@ class ChatRemoteDataSource {
       return null;
     }
 
+    final safePropertyId = propertyId.trim();
+    final safeTenantId = tenantId.trim();
+    final safeOwnerId = ownerId.trim();
+    if (safePropertyId.isEmpty || safeTenantId.isEmpty || safeOwnerId.isEmpty) {
+      throw Exception('Missing chat identifiers.');
+    }
+
     final dynamic existingRows = await AppSupabase.client
         .from('conversations')
         .select('*')
-        .eq('property_id', propertyId)
-        .eq('tenant_id', tenantId)
-        .eq('owner_id', ownerId)
+        .eq('property_id', safePropertyId)
+        .eq('tenant_id', safeTenantId)
+        .eq('owner_id', safeOwnerId)
         .order('created_at', ascending: true)
         .limit(1);
 
@@ -30,22 +38,47 @@ class ChatRemoteDataSource {
     }
 
     final nowIso = DateTime.now().toUtc().toIso8601String();
-    final dynamic createdRow = await AppSupabase.client
-        .from('conversations')
-        .insert({
-          'property_id': propertyId,
-          'tenant_id': tenantId,
-          'owner_id': ownerId,
-          'last_message_at': nowIso,
-        })
-        .select('*')
-        .single();
+    try {
+      final dynamic createdRow = await AppSupabase.client
+          .from('conversations')
+          .insert({
+            'property_id': safePropertyId,
+            'tenant_id': safeTenantId,
+            'owner_id': safeOwnerId,
+            'created_at': nowIso,
+            'last_message_at': nowIso,
+          })
+          .select('*')
+          .single();
 
-    if (createdRow is! Map<String, dynamic>) {
-      return null;
+      if (createdRow is! Map<String, dynamic>) {
+        return null;
+      }
+
+      return Conversation.fromJson(createdRow);
+    } on PostgrestException catch (e) {
+      if (!_isDuplicateKeyError(e)) {
+        rethrow;
+      }
+
+      final dynamic retriedRows = await AppSupabase.client
+          .from('conversations')
+          .select('*')
+          .eq('property_id', safePropertyId)
+          .eq('tenant_id', safeTenantId)
+          .eq('owner_id', safeOwnerId)
+          .order('created_at', ascending: true)
+          .limit(1);
+
+      if (retriedRows is List && retriedRows.isNotEmpty) {
+        final row = retriedRows.first;
+        if (row is Map<String, dynamic>) {
+          return Conversation.fromJson(row);
+        }
+      }
+
+      rethrow;
     }
-
-    return Conversation.fromJson(createdRow);
   }
 
   Future<List<Conversation>> listMyConversations({required String myUserId}) async {
@@ -129,5 +162,12 @@ class ChatRemoteDataSource {
 
     return ChatMessage.fromJson(row);
   }
-}
 
+  bool _isDuplicateKeyError(PostgrestException e) {
+    final code = e.code?.trim() ?? '';
+    if (code == '23505') {
+      return true;
+    }
+    return e.message.toLowerCase().contains('duplicate key');
+  }
+}
