@@ -25,11 +25,7 @@ class MyPropertiesRepository {
     await _remoteDataSource.updatePropertyStatus(propertyId, newStatus);
   }
 
-  Future<void> archiveProperty(String propertyId) async {
-    try {
-      await _remoteDataSource.archiveProperty(propertyId);
-    } catch (_) {
-      rethrow;
-    }
+  Future<void> deleteProperty(String propertyId) async {
+    await _remoteDataSource.deleteProperty(propertyId);
   }
 }

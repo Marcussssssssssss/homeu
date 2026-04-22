@@ -9,8 +9,6 @@ import 'package:homeu/app/booking/payment_remote_datasource.dart';
 import 'package:homeu/core/supabase/app_supabase.dart';
 import 'package:homeu/pages/home/property_item.dart';
 
-import 'package:homeu/pages/home/receipt_screen.dart';
-
 enum HomeUPaymentMethod { card, banking, ewallet }
 
 class HomeUPaymentScreen extends StatefulWidget {
@@ -36,9 +34,6 @@ class HomeUPaymentScreen extends StatefulWidget {
 class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
   final PaymentRemoteDataSource _paymentRemoteDataSource = const PaymentRemoteDataSource();
   HomeUPaymentMethod _selectedMethod = HomeUPaymentMethod.card;
-  final TextEditingController _cardNumberController = TextEditingController();
-  final TextEditingController _expiryController = TextEditingController();
-  final TextEditingController _cvvController = TextEditingController();
   final FocusNode _cardNumberFocus = FocusNode();
   final FocusNode _expiryFocus = FocusNode();
   final FocusNode _cvvFocus = FocusNode();
@@ -54,9 +49,6 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
 
   @override
   void dispose() {
-    _cardNumberController.dispose();
-    _expiryController.dispose();
-    _cvvController.dispose();
     _cardNumberFocus.dispose();
     _expiryFocus.dispose();
     _cvvFocus.dispose();
@@ -104,8 +96,6 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildStepIndicator(1),
-              const SizedBox(height: 24),
               Text(
                 'Payment Method',
                 style: TextStyle(
@@ -158,7 +148,6 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
                 const SizedBox(height: 12),
                 TextField(
                   key: const Key('card_number_field'),
-                  controller: _cardNumberController,
                   focusNode: _cardNumberFocus,
                   onTap: () {
                     if (_showCardBack) {
@@ -176,7 +165,6 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
                     Expanded(
                       child: TextField(
                         key: const Key('expiry_field'),
-                        controller: _expiryController,
                         focusNode: _expiryFocus,
                         onTap: () {
                           if (_showCardBack) {
@@ -193,7 +181,6 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
                     Expanded(
                       child: TextField(
                         key: const Key('cvv_field'),
-                        controller: _cvvController,
                         focusNode: _cvvFocus,
                         onTap: () {
                           if (!_showCardBack) {
@@ -244,30 +231,6 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
                       _summaryRow('Payment Status', _latestPayment!.status),
                     const Divider(height: 18),
                     _summaryRow('Total Amount', 'RM ${_formatCurrency(widget.totalPrice)}', emphasize: true),
-                    if (_latestPayment != null && _latestPayment!.status == 'Success') ...[
-                      const SizedBox(height: 20),
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => HomeUReceiptScreen(
-                                payment: _latestPayment!,
-                                propertyName: widget.property.name,
-                              ),
-                            ),
-                          );
-                        },
-                        icon: const Icon(Icons.receipt_long_rounded),
-                        label: const Text('View Receipt'),
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: const Size(double.infinity, 48),
-                          backgroundColor: const Color(0xFF10B981),
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        ),
-                      ),
-                    ],
                   ],
                 ),
               ),
@@ -380,17 +343,6 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
       return;
     }
 
-    if (_selectedMethod == HomeUPaymentMethod.card) {
-      if (_cardNumberController.text.isEmpty ||
-          _expiryController.text.isEmpty ||
-          _cvvController.text.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please fill in all card details.')),
-        );
-        return;
-      }
-    }
-
     final payerId = AppSupabase.auth.currentUser?.id;
     if (payerId == null || payerId.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -459,68 +411,6 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
       case HomeUPaymentMethod.ewallet:
         return 'E-Wallet';
     }
-  }
-
-  Widget _buildStepIndicator(int currentStep) {
-    return Row(
-      children: [
-        _buildStep(0, 'Details', currentStep >= 0, currentStep),
-        _buildConnector(currentStep >= 1),
-        _buildStep(1, 'Payment', currentStep >= 1, currentStep),
-        _buildConnector(currentStep >= 2),
-        _buildStep(2, 'Success', currentStep >= 2, currentStep),
-      ],
-    );
-  }
-
-  Widget _buildStep(int index, String label, bool isActive, int currentStep) {
-    final color = isActive ? context.homeuAccent : context.homeuMutedText;
-    final isCompleted = isActive && index < currentStep;
-    return Expanded(
-      child: Column(
-        children: [
-          Container(
-            width: 28,
-            height: 28,
-            decoration: BoxDecoration(
-              color: isActive ? color : Colors.transparent,
-              shape: BoxShape.circle,
-              border: Border.all(color: color, width: 2),
-            ),
-            child: Center(
-              child: isCompleted
-                  ? const Icon(Icons.check, size: 16, color: Colors.white)
-                  : Text(
-                      '${index + 1}',
-                      style: TextStyle(
-                        color: isActive ? Colors.white : color,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              color: color,
-              fontSize: 11,
-              fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildConnector(bool isActive) {
-    return Container(
-      width: 20,
-      height: 2,
-      margin: const EdgeInsets.only(bottom: 16),
-      color: isActive ? context.homeuAccent : context.homeuSoftBorder,
-    );
   }
 }
 

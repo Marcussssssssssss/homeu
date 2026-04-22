@@ -7,6 +7,7 @@ import 'package:homeu/app/booking/booking_remote_datasource.dart';
 import 'package:homeu/core/supabase/app_supabase.dart';
 import 'package:homeu/pages/home/payment_screen.dart';
 import 'package:homeu/pages/home/property_item.dart';
+import 'package:homeu/pages/home/viewing_screen.dart';
 
 class HomeUBookingScreen extends StatefulWidget {
   const HomeUBookingScreen({super.key, required this.property});
@@ -19,8 +20,7 @@ class HomeUBookingScreen extends StatefulWidget {
 
 class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
   static const List<int> _durationOptions = [1, 3, 6, 12];
-  final BookingRemoteDataSource _bookingRemoteDataSource =
-      const BookingRemoteDataSource();
+  final BookingRemoteDataSource _bookingRemoteDataSource = const BookingRemoteDataSource();
   int _selectedDurationMonths = 6;
   DateTime _startDate = DateTime.now().add(const Duration(days: 3));
   bool _isSubmitting = false;
@@ -42,34 +42,57 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
       ),
       bottomNavigationBar: SafeArea(
         minimum: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-        child: SizedBox(
-          width: double.infinity,
-          height: 52,
-          child: ElevatedButton(
-            key: const Key('confirm_booking_button'),
-            onPressed: _isSubmitting ? null : _confirmBooking,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF1E3A8A),
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              textStyle: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: double.infinity,
+              height: 46,
+              child: OutlinedButton(
+                key: const Key('schedule_viewing_button'),
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => HomeUViewingScreen(property: widget.property),
+                    ),
+                  );
+                },
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Color(0xFF1E3A8A)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+                child: const Text(
+                  'Schedule Viewing',
+                  style: TextStyle(
+                    color: Color(0xFF1E3A8A),
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
             ),
-            child: _isSubmitting
-                ? const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
-                  )
-                : const Text('Confirm Booking'),
-          ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: ElevatedButton(
+                key: const Key('confirm_booking_button'),
+                onPressed: _isSubmitting ? null : _confirmBooking,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF1E3A8A),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                ),
+                child: _isSubmitting
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      )
+                    : const Text('Confirm Booking'),
+              ),
+            ),
+          ],
         ),
       ),
       body: SafeArea(
@@ -80,17 +103,6 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
             children: [
               Text(
                 'Selected Property',
-                style: TextStyle(
-                  color: context.homeuPrimaryText,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 10),
-              _buildStepIndicator(0),
-              const SizedBox(height: 24),
-              Text(
-                'Property Details',
                 style: TextStyle(
                   color: context.homeuPrimaryText,
                   fontSize: 16,
@@ -201,13 +213,8 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
                       fontWeight: FontWeight.w700,
                     ),
                     side: BorderSide(color: context.homeuSoftBorder),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 10,
-                    ),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                   );
                 }).toList(),
               ),
@@ -226,10 +233,7 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
                 borderRadius: BorderRadius.circular(16),
                 onTap: _pickStartDate,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 14,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                   decoration: BoxDecoration(
                     color: context.homeuCard,
                     borderRadius: BorderRadius.circular(16),
@@ -237,10 +241,7 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
                   ),
                   child: Row(
                     children: [
-                      Icon(
-                        Icons.calendar_month_rounded,
-                        color: context.homeuAccent,
-                      ),
+                      Icon(Icons.calendar_month_rounded, color: context.homeuAccent),
                       const SizedBox(width: 8),
                       Text(
                         _formatDate(_startDate),
@@ -284,10 +285,7 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
                       children: [
                         Text(
                           'Monthly Price',
-                          style: TextStyle(
-                            color: context.homeuMutedText,
-                            fontSize: 13,
-                          ),
+                          style: TextStyle(color: context.homeuMutedText, fontSize: 13),
                         ),
                         const Spacer(),
                         Text(
@@ -305,10 +303,7 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
                       children: [
                         Text(
                           'Duration ($_selectedDurationMonths months)',
-                          style: TextStyle(
-                            color: context.homeuMutedText,
-                            fontSize: 13,
-                          ),
+                          style: TextStyle(color: context.homeuMutedText, fontSize: 13),
                         ),
                         const Spacer(),
                         Text(
@@ -385,9 +380,7 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
   Future<void> _confirmBooking() async {
     if (!AppSupabase.isInitialized) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Supabase is not initialized. Please try again later.'),
-        ),
+        const SnackBar(content: Text('Supabase is not initialized. Please try again later.')),
       );
       return;
     }
@@ -403,22 +396,6 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
     setState(() => _isSubmitting = true);
 
     try {
-      // Check for existing active booking
-      final hasActive = await _bookingRemoteDataSource.hasActiveBookingForProperty(
-        tenantId: tenantId,
-        propertyId: widget.property.id,
-      );
-
-      if (hasActive) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('You already have an active booking request for this property.'),
-          ),
-        );
-        return;
-      }
-
       final now = DateTime.now().toUtc();
       final booking = BookingRequest(
         id: '',
@@ -432,18 +409,14 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
         paymentStatus: 'Pending',
       );
 
-      debugPrint(
-        'Booking submit: propertyId=${widget.property.id}, ownerId=${widget.property.ownerId}, tenantId=$tenantId',
-      );
+      debugPrint('Booking submit: propertyId=${widget.property.id}, ownerId=${widget.property.ownerId}, tenantId=$tenantId');
 
       final created = await _bookingRemoteDataSource.createBooking(booking);
       if (!mounted) return;
 
       if (created == null || created.id.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Unable to create booking. Please try again.'),
-          ),
+          const SnackBar(content: Text('Unable to create booking. Please try again.')),
         );
         return;
       }
@@ -463,9 +436,9 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
       debugPrint('Create booking failed: $e');
       debugPrint('$st');
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Create booking failed: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Create booking failed: $e')),
+      );
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
     }
@@ -505,66 +478,5 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
 
     return '${date.day} ${months[date.month - 1]} ${date.year}';
   }
-
-  Widget _buildStepIndicator(int currentStep) {
-    return Row(
-      children: [
-        _buildStep(0, 'Details', currentStep >= 0, currentStep),
-        _buildConnector(currentStep >= 1),
-        _buildStep(1, 'Payment', currentStep >= 1, currentStep),
-        _buildConnector(currentStep >= 2),
-        _buildStep(2, 'Success', currentStep >= 2, currentStep),
-      ],
-    );
-  }
-
-  Widget _buildStep(int index, String label, bool isActive, int currentStep) {
-    final color = isActive ? context.homeuAccent : context.homeuMutedText;
-    final isCompleted = isActive && index < currentStep;
-    return Expanded(
-      child: Column(
-        children: [
-          Container(
-            width: 28,
-            height: 28,
-            decoration: BoxDecoration(
-              color: isActive ? color : Colors.transparent,
-              shape: BoxShape.circle,
-              border: Border.all(color: color, width: 2),
-            ),
-            child: Center(
-              child: isCompleted
-                  ? const Icon(Icons.check, size: 16, color: Colors.white)
-                  : Text(
-                      '${index + 1}',
-                      style: TextStyle(
-                        color: isActive ? Colors.white : color,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              color: color,
-              fontSize: 11,
-              fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildConnector(bool isActive) {
-    return Container(
-      width: 20,
-      height: 2,
-      margin: const EdgeInsets.only(bottom: 16),
-      color: isActive ? context.homeuAccent : context.homeuSoftBorder,
-    );
-  }
 }
+
