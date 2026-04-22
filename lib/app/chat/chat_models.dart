@@ -6,6 +6,13 @@ class Conversation {
     required this.tenantId,
     required this.lastMessageAt,
     required this.createdAt,
+    this.lastMessageText,
+    this.otherUserName,
+    this.otherUserPhotoUrl,
+    this.isOnline = false,
+    this.isUnread = false,
+    this.isArchived = false,
+    this.hasActiveBooking = false,
   });
 
   final String id;
@@ -14,6 +21,13 @@ class Conversation {
   final String tenantId;
   final DateTime? lastMessageAt;
   final DateTime createdAt;
+  final String? lastMessageText;
+  final String? otherUserName;
+  final String? otherUserPhotoUrl;
+  final bool isOnline;
+  final bool isUnread;
+  final bool isArchived;
+  final bool hasActiveBooking;
 
   factory Conversation.fromJson(Map<String, dynamic> json) {
     return Conversation(
@@ -24,6 +38,13 @@ class Conversation {
       lastMessageAt: _parseDateTime(json['last_message_at'] ?? json['lastMessageAt']),
       createdAt: _parseDateTime(json['created_at'] ?? json['createdAt']) ??
           DateTime.fromMillisecondsSinceEpoch(0),
+      lastMessageText: json['last_message_text']?.toString(),
+      otherUserName: json['other_user_name']?.toString(),
+      otherUserPhotoUrl: json['other_user_photo_url']?.toString(),
+      isOnline: json['is_online'] == true,
+      isUnread: json['is_unread'] == true,
+      isArchived: json['is_archived'] == true,
+      hasActiveBooking: json['has_active_booking'] == true,
     );
   }
 

@@ -46,3 +46,4 @@ class PropertyItem {
     return double.tryParse(normalized) ?? 0;
   }
 }
+

@@ -25,6 +25,7 @@ class _HomeUPropertyDetailsScreenState
 
   @override
   void dispose() {
+    _pageController.dispose();
     super.dispose();
   }
 
@@ -437,3 +438,5 @@ class _FacilityBadge extends StatelessWidget {
     );
   }
 }
+
+

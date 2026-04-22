@@ -55,7 +55,6 @@ class PropertyRemoteDataSource {
         .where((id) => id.isNotEmpty)
         .toSet()
         .toList(growable: false);
-
     if (ids.isEmpty) {
       return const <String, PropertyItem>{};
     }
@@ -90,7 +89,6 @@ class PropertyRemoteDataSource {
         mapped[property.id] = property;
       }
     }
-
     return mapped;
   }
 

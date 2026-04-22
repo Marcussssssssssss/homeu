@@ -51,9 +51,6 @@ const List<PropertyItem> _testProperties = <PropertyItem>[
         'A bright condo with modern finishing, full kitchen, and great ventilation.',
     ownerName: 'Nurul Huda',
     ownerRole: 'Verified Owner',
-    propertyType: 'Condo',
-    roomType: 'Whole Unit',
-    furnishing: 'Furnished',
     photoColors: [Color(0xFF5D7FBF), Color(0xFF4A68A8), Color(0xFF2F4F8F)],
   ),
   PropertyItem(
@@ -67,9 +64,6 @@ const List<PropertyItem> _testProperties = <PropertyItem>[
     description: 'Comfortable private room near campus.',
     ownerName: 'Amir Rahman',
     ownerRole: 'Host',
-    propertyType: 'Apartment',
-    roomType: 'Single Room',
-    furnishing: 'Partially Furnished',
     photoColors: [Color(0xFF4FAF95), Color(0xFF3D9B83), Color(0xFF2B7F6B)],
   ),
   PropertyItem(
@@ -83,9 +77,6 @@ const List<PropertyItem> _testProperties = <PropertyItem>[
     description: 'Spacious apartment for families.',
     ownerName: 'Sarah Lim',
     ownerRole: 'Premium Owner',
-    propertyType: 'Apartment',
-    roomType: 'Whole Unit',
-    furnishing: 'Unfurnished',
     photoColors: [Color(0xFF586476), Color(0xFF495567), Color(0xFF374151)],
   ),
 ];
@@ -1140,7 +1131,7 @@ void main() {
 
     expect(find.byType(HomeUUpdatePasswordScreen), findsOneWidget);
     expect(find.byKey(const Key('current_password_field')), findsOneWidget);
-    expect(find.text('Update Password'), findsWidgets);
+    expect(find.text('Update Password'), findsOneWidget);
   });
 
   testWidgets('Update password screen renders secure fields and actions', (

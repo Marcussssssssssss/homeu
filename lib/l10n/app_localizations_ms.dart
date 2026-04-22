@@ -413,6 +413,13 @@ class AppLocalizationsMs extends AppLocalizations {
   String get loginForgotPassword => 'Lupa kata laluan?';
 
   @override
+  String get loginBiometricComingSoon =>
+      'Biometric authentication coming soon.';
+
+  @override
+  String get loginUseFingerprint => 'Use Fingerprint';
+
+  @override
   String get loginNewHere => 'Baru di sini?';
 
   @override
@@ -710,4 +717,46 @@ class AppLocalizationsMs extends AppLocalizations {
   @override
   String get updatePasswordErrorGeneric =>
       'Tidak dapat mengemas kini kata laluan sekarang. Sila cuba lagi.';
+
+  @override
+  String get chatTitle => 'Mesej';
+
+  @override
+  String get chatSearchHint => 'Cari mesej...';
+
+  @override
+  String get chatOnline => 'Dalam Talian';
+
+  @override
+  String get chatOffline => 'Luar Talian';
+
+  @override
+  String get chatTypeMessageHint => 'Taip mesej...';
+
+  @override
+  String get chatYesterday => 'Semalam';
+
+  @override
+  String get chatFilterAll => 'All Messages';
+
+  @override
+  String get chatFilterUnread => 'Unread';
+
+  @override
+  String get chatFilterProperty => 'Property Related';
+
+  @override
+  String get chatFilterArchived => 'Archived';
+
+  @override
+  String get chatAttachImage => 'Image';
+
+  @override
+  String get chatAttachDocument => 'Document';
+
+  @override
+  String get chatAttachCamera => 'Camera';
+
+  @override
+  String get chatAttachmentTitle => 'Send Attachment';
 }

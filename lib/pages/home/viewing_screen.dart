@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
+import 'package:homeu/core/theme/homeu_app_theme.dart';
 import 'package:homeu/app/viewing/viewing_models.dart';
 import 'package:homeu/app/viewing/viewing_remote_datasource.dart';
 import 'package:homeu/core/supabase/app_supabase.dart';
@@ -28,10 +29,10 @@ class _HomeUViewingScreenState extends State<HomeUViewingScreen> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F8FC),
+      backgroundColor: context.colors.surface,
       appBar: AppBar(
         title: const Text('Schedule Viewing'),
-        backgroundColor: const Color(0xFFF6F8FC),
+        backgroundColor: context.colors.surface,
         elevation: 0,
       ),
       bottomNavigationBar: SafeArea(
@@ -42,7 +43,7 @@ class _HomeUViewingScreenState extends State<HomeUViewingScreen> {
             key: const Key('confirm_viewing_button'),
             onPressed: _isSubmitting ? null : _confirmViewing,
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF1E3A8A),
+              backgroundColor: context.homeuAccent,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
@@ -63,10 +64,10 @@ class _HomeUViewingScreenState extends State<HomeUViewingScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'Selected Property',
                 style: TextStyle(
-                  color: Color(0xFF1F314F),
+                  color: context.homeuPrimaryText,
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                 ),
@@ -75,13 +76,13 @@ class _HomeUViewingScreenState extends State<HomeUViewingScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.homeuCard,
                   borderRadius: BorderRadius.circular(16),
-                  boxShadow: const [
+                  boxShadow: [
                     BoxShadow(
-                      color: Color(0x141E3A8A),
+                      color: context.homeuCardShadow,
                       blurRadius: 12,
-                      offset: Offset(0, 4),
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
@@ -97,7 +98,7 @@ class _HomeUViewingScreenState extends State<HomeUViewingScreen> {
                           end: Alignment.bottomRight,
                           colors: [
                             widget.property.photoColors.first,
-                            const Color(0xFFEAF2FF),
+                            context.isDarkMode ? const Color(0xFF1E2D44) : const Color(0xFFEAF2FF),
                           ],
                         ),
                       ),
@@ -114,8 +115,8 @@ class _HomeUViewingScreenState extends State<HomeUViewingScreen> {
                         children: [
                           Text(
                             widget.property.name,
-                            style: const TextStyle(
-                              color: Color(0xFF1F314F),
+                            style: TextStyle(
+                              color: context.homeuPrimaryText,
                               fontSize: 15,
                               fontWeight: FontWeight.w700,
                             ),
@@ -123,8 +124,8 @@ class _HomeUViewingScreenState extends State<HomeUViewingScreen> {
                           const SizedBox(height: 4),
                           Text(
                             widget.property.location,
-                            style: const TextStyle(
-                              color: Color(0xFF667896),
+                            style: TextStyle(
+                              color: context.homeuMutedText,
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
                             ),
@@ -136,10 +137,10 @@ class _HomeUViewingScreenState extends State<HomeUViewingScreen> {
                 ),
               ),
               const SizedBox(height: 18),
-              const Text(
+              Text(
                 'Viewing Date',
                 style: TextStyle(
-                  color: Color(0xFF1F314F),
+                  color: context.homeuPrimaryText,
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                 ),
@@ -151,18 +152,18 @@ class _HomeUViewingScreenState extends State<HomeUViewingScreen> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: context.homeuCard,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0x1F1E3A8A)),
+                    border: Border.all(color: context.homeuSoftBorder),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.calendar_month_rounded, color: Color(0xFF1E3A8A)),
+                      Icon(Icons.calendar_month_rounded, color: context.homeuAccent),
                       const SizedBox(width: 8),
                       Text(
                         _formatDate(_selectedDate),
-                        style: const TextStyle(
-                          color: Color(0xFF1F314F),
+                        style: TextStyle(
+                          color: context.homeuPrimaryText,
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                         ),
@@ -172,10 +173,10 @@ class _HomeUViewingScreenState extends State<HomeUViewingScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
+              Text(
                 'Viewing Time',
                 style: TextStyle(
-                  color: Color(0xFF1F314F),
+                  color: context.homeuPrimaryText,
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                 ),
@@ -187,18 +188,18 @@ class _HomeUViewingScreenState extends State<HomeUViewingScreen> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: context.homeuCard,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: const Color(0x1F1E3A8A)),
+                    border: Border.all(color: context.homeuSoftBorder),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.schedule_rounded, color: Color(0xFF1E3A8A)),
+                      Icon(Icons.schedule_rounded, color: context.homeuAccent),
                       const SizedBox(width: 8),
                       Text(
                         _selectedTime.format(context),
-                        style: const TextStyle(
-                          color: Color(0xFF1F314F),
+                        style: TextStyle(
+                          color: context.homeuPrimaryText,
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                         ),
@@ -211,22 +212,22 @@ class _HomeUViewingScreenState extends State<HomeUViewingScreen> {
               Container(
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: context.homeuCard,
                   borderRadius: BorderRadius.circular(16),
-                  boxShadow: const [
+                  boxShadow: [
                     BoxShadow(
-                      color: Color(0x141E3A8A),
+                      color: context.homeuCardShadow,
                       blurRadius: 12,
-                      offset: Offset(0, 4),
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
                 child: Row(
                   children: [
-                    const Text(
+                    Text(
                       'Scheduled For',
                       style: TextStyle(
-                        color: Color(0xFF1F314F),
+                        color: context.homeuPrimaryText,
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
                       ),
@@ -234,8 +235,8 @@ class _HomeUViewingScreenState extends State<HomeUViewingScreen> {
                     const Spacer(),
                     Text(
                       _formatDateTime(_combinedScheduledAt()),
-                      style: const TextStyle(
-                        color: Color(0xFF1E3A8A),
+                      style: TextStyle(
+                        color: context.homeuAccent,
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                       ),
@@ -304,6 +305,19 @@ class _HomeUViewingScreenState extends State<HomeUViewingScreen> {
     setState(() => _isSubmitting = true);
 
     try {
+      final hasActive = await _viewingRemoteDataSource.hasActiveViewingForProperty(
+        tenantId: tenantId,
+        propertyId: widget.property.id,
+      );
+
+      if (hasActive) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('You already have a viewing request for this property.')),
+        );
+        return;
+      }
+
       final now = DateTime.now().toUtc();
       final request = ViewingRequest(
         id: '',
@@ -331,7 +345,7 @@ class _HomeUViewingScreenState extends State<HomeUViewingScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Viewing request submitted')),
       );
-      Navigator.of(context).pop();
+      Navigator.of(context).pop(true);
     } catch (e) {
       debugPrint('Failed to submit viewing request: $e');
       if (!mounted) return;

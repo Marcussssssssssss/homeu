@@ -106,5 +106,28 @@ class BookingRemoteDataSource {
         .update({'status': 'Cancelled', 'updated_at': DateTime.now().toUtc().toIso8601String()})
         .eq('id', bookingId);
   }
+
+  Future<bool> hasActiveBookingForProperty({
+    required String tenantId,
+    required String propertyId,
+  }) async {
+    if (!AppSupabase.isInitialized) {
+      return false;
+    }
+
+    final dynamic rows = await AppSupabase.client
+        .from('booking_requests')
+        .select('id')
+        .eq('tenant_id', tenantId)
+        .eq('property_id', propertyId)
+        .inFilter('status', ['Pending', 'Approved'])
+        .limit(1);
+
+    if (rows is! List) {
+      return false;
+    }
+
+    return rows.isNotEmpty;
+  }
 }
 

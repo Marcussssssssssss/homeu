@@ -232,5 +232,11 @@
   "updatePasswordErrorNewPasswordMustDiffer": "新密码必须与当前密码不同。",
   "updatePasswordErrorWeakPassword": "请设置更强的密码，至少包含 6 个字符。",
   "updatePasswordErrorNetwork": "网络错误，请检查网络连接后重试。",
-  "updatePasswordErrorGeneric": "暂时无法更新密码，请稍后再试。"
+  "updatePasswordErrorGeneric": "暂时无法更新密码，请稍后再试。",
+  "chatTitle": "消息",
+  "chatSearchHint": "搜索消息...",
+  "chatOnline": "在线",
+  "chatOffline": "离线",
+  "chatTypeMessageHint": "输入消息...",
+  "chatYesterday": "昨天"
 }
