@@ -18,7 +18,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navFavorites => 'Favourite';
 
   @override
-  String get navBookings => 'Bookings';
+  String get navBookings => 'Booking';
 
   @override
   String get navProfile => 'Profile';
@@ -414,13 +414,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loginForgotPassword => 'Forgot password?';
 
   @override
-  String get loginBiometricComingSoon =>
-      'Biometric authentication coming soon.';
-
-  @override
-  String get loginUseFingerprint => 'Use Fingerprint';
-
-  @override
   String get loginNewHere => 'New here?';
 
   @override
@@ -714,46 +707,4 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get updatePasswordErrorGeneric =>
       'Unable to update password right now. Please try again.';
-
-  @override
-  String get chatTitle => 'Messages';
-
-  @override
-  String get chatSearchHint => 'Search messages...';
-
-  @override
-  String get chatOnline => 'Online';
-
-  @override
-  String get chatOffline => 'Offline';
-
-  @override
-  String get chatTypeMessageHint => 'Type a message...';
-
-  @override
-  String get chatYesterday => 'Yesterday';
-
-  @override
-  String get chatFilterAll => 'All Messages';
-
-  @override
-  String get chatFilterUnread => 'Unread';
-
-  @override
-  String get chatFilterProperty => 'Property Related';
-
-  @override
-  String get chatFilterArchived => 'Archived';
-
-  @override
-  String get chatAttachImage => 'Image';
-
-  @override
-  String get chatAttachDocument => 'Document';
-
-  @override
-  String get chatAttachCamera => 'Camera';
-
-  @override
-  String get chatAttachmentTitle => 'Send Attachment';
 }
