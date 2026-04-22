@@ -346,10 +346,12 @@ class _HomeUConversationListScreenState extends State<HomeUConversationListScree
           _isLoading = false;
         });
       }
-    } catch (e) {
+    } catch (e, stack) {
+      debugPrint('Error loading conversations: $e');
+      debugPrint(stack.toString());
       if (mounted) {
         setState(() {
-          _loadError = 'Unable to load conversations right now.';
+          _loadError = 'Unable to load conversations right now: $e';
           _isLoading = false;
         });
       }
@@ -383,12 +385,14 @@ class _ConversationListItem extends StatelessWidget {
                 CircleAvatar(
                   radius: 28,
                   backgroundColor: context.homeuAccent.withValues(alpha: 0.1),
-                  backgroundImage: conversation.otherUserPhotoUrl != null
+                  backgroundImage: conversation.otherUserPhotoUrl != null &&
+                          conversation.otherUserPhotoUrl!.isNotEmpty
                       ? NetworkImage(conversation.otherUserPhotoUrl!)
                       : null,
-                  child: conversation.otherUserPhotoUrl == null
+                  child: conversation.otherUserPhotoUrl == null ||
+                          conversation.otherUserPhotoUrl!.isEmpty
                       ? Text(
-                          name.substring(0, 1).toUpperCase(),
+                          name.isNotEmpty ? name.substring(0, 1).toUpperCase() : 'U',
                           style: TextStyle(
                             color: context.homeuAccent,
                             fontWeight: FontWeight.bold,

@@ -11,6 +11,7 @@ class PaymentRemoteDataSource {
     required String payerId,
     required String method,
     required double amount,
+    required String bookingPaymentStatus,
     required bool simulateSuccess,
   }) async {
     if (!AppSupabase.isInitialized) {
@@ -19,7 +20,7 @@ class PaymentRemoteDataSource {
 
     final now = DateTime.now().toUtc();
     final status = simulateSuccess ? 'Success' : 'Failed';
-    final bookingPaymentStatus = simulateSuccess ? 'Paid' : 'Failed';
+    final resolvedBookingPaymentStatus = simulateSuccess ? bookingPaymentStatus : 'Failed';
 
     final dynamic row = await AppSupabase.client
         .from('payments')
@@ -38,7 +39,7 @@ class PaymentRemoteDataSource {
         .single();
 
     await AppSupabase.client.from('booking_requests').update({
-      'payment_status': bookingPaymentStatus,
+      'payment_status': resolvedBookingPaymentStatus,
       'updated_at': now.toIso8601String(),
     }).eq('id', bookingId);
 

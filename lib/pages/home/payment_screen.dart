@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
+import 'package:homeu/app/booking/booking_models.dart';
 import 'package:homeu/core/theme/homeu_app_theme.dart';
 import 'package:homeu/app/booking/payment_models.dart';
 import 'package:homeu/app/booking/payment_remote_datasource.dart';
@@ -20,14 +21,16 @@ class HomeUPaymentScreen extends StatefulWidget {
     required this.property,
     required this.durationMonths,
     required this.startDate,
-    required this.totalPrice,
+    this.totalPrice,
+    this.depositAmount,
   });
 
   final String bookingId;
   final PropertyItem property;
   final int durationMonths;
   final DateTime startDate;
-  final double totalPrice;
+  final double? totalPrice;
+  final double? depositAmount;
 
   @override
   State<HomeUPaymentScreen> createState() => _HomeUPaymentScreenState();
@@ -45,6 +48,9 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
   bool _showCardBack = false;
   bool _isSubmittingPayment = false;
   Payment? _latestPayment;
+
+  double get _resolvedDepositAmount =>
+      widget.depositAmount ?? widget.totalPrice ?? 0;
 
   @override
   void initState() {
@@ -72,7 +78,7 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
     return Scaffold(
       backgroundColor: context.colors.surface,
       appBar: AppBar(
-        title: const Text('Payment'),
+        title: const Text('Deposit Payment'),
         backgroundColor: context.colors.surface,
       ),
       bottomNavigationBar: SafeArea(
@@ -94,7 +100,7 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
                     height: 18,
                     child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                   )
-                : const Text('Pay Now'),
+                : const Text('Pay Deposit'),
           ),
         ),
       ),
@@ -107,7 +113,7 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
               _buildStepIndicator(1),
               const SizedBox(height: 24),
               Text(
-                'Payment Method',
+                'Deposit Payment Method',
                 style: TextStyle(
                   color: context.homeuPrimaryText,
                   fontSize: 16,
@@ -229,7 +235,7 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Payment Summary',
+                      'Deposit Payment Summary',
                       style: TextStyle(
                         color: context.homeuPrimaryText,
                         fontSize: 15,
@@ -243,7 +249,16 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
                     if (_latestPayment != null)
                       _summaryRow('Payment Status', _latestPayment!.status),
                     const Divider(height: 18),
-                    _summaryRow('Total Amount', 'RM ${_formatCurrency(widget.totalPrice)}', emphasize: true),
+                    _summaryRow('Deposit Due Today', 'RM ${_formatCurrency(_resolvedDepositAmount)}', emphasize: true),
+                    const SizedBox(height: 8),
+                    Text(
+                      'This payment covers the deposit / first month fee only. Monthly rent will be collected after owner approval.',
+                      style: TextStyle(
+                        color: context.homeuMutedText,
+                        fontSize: 12,
+                        height: 1.45,
+                      ),
+                    ),
                     if (_latestPayment != null && _latestPayment!.status == 'Success') ...[
                       const SizedBox(height: 20),
                       ElevatedButton.icon(
@@ -408,7 +423,8 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
         bookingId: widget.bookingId,
         payerId: payerId,
         method: _methodLabel(_selectedMethod),
-        amount: widget.totalPrice,
+        amount: _resolvedDepositAmount,
+        bookingPaymentStatus: BookingPaymentStatus.depositPaid,
         simulateSuccess: true,
       );
 

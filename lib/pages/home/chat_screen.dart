@@ -76,12 +76,16 @@ class _HomeUChatScreenState extends State<HomeUChatScreen> {
             CircleAvatar(
               radius: 20,
               backgroundColor: context.homeuAccent.withValues(alpha: 0.1),
-              backgroundImage: _conversation?.otherUserPhotoUrl != null
+              backgroundImage: _conversation?.otherUserPhotoUrl != null &&
+                      _conversation!.otherUserPhotoUrl!.isNotEmpty
                   ? NetworkImage(_conversation!.otherUserPhotoUrl!)
                   : null,
-              child: _conversation?.otherUserPhotoUrl == null
+              child: _conversation?.otherUserPhotoUrl == null ||
+                      _conversation!.otherUserPhotoUrl!.isEmpty
                   ? Text(
-                      otherName.substring(0, 1).toUpperCase(),
+                      otherName.isNotEmpty
+                          ? otherName.substring(0, 1).toUpperCase()
+                          : 'C',
                       style: TextStyle(
                         color: context.homeuAccent,
                         fontWeight: FontWeight.bold,

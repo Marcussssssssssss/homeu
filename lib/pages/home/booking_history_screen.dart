@@ -12,6 +12,7 @@ import 'package:homeu/app/booking/payment_remote_datasource.dart';
 import 'package:homeu/core/supabase/app_supabase.dart';
 import 'package:homeu/pages/home/property_details_screen.dart';
 import 'package:homeu/pages/home/property_item.dart';
+import 'package:homeu/pages/home/monthly_rent_payment_screen.dart';
 import 'package:homeu/pages/home/receipt_screen.dart';
 import 'package:homeu/pages/home/review_rating_screen.dart';
 import 'package:homeu/pages/home/widgets/qr_verification_dialog.dart';
@@ -186,6 +187,23 @@ class _HomeUBookingHistoryScreenState extends State<HomeUBookingHistoryScreen>
                           );
                         }
                       : null,
+                  onPayMonthlyRent: booking.status == HomeUBookingStatus.approved &&
+                          !BookingPaymentStatus.isMonthlyRentPaid(booking.paymentStatus)
+                      ? () async {
+                          await Navigator.of(context).push<bool>(
+                            MaterialPageRoute<bool>(
+                              builder: (_) => HomeUMonthlyRentPaymentScreen(
+                                booking: booking.booking,
+                                property: booking.property,
+                              ),
+                            ),
+                          );
+
+                          if (mounted) {
+                            refresh();
+                          }
+                        }
+                      : null,
                   onShowQR: (booking.status == HomeUBookingStatus.approved ||
                           booking.payment != null)
                       ? () => _showQRVerification(booking)
@@ -263,7 +281,8 @@ class _HomeUBookingHistoryScreenState extends State<HomeUBookingHistoryScreen>
       final List<_BookingHistoryItem> items = [];
       for (final booking in bookings) {
         Payment? payment;
-        if (booking.paymentStatus == 'Paid') {
+        if (BookingPaymentStatus.isDepositPaid(booking.paymentStatus) ||
+            BookingPaymentStatus.isMonthlyRentPaid(booking.paymentStatus)) {
           payment = await _paymentRemoteDataSource.getLatestPayment(booking.id);
         }
         items.add(_mapBookingItem(booking, propertyById[booking.propertyId], payment));
@@ -336,6 +355,7 @@ class _HomeUBookingHistoryScreenState extends State<HomeUBookingHistoryScreen>
 
     return _BookingHistoryItem(
       id: booking.id,
+      booking: booking,
       property: resolvedProperty,
       propertyName: propertyName,
       location: resolvedProperty.location,
@@ -343,6 +363,7 @@ class _HomeUBookingHistoryScreenState extends State<HomeUBookingHistoryScreen>
       bookingDate: _formatDate(booking.createdAt),
       rentalPeriod: 'N/A',
       status: _mapStatus(booking.status),
+      paymentStatus: booking.paymentStatus,
       payment: payment,
     );
   }
@@ -409,6 +430,7 @@ class _BookingHistoryCard extends StatelessWidget {
     this.onCancel,
     this.onLeaveReview,
     this.onViewReceipt,
+    this.onPayMonthlyRent,
     this.onShowQR,
   });
 
@@ -417,6 +439,7 @@ class _BookingHistoryCard extends StatelessWidget {
   final VoidCallback? onCancel;
   final VoidCallback? onLeaveReview;
   final VoidCallback? onViewReceipt;
+  final VoidCallback? onPayMonthlyRent;
   final VoidCallback? onShowQR;
 
   @override
@@ -494,7 +517,11 @@ class _BookingHistoryCard extends StatelessWidget {
                   label: context.l10n.rentalPeriodLabel,
                   value: item.rentalPeriod,
                 ),
-                if (onCancel != null || onLeaveReview != null || onViewReceipt != null || onShowQR != null) ...[
+                if (onCancel != null ||
+                    onLeaveReview != null ||
+                    onViewReceipt != null ||
+                    onPayMonthlyRent != null ||
+                    onShowQR != null) ...[
                   const SizedBox(height: 14),
                   Wrap(
                     alignment: WrapAlignment.end,
@@ -519,6 +546,19 @@ class _BookingHistoryCard extends StatelessWidget {
                           style: TextButton.styleFrom(
                             foregroundColor: const Color(0xFF10B981),
                             padding: const EdgeInsets.symmetric(horizontal: 8),
+                          ),
+                        ),
+                      if (onPayMonthlyRent != null)
+                        FilledButton.icon(
+                          key: const Key('pay_monthly_rent_button'),
+                          onPressed: onPayMonthlyRent,
+                          icon: const Icon(Icons.payments_rounded, size: 18),
+                          label: const Text('Pay Monthly Rent'),
+                          style: FilledButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
                         ),
                       if (onCancel != null)
@@ -632,6 +672,7 @@ class _InfoRow extends StatelessWidget {
 class _BookingHistoryItem {
   const _BookingHistoryItem({
     required this.id,
+    required this.booking,
     required this.property,
     required this.propertyName,
     required this.location,
@@ -639,10 +680,12 @@ class _BookingHistoryItem {
     required this.bookingDate,
     required this.rentalPeriod,
     required this.status,
+    required this.paymentStatus,
     this.payment,
   });
 
   final String id;
+  final BookingRequest booking;
   final PropertyItem property;
   final String propertyName;
   final String location;
@@ -650,6 +693,7 @@ class _BookingHistoryItem {
   final String bookingDate;
   final String rentalPeriod;
   final HomeUBookingStatus status;
+  final String paymentStatus;
   final Payment? payment;
 }
 

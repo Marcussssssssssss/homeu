@@ -26,7 +26,7 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
   bool _isSubmitting = false;
 
   double get _monthlyPrice => _extractPrice(widget.property.pricePerMonth);
-  double get _totalPrice => _monthlyPrice * _selectedDurationMonths;
+  double get _depositAmount => _monthlyPrice;
 
   @override
   Widget build(BuildContext context) {
@@ -272,7 +272,7 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Total Price Calculation',
+                      'Deposit Payment Summary',
                       style: TextStyle(
                         color: context.homeuPrimaryText,
                         fontSize: 15,
@@ -283,7 +283,7 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
                     Row(
                       children: [
                         Text(
-                          'Monthly Price',
+                          'Monthly Rent',
                           style: TextStyle(
                             color: context.homeuMutedText,
                             fontSize: 13,
@@ -304,7 +304,7 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
                     Row(
                       children: [
                         Text(
-                          'Duration ($_selectedDurationMonths months)',
+                          'Booking Duration ($_selectedDurationMonths months)',
                           style: TextStyle(
                             color: context.homeuMutedText,
                             fontSize: 13,
@@ -328,7 +328,7 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
                     Row(
                       children: [
                         Text(
-                          'Estimated Total',
+                          'Amount Due Today',
                           style: TextStyle(
                             color: context.homeuPrimaryText,
                             fontSize: 15,
@@ -337,7 +337,7 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
                         ),
                         const Spacer(),
                         Text(
-                          'RM ${_formatCurrency(_totalPrice)}',
+                          'RM ${_formatCurrency(_depositAmount)}',
                           key: const Key('total_price_text'),
                           style: TextStyle(
                             color: context.homeuPrice,
@@ -346,6 +346,15 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
                           ),
                         ),
                       ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'You only need to pay the deposit / first month fee now. Monthly rent will be available after owner approval.',
+                      style: TextStyle(
+                        color: context.homeuMutedText,
+                        fontSize: 12,
+                        height: 1.45,
+                      ),
                     ),
                   ],
                 ),
@@ -428,8 +437,8 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
         status: 'Pending',
         createdAt: now,
         updatedAt: now,
-        totalAmount: _totalPrice,
-        paymentStatus: 'Pending',
+        totalAmount: _depositAmount,
+        paymentStatus: BookingPaymentStatus.depositPending,
       );
 
       debugPrint(
@@ -455,7 +464,8 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
             property: widget.property,
             durationMonths: _selectedDurationMonths,
             startDate: _startDate,
-            totalPrice: _totalPrice,
+            totalPrice: _depositAmount,
+            depositAmount: _depositAmount,
           ),
         ),
       );

@@ -1,3 +1,25 @@
+class BookingPaymentStatus {
+  const BookingPaymentStatus._();
+
+  static const String depositPending = 'Deposit Pending';
+  static const String depositPaid = 'Deposit Paid';
+  static const String monthlyRentDue = 'Monthly Rent Due';
+  static const String monthlyRentPaid = 'Monthly Rent Paid';
+
+  static bool isDepositPaid(String value) {
+    final normalized = value.trim().toLowerCase();
+    return normalized == depositPaid.toLowerCase() || normalized == 'paid';
+  }
+
+  static bool isMonthlyRentDue(String value) {
+    return value.trim().toLowerCase() == monthlyRentDue.toLowerCase();
+  }
+
+  static bool isMonthlyRentPaid(String value) {
+    return value.trim().toLowerCase() == monthlyRentPaid.toLowerCase();
+  }
+}
+
 class BookingRequest {
   const BookingRequest({
     required this.id,
@@ -33,7 +55,7 @@ class BookingRequest {
       updatedAt: _parseDateTime(json['updated_at'] ?? json['updatedAt']) ??
           DateTime.fromMillisecondsSinceEpoch(0),
       totalAmount: _parseDouble(json['total_amount'] ?? json['totalAmount']) ?? 0,
-      paymentStatus: json['payment_status']?.toString() ?? json['paymentStatus']?.toString() ?? '',
+      paymentStatus: json['payment_status']?.toString() ?? json['paymentStatus']?.toString() ?? BookingPaymentStatus.depositPending,
     );
   }
 
