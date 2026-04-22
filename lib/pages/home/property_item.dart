@@ -18,6 +18,8 @@ class PropertyItem {
     this.furnishing = 'Any',
     this.nearbyLandmarks = 'Nearby landmarks not available.',
     this.createdAt,
+    this.facilities = const <String>[],
+    this.imageUrls = const <String>[],
   });
 
   final String id;
@@ -36,10 +38,11 @@ class PropertyItem {
   final String furnishing;
   final String nearbyLandmarks;
   final DateTime? createdAt;
+  final List<String> facilities;
+  final List<String> imageUrls;
 
   double get pricePerMonthValue {
     final normalized = pricePerMonth.replaceAll(RegExp(r'[^0-9.]'), '');
     return double.tryParse(normalized) ?? 0;
   }
 }
-

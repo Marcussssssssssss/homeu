@@ -10,11 +10,13 @@ class PropertyRemoteDataSource {
       return const <PropertyItem>[];
     }
 
+    // Only fetch properties where status is 'active'
     final dynamic rows = await AppSupabase.client
         .from('properties')
         .select(
-          'id, owner_id, title, description, location_area, monthly_price, property_type, room_type, furnishing, nearby_landmarks, created_at',
-        );
+          'id, owner_id, title, description, location_area, monthly_price, property_type, room_type, furnishing, nearby_landmarks, created_at, status, facilities',
+        )
+        .eq('status', 'Active');
 
     if (rows is! List) {
       return const <PropertyItem>[];
@@ -49,7 +51,7 @@ class PropertyRemoteDataSource {
     final dynamic rows = await AppSupabase.client
         .from('properties')
         .select(
-          'id, owner_id, title, description, location_area, monthly_price, property_type, room_type, furnishing, nearby_landmarks, created_at',
+          'id, owner_id, title, description, location_area, monthly_price, property_type, room_type, furnishing, nearby_landmarks, created_at, status, facilities',
         )
         .inFilter('id', ids);
 
@@ -126,6 +128,16 @@ class PropertyRemoteDataSource {
         : 'Property Owner';
     final ownerRole = _formatOwnerRole(ownerProfile?.role ?? 'owner');
 
+    // Parse facilities from JSON array or string
+    final rawFacilities = row['facilities'];
+    List<String> facilities = [];
+    if (rawFacilities is List) {
+      facilities = rawFacilities.map((e) => e.toString()).toList();
+    } else if (rawFacilities is String) {
+      // Handle comma-separated string if that's how it's stored
+      facilities = rawFacilities.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+    }
+
     return PropertyItem(
       id: row['id']?.toString() ?? '',
       ownerId: ownerId,
@@ -142,6 +154,7 @@ class PropertyRemoteDataSource {
       furnishing: row['furnishing']?.toString() ?? 'Any',
       nearbyLandmarks: row['nearby_landmarks']?.toString() ?? 'Nearby landmarks not available.',
       createdAt: createdAt,
+      facilities: facilities,
       photoColors: const [
         Color(0xFF5D7FBF),
         Color(0xFF4A68A8),
@@ -171,4 +184,3 @@ class _OwnerProfile {
   final String fullName;
   final String role;
 }
-

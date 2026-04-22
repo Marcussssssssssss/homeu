@@ -27,6 +27,22 @@ class _HomeUPropertyDetailsScreenState extends State<HomeUPropertyDetailsScreen>
     super.dispose();
   }
 
+  IconData _getFacilityIcon(String facility) {
+    final f = facility.toLowerCase();
+    if (f.contains('wifi')) return Icons.wifi_rounded;
+    if (f.contains('parking')) return Icons.local_parking_rounded;
+    if (f.contains('aircond')) return Icons.ac_unit_rounded;
+    if (f.contains('lift')) return Icons.elevator_rounded;
+    if (f.contains('gym')) return Icons.fitness_center_rounded;
+    if (f.contains('swimming pool') || f.contains('pool')) return Icons.pool_rounded;
+    if (f.contains('security')) return Icons.security_rounded;
+    if (f.contains('balcony')) return Icons.balcony_rounded;
+    if (f.contains('playground')) return Icons.child_care_rounded;
+    if (f.contains('washing machine')) return Icons.local_laundry_service_rounded;
+    if (f.contains('bbq') || f.contains('pit')) return Icons.outdoor_grill_rounded;
+    return Icons.check_circle_outline_rounded;
+  }
+
   @override
   Widget build(BuildContext context) {
     if (!HomeUSession.canAccess(HomeURole.tenant)) {
@@ -311,16 +327,25 @@ class _HomeUPropertyDetailsScreenState extends State<HomeUPropertyDetailsScreen>
                 ),
               ),
               const SizedBox(height: 10),
-              const Row(
-                key: Key('facilities_row'),
-                children: [
-                  _FacilityBadge(icon: Icons.wifi_rounded, label: 'WiFi'),
-                  SizedBox(width: 8),
-                  _FacilityBadge(icon: Icons.local_parking_rounded, label: 'Parking'),
-                  SizedBox(width: 8),
-                  _FacilityBadge(icon: Icons.ac_unit_rounded, label: 'Aircond'),
-                ],
-              ),
+              if (property.facilities.isEmpty)
+                Text(
+                  'No facilities listed.',
+                  style: TextStyle(
+                    color: context.homeuMutedText,
+                    fontSize: 13,
+                  ),
+                )
+              else
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
+                  children: property.facilities.map((f) {
+                    return _FacilityBadge(
+                      icon: _getFacilityIcon(f),
+                      label: f,
+                    );
+                  }).toList(),
+                ),
               const SizedBox(height: 18),
               Text(
                 'Owner Information',
@@ -409,31 +434,31 @@ class _FacilityBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        decoration: BoxDecoration(
-          color: context.homeuCard,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: context.homeuSoftBorder),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, color: context.homeuAccent, size: 20),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                color: context.homeuPrimaryText,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-              ),
+    return Container(
+      width: (MediaQuery.of(context).size.width - 64) / 3,
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      decoration: BoxDecoration(
+        color: context.homeuCard,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: context.homeuSoftBorder),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, color: context.homeuAccent, size: 20),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: context.homeuPrimaryText,
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 }
-
-

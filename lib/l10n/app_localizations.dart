@@ -115,7 +115,7 @@ abstract class AppLocalizations {
   /// No description provided for @navFavorites.
   ///
   /// In en, this message translates to:
-  /// **'Favorites'**
+  /// **'Favourite'**
   String get navFavorites;
 
   /// No description provided for @navBookings.
