@@ -44,8 +44,8 @@ class PropertyRemoteDataSource {
   }
 
   Future<Map<String, PropertyItem>> fetchPropertiesByIds(
-      Iterable<String> propertyIds,
-      ) async {
+    Iterable<String> propertyIds,
+  ) async {
     if (!AppSupabase.isInitialized) {
       return const <String, PropertyItem>{};
     }
@@ -260,7 +260,6 @@ class PropertyRemoteDataSource {
         Color(0xFF4A68A8),
         Color(0xFF2F4F8F),
       ],
-      imageUrl: imageUrls.isNotEmpty ? imageUrls.first : null,
     );
   }
 
