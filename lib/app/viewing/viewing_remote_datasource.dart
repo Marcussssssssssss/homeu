@@ -79,5 +79,28 @@ class ViewingRemoteDataSource {
         .eq('id', viewingId)
         .eq('tenant_id', tenantId);
   }
+
+  Future<bool> hasActiveViewingForProperty({
+    required String tenantId,
+    required String propertyId,
+  }) async {
+    if (!AppSupabase.isInitialized) {
+      return false;
+    }
+
+    final dynamic rows = await AppSupabase.client
+        .from('viewing_requests')
+        .select('id')
+        .eq('tenant_id', tenantId)
+        .eq('property_id', propertyId)
+        .inFilter('status', ['Pending', 'Approved', 'RescheduleRequested'])
+        .limit(1);
+
+    if (rows is! List) {
+      return false;
+    }
+
+    return rows.isNotEmpty;
+  }
 }
 

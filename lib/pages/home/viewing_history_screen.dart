@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
+import 'package:homeu/app/homeu_app.dart';
 import 'package:homeu/core/theme/homeu_app_theme.dart';
 import 'package:homeu/app/property/property_remote_datasource.dart';
 import 'package:homeu/app/viewing/viewing_models.dart';
@@ -8,6 +9,7 @@ import 'package:homeu/app/viewing/viewing_remote_datasource.dart';
 import 'package:homeu/core/supabase/app_supabase.dart';
 import 'package:homeu/pages/home/property_details_screen.dart';
 import 'package:homeu/pages/home/property_item.dart';
+import 'package:homeu/pages/home/widgets/qr_verification_dialog.dart';
 import 'package:homeu/pages/home/widgets/status_filter_chips.dart';
 
 enum HomeUViewingFilterStatus {
@@ -30,7 +32,8 @@ class HomeUViewingHistoryScreen extends StatefulWidget {
       _HomeUViewingHistoryScreenState();
 }
 
-class _HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
+class _HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen>
+    with RouteAware {
   final ViewingRemoteDataSource _viewingRemoteDataSource =
       const ViewingRemoteDataSource();
   final PropertyRemoteDataSource _propertyRemoteDataSource =
@@ -56,6 +59,28 @@ class _HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
       return;
     }
     _loadViewings();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context)!);
+  }
+
+  @override
+  void dispose() {
+    routeObserver.unsubscribe(this);
+    super.dispose();
+  }
+
+  @override
+  void didPopNext() {
+    // Called when the top route has been popped off, and this route shows up.
+    refresh();
+  }
+
+  void refresh() {
+    _loadViewings(silent: true);
   }
 
   @override
@@ -151,6 +176,9 @@ class _HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
                         onCancel: _tenantId == null
                             ? null
                             : () => _handleCancel(viewing, _tenantId!),
+                        onShowQR: viewing.status.toLowerCase() == 'approved'
+                            ? () => _showQRVerification(viewing)
+                            : null,
                       );
                     }),
                   ],
@@ -160,7 +188,7 @@ class _HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
     );
   }
 
-  Future<void> _loadViewings() async {
+  Future<void> _loadViewings({bool silent = false}) async {
     if (!AppSupabase.isInitialized) {
       if (!mounted) {
         return;
@@ -170,7 +198,7 @@ class _HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
         _viewings = const <ViewingRequest>[];
         _propertyById = const <String, PropertyItem>{};
         _loadError = 'Supabase is not initialized.';
-        _isLoading = false;
+        if (!silent) _isLoading = false;
       });
       return;
     }
@@ -186,9 +214,13 @@ class _HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
         _viewings = const <ViewingRequest>[];
         _propertyById = const <String, PropertyItem>{};
         _loadError = 'Please log in to view your viewing history.';
-        _isLoading = false;
+        if (!silent) _isLoading = false;
       });
       return;
+    }
+
+    if (!silent && _viewings.isEmpty) {
+      setState(() => _isLoading = true);
     }
 
     try {
@@ -361,6 +393,18 @@ class _HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
     }
   }
 
+  void _showQRVerification(ViewingRequest viewing) {
+    final tenantName = AppSupabase.auth.currentUser?.email?.split('@').first ?? 'Tenant';
+    showDialog<void>(
+      context: context,
+      builder: (context) => HomeUQRVerificationDialog(
+        id: viewing.id,
+        tenantName: tenantName,
+        title: 'Viewing Verification',
+      ),
+    );
+  }
+
   HomeUViewingFilterStatus _mapStatus(String status) {
     switch (status.trim().toLowerCase()) {
       case 'approved':
@@ -407,6 +451,7 @@ class _ViewingCard extends StatelessWidget {
     required this.onOpenProperty,
     required this.onReschedule,
     required this.onCancel,
+    this.onShowQR,
   });
 
   final ViewingRequest viewing;
@@ -414,6 +459,7 @@ class _ViewingCard extends StatelessWidget {
   final VoidCallback onOpenProperty;
   final VoidCallback? onReschedule;
   final VoidCallback? onCancel;
+  final VoidCallback? onShowQR;
 
   @override
   Widget build(BuildContext context) {
@@ -467,6 +513,21 @@ class _ViewingCard extends StatelessWidget {
                 const SizedBox(height: 10),
                 Row(
                   children: [
+                    if (onShowQR != null)
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: ElevatedButton.icon(
+                            onPressed: onShowQR,
+                            icon: const Icon(Icons.qr_code_rounded, size: 18),
+                            label: const Text('Show QR'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF10B981),
+                              foregroundColor: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
                     Expanded(
                       child: OutlinedButton(
                         onPressed: onReschedule,
