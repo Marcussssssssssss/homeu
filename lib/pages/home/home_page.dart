@@ -870,8 +870,10 @@ class _PropertyCard extends StatelessWidget {
             Stack(
               children: [
                 PropertyImageGallery(
-                  colors: property.photoColors,
+                  key: ValueKey('home_gallery_${property.id}'),
+                  imageUrls: property.imageUrls,
                   onTap: onTap,
+                  limit: 3,
                 ),
                 Positioned(
                   right: 10,

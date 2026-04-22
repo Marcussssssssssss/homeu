@@ -83,7 +83,7 @@ class _EmptyComparisonState extends StatelessWidget {
             width: 80,
             height: 80,
             decoration: BoxDecoration(
-              color: context.homeuAccent.withValues(alpha: 0.1),
+              color: context.homeuAccent.withOpacity(0.1),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Icon(
@@ -184,9 +184,9 @@ class _PriceComparisonWidget extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: context.homeuAccent.withValues(alpha: 0.1),
+        color: context.homeuAccent.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: context.homeuAccent.withValues(alpha: 0.3)),
+        border: Border.all(color: context.homeuAccent.withOpacity(0.3)),
       ),
       child: Row(
         children: [
@@ -258,7 +258,9 @@ class _PropertyComparisonCard extends StatelessWidget {
           Stack(
             children: [
               PropertyImageGallery(
-                colors: property.photoColors,
+                key: ValueKey('compare_gallery_${property.id}'),
+                imageUrls: property.imageUrls,
+                limit: 3,
               ),
               Positioned(
                 top: 8,
@@ -266,7 +268,7 @@ class _PropertyComparisonCard extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.5),
+                    color: Colors.black.withOpacity(0.5),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
@@ -291,7 +293,7 @@ class _PropertyComparisonCard extends StatelessWidget {
                     width: 28,
                     height: 28,
                     decoration: BoxDecoration(
-                      color: Colors.red.withValues(alpha: 0.9),
+                      color: Colors.red.withOpacity(0.9),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: const Center(

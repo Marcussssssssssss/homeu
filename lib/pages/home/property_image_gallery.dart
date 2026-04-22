@@ -3,12 +3,16 @@ import 'package:flutter/material.dart';
 class PropertyImageGallery extends StatefulWidget {
   const PropertyImageGallery({
     super.key,
-    required this.colors,
+    required this.imageUrls,
     this.onTap,
+    this.limit,
+    this.height = 148,
   });
 
-  final List<Color> colors;
+  final List<String> imageUrls;
   final VoidCallback? onTap;
+  final int? limit;
+  final double height;
 
   @override
   State<PropertyImageGallery> createState() => _PropertyImageGalleryState();
@@ -31,71 +35,52 @@ class _PropertyImageGalleryState extends State<PropertyImageGallery> {
   }
 
   @override
+  void didUpdateWidget(covariant PropertyImageGallery oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.imageUrls != widget.imageUrls) {
+      _currentIndex = 0;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _pageController.hasClients) {
+          _pageController.jumpToPage(0);
+        }
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final colors = widget.colors;
-    final hasMultiple = colors.isNotEmpty && colors.length > 1;
-    final safeColors = colors.isNotEmpty ? colors : [Colors.grey];
+    List<String> finalUrls = widget.imageUrls;
+
+    // Apply specific rules for limited views (Home and Compare)
+    if (widget.limit != null && finalUrls.isNotEmpty) {
+      if (finalUrls.length >= widget.limit!) {
+        finalUrls = finalUrls.take(widget.limit!).toList();
+      }
+      // If count is 1 or 2 and less than limit, finalUrls remains as is (showing 1 or 2).
+    }
+
+    final hasMultiple = finalUrls.length > 1;
 
     return GestureDetector(
       onTap: widget.onTap,
       child: Stack(
         children: [
           SizedBox(
-            height: 148,
-            child: hasMultiple
-                ? PageView.builder(
-                    controller: _pageController,
-                    onPageChanged: (index) {
-                      setState(() => _currentIndex = index);
-                    },
-                    itemCount: safeColors.length,
-                    itemBuilder: (context, index) {
-                      return Container(
-                        decoration: BoxDecoration(
-                          borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(16),
-                          ),
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              safeColors[index].withValues(alpha: 0.9),
-                              const Color(0xFFF0F5FF),
-                            ],
-                          ),
-                        ),
-                        child: const Center(
-                          child: Icon(
-                            Icons.apartment_rounded,
-                            size: 56,
-                            color: Colors.white,
-                          ),
-                        ),
-                      );
-                    },
-                  )
-                : Container(
-                    decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.vertical(
-                        top: Radius.circular(16),
-                      ),
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          safeColors.first.withValues(alpha: 0.9),
-                          const Color(0xFFF0F5FF),
-                        ],
-                      ),
-                    ),
-                    child: const Center(
-                      child: Icon(
-                        Icons.apartment_rounded,
-                        size: 56,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
+            height: widget.height,
+            child: finalUrls.isEmpty
+                ? _buildPlaceholder()
+                : (hasMultiple
+                    ? PageView.builder(
+                        controller: _pageController,
+                        onPageChanged: (index) {
+                          setState(() => _currentIndex = index);
+                        },
+                        itemCount: finalUrls.length,
+                        itemBuilder: (context, index) {
+                          return _buildImage(finalUrls[index]);
+                        },
+                      )
+                    : _buildImage(finalUrls.first)),
           ),
           if (hasMultiple)
             Positioned(
@@ -105,7 +90,7 @@ class _PropertyImageGalleryState extends State<PropertyImageGallery> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(
-                  safeColors.length,
+                  finalUrls.length,
                   (index) => Container(
                     margin: const EdgeInsets.symmetric(horizontal: 4),
                     width: _currentIndex == index ? 24 : 8,
@@ -113,7 +98,7 @@ class _PropertyImageGalleryState extends State<PropertyImageGallery> {
                     decoration: BoxDecoration(
                       color: _currentIndex == index
                           ? Colors.white
-                          : Colors.white.withValues(alpha: 0.5),
+                          : Colors.white.withOpacity(0.5),
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
@@ -124,6 +109,58 @@ class _PropertyImageGalleryState extends State<PropertyImageGallery> {
       ),
     );
   }
+
+  Widget _buildImage(String url) {
+    return ClipRRect(
+      borderRadius: const BorderRadius.vertical(
+        top: Radius.circular(16),
+      ),
+      child: Image.network(
+        url,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        height: double.infinity,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return _buildPlaceholder(isLoading: true);
+        },
+        errorBuilder: (context, error, stackTrace) {
+          debugPrint('Failed to load image: $url');
+          debugPrint('Error: $error');
+          return _buildPlaceholder();
+        },
+      ),
+    );
+  }
+
+  Widget _buildPlaceholder({bool isLoading = false}) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: const BorderRadius.vertical(
+          top: Radius.circular(16),
+        ),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Colors.blueGrey.withOpacity(0.1),
+            Colors.blueGrey.withOpacity(0.05),
+          ],
+        ),
+      ),
+      child: Center(
+        child: isLoading
+            ? const SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : const Icon(
+                Icons.apartment_rounded,
+                size: 56,
+                color: Colors.blueGrey,
+              ),
+      ),
+    );
+  }
 }
-
-
