@@ -13,8 +13,8 @@ class PropertyRemoteDataSource {
     final dynamic rows = await AppSupabase.client
         .from('properties')
         .select(
-          'id, owner_id, title, description, location_area, monthly_price, property_type, room_type, furnishing, nearby_landmarks, created_at, status, facilities',
-        )
+      'id, owner_id, title, description, location_area, monthly_price, property_type, room_type, furnishing, nearby_landmarks, created_at, status, facilities',
+    )
         .eq('status', 'Active');
 
     if (rows is! List) {
@@ -44,8 +44,8 @@ class PropertyRemoteDataSource {
   }
 
   Future<Map<String, PropertyItem>> fetchPropertiesByIds(
-    Iterable<String> propertyIds,
-  ) async {
+      Iterable<String> propertyIds,
+      ) async {
     if (!AppSupabase.isInitialized) {
       return const <String, PropertyItem>{};
     }
@@ -63,8 +63,8 @@ class PropertyRemoteDataSource {
     final dynamic rows = await AppSupabase.client
         .from('properties')
         .select(
-          'id, owner_id, title, description, location_area, monthly_price, property_type, room_type, furnishing, nearby_landmarks, created_at, status, facilities',
-        )
+      'id, owner_id, title, description, location_area, monthly_price, property_type, room_type, furnishing, nearby_landmarks, created_at, status, facilities',
+    )
         .inFilter('id', ids);
 
     if (rows is! List) {
@@ -260,6 +260,7 @@ class PropertyRemoteDataSource {
         Color(0xFF4A68A8),
         Color(0xFF2F4F8F),
       ],
+      imageUrl: imageUrls.isNotEmpty ? imageUrls.first : null,
     );
   }
 

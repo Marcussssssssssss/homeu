@@ -1,6 +1,5 @@
 import 'package:homeu/app/chat/chat_models.dart';
 import 'package:homeu/core/supabase/app_supabase.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ChatRemoteDataSource {
   const ChatRemoteDataSource();
@@ -14,71 +13,52 @@ class ChatRemoteDataSource {
       return null;
     }
 
-    final safePropertyId = propertyId.trim();
-    final safeTenantId = tenantId.trim();
-    final safeOwnerId = ownerId.trim();
-    if (safePropertyId.isEmpty || safeTenantId.isEmpty || safeOwnerId.isEmpty) {
-      throw Exception('Missing chat identifiers.');
-    }
-
+    // Check for existing conversation with ordering as per GitHub version
     final dynamic existingRows = await AppSupabase.client
         .from('conversations')
         .select('*')
-        .eq('property_id', safePropertyId)
-        .eq('tenant_id', safeTenantId)
-        .eq('owner_id', safeOwnerId)
+        .eq('property_id', propertyId)
+        .eq('tenant_id', tenantId)
+        .eq('owner_id', ownerId)
         .order('created_at', ascending: true)
         .limit(1);
 
+    Map<String, dynamic>? row;
     if (existingRows is List && existingRows.isNotEmpty) {
-      final row = existingRows.first;
-      if (row is Map<String, dynamic>) {
-        return Conversation.fromJson(row);
-      }
+      row = existingRows.first as Map<String, dynamic>?;
     }
 
-    final nowIso = DateTime.now().toUtc().toIso8601String();
-    try {
+    if (row == null) {
+      final nowIso = DateTime.now().toUtc().toIso8601String();
       final dynamic createdRow = await AppSupabase.client
           .from('conversations')
           .insert({
-            'property_id': safePropertyId,
-            'tenant_id': safeTenantId,
-            'owner_id': safeOwnerId,
-            'created_at': nowIso,
+            'property_id': propertyId,
+            'tenant_id': tenantId,
+            'owner_id': ownerId,
             'last_message_at': nowIso,
           })
           .select('*')
           .single();
-
-      if (createdRow is! Map<String, dynamic>) {
-        return null;
+      if (createdRow is Map<String, dynamic>) {
+        row = createdRow;
       }
-
-      return Conversation.fromJson(createdRow);
-    } on PostgrestException catch (e) {
-      if (!_isDuplicateKeyError(e)) {
-        rethrow;
-      }
-
-      final dynamic retriedRows = await AppSupabase.client
-          .from('conversations')
-          .select('*')
-          .eq('property_id', safePropertyId)
-          .eq('tenant_id', safeTenantId)
-          .eq('owner_id', safeOwnerId)
-          .order('created_at', ascending: true)
-          .limit(1);
-
-      if (retriedRows is List && retriedRows.isNotEmpty) {
-        final row = retriedRows.first;
-        if (row is Map<String, dynamic>) {
-          return Conversation.fromJson(row);
-        }
-      }
-
-      rethrow;
     }
+
+    if (row == null) return null;
+
+    // Fetch other user's profile to populate other_user_name and other_user_photo_url
+    final myUserId = AppSupabase.auth.currentUser?.id;
+    final otherUserId = row['tenant_id'] == myUserId ? row['owner_id'] : row['tenant_id'];
+    final profile = await _fetchProfile(otherUserId.toString());
+    
+    final Map<String, dynamic> json = Map<String, dynamic>.from(row);
+    if (profile != null) {
+      json['other_user_name'] = profile['full_name'];
+      json['other_user_photo_url'] = profile['profile_image_url'];
+    }
+
+    return Conversation.fromJson(json);
   }
 
   Future<List<Conversation>> listMyConversations({required String myUserId}) async {
@@ -86,6 +66,7 @@ class ChatRemoteDataSource {
       return const <Conversation>[];
     }
 
+    // Integrated ordering logic from GitHub version
     final dynamic rows = await AppSupabase.client
         .from('conversations')
         .select('*')
@@ -97,10 +78,59 @@ class ChatRemoteDataSource {
       return const <Conversation>[];
     }
 
-    return rows
-        .whereType<Map<String, dynamic>>()
-        .map(Conversation.fromJson)
-        .toList(growable: false);
+    final convs = rows.whereType<Map<String, dynamic>>().toList();
+    if (convs.isEmpty) return [];
+
+    // Collect all unique user IDs to fetch profiles for
+    final Set<String> userIds = {};
+    for (final c in convs) {
+      userIds.add(c['tenant_id'].toString());
+      userIds.add(c['owner_id'].toString());
+    }
+    userIds.remove(myUserId);
+
+    // Batch fetch profiles - Keeping your optimized performance logic
+    final Map<String, Map<String, dynamic>> profileMap = {};
+    if (userIds.isNotEmpty) {
+      final dynamic profiles = await AppSupabase.client
+          .from('profiles')
+          .select('id, full_name, profile_image_url')
+          .inFilter('id', userIds.toList());
+      
+      if (profiles is List) {
+        for (final p in profiles) {
+          if (p is Map<String, dynamic>) {
+            profileMap[p['id'].toString()] = p;
+          }
+        }
+      }
+    }
+
+    return convs.map((row) {
+      final otherUserId = row['tenant_id'] == myUserId ? row['owner_id'] : row['tenant_id'];
+      final profile = profileMap[otherUserId.toString()];
+      
+      final Map<String, dynamic> json = Map<String, dynamic>.from(row);
+      if (profile != null) {
+        json['other_user_name'] = profile['full_name'];
+        json['other_user_photo_url'] = profile['profile_image_url'];
+      }
+      
+      return Conversation.fromJson(json);
+    }).toList();
+  }
+
+  Future<Map<String, dynamic>?> _fetchProfile(String userId) async {
+    try {
+      final dynamic row = await AppSupabase.client
+          .from('profiles')
+          .select('id, full_name, profile_image_url')
+          .eq('id', userId)
+          .maybeSingle();
+      return row as Map<String, dynamic>?;
+    } catch (_) {
+      return null;
+    }
   }
 
   Future<List<ChatMessage>> fetchMessages(String conversationId) async {
@@ -161,13 +191,5 @@ class ChatRemoteDataSource {
     }
 
     return ChatMessage.fromJson(row);
-  }
-
-  bool _isDuplicateKeyError(PostgrestException e) {
-    final code = e.code?.trim() ?? '';
-    if (code == '23505') {
-      return true;
-    }
-    return e.message.toLowerCase().contains('duplicate key');
   }
 }
