@@ -6,8 +6,8 @@ import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/core/localization/homeu_l10n.dart';
 import 'package:homeu/core/theme/homeu_app_theme.dart';
 import 'package:homeu/pages/home/home_tenant_shell_screen.dart';
+import 'package:homeu/pages/home/home_owner_shell_screen.dart';
 import 'package:homeu/pages/auth/register_screen.dart';
-import 'package:homeu/pages/home/owner_dashboard_screen.dart';
 
 import 'forgot_password_screen.dart';
 
@@ -79,7 +79,7 @@ class _HomeULoginScreenState extends State<HomeULoginScreen> {
     HomeUSession.register(result.role!);
 
     final Widget destination = result.role == HomeURole.owner
-        ? const HomeUOwnerDashboardScreen()
+        ? const HomeUOwnerShellScreen()
         : const HomeUTenantShellScreen();
 
     Navigator.of(

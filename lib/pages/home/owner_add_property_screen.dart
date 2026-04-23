@@ -336,34 +336,40 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
               const SizedBox(height: 14),
               _SectionCard(
                 title: 'Facilities',
-                child: Wrap(
-                  key: const Key('facilities_checklist'),
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: _allFacilities.map(
-                        (facility) => FilterChip(
-                      label: Text(facility),
-                      selected: _selectedFacilities.contains(facility),
-                      onSelected: _isLoading
-                          ? null
-                          : (selected) {
-                        setState(() {
-                          if (selected) {
-                            _selectedFacilities.add(facility);
-                          } else {
-                            _selectedFacilities.remove(facility);
-                          }
-                        });
-                      },
-                      selectedColor: const Color(0xFFEAF2FF),
-                      checkmarkColor: const Color(0xFF1E3A8A),
-                      labelStyle: const TextStyle(
-                        color: Color(0xFF1F314F),
-                        fontWeight: FontWeight.w600,
-                      ),
-                      side: const BorderSide(color: Color(0x331E3A8A)),
+                child: SizedBox(
+                  height: 150,
+                  width: double.infinity,
+                  child: SingleChildScrollView(
+                    child: Wrap(
+                      key: const Key('facilities_checklist'),
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: _allFacilities.map(
+                            (facility) => FilterChip(
+                          label: Text(facility),
+                          selected: _selectedFacilities.contains(facility),
+                          onSelected: _isLoading
+                              ? null
+                              : (selected) {
+                            setState(() {
+                              if (selected) {
+                                _selectedFacilities.add(facility);
+                              } else {
+                                _selectedFacilities.remove(facility);
+                              }
+                            });
+                          },
+                          selectedColor: const Color(0xFFEAF2FF),
+                          checkmarkColor: const Color(0xFF1E3A8A),
+                          labelStyle: const TextStyle(
+                            color: Color(0xFF1F314F),
+                            fontWeight: FontWeight.w600,
+                          ),
+                          side: const BorderSide(color: Color(0x331E3A8A)),
+                        ),
+                      ).toList(),
                     ),
-                  ).toList(),
+                  ),
                 ),
               ),
               const SizedBox(height: 14),

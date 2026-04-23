@@ -8,9 +8,16 @@ import 'package:homeu/core/theme/homeu_app_theme.dart';
 import 'package:homeu/pages/home/conversation_list_screen.dart';
 import 'package:homeu/pages/home/owner_bottom_navigation_bar.dart';
 import 'package:homeu/pages/home/profile_screen.dart';
+import 'package:homeu/pages/home/owner_booking_requests_screen.dart';
+import 'package:homeu/pages/home/owner_my_properties_screen.dart';
 
 class HomeUOwnerAnalyticsScreen extends StatefulWidget {
-  const HomeUOwnerAnalyticsScreen({super.key});
+  const HomeUOwnerAnalyticsScreen({
+    super.key,
+    this.showBottomNavigationBar = true,
+  });
+
+  final bool showBottomNavigationBar;
 
   @override
   State<HomeUOwnerAnalyticsScreen> createState() =>
@@ -86,32 +93,49 @@ class _HomeUOwnerAnalyticsScreenState extends State<HomeUOwnerAnalyticsScreen> {
       appBar: AppBar(
         title: Text(context.l10n.ownerAnalyticsTitle),
         backgroundColor: context.colors.surface,
+        automaticallyImplyLeading: false,
       ),
-      bottomNavigationBar: HomeUOwnerBottomNavigationBar(
-        selectedIndex: _selectedNavIndex,
-        onDestinationSelected: (index) {
-          setState(() {
-            _selectedNavIndex = index;
-          });
-          if (index == 0) {
-            Navigator.of(context).pop();
-          }
-          if (index == 4) {
-            Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => const HomeUConversationListScreen(),
-              ),
-            );
-          }
-          if (index == 5) {
-            Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => const HomeUProfileScreen(role: HomeURole.owner),
-              ),
-            );
-          }
-        },
-      ),
+      bottomNavigationBar: widget.showBottomNavigationBar
+          ? HomeUOwnerBottomNavigationBar(
+              selectedIndex: _selectedNavIndex,
+              onDestinationSelected: (index) {
+                if (index == _selectedNavIndex) return;
+
+                if (index == 0) {
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                  return;
+                }
+                if (index == 1) {
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(builder: (_) => const HomeUOwnerMyPropertiesScreen()),
+                  );
+                  return;
+                }
+                if (index == 2) {
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(builder: (_) => const HomeUOwnerBookingRequestsScreen()),
+                  );
+                  return;
+                }
+                if (index == 4) {
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const HomeUConversationListScreen(),
+                    ),
+                  );
+                  return;
+                }
+                if (index == 5) {
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const HomeUProfileScreen(role: HomeURole.owner),
+                    ),
+                  );
+                  return;
+                }
+              },
+            )
+          : null,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
