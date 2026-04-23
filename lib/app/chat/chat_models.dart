@@ -6,6 +6,13 @@ class Conversation {
     required this.tenantId,
     required this.lastMessageAt,
     required this.createdAt,
+    this.otherUserName,
+    this.otherUserPhotoUrl,
+    this.lastMessageText,
+    this.isUnread = false,
+    this.hasActiveBooking = false,
+    this.isArchived = false,
+    this.isOnline = false,
   });
 
   final String id;
@@ -14,6 +21,15 @@ class Conversation {
   final String tenantId;
   final DateTime? lastMessageAt;
   final DateTime createdAt;
+  
+  // UI and Joined Fields
+  final String? otherUserName;
+  final String? otherUserPhotoUrl;
+  final String? lastMessageText;
+  final bool isUnread;
+  final bool hasActiveBooking;
+  final bool isArchived;
+  final bool isOnline;
 
   factory Conversation.fromJson(Map<String, dynamic> json) {
     return Conversation(
@@ -24,36 +40,19 @@ class Conversation {
       lastMessageAt: _parseDateTime(json['last_message_at'] ?? json['lastMessageAt']),
       createdAt: _parseDateTime(json['created_at'] ?? json['createdAt']) ??
           DateTime.fromMillisecondsSinceEpoch(0),
+      otherUserName: json['other_user_name']?.toString(),
+      otherUserPhotoUrl: json['other_user_photo_url']?.toString(),
+      lastMessageText: json['last_message_text']?.toString() ?? json['lastMessageText']?.toString(),
+      isUnread: json['is_unread'] == true || json['isUnread'] == true,
+      hasActiveBooking: json['has_active_booking'] == true || json['hasActiveBooking'] == true,
+      isArchived: json['is_archived'] == true || json['isArchived'] == true,
+      isOnline: json['is_online'] == true || json['isOnline'] == true,
     );
   }
 
-  Map<String, dynamic> toInsertJson() {
-    final data = <String, dynamic>{
-      'property_id': propertyId,
-      'owner_id': ownerId,
-      'tenant_id': tenantId,
-      'last_message_at': lastMessageAt?.toUtc().toIso8601String(),
-      'created_at': createdAt.toUtc().toIso8601String(),
-    };
-
-    if (id.isNotEmpty) {
-      data['id'] = id;
-    }
-
-    return data;
-  }
-
   static DateTime? _parseDateTime(dynamic value) {
-    if (value is DateTime) {
-      return value;
-    }
-    if (value is String) {
-      final normalized = value.trim();
-      if (normalized.isEmpty) {
-        return null;
-      }
-      return DateTime.tryParse(normalized);
-    }
+    if (value is DateTime) return value;
+    if (value is String) return DateTime.tryParse(value);
     return null;
   }
 }
@@ -66,6 +65,7 @@ class ChatMessage {
     required this.messageText,
     required this.status,
     required this.createdAt,
+    this.attachmentUrl,
   });
 
   final String id;
@@ -74,48 +74,24 @@ class ChatMessage {
   final String messageText;
   final String? status;
   final DateTime createdAt;
+  final String? attachmentUrl;
 
   factory ChatMessage.fromJson(Map<String, dynamic> json) {
     return ChatMessage(
       id: json['id']?.toString() ?? '',
-      conversationId:
-          json['conversation_id']?.toString() ?? json['conversationId']?.toString() ?? '',
+      conversationId: json['conversation_id']?.toString() ?? json['conversationId']?.toString() ?? '',
       senderId: json['sender_id']?.toString() ?? json['senderId']?.toString() ?? '',
       messageText: json['message_text']?.toString() ?? json['messageText']?.toString() ?? '',
       status: json['status']?.toString(),
+      attachmentUrl: json['attachment_url']?.toString() ?? json['attachmentUrl']?.toString(),
       createdAt: _parseDateTime(json['created_at'] ?? json['createdAt']) ??
           DateTime.fromMillisecondsSinceEpoch(0),
     );
   }
 
-  Map<String, dynamic> toInsertJson() {
-    final data = <String, dynamic>{
-      'conversation_id': conversationId,
-      'sender_id': senderId,
-      'message_text': messageText,
-      'status': status,
-      'created_at': createdAt.toUtc().toIso8601String(),
-    };
-
-    if (id.isNotEmpty) {
-      data['id'] = id;
-    }
-
-    return data;
-  }
-
   static DateTime? _parseDateTime(dynamic value) {
-    if (value is DateTime) {
-      return value;
-    }
-    if (value is String) {
-      final normalized = value.trim();
-      if (normalized.isEmpty) {
-        return null;
-      }
-      return DateTime.tryParse(normalized);
-    }
+    if (value is DateTime) return value;
+    if (value is String) return DateTime.tryParse(value);
     return null;
   }
 }
-

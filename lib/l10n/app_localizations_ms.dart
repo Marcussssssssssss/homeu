@@ -710,4 +710,46 @@ class AppLocalizationsMs extends AppLocalizations {
   @override
   String get updatePasswordErrorGeneric =>
       'Tidak dapat mengemas kini kata laluan sekarang. Sila cuba lagi.';
+
+  @override
+  String get chatTitle => 'Mesej';
+
+  @override
+  String get chatSearchHint => 'Cari mesej...';
+
+  @override
+  String get chatFilterAll => 'Semua';
+
+  @override
+  String get chatFilterUnread => 'Belum dibaca';
+
+  @override
+  String get chatFilterProperty => 'Hartanah';
+
+  @override
+  String get chatFilterArchived => 'Diarkibkan';
+
+  @override
+  String get chatYesterday => 'Semalam';
+
+  @override
+  String get chatOnline => 'Dalam Talian';
+
+  @override
+  String get chatOffline => 'Luar Talian';
+
+  @override
+  String get chatTypeMessageHint => 'Taip mesej...';
+
+  @override
+  String get chatAttachmentTitle => 'Hantar Lampiran';
+
+  @override
+  String get chatAttachImage => 'Imej';
+
+  @override
+  String get chatAttachCamera => 'Kamera';
+
+  @override
+  String get chatAttachDocument => 'Dokumen';
 }

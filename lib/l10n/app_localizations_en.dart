@@ -707,4 +707,46 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get updatePasswordErrorGeneric =>
       'Unable to update password right now. Please try again.';
+
+  @override
+  String get chatTitle => 'Messages';
+
+  @override
+  String get chatSearchHint => 'Search messages...';
+
+  @override
+  String get chatFilterAll => 'All';
+
+  @override
+  String get chatFilterUnread => 'Unread';
+
+  @override
+  String get chatFilterProperty => 'Property';
+
+  @override
+  String get chatFilterArchived => 'Archived';
+
+  @override
+  String get chatYesterday => 'Yesterday';
+
+  @override
+  String get chatOnline => 'Online';
+
+  @override
+  String get chatOffline => 'Offline';
+
+  @override
+  String get chatTypeMessageHint => 'Type a message...';
+
+  @override
+  String get chatAttachmentTitle => 'Send Attachment';
+
+  @override
+  String get chatAttachImage => 'Image';
+
+  @override
+  String get chatAttachCamera => 'Camera';
+
+  @override
+  String get chatAttachDocument => 'Document';
 }

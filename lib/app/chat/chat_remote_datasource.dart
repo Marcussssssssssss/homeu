@@ -142,7 +142,7 @@ class ChatRemoteDataSource {
         .from('chat_messages')
         .select('*')
         .eq('conversation_id', conversationId)
-        .order('created_at', ascending: true);
+        .order('created_at', ascending: false);
 
     if (rows is! List) {
       return const <ChatMessage>[];
@@ -157,14 +157,15 @@ class ChatRemoteDataSource {
   Future<ChatMessage?> sendMessage({
     required String conversationId,
     required String senderId,
-    required String messageText,
+    String? messageText,
+    String? attachmentUrl,
   }) async {
     if (!AppSupabase.isInitialized) {
       return null;
     }
 
-    final trimmedMessage = messageText.trim();
-    if (trimmedMessage.isEmpty) {
+    final trimmedMessage = messageText?.trim();
+    if ((trimmedMessage == null || trimmedMessage.isEmpty) && attachmentUrl == null) {
       return null;
     }
 
@@ -174,17 +175,13 @@ class ChatRemoteDataSource {
         .insert({
           'conversation_id': conversationId,
           'sender_id': senderId,
-          'message_text': trimmedMessage,
+          'message_text': trimmedMessage ?? '',
+          'attachment_url': attachmentUrl,
           'status': 'sent',
           'created_at': nowIso,
         })
         .select('*')
         .single();
-
-    await AppSupabase.client
-        .from('conversations')
-        .update({'last_message_at': nowIso})
-        .eq('id', conversationId);
 
     if (row is! Map<String, dynamic>) {
       return null;

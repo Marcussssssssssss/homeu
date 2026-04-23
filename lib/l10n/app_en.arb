@@ -232,5 +232,19 @@
   "updatePasswordErrorNewPasswordMustDiffer": "New password must be different from your current password.",
   "updatePasswordErrorWeakPassword": "Please choose a stronger password with at least 6 characters.",
   "updatePasswordErrorNetwork": "Network error. Please check your internet connection and try again.",
-  "updatePasswordErrorGeneric": "Unable to update password right now. Please try again."
+  "updatePasswordErrorGeneric": "Unable to update password right now. Please try again.",
+  "chatTitle": "Messages",
+  "chatSearchHint": "Search messages...",
+  "chatFilterAll": "All",
+  "chatFilterUnread": "Unread",
+  "chatFilterProperty": "Property",
+  "chatFilterArchived": "Archived",
+  "chatYesterday": "Yesterday",
+  "chatOnline": "Online",
+  "chatOffline": "Offline",
+  "chatTypeMessageHint": "Type a message...",
+  "chatAttachmentTitle": "Send Attachment",
+  "chatAttachImage": "Image",
+  "chatAttachCamera": "Camera",
+  "chatAttachDocument": "Document"
 }
