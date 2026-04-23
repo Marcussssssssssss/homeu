@@ -54,33 +54,33 @@ class _HomeUOwnerDashboardScreenState extends State<HomeUOwnerDashboardScreen> {
       backgroundColor: const Color(0xFFF6F8FC),
       bottomNavigationBar: widget.showBottomNavigationBar
           ? HomeUOwnerBottomNavigationBar(
-              selectedIndex: _selectedNavIndex,
-              onDestinationSelected: (index) {
-                if (index == 1) {
-                  Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const HomeUOwnerMyPropertiesScreen()));
-                  return;
-                }
-                if (index == 2) {
-                  Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const HomeUOwnerBookingRequestsScreen()));
-                  return;
-                }
-                if (index == 3) {
-                  Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const HomeUOwnerAnalyticsScreen()));
-                  return;
-                }
-                if (index == 4) {
-                  Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const HomeUConversationListScreen()));
-                  return;
-                }
-                if (index == 5) {
-                  Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const HomeUProfileScreen(role: HomeURole.owner)));
-                  return;
-                }
-                setState(() {
-                  _selectedNavIndex = index;
-                });
-              },
-            )
+        selectedIndex: _selectedNavIndex,
+        onDestinationSelected: (index) {
+          if (index == 1) {
+            Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const HomeUOwnerMyPropertiesScreen()));
+            return;
+          }
+          if (index == 2) {
+            Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const HomeUOwnerBookingRequestsScreen()));
+            return;
+          }
+          if (index == 3) {
+            Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const HomeUOwnerAnalyticsScreen()));
+            return;
+          }
+          if (index == 4) {
+            Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const HomeUConversationListScreen()));
+            return;
+          }
+          if (index == 5) {
+            Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const HomeUProfileScreen(role: HomeURole.owner)));
+            return;
+          }
+          setState(() {
+            _selectedNavIndex = index;
+          });
+        },
+      )
           : null,
       body: SafeArea(
         child: RefreshIndicator(

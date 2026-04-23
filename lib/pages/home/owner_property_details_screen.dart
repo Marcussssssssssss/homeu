@@ -89,10 +89,10 @@ class _HomeUOwnerPropertyDetailsScreenState extends State<HomeUOwnerPropertyDeta
                     child: hasImage
                         ? Image.network(p.coverImageUrl!, height: 200, fit: BoxFit.cover)
                         : Container(
-                            height: 200,
-                            color: const Color(0xFFEAF2FF),
-                            child: const Icon(Icons.image_not_supported, size: 48, color: Color(0xFF90A4C4)),
-                          ),
+                      height: 200,
+                      color: const Color(0xFFEAF2FF),
+                      child: const Icon(Icons.image_not_supported, size: 48, color: Color(0xFF90A4C4)),
+                    ),
                   ),
                   Padding(
                     padding: const EdgeInsets.all(16),

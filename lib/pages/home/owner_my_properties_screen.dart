@@ -50,33 +50,33 @@ class _HomeUOwnerMyPropertiesScreenState extends State<HomeUOwnerMyPropertiesScr
       ),
       bottomNavigationBar: widget.showBottomNavigationBar
           ? HomeUOwnerBottomNavigationBar(
-              selectedIndex: _selectedNavIndex,
-              onDestinationSelected: (index) {
-                if (index == _selectedNavIndex) return;
+        selectedIndex: _selectedNavIndex,
+        onDestinationSelected: (index) {
+          if (index == _selectedNavIndex) return;
 
-                if (index == 0) {
-                  Navigator.of(context).popUntil((route) => route.isFirst);
-                  return;
-                }
-                if (index == 1) return;
-                if (index == 2) {
-                  Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const HomeUOwnerBookingRequestsScreen()));
-                  return;
-                }
-                if (index == 3) {
-                  Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const HomeUOwnerAnalyticsScreen()));
-                  return;
-                }
-                if (index == 4) {
-                  Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const HomeUConversationListScreen()));
-                  return;
-                }
-                if (index == 5) {
-                  Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const HomeUProfileScreen(role: HomeURole.owner)));
-                  return;
-                }
-              },
-            )
+          if (index == 0) {
+            Navigator.of(context).popUntil((route) => route.isFirst);
+            return;
+          }
+          if (index == 1) return;
+          if (index == 2) {
+            Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const HomeUOwnerBookingRequestsScreen()));
+            return;
+          }
+          if (index == 3) {
+            Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const HomeUOwnerAnalyticsScreen()));
+            return;
+          }
+          if (index == 4) {
+            Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const HomeUConversationListScreen()));
+            return;
+          }
+          if (index == 5) {
+            Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const HomeUProfileScreen(role: HomeURole.owner)));
+            return;
+          }
+        },
+      )
           : null,
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: const Color(0xFF1E3A8A),
