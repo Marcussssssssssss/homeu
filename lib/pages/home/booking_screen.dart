@@ -47,32 +47,6 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
           children: [
             SizedBox(
               width: double.infinity,
-              height: 46,
-              child: OutlinedButton(
-                key: const Key('schedule_viewing_button'),
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => HomeUViewingScreen(property: widget.property),
-                    ),
-                  );
-                },
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Color(0xFF1E3A8A)),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                ),
-                child: const Text(
-                  'Schedule Viewing',
-                  style: TextStyle(
-                    color: Color(0xFF1E3A8A),
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            SizedBox(
-              width: double.infinity,
               height: 52,
               child: ElevatedButton(
                 key: const Key('confirm_booking_button'),
