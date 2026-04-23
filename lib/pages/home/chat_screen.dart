@@ -7,8 +7,14 @@ import 'package:homeu/core/theme/homeu_app_theme.dart';
 import 'package:homeu/core/supabase/app_supabase.dart';
 import 'package:homeu/pages/home/property_item.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:homeu/app/chat/chat_local_datasource.dart';
+import 'package:homeu/pages/home/chat_image_view.dart';
+import 'dart:async';
+import 'package:uuid/uuid.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as p;
 
 class HomeUChatScreen extends StatefulWidget {
   const HomeUChatScreen.start({super.key, required PropertyItem property})
@@ -31,8 +37,11 @@ class HomeUChatScreen extends StatefulWidget {
 class _HomeUChatScreenState extends State<HomeUChatScreen> {
   final ChatRemoteDataSource _chatRemoteDataSource =
       const ChatRemoteDataSource();
+  final ChatLocalDataSource _chatLocalDataSource = ChatLocalDataSource();
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
+  final _uuid = const Uuid();
 
   Conversation? _conversation;
   List<ChatMessage> _messages = const <ChatMessage>[];
@@ -51,15 +60,72 @@ class _HomeUChatScreenState extends State<HomeUChatScreen> {
   void initState() {
     super.initState();
     _initializeChat();
+    _setupConnectivityListener();
   }
 
   @override
   void dispose() {
     _presenceChannel?.unsubscribe();
     _messagesChannel?.unsubscribe();
+    _connectivitySubscription?.cancel();
     _messageController.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  void _setupConnectivityListener() {
+    _connectivitySubscription = Connectivity().onConnectivityChanged.listen((results) {
+      if (results.any((result) => result != ConnectivityResult.none)) {
+        _syncPendingMessages();
+      }
+    });
+  }
+
+  Future<void> _syncPendingMessages() async {
+    final pendingMessages = await _chatLocalDataSource.getAllPendingMessages();
+    if (pendingMessages.isEmpty) return;
+
+    for (final message in pendingMessages) {
+      try {
+        String? finalUrl = message.attachmentUrl;
+
+        // If it's a pending file upload
+        if (message.syncStatus == 'pending_upload' && finalUrl != null && !finalUrl.startsWith('http')) {
+          final file = io.File(finalUrl);
+          if (await file.exists()) {
+            final fileName = p.basename(finalUrl);
+            final storagePath = '${message.conversationId}/$fileName';
+
+            await AppSupabase.client.storage
+                .from('chat_attachments')
+                .upload(storagePath, file);
+
+            finalUrl = AppSupabase.client.storage
+                .from('chat_attachments')
+                .getPublicUrl(storagePath);
+          }
+        }
+
+        final sent = await _chatRemoteDataSource.sendMessage(
+          conversationId: message.conversationId,
+          senderId: message.senderId,
+          messageText: message.messageText,
+          attachmentUrl: finalUrl,
+        );
+
+        if (sent != null) {
+          // IMPORTANT: Mark as synced locally
+          await _chatLocalDataSource.markAsSynced(message.id);
+          
+          // Refresh list if we are in this conversation
+          if (_conversation?.id == message.conversationId) {
+            _loadMessages();
+          }
+        }
+      } catch (e) {
+        debugPrint('Sync failed for message ${message.id}: $e');
+      }
+    }
   }
 
   @override
@@ -312,11 +378,6 @@ class _HomeUChatScreenState extends State<HomeUChatScreen> {
                     label: context.l10n.chatAttachCamera,
                     onTap: () => _pickImage(ImageSource.camera),
                   ),
-                  _buildAttachmentOption(
-                    icon: Icons.description_outlined,
-                    label: context.l10n.chatAttachDocument,
-                    onTap: _pickDocument,
-                  ),
                 ],
               ),
             ],
@@ -374,18 +435,19 @@ class _HomeUChatScreenState extends State<HomeUChatScreen> {
     }
   }
 
-  Future<void> _pickDocument() async {
-    Navigator.pop(context);
-    try {
-      final FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.any,
-      );
-      if (result != null && result.files.single.path != null) {
-        await _uploadFile(result.files.single.path!, result.files.single.name);
-      }
-    } catch (e) {
-      _showSnackBar('Error picking document: $e');
+  Future<String> _saveFileLocally(String path, String name) async {
+    final directory = await getApplicationDocumentsDirectory();
+    final chatDir = io.Directory(p.join(directory.path, 'chat_files'));
+    if (!await chatDir.exists()) {
+      await chatDir.create(recursive: true);
     }
+    
+    final extension = p.extension(name);
+    final fileName = '${DateTime.now().millisecondsSinceEpoch}$extension';
+    final localPath = p.join(chatDir.path, fileName);
+    
+    await io.File(path).copy(localPath);
+    return localPath;
   }
 
   Future<void> _uploadFile(String path, String name) async {
@@ -393,12 +455,37 @@ class _HomeUChatScreenState extends State<HomeUChatScreen> {
     final userId = _currentUserId;
     if (conversationId == null || userId == null) return;
 
+    final connectivity = await Connectivity().checkConnectivity();
+    final isOffline = connectivity.contains(ConnectivityResult.none);
+
+    if (isOffline) {
+      final localPath = await _saveFileLocally(path, name);
+      final tempId = _uuid.v4();
+      final localMessage = ChatMessage(
+        id: tempId,
+        conversationId: conversationId,
+        senderId: userId,
+        messageText: '', // Keep empty for image messages
+        attachmentUrl: localPath,
+        status: 'sending',
+        createdAt: DateTime.now(),
+        syncStatus: 'pending_upload',
+      );
+
+      await _chatLocalDataSource.insertMessage(localMessage);
+      setState(() {
+        _messages = [localMessage, ..._messages];
+      });
+      _scrollToBottom();
+      return;
+    }
+
     setState(() => _isSending = true);
 
     try {
       final file = io.File(path);
-      final extension = name.split('.').last;
-      final fileName = '${DateTime.now().millisecondsSinceEpoch}.$extension';
+      final extension = p.extension(name);
+      final fileName = '${DateTime.now().millisecondsSinceEpoch}$extension';
       final storagePath = '$conversationId/$fileName';
 
       // 1. Upload to Supabase Storage
@@ -415,14 +502,14 @@ class _HomeUChatScreenState extends State<HomeUChatScreen> {
       final sent = await _chatRemoteDataSource.sendMessage(
         conversationId: conversationId,
         senderId: userId,
-        messageText: '', // Or filename if preferred
+        messageText: '', // Keep empty for image messages
         attachmentUrl: publicUrl,
       );
 
       if (sent != null) {
-        // Real-time listener will pick up the new message, 
-        // but we can also manually add it for even faster UI response if desired.
-        // For now, relying on Postgres Changes listener.
+        // Local sync handled via remote datasource normally, 
+        // but since we are sending it now, we should ensure local is updated if we used a temp id
+        // In this online path, we usually don't have a tempId yet unless we are retrying.
       }
     } on StorageException catch (e) {
       _showSnackBar('Storage error: ${e.message}');
@@ -603,13 +690,18 @@ class _HomeUChatScreenState extends State<HomeUChatScreen> {
     }
 
     try {
-      final rows = await _chatRemoteDataSource.fetchMessages(conversationId);
+      final remoteMessages = await _chatRemoteDataSource.fetchMessages(conversationId);
+      final pendingMessages = await _chatLocalDataSource.getPendingMessages(conversationId);
+
       if (!mounted) {
         return;
       }
 
       setState(() {
-        _messages = rows;
+        // Merge and sort
+        final combined = [...pendingMessages, ...remoteMessages];
+        combined.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+        _messages = combined;
       });
     } on PostgrestException catch (e) {
       if (!mounted) {
@@ -637,7 +729,25 @@ class _HomeUChatScreenState extends State<HomeUChatScreen> {
       return;
     }
 
-    setState(() => _isSending = true);
+    // Offline-first: Create local message
+    final tempId = _uuid.v4();
+    final localMessage = ChatMessage(
+      id: tempId,
+      conversationId: conversationId,
+      senderId: userId,
+      messageText: text,
+      status: 'sending',
+      createdAt: DateTime.now(),
+      syncStatus: 'pending',
+    );
+
+    // Save locally and update UI immediately
+    await _chatLocalDataSource.insertMessage(localMessage);
+    setState(() {
+      _messages = [localMessage, ..._messages];
+      _messageController.clear();
+    });
+    _scrollToBottom();
 
     try {
       final sent = await _chatRemoteDataSource.sendMessage(
@@ -650,30 +760,12 @@ class _HomeUChatScreenState extends State<HomeUChatScreen> {
         return;
       }
 
-      if (sent == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Unable to send message.')),
-        );
-        return;
+      if (sent != null) {
+        await _chatLocalDataSource.markAsSynced(tempId);
+        _loadMessages(); // Refresh to get the real message from Supabase
       }
-
-      _messageController.clear();
-      // No need to manually reload messages or scroll bottom, 
-      // the realtime listener and reverse:true handle it.
-    } on PostgrestException catch (e) {
-      if (!mounted) {
-        return;
-      }
-      _showSnackBar(e.message);
-    } catch (_) {
-      if (!mounted) {
-        return;
-      }
-      _showSnackBar('Failed to send message.');
-    } finally {
-      if (mounted) {
-        setState(() => _isSending = false);
-      }
+    } catch (e) {
+      debugPrint('Failed to send message immediately, will retry when online: $e');
     }
   }
 
@@ -730,18 +822,22 @@ class _MessageBubble extends StatelessWidget {
     final attachmentUrl = message.attachmentUrl;
     final hasAttachment = attachmentUrl != null && attachmentUrl.isNotEmpty;
     
+    final isLocalFile = hasAttachment && !attachmentUrl.startsWith('http');
+    
     // Also check if text itself looks like a Supabase URL (fallback)
     final looksLikeUrl = message.messageText.contains('supabase.co/storage/v1/object/public/');
     final imageUrl = hasAttachment ? attachmentUrl : (looksLikeUrl ? message.messageText : null);
     final isImage = imageUrl != null && _isImageUrl(imageUrl);
     
-    final hasText = message.messageText.isNotEmpty && !looksLikeUrl;
+    final hasText = message.messageText.isNotEmpty && 
+                    !looksLikeUrl && 
+                    !_isFileName(message.messageText);
 
     return Align(
       alignment: isMine ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
-        padding: EdgeInsets.all(isImage ? 4 : 12),
+        padding: EdgeInsets.all(isImage ? 0 : 12), // Set to 0 if image to allow ClipRRect to fill
         constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
         decoration: BoxDecoration(
           color: isMine ? context.homeuAccent : context.homeuRaisedCard,
@@ -760,72 +856,126 @@ class _MessageBubble extends StatelessWidget {
               ),
           ],
         ),
-        child: Column(
-          crossAxisAlignment: isMine ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-          children: [
-            if (isImage)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.network(
-                  imageUrl!,
-                  fit: BoxFit.cover,
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return Container(
-                      width: 200,
-                      height: 200,
-                      color: Colors.grey[200],
-                      child: const Center(child: CircularProgressIndicator()),
+        child: ClipRRect(
+          borderRadius: BorderRadius.only(
+            topLeft: const Radius.circular(16),
+            topRight: const Radius.circular(16),
+            bottomLeft: Radius.circular(isMine ? 16 : 4),
+            bottomRight: Radius.circular(isMine ? 4 : 16),
+          ),
+          child: Column(
+            crossAxisAlignment: isMine ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+            children: [
+              if (isImage)
+                GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => HomeUChatImageView(imageUrl: imageUrl),
+                      ),
                     );
                   },
-                  errorBuilder: (context, error, stackTrace) => Container(
-                    width: 200,
-                    height: 100,
-                    color: Colors.grey[300],
-                    child: const Icon(Icons.broken_image, color: Colors.grey),
+                  child: Hero(
+                    tag: imageUrl,
+                    child: Stack(
+                      alignment: Alignment.bottomRight,
+                      children: [
+                        isLocalFile 
+                          ? Image.file(
+                              io.File(imageUrl),
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) => Container(
+                                width: 200,
+                                height: 100,
+                                color: Colors.grey[300],
+                                child: const Icon(Icons.broken_image, color: Colors.grey),
+                              ),
+                            )
+                          : Image.network(
+                              imageUrl,
+                              fit: BoxFit.cover,
+                              loadingBuilder: (context, child, loadingProgress) {
+                                if (loadingProgress == null) return child;
+                                return Container(
+                                  width: 200,
+                                  height: 200,
+                                  color: Colors.grey[200],
+                                  child: const Center(child: CircularProgressIndicator()),
+                                );
+                              },
+                              errorBuilder: (context, error, stackTrace) => Container(
+                                width: 200,
+                                height: 100,
+                                color: Colors.grey[300],
+                                child: const Icon(Icons.broken_image, color: Colors.grey),
+                              ),
+                            ),
+                        if (isMine && message.syncStatus.startsWith('pending'))
+                          Positioned(
+                            bottom: 8,
+                            right: 8,
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withValues(alpha: 0.5),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.access_time,
+                                size: 16,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
                 ),
-              )
-            else if (hasAttachment)
-              // Handle non-image attachments (documents)
-              InkWell(
-                onTap: () {
-                  // Logic to open document URL
-                },
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.description, color: isMine ? Colors.white : context.homeuAccent),
-                    const SizedBox(width: 8),
-                    Flexible(
-                      child: Text(
-                        'Document',
-                        style: TextStyle(
-                          color: isMine ? Colors.white : context.homeuPrimaryText,
-                          decoration: TextDecoration.underline,
+              if (isImage && hasText) const SizedBox(height: 8),
+              if (hasText)
+                Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          message.messageText,
+                          style: TextStyle(
+                            color: isMine ? Colors.white : context.homeuPrimaryText,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-            if (isImage && hasText) const SizedBox(height: 8),
-            if (hasText)
-              Padding(
-                padding: isImage ? const EdgeInsets.all(8.0) : EdgeInsets.zero,
-                child: Text(
-                  message.messageText,
-                  style: TextStyle(
-                    color: isMine ? Colors.white : context.homeuPrimaryText,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
+                      if (isMine) ...[
+                        const SizedBox(width: 4),
+                        Icon(
+                          message.syncStatus.startsWith('pending')
+                            ? Icons.access_time 
+                            : Icons.done_all,
+                          size: 14,
+                          color: Colors.white70,
+                        ),
+                      ],
+                    ],
                   ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  bool _isFileName(String text) {
+    final lowerText = text.toLowerCase();
+    return lowerText.endsWith('.jpg') || 
+           lowerText.endsWith('.jpeg') || 
+           lowerText.endsWith('.png') || 
+           lowerText.endsWith('.webp') ||
+           lowerText.endsWith('.gif');
   }
 
   bool _isImageUrl(String url) {

@@ -66,6 +66,7 @@ class ChatMessage {
     required this.status,
     required this.createdAt,
     this.attachmentUrl,
+    this.syncStatus = 'synced',
   });
 
   final String id;
@@ -75,6 +76,7 @@ class ChatMessage {
   final String? status;
   final DateTime createdAt;
   final String? attachmentUrl;
+  final String syncStatus;
 
   factory ChatMessage.fromJson(Map<String, dynamic> json) {
     return ChatMessage(
@@ -86,6 +88,7 @@ class ChatMessage {
       attachmentUrl: json['attachment_url']?.toString() ?? json['attachmentUrl']?.toString(),
       createdAt: _parseDateTime(json['created_at'] ?? json['createdAt']) ??
           DateTime.fromMillisecondsSinceEpoch(0),
+      syncStatus: json['sync_status']?.toString() ?? 'synced',
     );
   }
 
