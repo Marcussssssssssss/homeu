@@ -77,7 +77,7 @@ class BookingRequestsRemoteDataSource {
     }
 
     if (newStatus == 'Approved') {
-      final approvedData = response.first as Map<String, dynamic>;
+      final approvedData = response.first;
       final propertyId = approvedData['property_id'];
 
       final startA = _parseDateTime(approvedData['created_at']);
