@@ -13,14 +13,12 @@ class ChatRemoteDataSource {
       return null;
     }
 
-    // Check for existing conversation with ordering as per GitHub version
+    // Consolidated: Look up existing room between these two users regardless of property
     final dynamic existingRows = await AppSupabase.client
         .from('conversations')
         .select('*')
-        .eq('property_id', propertyId)
         .eq('tenant_id', tenantId)
         .eq('owner_id', ownerId)
-        .order('created_at', ascending: true)
         .limit(1);
 
     Map<String, dynamic>? row;
@@ -67,6 +65,7 @@ class ChatRemoteDataSource {
     }
 
     // Integrated ordering logic from GitHub version
+    // AND: Distinct grouping by owner/tenant pairs to avoid duplicates in UI
     final dynamic rows = await AppSupabase.client
         .from('conversations')
         .select('*')
@@ -78,8 +77,33 @@ class ChatRemoteDataSource {
       return const <Conversation>[];
     }
 
-    final convs = rows.whereType<Map<String, dynamic>>().toList();
+    var convs = rows.whereType<Map<String, dynamic>>().toList();
     if (convs.isEmpty) return [];
+
+    // Consolidation Logic: Since we might have legacy property-based conversations, 
+    // or to strictly enforce one thread per owner in the UI.
+    final Map<String, Map<String, dynamic>> consolidated = {};
+    for (final c in convs) {
+      final otherUserId = c['tenant_id'] == myUserId ? c['owner_id'] : c['tenant_id'];
+      final key = otherUserId.toString();
+      if (!consolidated.containsKey(key)) {
+        consolidated[key] = c;
+      } else {
+        // Keep the one with the more recent message
+        final existingDate = _parseDateTime(consolidated[key]!['last_message_at']);
+        final currentDate = _parseDateTime(c['last_message_at']);
+        if (currentDate != null && (existingDate == null || currentDate.isAfter(existingDate))) {
+          consolidated[key] = c;
+        }
+      }
+    }
+    convs = consolidated.values.toList();
+    // Re-sort after consolidation
+    convs.sort((a, b) {
+      final da = _parseDateTime(a['last_message_at']) ?? DateTime.fromMillisecondsSinceEpoch(0);
+      final db = _parseDateTime(b['last_message_at']) ?? DateTime.fromMillisecondsSinceEpoch(0);
+      return db.compareTo(da);
+    });
 
     // Collect all unique user IDs to fetch profiles for
     final Set<String> userIds = {};
@@ -118,6 +142,12 @@ class ChatRemoteDataSource {
       
       return Conversation.fromJson(json);
     }).toList();
+  }
+
+  static DateTime? _parseDateTime(dynamic value) {
+    if (value is DateTime) return value;
+    if (value is String) return DateTime.tryParse(value);
+    return null;
   }
 
   Future<Map<String, dynamic>?> _fetchProfile(String userId) async {

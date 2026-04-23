@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
 import 'package:homeu/core/theme/homeu_app_theme.dart';
@@ -81,81 +82,89 @@ class _HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
         elevation: 0,
       ),
       body: SafeArea(
-        child: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : RefreshIndicator(
-                onRefresh: _loadViewings,
-                child: ListView(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
-                  children: [
-                    HomeUStatusFilterChips<HomeUViewingFilterStatus>(
-                      statuses: HomeUViewingFilterStatus.values,
-                      selected: _selectedStatus,
-                      labelBuilder: _statusLabel,
-                      keyBuilder: (status) =>
-                          Key('viewing_status_filter_${status.name}'),
-                      onSelected: (status) {
-                        setState(() {
-                          _selectedStatus = status;
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 14),
-                    if (_loadError != null)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: Text(
-                          _loadError!,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: Color(0xFFC53030),
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    if (visibleViewings.isEmpty)
-                      Padding(
-                        padding: EdgeInsets.only(top: 24),
-                        child: Text(
-                          _selectedStatus == HomeUViewingFilterStatus.all
-                              ? 'No viewing requests yet.'
-                              : 'No viewing requests found for this status.',
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: Color(0xFF667896),
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ...visibleViewings.map((viewing) {
-                      final property =
-                          _propertyById[viewing.propertyId] ??
-                          _buildFallbackPropertyItem(viewing);
-                      return _ViewingCard(
-                        viewing: viewing,
-                        property: property,
-                        onOpenProperty: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute<void>(
-                              builder: (_) => HomeUPropertyDetailsScreen(
-                                property: property,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: HomeUStatusFilterChips<HomeUViewingFilterStatus>(
+                statuses: HomeUViewingFilterStatus.values
+                    .where((s) => s != HomeUViewingFilterStatus.pending)
+                    .toList(),
+                selected: _selectedStatus,
+                labelBuilder: _statusLabel,
+                keyBuilder: (status) =>
+                    Key('viewing_status_filter_${status.name}'),
+                onSelected: (status) {
+                  setState(() {
+                    _selectedStatus = status;
+                  });
+                },
+              ),
+            ),
+            Expanded(
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : RefreshIndicator(
+                      onRefresh: _loadViewings,
+                      child: ListView.builder(
+                        padding: const EdgeInsets.fromLTRB(16, 4, 16, 20),
+                        itemCount: visibleViewings.length + (_loadError != null || visibleViewings.isEmpty ? 1 : 0),
+                        itemBuilder: (context, index) {
+                          if (_loadError != null && index == 0) {
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 24),
+                              child: Text(
+                                _loadError!,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  color: Color(0xFFC53030),
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
-                            ),
+                            );
+                          }
+                          if (visibleViewings.isEmpty && index == 0) {
+                            return Padding(
+                              padding: const EdgeInsets.only(top: 120),
+                              child: Text(
+                                _selectedStatus == HomeUViewingFilterStatus.all
+                                    ? 'No viewing requests yet.'
+                                    : 'No viewing requests found for this status.',
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  color: Color(0xFF667896),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            );
+                          }
+
+                          final viewing = visibleViewings[index];
+                          final property =
+                              _propertyById[viewing.propertyId] ??
+                              _buildFallbackPropertyItem(viewing);
+                          
+                          return _ViewingHistoryCard(
+                            viewing: viewing,
+                            property: property,
+                            onTap: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute<void>(
+                                  builder: (_) => HomeUPropertyDetailsScreen(
+                                    property: property,
+                                  ),
+                                ),
+                              );
+                            },
                           );
                         },
-                        onReschedule: _tenantId == null
-                            ? null
-                            : () => _handleReschedule(viewing, _tenantId!),
-                        onCancel: _tenantId == null
-                            ? null
-                            : () => _handleCancel(viewing, _tenantId!),
-                      );
-                    }),
-                  ],
-                ),
-              ),
+                      ),
+                    ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -242,125 +251,6 @@ class _HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
     );
   }
 
-  Future<void> _handleReschedule(
-    ViewingRequest viewing,
-    String tenantId,
-  ) async {
-    final now = DateTime.now();
-    final pickedDate = await showDatePicker(
-      context: context,
-      initialDate: now.add(const Duration(days: 1)),
-      firstDate: now,
-      lastDate: now.add(const Duration(days: 365)),
-    );
-
-    if (pickedDate == null) {
-      return;
-    }
-    if (!mounted) {
-      return;
-    }
-
-    final pickedTime = await showTimePicker(
-      context: context,
-      initialTime: const TimeOfDay(hour: 10, minute: 0),
-    );
-
-    if (pickedTime == null) {
-      return;
-    }
-    if (!mounted) {
-      return;
-    }
-
-    String? reason;
-    final controller = TextEditingController();
-    try {
-      reason = await showDialog<String?>(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: const Text('Reschedule Reason (Optional)'),
-            content: TextField(
-              controller: controller,
-              maxLines: 2,
-              decoration: const InputDecoration(hintText: 'Add reason'),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(null),
-                child: const Text('Skip'),
-              ),
-              FilledButton(
-                onPressed: () =>
-                    Navigator.of(context).pop(controller.text.trim()),
-                child: const Text('Save'),
-              ),
-            ],
-          );
-        },
-      );
-    } finally {
-      controller.dispose();
-    }
-
-    final scheduledAt = DateTime(
-      pickedDate.year,
-      pickedDate.month,
-      pickedDate.day,
-      pickedTime.hour,
-      pickedTime.minute,
-    );
-
-    try {
-      await _viewingRemoteDataSource.requestReschedule(
-        viewingId: viewing.id,
-        tenantId: tenantId,
-        newScheduledAt: scheduledAt,
-        reason: reason == null || reason.isEmpty ? null : reason,
-      );
-
-      if (!mounted) {
-        return;
-      }
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Reschedule request submitted.')),
-      );
-      await _loadViewings();
-    } catch (_) {
-      if (!mounted) {
-        return;
-      }
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Unable to reschedule right now.')),
-      );
-    }
-  }
-
-  Future<void> _handleCancel(ViewingRequest viewing, String tenantId) async {
-    try {
-      await _viewingRemoteDataSource.cancelViewing(
-        viewingId: viewing.id,
-        tenantId: tenantId,
-      );
-
-      if (!mounted) {
-        return;
-      }
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Viewing request cancelled.')),
-      );
-      await _loadViewings();
-    } catch (_) {
-      if (!mounted) {
-        return;
-      }
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Unable to cancel right now.')),
-      );
-    }
-  }
-
   HomeUViewingFilterStatus _mapStatus(String status) {
     switch (status.trim().toLowerCase()) {
       case 'approved':
@@ -400,151 +290,240 @@ class _HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
   }
 }
 
-class _ViewingCard extends StatelessWidget {
-  const _ViewingCard({
+class _ViewingHistoryCard extends StatelessWidget {
+  const _ViewingHistoryCard({
     required this.viewing,
     required this.property,
-    required this.onOpenProperty,
-    required this.onReschedule,
-    required this.onCancel,
+    this.onTap,
   });
 
   final ViewingRequest viewing;
   final PropertyItem property;
-  final VoidCallback onOpenProperty;
-  final VoidCallback? onReschedule;
-  final VoidCallback? onCancel;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      key: Key('viewing_card_${viewing.id}'),
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x141E3A8A),
-            blurRadius: 12,
-            offset: Offset(0, 4),
+    const purpleAccent = Color(0xFF6366F1);
+    const grayBorder = Color(0xFFF1F5F9);
+    final isPast = viewing.status.toLowerCase() == 'completed' || 
+                   viewing.status.toLowerCase() == 'cancelled' ||
+                   viewing.status.toLowerCase() == 'rejected';
+
+    Widget cardContent = Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Image
+        ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: _buildImage(
+            property.imageUrls.isNotEmpty ? property.imageUrls[0] : null,
+            110,
+            130,
           ),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: onOpenProperty,
-          child: Padding(
-            padding: const EdgeInsets.all(14),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  property.name,
+        ),
+        const SizedBox(width: 16),
+        // Info
+        Expanded(
+          child: _buildInfoSection(context, purpleAccent),
+        ),
+      ],
+    );
+
+    if (isPast) {
+      cardContent = ColorFiltered(
+        colorFilter: const ColorFilter.matrix(<double>[
+          0.2126, 0.7152, 0.0722, 0, 0,
+          0.2126, 0.7152, 0.0722, 0, 0,
+          0.2126, 0.7152, 0.0722, 0, 0,
+          0,      0,      0,      1, 0,
+        ]),
+        child: cardContent,
+      );
+    }
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: grayBorder, width: 1.5),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Stack(
+          children: [
+            cardContent,
+            Positioned(
+              top: 0,
+              right: 0,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF10B981), // Premium Green badge
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  viewing.status.toUpperCase(),
                   style: const TextStyle(
-                    color: Color(0xFF1F314F),
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
                 ),
-                const SizedBox(height: 8),
-                _InfoRow(label: 'Location', value: property.location),
-                const SizedBox(height: 4),
-                _InfoRow(label: 'Price', value: property.pricePerMonth),
-                const SizedBox(height: 4),
-                _InfoRow(
-                  label: 'Scheduled At',
-                  value: _formatDateTime(viewing.scheduledAt.toLocal()),
-                ),
-                const SizedBox(height: 4),
-                _InfoRow(label: 'Status', value: viewing.status),
-                if (property.ownerName.trim().isNotEmpty) ...[
-                  const SizedBox(height: 4),
-                  _InfoRow(label: 'Agent/Host', value: property.ownerName),
-                ],
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: onReschedule,
-                        child: const Text('Reschedule'),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: onCancel,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFC53030),
-                        ),
-                        child: const Text('Cancel'),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
   }
 
-  String _formatDateTime(DateTime date) {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-
-    final hour = date.hour % 12 == 0 ? 12 : date.hour % 12;
-    final minute = date.minute.toString().padLeft(2, '0');
-    final period = date.hour >= 12 ? 'PM' : 'AM';
-    return '${date.day} ${months[date.month - 1]} ${date.year}, $hour:$minute $period';
+  Widget _buildImage(String? url, double width, double height) {
+    if (url == null || url.isEmpty) {
+      return Container(
+        width: width,
+        height: height,
+        color: const Color(0xFFF1F5F9),
+        child: const Icon(Icons.image_outlined, color: Color(0xFF94A3B8), size: 24),
+      );
+    }
+    return Image.network(
+      url,
+      width: width,
+      height: height,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => Container(
+        width: width,
+        height: height,
+        color: const Color(0xFFF1F5F9),
+        child: const Icon(Icons.broken_image_outlined, color: Color(0xFF94A3B8), size: 24),
+      ),
+    );
   }
-}
 
-class _InfoRow extends StatelessWidget {
-  const _InfoRow({required this.label, required this.value});
+  Widget _buildInfoSection(BuildContext context, Color purpleAccent) {
+    final dateFormat = DateFormat('MMM d, yyyy');
+    final timeFormat = DateFormat('hh:mm a');
+    final scheduledAt = viewing.scheduledAt.toLocal();
 
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          '$label: ',
-          style: const TextStyle(
-            color: Color(0xFF667896),
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
+        // Star rating above title
+        Row(
+          children: List.generate(5, (index) {
+            return Icon(
+              Icons.star,
+              size: 14,
+              color: index < property.rating.floor() ? const Color(0xFFF59E0B) : const Color(0xFFE2E8F0),
+            );
+          }),
+        ),
+        const SizedBox(height: 6),
+        // Title (Property Name)
+        Padding(
+          padding: const EdgeInsets.only(right: 60), // Avoid overlap with status badge
+          child: Text(
+            property.name,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF0F172A),
+              height: 1.2,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
-        Expanded(
-          child: Text(
-            value,
-            style: const TextStyle(
-              color: Color(0xFF1F314F),
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
+        const SizedBox(height: 8),
+        // Location with purple pin
+        Row(
+          children: [
+            Icon(Icons.location_on, size: 16, color: purpleAccent),
+            const SizedBox(width: 4),
+            Expanded(
+              child: Text(
+                property.location,
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: Color(0xFF64748B),
+                  fontWeight: FontWeight.w500,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        // Viewing Details Row
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            _buildDetailColumn(
+              'Viewing Date',
+              dateFormat.format(scheduledAt),
+              purpleAccent,
+            ),
+            const SizedBox(width: 14),
+            _buildDetailColumn(
+              'Viewing Time',
+              timeFormat.format(scheduledAt),
+              purpleAccent,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDetailColumn(String label, String value, Color accentColor) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 10,
+            color: accentColor,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF334155),
           ),
         ),
       ],
     );
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'approved':
+        return Colors.green;
+      case 'rejected':
+      case 'cancelled':
+      case 'canceled':
+        return Colors.red;
+      case 'completed':
+        return Colors.blue;
+      case 'pending':
+        return Colors.orange;
+      default:
+        return const Color(0xFF0F172A);
+    }
   }
 }
