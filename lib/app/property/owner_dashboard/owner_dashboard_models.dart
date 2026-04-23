@@ -6,6 +6,8 @@ class DashboardData {
     required this.occupancyRate,
     required this.recentProperties,
     required this.recentRequests,
+
+    required this.recentViewingRequests,
   });
 
   final double totalEarnings;
@@ -14,4 +16,6 @@ class DashboardData {
   final String occupancyRate;
   final List<Map<String, dynamic>> recentProperties;
   final List<Map<String, dynamic>> recentRequests;
+
+  final List<Map<String, dynamic>> recentViewingRequests;
 }

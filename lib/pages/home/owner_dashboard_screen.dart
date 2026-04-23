@@ -18,10 +18,12 @@ class HomeUOwnerDashboardScreen extends StatefulWidget {
     super.key,
     this.ownerName = 'Owner',
     this.showBottomNavigationBar = true,
+    this.onNavigateToTab,
   });
 
   final String ownerName;
   final bool showBottomNavigationBar;
+  final ValueChanged<int>? onNavigateToTab;
 
   @override
   State<HomeUOwnerDashboardScreen> createState() => _HomeUOwnerDashboardScreenState();
@@ -29,13 +31,13 @@ class HomeUOwnerDashboardScreen extends StatefulWidget {
 
 class _HomeUOwnerDashboardScreenState extends State<HomeUOwnerDashboardScreen> {
   int _selectedNavIndex = 0;
-  late final OwnerDashboardController _controller; // Add the controller
+  late final OwnerDashboardController _controller;
 
   @override
   void initState() {
     super.initState();
     _controller = OwnerDashboardController();
-    _controller.loadDashboard(); // Fetch data when screen loads
+    _controller.loadDashboard();
   }
 
   @override
@@ -145,7 +147,6 @@ class _HomeUOwnerDashboardScreenState extends State<HomeUOwnerDashboardScreen> {
                     ),
                     const SizedBox(height: 14),
 
-                    // --- EARNINGS ---
                     Container(
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
@@ -176,7 +177,6 @@ class _HomeUOwnerDashboardScreenState extends State<HomeUOwnerDashboardScreen> {
                     const Text('Quick Stats', style: TextStyle(color: Color(0xFF1F314F), fontSize: 16, fontWeight: FontWeight.w700)),
                     const SizedBox(height: 10),
 
-                    // -- stats --
                     Row(
                       children: [
                         Expanded(child: _OwnerStatCard(label: 'Active Listings', value: '${data.activeListings}')),
@@ -247,7 +247,8 @@ class _HomeUOwnerDashboardScreenState extends State<HomeUOwnerDashboardScreen> {
                       }),
 
                     const SizedBox(height: 12),
-                    const Text('Recent Requests', style: TextStyle(color: Color(0xFF1F314F), fontSize: 16, fontWeight: FontWeight.w700)),
+
+                    const Text('Recent Booking Requests', style: TextStyle(color: Color(0xFF1F314F), fontSize: 16, fontWeight: FontWeight.w700)),
                     const SizedBox(height: 10),
 
                     if (data.recentRequests.isEmpty)
@@ -265,7 +266,7 @@ class _HomeUOwnerDashboardScreenState extends State<HomeUOwnerDashboardScreen> {
                             Icon(Icons.inbox_rounded, size: 48, color: Colors.grey.shade300),
                             const SizedBox(height: 12),
                             const Text(
-                              'No active requests at the moment',
+                              'No active booking requests',
                               style: TextStyle(color: Color(0xFF667896), fontSize: 14, fontWeight: FontWeight.w500),
                             ),
                           ],
@@ -278,7 +279,53 @@ class _HomeUOwnerDashboardScreenState extends State<HomeUOwnerDashboardScreen> {
                         propertyName: req['propertyName'],
                         status: req['status'],
                         onTap: () {
-                          Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const HomeUOwnerBookingRequestsScreen()));
+                          if (widget.onNavigateToTab != null) {
+                            widget.onNavigateToTab!(2);
+                          } else {
+                            Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const HomeUOwnerBookingRequestsScreen()))
+                                .then((_) => _controller.loadDashboard());
+                          }
+                        },
+                      )),
+
+                    const SizedBox(height: 16),
+
+                    const Text('Recent Viewing Requests', style: TextStyle(color: Color(0xFF1F314F), fontSize: 16, fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 10),
+
+                    if (data.recentViewingRequests.isEmpty)
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 30),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: const Color(0x1F1E3A8A)),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.visibility_outlined, size: 48, color: Colors.grey.shade300),
+                            const SizedBox(height: 12),
+                            const Text(
+                              'No active viewing requests',
+                              style: TextStyle(color: Color(0xFF667896), fontSize: 14, fontWeight: FontWeight.w500),
+                            ),
+                          ],
+                        ),
+                      )
+                    else
+                      ...data.recentViewingRequests.map((req) => _ViewingRequestCard(
+                        requestKey: Key('view_${req['id']}'),
+                        tenantName: req['tenantName'],
+                        propertyName: req['propertyName'],
+                        status: req['status'],
+                        onTap: () {
+                          if (widget.onNavigateToTab != null) {
+                            widget.onNavigateToTab!(2);
+                          } else {
+                            Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const HomeUOwnerBookingRequestsScreen(initialTabIndex: 1)));
+                          }
                         },
                       )),
                   ],
@@ -349,7 +396,6 @@ class _OwnerPropertyCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // --- SMART UI STATUS COLORS ---
     Color statusColor;
     Color statusBgColor;
 
@@ -366,7 +412,6 @@ class _OwnerPropertyCard extends StatelessWidget {
       statusColor = const Color(0xFF0F8A5F);
       statusBgColor = const Color(0xFFE6F7EF);
     } else {
-      // Active / Published
       statusColor = const Color(0xFF1E3A8A);
       statusBgColor = const Color(0xFFEAF2FF);
     }
@@ -532,3 +577,109 @@ class _RequestCard extends StatelessWidget {
   }
 }
 
+// --- NEW VIEWING REQUEST CARD ---
+class _ViewingRequestCard extends StatelessWidget {
+  const _ViewingRequestCard({
+    required this.requestKey,
+    required this.tenantName,
+    required this.propertyName,
+    required this.status,
+    required this.onTap,
+  });
+
+  final Key requestKey;
+  final String tenantName;
+  final String propertyName;
+  final String status;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final isPending = status == 'Pending' || status == 'Pending Decision';
+    final isApproved = status == 'Approved';
+
+    Color badgeColor;
+    Color textColor;
+
+    if (isPending) {
+      badgeColor = Colors.orange.shade50;
+      textColor = Colors.orange.shade800;
+    } else if (isApproved) {
+      badgeColor = Colors.green.shade50;
+      textColor = Colors.green.shade800;
+    } else {
+      badgeColor = Colors.blueGrey.shade50;
+      textColor = Colors.blueGrey.shade800;
+    }
+
+    return InkWell(
+      key: requestKey,
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(14),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: const [
+            BoxShadow(color: Color(0x141E3A8A), blurRadius: 10, offset: Offset(0, 4)),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const CircleAvatar(
+                  radius: 18,
+                  backgroundColor: Color(0x1F1E3A8A),
+                  child: Icon(Icons.person_rounded, color: Color(0xFF1E3A8A), size: 20),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    tenantName,
+                    style: const TextStyle(color: Color(0xFF1F314F), fontSize: 15, fontWeight: FontWeight.w700),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: badgeColor,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    status,
+                    style: TextStyle(color: textColor, fontSize: 11, fontWeight: FontWeight.w700),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'Property',
+              style: TextStyle(color: Color(0xFF667896), fontSize: 11, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              propertyName,
+              style: const TextStyle(color: Color(0xFF1F314F), fontSize: 14, fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 10),
+            const Row(
+              children: [
+                Icon(Icons.visibility_outlined, color: Color(0xFF1E3A8A), size: 18),
+                SizedBox(width: 6),
+                Text(
+                  'Tap to review viewing',
+                  style: TextStyle(color: Color(0xFF1E3A8A), fontSize: 12, fontWeight: FontWeight.w700),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
