@@ -39,7 +39,7 @@ class BookingRequestsRemoteDataSource {
     if (tenantIds.isNotEmpty) {
       final dynamic profilesResponse = await AppSupabase.client
           .from('profiles')
-          .select('id, full_name, email, phone_number')
+          .select('id, full_name, email, phone_number, profile_image_url')
           .inFilter('id', tenantIds);
 
       if (profilesResponse is List) {
@@ -59,6 +59,7 @@ class BookingRequestsRemoteDataSource {
           'full_name': tenant?['full_name'],
           'email': tenant?['email'],
           'phone': tenant?['phone_number'] ?? tenant?['phone'],
+          'profile_image_url': tenant?['profile_image_url'],
         },
       });
     }).toList(growable: false);
@@ -76,7 +77,7 @@ class BookingRequestsRemoteDataSource {
     }
 
     if (newStatus == 'Approved') {
-      final approvedData = response.first as Map<String, dynamic>;
+      final approvedData = response.first;
       final propertyId = approvedData['property_id'];
 
       final startA = _parseDateTime(approvedData['created_at']);

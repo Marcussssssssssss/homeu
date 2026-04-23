@@ -1,11 +1,8 @@
-import 'dart:io';
-
 import 'package:homeu/app/auth/homeu_auth_service.dart';
 import 'package:homeu/app/property/add_property/add_property_models.dart';
 import 'package:homeu/app/property/add_property/add_property_remote_datasource.dart';
 import 'package:homeu/app/property/add_property/property_image_remote_datasource.dart';
 import 'package:homeu/core/supabase/app_supabase.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AddPropertyRepository {
   AddPropertyRepository({
@@ -49,6 +46,8 @@ class AddPropertyRepository {
           title: payload.title,
           description: payload.description,
           locationArea: payload.locationArea,
+          latitude: payload.latitude,
+          longitude: payload.longitude,
           monthlyPrice: payload.monthlyPrice,
           rentalType: payload.rentalType,
           propertyType: payload.propertyType,
@@ -63,6 +62,8 @@ class AddPropertyRepository {
           title: payload.title,
           description: payload.description,
           locationArea: payload.locationArea,
+          latitude: payload.latitude,
+          longitude: payload.longitude,
           monthlyPrice: payload.monthlyPrice,
           rentalType: payload.rentalType,
           propertyType: payload.propertyType,
@@ -119,9 +120,7 @@ class AddPropertyRepository {
         message: successMessage,
         createdPropertyId: finalPropertyId,
       );
-    } catch (e, st) {
-      print('AddProperty submit unexpected error: $e');
-      print(st);
+    } catch (e) {
       return AddPropertySubmissionResult(
         status: AddPropertySubmissionStatus.failure,
         message: e.toString(),

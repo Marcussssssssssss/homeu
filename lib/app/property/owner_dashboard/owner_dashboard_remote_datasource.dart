@@ -3,6 +3,7 @@ import 'owner_dashboard_models.dart';
 
 class OwnerDashboardRemoteDataSource {
   Future<DashboardData> fetchDashboardData(String ownerId) async {
+    // 1. Fetch Properties
     final dynamic propertiesResponse = await AppSupabase.client
         .from('properties')
         .select('id, title, location_area, monthly_price, status, property_image(public_url), booking_requests(status, move_in_date, move_out_date, total_amount, created_at)')
@@ -14,6 +15,7 @@ class OwnerDashboardRemoteDataSource {
         ? propertiesResponse.whereType<Map<String, dynamic>>().toList()
         : [];
 
+    // 2. Fetch Bookings
     final dynamic bookingsResponse = await AppSupabase.client
         .from('booking_requests')
         .select('id, property_id, tenant_id, status, total_amount, payment_status, created_at')
@@ -24,6 +26,19 @@ class OwnerDashboardRemoteDataSource {
         ? bookingsResponse.whereType<Map<String, dynamic>>().toList()
         : [];
 
+    // 3. Fetch Viewings (Simplified Select)
+    final dynamic viewingsResponse = await AppSupabase.client
+        .from('viewing_requests')
+        .select('id, property_id, tenant_id, status, created_at')
+        .eq('owner_id', ownerId)
+        .order('created_at', ascending: false)
+        .limit(5);
+
+    final List<Map<String, dynamic>> viewings = viewingsResponse != null
+        ? List<Map<String, dynamic>>.from(viewingsResponse)
+        : [];
+
+    // --- Analytics Logic ---
     int activeListings = 0;
     int occupiedCount = 0;
     for (final p in properties) {
@@ -42,6 +57,7 @@ class OwnerDashboardRemoteDataSource {
     final currentMonth = now.month;
     final currentYear = now.year;
 
+    // Process Bookings
     for (var b in bookings) {
       final status = b['status']?.toString() ?? '';
       final paymentStatus = b['payment_status']?.toString() ?? 'Pending';
@@ -61,8 +77,23 @@ class OwnerDashboardRemoteDataSource {
         }
       }
 
+      // Add tenant to our fetch list
       final tId = b['tenant_id']?.toString();
-      if (tId != null && tId.isNotEmpty) {
+      if (tId != null && tId.isNotEmpty && !tenantIdsToFetch.contains(tId)) {
+        tenantIdsToFetch.add(tId);
+      }
+    }
+
+    // Process Viewings for Analytics and Tenant Names
+    for (var v in viewings) {
+      final status = v['status']?.toString() ?? '';
+      if (status == 'Pending') {
+        pendingRequests++; // Add pending viewings to the dashboard total!
+      }
+
+      // Add viewing tenants to our fetch list too
+      final tId = v['tenant_id']?.toString();
+      if (tId != null && tId.isNotEmpty && !tenantIdsToFetch.contains(tId)) {
         tenantIdsToFetch.add(tId);
       }
     }
@@ -73,6 +104,7 @@ class OwnerDashboardRemoteDataSource {
       occupancyRate = '${rate.toStringAsFixed(0)}%';
     }
 
+    // --- Fetch ALL Tenant Names safely ---
     Map<String, String> tenantNames = {};
     if (tenantIdsToFetch.isNotEmpty) {
       final dynamic profilesResponse = await AppSupabase.client
@@ -87,8 +119,8 @@ class OwnerDashboardRemoteDataSource {
       }
     }
 
+    // --- Map Recent Bookings for UI ---
     List<Map<String, dynamic>> recentRequests = [];
-
     final activeBookings = bookings.where((b) {
       final status = b['status']?.toString().trim().toLowerCase() ?? '';
       return status != 'cancelled';
@@ -108,6 +140,22 @@ class OwnerDashboardRemoteDataSource {
       });
     }
 
+    // --- Map Recent Viewings for UI ---
+    List<Map<String, dynamic>> recentViewingsList = [];
+    for (var v in viewings.take(3)) {
+      final prop = properties.firstWhere(
+              (p) => p['id'] == v['property_id'],
+          orElse: () => {'title': 'Unknown Property'}
+      );
+
+      recentViewingsList.add({
+        'id': v['id'],
+        'tenantName': tenantNames[v['tenant_id']] ?? 'Unknown Tenant',
+        'propertyName': prop['title'],
+        'status': v['status'] ?? 'Unknown',
+      });
+    }
+
     return DashboardData(
       totalEarnings: totalEarnings,
       activeListings: activeListings,
@@ -115,8 +163,10 @@ class OwnerDashboardRemoteDataSource {
       occupancyRate: occupancyRate,
       recentProperties: properties.take(3).toList(),
       recentRequests: recentRequests,
+      recentViewingRequests: recentViewingsList, // Safely mapped Strings!
     );
   }
+
   bool _isCurrentlyOccupied(Map<String, dynamic> propertyRow) {
     final bookings = propertyRow['booking_requests'];
     if (bookings is! List) {

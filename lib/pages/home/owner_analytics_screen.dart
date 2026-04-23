@@ -10,6 +10,9 @@ import 'package:homeu/pages/home/owner_bottom_navigation_bar.dart';
 import 'package:homeu/pages/home/profile_screen.dart';
 import 'package:homeu/pages/home/owner_booking_requests_screen.dart';
 import 'package:homeu/pages/home/owner_my_properties_screen.dart';
+import '../../app/property/owner_analytics/owner_analytics_models.dart';
+import '../../app/property/owner_analytics/owner_analytics_controller.dart';
+import 'owner_dashboard_screen.dart';
 
 class HomeUOwnerAnalyticsScreen extends StatefulWidget {
   const HomeUOwnerAnalyticsScreen({
@@ -26,54 +29,47 @@ class HomeUOwnerAnalyticsScreen extends StatefulWidget {
 
 class _HomeUOwnerAnalyticsScreenState extends State<HomeUOwnerAnalyticsScreen> {
   int _selectedNavIndex = 3;
+  late final OwnerAnalyticsController _controller;
 
-  static const List<_MonthlyEarning> _monthlyEarnings = [
-    _MonthlyEarning(1, 7400),
-    _MonthlyEarning(2, 8100),
-    _MonthlyEarning(3, 9600),
-    _MonthlyEarning(4, 11200),
-    _MonthlyEarning(5, 12480),
-    _MonthlyEarning(6, 10750),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _controller = OwnerAnalyticsController();
+    _controller.loadAnalytics();
+  }
 
-  static const List<_RentalTypeSlice> _rentalTypeDistribution = [
-    _RentalTypeSlice(_OwnerRentalType.condo, 45, Color(0xFF1E3A8A)),
-    _RentalTypeSlice(_OwnerRentalType.apartment, 30, Color(0xFF10B981)),
-    _RentalTypeSlice(_OwnerRentalType.room, 15, Color(0xFFF59E0B)),
-    _RentalTypeSlice(_OwnerRentalType.landed, 10, Color(0xFF7C3AED)),
-  ];
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   String _monthLabel(BuildContext context, int month) {
     final t = context.l10n;
     switch (month) {
-      case 1:
-        return t.monthShortJan;
-      case 2:
-        return t.monthShortFeb;
-      case 3:
-        return t.monthShortMar;
-      case 4:
-        return t.monthShortApr;
-      case 5:
-        return t.monthShortMay;
-      case 6:
-        return t.monthShortJun;
-      default:
-        return month.toString();
+      case 1: return t.monthShortJan;
+      case 2: return t.monthShortFeb;
+      case 3: return t.monthShortMar;
+      case 4: return t.monthShortApr;
+      case 5: return t.monthShortMay;
+      case 6: return t.monthShortJun;
+      case 7: return 'Jul';
+      case 8: return 'Aug';
+      case 9: return 'Sep';
+      case 10: return 'Oct';
+      case 11: return 'Nov';
+      case 12: return 'Dec';
+      default: return month.toString();
     }
   }
 
-  String _rentalTypeLabel(BuildContext context, _OwnerRentalType type) {
+  String _rentalTypeLabel(BuildContext context, OwnerRentalType type) {
     final t = context.l10n;
     switch (type) {
-      case _OwnerRentalType.condo:
-        return t.rentalTypeCondo;
-      case _OwnerRentalType.apartment:
-        return t.rentalTypeApartment;
-      case _OwnerRentalType.room:
-        return t.rentalTypeRoom;
-      case _OwnerRentalType.landed:
-        return t.rentalTypeLanded;
+      case OwnerRentalType.condo: return t.rentalTypeCondo;
+      case OwnerRentalType.apartment: return t.rentalTypeApartment;
+      case OwnerRentalType.room: return t.rentalTypeRoom;
+      case OwnerRentalType.landed: return t.rentalTypeLanded;
     }
   }
 
@@ -82,11 +78,6 @@ class _HomeUOwnerAnalyticsScreenState extends State<HomeUOwnerAnalyticsScreen> {
     if (!HomeUSession.canAccess(HomeURole.owner)) {
       return const HomeURoleBlockedScreen(requiredRole: HomeURole.owner);
     }
-
-    final maxMonthlyValue = _monthlyEarnings
-        .map((e) => e.value)
-        .reduce((a, b) => a > b ? a : b)
-        .toDouble();
 
     return Scaffold(
       backgroundColor: context.colors.surface,
@@ -97,260 +88,252 @@ class _HomeUOwnerAnalyticsScreenState extends State<HomeUOwnerAnalyticsScreen> {
       ),
       bottomNavigationBar: widget.showBottomNavigationBar
           ? HomeUOwnerBottomNavigationBar(
-              selectedIndex: _selectedNavIndex,
-              onDestinationSelected: (index) {
-                if (index == _selectedNavIndex) return;
+        selectedIndex: _selectedNavIndex,
+        onDestinationSelected: (index) {
+          if (index == _selectedNavIndex) return;
 
-                if (index == 0) {
-                  Navigator.of(context).popUntil((route) => route.isFirst);
-                  return;
-                }
-                if (index == 1) {
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(builder: (_) => const HomeUOwnerMyPropertiesScreen()),
-                  );
-                  return;
-                }
-                if (index == 2) {
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(builder: (_) => const HomeUOwnerBookingRequestsScreen()),
-                  );
-                  return;
-                }
-                if (index == 4) {
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute<void>(
-                      builder: (_) => const HomeUConversationListScreen(),
-                    ),
-                  );
-                  return;
-                }
-                if (index == 5) {
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute<void>(
-                      builder: (_) => const HomeUProfileScreen(role: HomeURole.owner),
-                    ),
-                  );
-                  return;
-                }
-              },
-            )
+          if (index == 0) {
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (_) => const HomeUOwnerDashboardScreen()),
+                  (route) => false,
+            );
+            return;
+          }
+          if (index == 1) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (_) => const HomeUOwnerMyPropertiesScreen()),
+            );
+            return;
+          }
+          if (index == 2) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (_) => const HomeUOwnerBookingRequestsScreen()),
+            );
+            return;
+          }
+          if (index == 4) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute<void>(builder: (_) => const HomeUConversationListScreen()),
+            );
+            return;
+          }
+          if (index == 5) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute<void>(builder: (_) => const HomeUProfileScreen(role: HomeURole.owner)),
+            );
+            return;
+          }
+        },
+      )
           : null,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                context.l10n.ownerAnalyticsSubtitle,
-                style: TextStyle(
-                  color: context.homeuMutedText,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: _OwnerAnalyticsStatCard(
-                      label: context.l10n.ownerStatNetEarnings,
-                      value: 'RM 12,480',
-                      keyValue: const Key('owner_stat_net_earnings'),
-                    ),
+        child: RefreshIndicator(
+          onRefresh: _controller.loadAnalytics,
+          color: context.homeuAccent,
+          child: ListenableBuilder(
+            listenable: _controller,
+            builder: (context, _) {
+              if (_controller.isLoading) {
+                return Center(child: CircularProgressIndicator(color: context.homeuAccent));
+              }
+
+              if (_controller.errorMessage != null) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.error_outline, color: Colors.red, size: 40),
+                      const SizedBox(height: 16),
+                      Text(_controller.errorMessage!),
+                      TextButton(
+                        onPressed: _controller.loadAnalytics,
+                        child: const Text('Retry'),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: _OwnerAnalyticsStatCard(
-                      label: context.l10n.ownerOccupancy,
-                      value: '91%',
-                      keyValue: const Key('owner_stat_occupancy'),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: _OwnerAnalyticsStatCard(
-                      label: context.l10n.ownerNavRequests,
-                      value: '17',
-                      keyValue: const Key('owner_stat_requests'),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 14),
-              Container(
-                key: const Key('monthly_earnings_bar_chart'),
-                padding: const EdgeInsets.all(14),
-                decoration: _cardDecoration(context),
+                );
+              }
+
+              final data = _controller.data!;
+
+              // Calculate max value for the bar chart scaling
+              double maxMonthlyValue = 1.0;
+              if (data.monthlyEarnings.isNotEmpty) {
+                maxMonthlyValue = data.monthlyEarnings.map((e) => e.value).reduce((a, b) => a > b ? a : b);
+                if (maxMonthlyValue == 0) maxMonthlyValue = 1.0; // Prevent divide by zero
+              }
+
+              return SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      context.l10n.ownerMonthlyEarnings,
+                      context.l10n.ownerAnalyticsSubtitle,
                       style: TextStyle(
-                        color: context.homeuPrimaryText,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    SizedBox(
-                      height: 200,
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: _monthlyEarnings
-                            .map(
-                              (entry) => Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 4,
-                                  ),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    children: [
-                                      Expanded(
-                                        child: Align(
-                                          alignment: Alignment.bottomCenter,
-                                          child: Container(
-                                            height:
-                                                130 *
-                                                (entry.value / maxMonthlyValue),
-                                            decoration: BoxDecoration(
-                                              color: context.homeuAccent,
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Text(
-                                        _monthLabel(context, entry.month),
-                                        style: TextStyle(
-                                          color: context.homeuMutedText,
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            )
-                            .toList(),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 14),
-              Container(
-                key: const Key('rental_type_pie_chart'),
-                padding: const EdgeInsets.all(14),
-                decoration: _cardDecoration(context),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      context.l10n.ownerRentalTypeDistribution,
-                      style: TextStyle(
-                        color: context.homeuPrimaryText,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
+                        color: context.homeuMutedText,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                     const SizedBox(height: 12),
                     Row(
                       children: [
-                        SizedBox(
-                          width: 130,
-                          height: 130,
-                          child: CustomPaint(
-                            painter: _PieChartPainter(_rentalTypeDistribution),
+                        Expanded(
+                          child: _OwnerAnalyticsStatCard(
+                            label: context.l10n.ownerStatNetEarnings,
+                            value: 'RM ${data.netEarnings.toStringAsFixed(0)}',
+                            keyValue: const Key('owner_stat_net_earnings'),
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: 8),
                         Expanded(
-                          child: Column(
-                            children: _rentalTypeDistribution
-                                .map(
-                                  (slice) => Padding(
-                                    padding: const EdgeInsets.only(bottom: 8),
-                                    child: Row(
+                          child: _OwnerAnalyticsStatCard(
+                            label: context.l10n.ownerOccupancy,
+                            value: data.occupancyRate,
+                            keyValue: const Key('owner_stat_occupancy'),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: _OwnerAnalyticsStatCard(
+                            label: context.l10n.ownerNavRequests,
+                            value: '${data.totalRequests}',
+                            keyValue: const Key('owner_stat_requests'),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    Container(
+                      key: const Key('monthly_earnings_bar_chart'),
+                      padding: const EdgeInsets.all(14),
+                      decoration: _cardDecoration(context),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            context.l10n.ownerMonthlyEarnings,
+                            style: TextStyle(
+                              color: context.homeuPrimaryText,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          SizedBox(
+                            height: 200,
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: data.monthlyEarnings
+                                  .map(
+                                    (entry) => Expanded(
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.end,
                                       children: [
-                                        Container(
-                                          width: 10,
-                                          height: 10,
-                                          decoration: BoxDecoration(
-                                            color: slice.color,
-                                            shape: BoxShape.circle,
+                                        Expanded(
+                                          child: Align(
+                                            alignment: Alignment.bottomCenter,
+                                            child: Container(
+                                              height: 130 * (entry.value / maxMonthlyValue),
+                                              decoration: BoxDecoration(
+                                                color: context.homeuAccent,
+                                                borderRadius: BorderRadius.circular(8),
+                                              ),
+                                            ),
                                           ),
                                         ),
-                                        const SizedBox(width: 8),
-                                        Expanded(
-                                          child: Text(
-                                            '${_rentalTypeLabel(context, slice.type)} (${slice.percent}%)',
-                                            style: TextStyle(
-                                              color: context.homeuPrimaryText,
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w600,
-                                            ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          _monthLabel(context, entry.month),
+                                          style: TextStyle(
+                                            color: context.homeuMutedText,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w600,
                                           ),
                                         ),
                                       ],
                                     ),
                                   ),
-                                )
-                                .toList(),
+                                ),
+                              ).toList(),
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    Container(
+                      key: const Key('rental_type_pie_chart'),
+                      padding: const EdgeInsets.all(14),
+                      decoration: _cardDecoration(context),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            context.l10n.ownerRentalTypeDistribution,
+                            style: TextStyle(
+                              color: context.homeuPrimaryText,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              SizedBox(
+                                width: 130,
+                                height: 130,
+                                child: CustomPaint(
+                                  painter: _PieChartPainter(data.rentalDistribution),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  children: data.rentalDistribution
+                                      .map(
+                                        (slice) => Padding(
+                                      padding: const EdgeInsets.only(bottom: 8),
+                                      child: Row(
+                                        children: [
+                                          Container(
+                                            width: 10,
+                                            height: 10,
+                                            decoration: BoxDecoration(
+                                              color: slice.color,
+                                              shape: BoxShape.circle,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            child: Text(
+                                              '${_rentalTypeLabel(context, slice.type)} (${slice.percent}%)',
+                                              style: TextStyle(
+                                                color: context.homeuPrimaryText,
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ).toList(),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(height: 14),
-              Container(
-                key: const Key('occupancy_rate_progress'),
-                padding: const EdgeInsets.all(14),
-                decoration: _cardDecoration(context),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      context.l10n.ownerOccupancyRate,
-                      style: TextStyle(
-                        color: context.homeuPrimaryText,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(999),
-                      child: LinearProgressIndicator(
-                        minHeight: 10,
-                        value: 0.91,
-                        backgroundColor: context.homeuSoftBorder,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          context.homeuSuccess,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      context.l10n.ownerOccupancyRateDescription,
-                      style: TextStyle(
-                        color: context.homeuMutedText,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+              );
+            },
           ),
         ),
       ),
@@ -365,7 +348,7 @@ class _HomeUOwnerAnalyticsScreenState extends State<HomeUOwnerAnalyticsScreen> {
         BoxShadow(
           color: context.homeuAccent.withValues(alpha: 0.14),
           blurRadius: 12,
-          offset: Offset(0, 4),
+          offset: const Offset(0, 4),
         ),
       ],
     );
@@ -422,7 +405,7 @@ class _OwnerAnalyticsStatCard extends StatelessWidget {
 class _PieChartPainter extends CustomPainter {
   _PieChartPainter(this.slices);
 
-  final List<_RentalTypeSlice> slices;
+  final List<RentalTypeData> slices;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -453,21 +436,4 @@ class _PieChartPainter extends CustomPainter {
   bool shouldRepaint(covariant _PieChartPainter oldDelegate) {
     return oldDelegate.slices != slices;
   }
-}
-
-class _MonthlyEarning {
-  const _MonthlyEarning(this.month, this.value);
-
-  final int month;
-  final int value;
-}
-
-enum _OwnerRentalType { condo, apartment, room, landed }
-
-class _RentalTypeSlice {
-  const _RentalTypeSlice(this.type, this.percent, this.color);
-
-  final _OwnerRentalType type;
-  final int percent;
-  final Color color;
 }

@@ -21,20 +21,17 @@ class HomeUOwnerShellScreen extends StatefulWidget {
 
 class _HomeUOwnerShellScreenState extends State<HomeUOwnerShellScreen> {
   late int _currentIndex;
-  late final List<Widget> _tabs;
 
   @override
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex.clamp(0, 5);
-    _tabs = const [
-      HomeUOwnerDashboardScreen(showBottomNavigationBar: false),
-      HomeUOwnerMyPropertiesScreen(showBottomNavigationBar: false),
-      HomeUOwnerBookingRequestsScreen(showBottomNavigationBar: false),
-      HomeUOwnerAnalyticsScreen(showBottomNavigationBar: false),
-      HomeUConversationListScreen(),
-      HomeUProfileScreen(role: HomeURole.owner),
-    ];
+  }
+
+  void _switchTab(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
   }
 
   @override
@@ -43,21 +40,25 @@ class _HomeUOwnerShellScreenState extends State<HomeUOwnerShellScreen> {
       return const HomeURoleBlockedScreen(requiredRole: HomeURole.owner);
     }
 
+    final List<Widget> tabs = [
+      HomeUOwnerDashboardScreen(
+        showBottomNavigationBar: false,
+        onNavigateToTab: (index) => setState(() => _currentIndex = index),
+      ),
+      const HomeUOwnerMyPropertiesScreen(showBottomNavigationBar: false),
+      const HomeUOwnerBookingRequestsScreen(showBottomNavigationBar: false),
+      const HomeUOwnerAnalyticsScreen(showBottomNavigationBar: false),
+      const HomeUConversationListScreen(),
+      const HomeUProfileScreen(role: HomeURole.owner),
+    ];
+
     return Scaffold(
       backgroundColor: context.colors.surface,
-      body: IndexedStack(index: _currentIndex, children: _tabs),
+      body: IndexedStack(index: _currentIndex, children: tabs),
       bottomNavigationBar: HomeUOwnerBottomNavigationBar(
         selectedIndex: _currentIndex,
-        onDestinationSelected: (index) {
-          if (index == _currentIndex) {
-            return;
-          }
-          setState(() {
-            _currentIndex = index;
-          });
-        },
+        onDestinationSelected: _switchTab,
       ),
     );
   }
 }
-

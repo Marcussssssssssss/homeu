@@ -7,6 +7,7 @@ class BookingRequestModel {
     required this.propertyTitle,
     required this.monthlyPrice,
     required this.tenantName,
+    this.tenantProfileUrl,
     required this.tenantPhone,
     required this.tenantEmail,
     required this.startDate,
@@ -21,6 +22,7 @@ class BookingRequestModel {
   final String propertyTitle;
   final num monthlyPrice;
   final String tenantName;
+  final String? tenantProfileUrl;
   final String tenantPhone;
   final String tenantEmail;
   final DateTime? startDate;
@@ -47,6 +49,7 @@ class BookingRequestModel {
       propertyTitle: property['title']?.toString() ?? 'Unknown Property',
       monthlyPrice: monthlyPrice,
       tenantName: tenant['full_name']?.toString() ?? 'Unknown Tenant',
+      tenantProfileUrl: tenant['profile_image_url'],
       tenantPhone: tenant['phone']?.toString() ?? tenant['phone_number']?.toString() ?? 'No Phone',
       tenantEmail: tenant['email']?.toString() ?? 'No Email',
       startDate: parsedStartDate,

@@ -16,7 +16,7 @@ class ViewingRequestsRemoteDataSource {
           properties!inner (title, owner_id)
         ''')
         .eq('properties.owner_id', ownerId)
-        .order('scheduled_at', ascending: true); // Sort by soonest viewing!
+        .order('scheduled_at', ascending: true);
 
     if (response is! List) return const <ViewingRequestModel>[];
 
@@ -34,7 +34,7 @@ class ViewingRequestsRemoteDataSource {
     if (tenantIds.isNotEmpty) {
       final dynamic profilesResponse = await AppSupabase.client
           .from('profiles')
-          .select('id, full_name, email, phone_number')
+          .select('id, full_name, email, phone_number, profile_image_url')
           .inFilter('id', tenantIds);
 
       if (profilesResponse is List) {
@@ -54,6 +54,7 @@ class ViewingRequestsRemoteDataSource {
           'full_name': tenant?['full_name'],
           'email': tenant?['email'],
           'phone_number': tenant?['phone_number'],
+          'profile_image_url': tenant?['profile_image_url'],
         },
       });
     }).toList(growable: false);
@@ -65,7 +66,5 @@ class ViewingRequestsRemoteDataSource {
         .update({'status': newStatus})
         .eq('id', viewingId);
 
-    // Note: If you want auto-cancel logic for overlapping viewing times,
-    // you would add it here exactly like we did for bookings!
   }
 }
