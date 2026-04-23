@@ -5,6 +5,8 @@ class AddPropertyPayload {
     required this.title,
     required this.description,
     required this.locationArea,
+    required this.latitude,
+    required this.longitude,
     required this.monthlyPrice,
     required this.rentalType,
     required this.propertyType,
@@ -19,6 +21,8 @@ class AddPropertyPayload {
   final String title;
   final String description;
   final String locationArea;
+  final double? latitude;
+  final double? longitude;
   final num monthlyPrice;
   final String rentalType;
   final String propertyType;

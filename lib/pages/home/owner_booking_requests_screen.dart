@@ -308,14 +308,19 @@ class _HomeUOwnerBookingRequestsScreenState extends State<HomeUOwnerBookingReque
                                 children: [
                                   Row(
                                     children: [
-                                      const CircleAvatar(
+                                      CircleAvatar(
                                         radius: 18,
-                                        backgroundColor: Color(0xFFEAF2FF),
-                                        child: Icon(
+                                        backgroundColor: const Color(0xFFEAF2FF),
+                                        backgroundImage: (request.tenantProfileUrl != null && request.tenantProfileUrl!.isNotEmpty)
+                                            ? NetworkImage(request.tenantProfileUrl!)
+                                            : null,
+                                        child: (request.tenantProfileUrl == null || request.tenantProfileUrl!.isEmpty)
+                                            ? const Icon(
                                           Icons.person_rounded,
                                           color: Color(0xFF1E3A8A),
                                           size: 20,
-                                        ),
+                                        )
+                                            : null,
                                       ),
                                       const SizedBox(width: 10),
                                       Expanded(
@@ -594,14 +599,19 @@ class _HomeUOwnerBookingRequestsScreenState extends State<HomeUOwnerBookingReque
                               children: [
                                 Row(
                                   children: [
-                                    const CircleAvatar(
+                                    CircleAvatar(
                                       radius: 18,
-                                      backgroundColor: Color(0xFFEAF2FF),
-                                      child: Icon(
+                                      backgroundColor: const Color(0xFFEAF2FF),
+                                      backgroundImage: (request.tenantProfileUrl != null && request.tenantProfileUrl!.isNotEmpty)
+                                          ? NetworkImage(request.tenantProfileUrl!)
+                                          : null,
+                                      child: (request.tenantProfileUrl == null || request.tenantProfileUrl!.isEmpty)
+                                          ? const Icon(
                                         Icons.person_rounded,
                                         color: Color(0xFF1E3A8A),
                                         size: 20,
-                                      ),
+                                      )
+                                          : null,
                                     ),
                                     const SizedBox(width: 10),
                                     Expanded(

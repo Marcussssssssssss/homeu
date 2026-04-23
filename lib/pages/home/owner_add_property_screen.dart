@@ -1,10 +1,13 @@
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
 import 'package:homeu/app/property/add_property/add_property_controller.dart';
 import 'package:homeu/app/property/add_property/add_property_models.dart';
+
+import 'owner_map_selection_screen.dart';
 
 class HomeUOwnerAddPropertyScreen extends StatefulWidget {
   const HomeUOwnerAddPropertyScreen({super.key, this.propertyId});
@@ -32,6 +35,12 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
   final TextEditingController _addressController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
 
+  String? _titleError;
+  String? _priceError;
+  String? _addressError;
+  String? _descriptionError;
+  bool _locationError = false;
+
   bool _isLoading = false;
 
   final Set<String> _selectedFacilities = {'WiFi', 'Parking'};
@@ -43,6 +52,8 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
 
   bool _publishImmediately = true;
   DateTime? _scheduledPublishDate;
+
+  LatLng? _selectedCoordinates;
 
   // image picker
   final ImagePicker _imagePicker = ImagePicker();
@@ -73,6 +84,13 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
         _selectedRentalType = data['room_type'] ?? 'Whole Unit';
         _selectedPropertyType = data['property_type'] ?? 'Condo';
         _selectedFurnishing = data['furnishing'] ?? 'Partially Furnished';
+
+        if (data['latitude'] != null && data['longitude'] != null) {
+          _selectedCoordinates = LatLng(
+            (data['latitude'] as num).toDouble(),
+            (data['longitude'] as num).toDouble(),
+          );
+        }
 
         if (data['facilities'] != null) {
           _selectedFacilities.clear();
@@ -146,35 +164,50 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
     final locationArea = _addressController.text.trim();
     final description = _descriptionController.text.trim();
 
-    // allow "1800" or "1,800"
     final rawPrice = _priceController.text.trim().replaceAll(',', '');
     final monthlyPrice = num.tryParse(rawPrice);
 
-    if (status == 'Active') {
-      if (title.isEmpty || locationArea.isEmpty || description.isEmpty ||
-          monthlyPrice == null || monthlyPrice <= 0) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please fill in all required fields to publish.')),
-        );
-        return;
+    bool hasError = false;
+
+    setState(() {
+      if (status == 'Active') {
+        _titleError = title.isEmpty ? 'Property Name is required' : null;
+        _priceError = (monthlyPrice == null || monthlyPrice <= 0) ? 'Valid monthly price is required' : null;
+        _addressError = locationArea.isEmpty ? 'Address is required' : null;
+        _descriptionError = description.isEmpty ? 'Description is required' : null;
+
+        hasError = _titleError != null || _priceError != null || _addressError != null || _descriptionError != null;
+      } else {
+        // If Draft, only title is strictly required
+        _titleError = title.isEmpty ? 'Property Name is required to save draft' : null;
+        _priceError = null;
+        _addressError = null;
+        _descriptionError = null;
+
+        hasError = _titleError != null;
       }
+    });
+
+    if (hasError) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please fill in all required fields to publish.'),
+          backgroundColor: Color(0xFFC53030),
+        ),
+      );
+      return;
+    }
+
+    if (status == 'Active') {
       if (_selectedImages.isEmpty && widget.propertyId == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select at least 1 image to publish.')),
+          const SnackBar(content: Text('Please select at least 1 image to publish.'), backgroundColor: Color(0xFFC53030)),
         );
         return;
       }
       if (!_publishImmediately && _scheduledPublishDate == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select a date to schedule publication.')),
-        );
-        return;
-      }
-    } else {
-      // If saving as Draft, just require a title so we have something to save
-      if (title.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please enter at least a Property Name to save as draft.')),
+          const SnackBar(content: Text('Please select a date to schedule publication.'), backgroundColor: Color(0xFFC53030)),
         );
         return;
       }
@@ -193,6 +226,8 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
         title: title,
         description: description,
         locationArea: locationArea,
+        latitude: _selectedCoordinates?.latitude,
+        longitude: _selectedCoordinates?.longitude,
         monthlyPrice: monthlyPrice ?? 0,
         rentalType: _selectedRentalType,
         propertyType: _selectedPropertyType,
@@ -271,6 +306,7 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
                       hintText: 'e.g. Skyline Condo Suite',
                       keyValue: const Key('property_name_field'),
                       controller: _titleController,
+                      errorText: _titleError,
                     ),
                     const SizedBox(height: 12),
                     // rental type (whole unit / room)
@@ -313,6 +349,7 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
                       keyValue: const Key('price_field'),
                       keyboardType: TextInputType.number,
                       controller: _priceController,
+                      errorText: _priceError,
                     ),
                     const SizedBox(height: 12),
                     _LabeledTextField(
@@ -321,6 +358,7 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
                       keyValue: const Key('address_field'),
                       maxLines: 2,
                       controller: _addressController,
+                      errorText: _addressError,
                     ),
                     const SizedBox(height: 12),
                     _LabeledTextField(
@@ -329,6 +367,7 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
                       keyValue: const Key('description_field'),
                       maxLines: 4,
                       controller: _descriptionController,
+                      errorText: _descriptionError,
                     ),
                   ],
                 ),
@@ -401,7 +440,6 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
                             child: const _UploadTile(addMode: true),
                           ),
 
-                        // 1. Show EXISTING images from database
                         ...List.generate(_existingImages.length, (index) {
                           final img = _existingImages[index];
                           return Stack(
@@ -439,7 +477,6 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
                           );
                         }),
 
-                        // 2. Show NEW images picked from device
                         ...List.generate(_selectedImages.length, (index) {
                           final file = _selectedImages[index];
                           return Stack(
@@ -478,14 +515,14 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
               ),
               const SizedBox(height: 14),
               _SectionCard(
-                title: 'Location',
+                title: 'Map Location',
                 child: Container(
                   key: const Key('select_location_section'),
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: const Color(0xFFF4F8FF),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0x331E3A8A)),
+                    border: Border.all(color: _locationError ? const Color(0xFFC53030) : const Color(0x331E3A8A), width: _locationError ? 1.5 : 1.0),
                   ),
                   child: Row(
                     children: [
@@ -500,20 +537,52 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
                             colors: [Color(0xFFDCE9FF), Color(0xFFD7F5E7)],
                           ),
                         ),
-                        child: const Icon(Icons.location_pin, color: Color(0xFF1E3A8A), size: 28),
-                      ),
-                      const SizedBox(width: 10),
-                      const Expanded(
-                        child: Text(
-                          'Select property location with pin reference\nNo external API integration required.',
-                          style: TextStyle(
-                            color: Color(0xFF4C607E),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
+                        child: Icon(
+                            _selectedCoordinates == null ? Icons.map_outlined : Icons.location_pin,
+                            color: const Color(0xFF1E3A8A),
+                            size: 28
                         ),
                       ),
-                      TextButton(onPressed: _isLoading ? null : () {}, child: const Text('Select')),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _selectedCoordinates == null
+                                  ? 'Pin property on map (Required)'
+                                  : 'Coordinates Selected',
+                              style: TextStyle(
+                                color: _locationError ? const Color(0xFFC53030) : const Color(0xFF1F314F),
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            if (_selectedCoordinates != null)
+                              Text(
+                                '${_selectedCoordinates!.latitude.toStringAsFixed(5)}, ${_selectedCoordinates!.longitude.toStringAsFixed(5)}',
+                                style: const TextStyle(color: Color(0xFF667896), fontSize: 11),
+                              ),
+                          ],
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: _isLoading ? null : () async {
+                          final LatLng? result = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => MapSelectionScreen(initialLocation: _selectedCoordinates),
+                            ),
+                          );
+                          if (result != null) {
+                            setState(() {
+                              _selectedCoordinates = result;
+                              _locationError = false;
+                            });
+                          }
+                        },
+                        child: Text(_selectedCoordinates == null ? 'Select' : 'Edit'),
+                      ),
                     ],
                   ),
                 ),
@@ -717,6 +786,7 @@ class _LabeledTextField extends StatelessWidget {
     this.controller,
     this.maxLines = 1,
     this.keyboardType,
+    this.errorText,
   });
 
   final String label;
@@ -725,6 +795,7 @@ class _LabeledTextField extends StatelessWidget {
   final TextEditingController? controller;
   final int maxLines;
   final TextInputType? keyboardType;
+  final String? errorText;
 
   @override
   Widget build(BuildContext context) {
@@ -747,6 +818,7 @@ class _LabeledTextField extends StatelessWidget {
           maxLines: maxLines,
           decoration: InputDecoration(
             hintText: hintText,
+            errorText: errorText,
             filled: true,
             fillColor: const Color(0xFFFBFCFF),
             border: OutlineInputBorder(

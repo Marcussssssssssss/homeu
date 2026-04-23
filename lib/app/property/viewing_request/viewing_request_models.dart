@@ -3,6 +3,7 @@ class ViewingRequestModel {
     required this.id,
     required this.propertyTitle,
     required this.tenantName,
+    this.tenantProfileUrl,
     required this.tenantPhone,
     required this.tenantEmail,
     required this.scheduledAt,
@@ -12,6 +13,7 @@ class ViewingRequestModel {
   final String id;
   final String propertyTitle;
   final String tenantName;
+  final String? tenantProfileUrl;
   final String tenantPhone;
   final String tenantEmail;
   final DateTime scheduledAt;
@@ -25,6 +27,7 @@ class ViewingRequestModel {
       id: json['id']?.toString() ?? '',
       propertyTitle: property['title']?.toString() ?? 'Unknown Property',
       tenantName: tenant['full_name']?.toString() ?? 'Unknown Tenant',
+      tenantProfileUrl: tenant?['profile_image_url'],
       tenantPhone: tenant['phone_number']?.toString() ?? tenant['phone']?.toString() ?? 'No Phone',
       tenantEmail: tenant['email']?.toString() ?? 'No Email',
       scheduledAt: DateTime.tryParse(json['scheduled_at']?.toString() ?? '') ?? DateTime.now(),

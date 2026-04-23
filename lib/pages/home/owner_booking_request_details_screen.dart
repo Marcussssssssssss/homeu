@@ -4,7 +4,7 @@ import '../../app/chat/chat_remote_datasource.dart';
 import '../../app/property/booking_request/booking_request_models.dart';
 import '../../app/property/booking_request/booking_requests_controller.dart';
 import '../../core/supabase/app_supabase.dart';
-import 'package:homeu/pages/home/chat_screen.dart'; // Ready for when you wire up the chat
+import 'package:homeu/pages/home/chat_screen.dart';
 
 class HomeUOwnerBookingRequestDetailsScreen extends StatefulWidget {
   const HomeUOwnerBookingRequestDetailsScreen({
@@ -146,10 +146,15 @@ class _HomeUOwnerBookingRequestDetailsScreenState extends State<HomeUOwnerBookin
                   children: [
                     Row(
                       children: [
-                        const CircleAvatar(
+                        CircleAvatar(
                           radius: 32,
-                          backgroundColor: Color(0xFFEAF2FF),
-                          child: Icon(Icons.person_rounded, color: Color(0xFF1E3A8A), size: 36),
+                          backgroundColor: const Color(0xFFEAF2FF),
+                          backgroundImage: (widget.request.tenantProfileUrl != null && widget.request.tenantProfileUrl!.isNotEmpty)
+                              ? NetworkImage(widget.request.tenantProfileUrl!)
+                              : null,
+                          child: (widget.request.tenantProfileUrl == null || widget.request.tenantProfileUrl!.isEmpty)
+                              ? const Icon(Icons.person_rounded, color: Color(0xFF1E3A8A), size: 36)
+                              : null,
                         ),
                         const SizedBox(width: 16),
                         Expanded(
