@@ -208,8 +208,8 @@ class _BrowseListingIllustration extends StatelessWidget {
       child: Stack(
         children: [
           Positioned(
-            top: 16,
-            right: 18,
+            top: 14,
+            right: 14,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
               decoration: BoxDecoration(
@@ -224,14 +224,16 @@ class _BrowseListingIllustration extends StatelessWidget {
                 ],
               ),
               child: Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.tune_rounded, size: 16, color: accent),
-                  SizedBox(width: 6),
+                  Icon(Icons.tune_rounded, size: 14, color: accent),
+                  const SizedBox(width: 4),
                   Text(
                     context.l10n.onboardingFilters,
                     style: TextStyle(
                       color: accent,
-                      fontWeight: FontWeight.w600,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ],
@@ -239,27 +241,30 @@ class _BrowseListingIllustration extends StatelessWidget {
             ),
           ),
           Center(
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: SizedBox(
-                width: 230,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _ListingCard(
-                      title: context.l10n.onboardingExampleListing1Title,
-                      subtitle: context.l10n.onboardingExampleListing1Subtitle,
-                      price: context.l10n.onboardingExampleListing1Price,
-                      accent: const Color(0xFF1E3A8A),
-                    ),
-                    const SizedBox(height: 12),
-                    _ListingCard(
-                      title: context.l10n.onboardingExampleListing2Title,
-                      subtitle: context.l10n.onboardingExampleListing2Subtitle,
-                      price: context.l10n.onboardingExampleListing2Price,
-                      accent: const Color(0xFF10B981),
-                    ),
-                  ],
+            child: Padding(
+              padding: const EdgeInsets.only(top: 24),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: SizedBox(
+                  width: 230,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _ListingCard(
+                        title: context.l10n.onboardingExampleListing1Title,
+                        subtitle: context.l10n.onboardingExampleListing1Subtitle,
+                        price: context.l10n.onboardingExampleListing1Price,
+                        accent: const Color(0xFF1E3A8A),
+                      ),
+                      const SizedBox(height: 12),
+                      _ListingCard(
+                        title: context.l10n.onboardingExampleListing2Title,
+                        subtitle: context.l10n.onboardingExampleListing2Subtitle,
+                        price: context.l10n.onboardingExampleListing2Price,
+                        accent: const Color(0xFF10B981),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

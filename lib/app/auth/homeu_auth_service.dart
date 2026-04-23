@@ -60,7 +60,7 @@ class HomeUAuthService {
 
   Future<void> signOut() async {
     if (AppSupabase.isInitialized) {
-      await AppSupabase.auth.signOut(scope: SignOutScope.local);
+      await AppSupabase.auth.signOut();
     }
   }
 }

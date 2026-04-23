@@ -6,6 +6,7 @@ import 'package:homeu/app/auth/homeu_auth_service.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/profile/profile_controller.dart';
 import 'package:homeu/app/profile/profile_models.dart';
+import 'package:homeu/app/profile/profile_local_datasource.dart';
 import 'package:homeu/app/settings/homeu_language_controller.dart';
 import 'package:homeu/app/settings/homeu_theme_controller.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
@@ -372,6 +373,80 @@ class _HomeUProfileScreenState extends State<HomeUProfileScreen> {
     }
   }
 
+  Future<void> _showLogoutConfirmation() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            'Log out?',
+            style: TextStyle(
+              color: context.homeuPrimaryText,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          content: Text(
+            'Are you sure you want to log out of your HomeU account?',
+            style: TextStyle(
+              color: context.homeuSecondaryText,
+            ),
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(
+                'Cancel',
+                style: TextStyle(
+                  color: context.homeuMutedText,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text(
+                'Log Out',
+                style: TextStyle(
+                  color: Color(0xFFEF4444),
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed == true && mounted) {
+      await _handleLogout();
+    }
+  }
+
+  Future<void> _handleLogout() async {
+    try {
+      await HomeUAuthService.instance.signOut();
+    } catch (_) {
+      // Keep logout resilient even if remote sign-out fails.
+    }
+
+    HomeUSession.logout();
+    await HomeUProfileLocalDataSource().clearAll();
+
+    if (!mounted) {
+      return;
+    }
+
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute<void>(
+        builder: (_) => const HomeULoginScreen(),
+      ),
+      (route) => false,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (!HomeUSession.canAccess(widget.role)) {
@@ -596,26 +671,7 @@ class _HomeUProfileScreenState extends State<HomeUProfileScreen> {
                         height: 52,
                         child: ElevatedButton(
                           key: const Key('logout_button'),
-                          onPressed: () async {
-                            try {
-                              await HomeUAuthService.instance.signOut();
-                            } catch (_) {
-                              // Keep logout resilient even if remote sign-out fails.
-                            }
-
-                            HomeUSession.logout();
-
-                            if (!context.mounted) {
-                              return;
-                            }
-
-                            Navigator.of(context).pushAndRemoveUntil(
-                              MaterialPageRoute<void>(
-                                builder: (_) => const HomeULoginScreen(),
-                              ),
-                              (route) => false,
-                            );
-                          },
+                          onPressed: _showLogoutConfirmation,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: context.homeuAccent,
                             foregroundColor: Colors.white,

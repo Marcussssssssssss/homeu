@@ -115,5 +115,10 @@ class HomeUProfileLocalDataSource {
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
-}
 
+  Future<void> clearAll() async {
+    final db = await database;
+    await db.delete(_profileTable);
+    await db.delete(_preferenceTable);
+  }
+}
