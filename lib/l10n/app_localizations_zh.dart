@@ -654,4 +654,46 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get updatePasswordErrorGeneric => '暂时无法更新密码，请稍后再试。';
+
+  @override
+  String get chatTitle => '消息';
+
+  @override
+  String get chatSearchHint => '搜索消息...';
+
+  @override
+  String get chatFilterAll => '全部';
+
+  @override
+  String get chatFilterUnread => '未读';
+
+  @override
+  String get chatFilterProperty => '房源';
+
+  @override
+  String get chatFilterArchived => '已归档';
+
+  @override
+  String get chatYesterday => '昨天';
+
+  @override
+  String get chatOnline => '在线';
+
+  @override
+  String get chatOffline => '离线';
+
+  @override
+  String get chatTypeMessageHint => '输入消息...';
+
+  @override
+  String get chatAttachmentTitle => '发送附件';
+
+  @override
+  String get chatAttachImage => '图片';
+
+  @override
+  String get chatAttachCamera => '拍照';
+
+  @override
+  String get chatAttachDocument => '文档';
 }

@@ -238,5 +238,13 @@
   "chatOnline": "在线",
   "chatOffline": "离线",
   "chatTypeMessageHint": "输入消息...",
-  "chatYesterday": "昨天"
+  "chatYesterday": "昨天",
+  "chatFilterAll": "全部",
+  "chatFilterUnread": "未读",
+  "chatFilterProperty": "房源",
+  "chatFilterArchived": "已归档",
+  "chatAttachmentTitle": "发送附件",
+  "chatAttachImage": "图片",
+  "chatAttachCamera": "拍照",
+  "chatAttachDocument": "文档"
 }
