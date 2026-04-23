@@ -5,159 +5,38 @@ class BookingRequestsRemoteDataSource {
   const BookingRequestsRemoteDataSource();
 
   Future<List<BookingRequestModel>> fetchOwnerRequests(String ownerId) async {
-    final dynamic response = await AppSupabase.client
-        .from('booking_requests')
+    // Joins bookings with properties (to filter by owner) and profiles (for tenant info)
+    final response = await AppSupabase.client
+        .from('bookings')
         .select('''
           id, 
-          property_id,
-          tenant_id,
+          start_date, 
+          duration_months, 
           status, 
           created_at,
-          total_amount,
-          properties!inner (title, monthly_price, owner_id)
+          properties!inner (title, monthly_price, owner_id),
+          profiles (full_name, phone, email)
         ''')
         .eq('properties.owner_id', ownerId)
         .order('created_at', ascending: false);
 
-    if (response is! List) {
-      return const <BookingRequestModel>[];
+    if (response is List) {
+      return response
+          .map((data) => BookingRequestModel.fromJson(data as Map<String, dynamic>))
+          .toList();
     }
-
-    final bookingRows = response.whereType<Map<String, dynamic>>().toList(growable: false);
-    if (bookingRows.isEmpty) {
-      return const <BookingRequestModel>[];
-    }
-
-    final tenantIds = bookingRows
-        .map((row) => row['tenant_id']?.toString())
-        .whereType<String>()
-        .where((id) => id.isNotEmpty)
-        .toSet()
-        .toList(growable: false);
-
-    Map<String, Map<String, dynamic>> profilesById = const <String, Map<String, dynamic>>{};
-    if (tenantIds.isNotEmpty) {
-      final dynamic profilesResponse = await AppSupabase.client
-          .from('profiles')
-          .select('id, full_name, email, phone_number')
-          .inFilter('id', tenantIds);
-
-      if (profilesResponse is List) {
-        profilesById = {
-          for (final row in profilesResponse.whereType<Map<String, dynamic>>())
-            if ((row['id']?.toString() ?? '').isNotEmpty) row['id'].toString(): row,
-        };
-      }
-    }
-
-    return bookingRows.map((row) {
-      final tenantId = row['tenant_id']?.toString() ?? '';
-      final tenant = profilesById[tenantId];
-      return BookingRequestModel.fromJson({
-        ...row,
-        'profiles': {
-          'full_name': tenant?['full_name'],
-          'email': tenant?['email'],
-          'phone': tenant?['phone_number'] ?? tenant?['phone'],
-        },
-      });
-    }).toList(growable: false);
+    return [];
   }
 
   Future<void> updateBookingStatus(String bookingId, String newStatus) async {
     final response = await AppSupabase.client
-        .from('booking_requests')
+        .from('bookings')
         .update({'status': newStatus})
         .eq('id', bookingId)
-        .select('id, property_id, created_at, total_amount, properties!inner(monthly_price)');
+        .select();
 
     if (response.isEmpty) {
       throw Exception('Failed to update booking. You may not have permission.');
     }
-
-    if (newStatus == 'Approved') {
-      final approvedData = response.first as Map<String, dynamic>;
-      final propertyId = approvedData['property_id'];
-
-      final startA = _parseDateTime(approvedData['created_at']);
-      final durationA = _resolveDurationMonths(approvedData);
-
-      if (propertyId != null && startA != null) {
-        final endA = DateTime(startA.year, startA.month + durationA, startA.day);
-        final pendingResponses = await AppSupabase.client
-            .from('booking_requests')
-            .select('id, created_at, total_amount, properties!inner(monthly_price)')
-            .eq('property_id', propertyId)
-            .neq('id', bookingId)
-            .inFilter('status', ['Pending', 'Pending Decision']);
-
-        final pendingList = pendingResponses as List<dynamic>? ?? [];
-        final idsToCancel = <String>[];
-
-        for (final pending in pendingList.whereType<Map<String, dynamic>>()) {
-          final startB = _parseDateTime(pending['created_at']);
-          if (startB == null) {
-            continue;
-          }
-
-          final durationB = _resolveDurationMonths(pending);
-          final endB = DateTime(startB.year, startB.month + durationB, startB.day);
-
-          if (startA.isBefore(endB) && endA.isAfter(startB)) {
-            final id = pending['id']?.toString() ?? '';
-            if (id.isNotEmpty) {
-              idsToCancel.add(id);
-            }
-          }
-        }
-
-        if (idsToCancel.isNotEmpty) {
-          await AppSupabase.client
-              .from('booking_requests')
-              .update({'status': 'Cancelled'})
-              .inFilter('id', idsToCancel);
-        }
-      }
-    }
-  }
-
-  DateTime? _parseDateTime(dynamic value) {
-    if (value is DateTime) {
-      return value;
-    }
-    if (value is String) {
-      return DateTime.tryParse(value);
-    }
-    return null;
-  }
-
-  int _resolveDurationMonths(Map<String, dynamic> row) {
-    final rawDuration = row['duration_months'];
-    if (rawDuration is num && rawDuration > 0) {
-      return rawDuration.toInt();
-    }
-
-    final totalAmount = _parseNum(row['total_amount']);
-    final properties = row['properties'];
-    final monthlyPrice = properties is Map<String, dynamic>
-        ? _parseNum(properties['monthly_price'])
-        : null;
-
-    if (totalAmount != null && monthlyPrice != null && monthlyPrice > 0) {
-      final estimate = (totalAmount / monthlyPrice).round();
-      return estimate > 0 ? estimate : 1;
-    }
-
-    return 1;
-  }
-
-  num? _parseNum(dynamic value) {
-    if (value is num) {
-      return value;
-    }
-    if (value is String) {
-      return num.tryParse(value);
-    }
-    return null;
   }
 }

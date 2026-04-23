@@ -5,12 +5,15 @@ import 'package:homeu/app/profile/profile_controller.dart';
 import 'package:homeu/app/profile/profile_models.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
 import 'package:homeu/app/favorites/homeu_favorites_controller.dart';
+import 'package:homeu/app/property/property_comparison_controller.dart';
 import 'package:homeu/core/localization/homeu_l10n.dart';
 import 'package:homeu/core/theme/homeu_app_theme.dart';
 import 'package:homeu/app/property/property_remote_datasource.dart';
 import 'package:homeu/core/supabase/app_supabase.dart';
 import 'package:homeu/pages/home/property_details_screen.dart';
 import 'package:homeu/pages/home/property_item.dart';
+import 'package:homeu/pages/home/property_comparison_screen.dart';
+import 'package:homeu/pages/home/property_image_gallery.dart';
 
 enum _SortOption { priceLowToHigh, priceHighToLow, newest }
 
@@ -472,15 +475,55 @@ class _HomeUHomePageState extends State<HomeUHomePage> {
 
         return Scaffold(
           backgroundColor: context.colors.surface,
-          floatingActionButton: widget.showQrScanFab
-              ? FloatingActionButton.extended(
+          floatingActionButton: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              ListenableBuilder(
+                listenable: PropertyComparisonController.instance,
+                builder: (context, _) {
+                  final count =
+                      PropertyComparisonController.instance.selectionCount;
+                  if (count == 0) return const SizedBox.shrink();
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: SizedBox(
+                      width: 44,
+                      height: 44,
+                      child: FloatingActionButton(
+                        heroTag: 'compare_fab',
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => const PropertyComparisonScreen(),
+                            ),
+                          );
+                        },
+                        backgroundColor: context.homeuAccent,
+                        foregroundColor: Colors.white,
+                        elevation: 4,
+                        child: Badge(
+                          label: Text('$count'),
+                          backgroundColor: Colors.white,
+                          textColor: context.homeuAccent,
+                          child: const Icon(Icons.compare_arrows_rounded, size: 20),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+              if (widget.showQrScanFab)
+                FloatingActionButton.extended(
+                  heroTag: 'qr_fab',
                   onPressed: () {},
                   backgroundColor: context.homeuAccent,
                   foregroundColor: Colors.white,
                   icon: const Icon(Icons.qr_code_scanner_rounded),
                   label: Text(t.homeScanQr),
-                )
-              : null,
+                ),
+            ],
+          ),
           body: SafeArea(
             child: LayoutBuilder(
               builder: (context, constraints) {
@@ -813,7 +856,7 @@ class _PropertyCard extends StatelessWidget {
           BoxShadow(
             color: context.homeuAccent.withValues(alpha: 0.14),
             blurRadius: 14,
-            offset: Offset(0, 5),
+            offset: const Offset(0, 5),
           ),
         ],
       ),
@@ -826,30 +869,11 @@ class _PropertyCard extends StatelessWidget {
           children: [
             Stack(
               children: [
-                Container(
-                  height: 148,
-                  decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(16),
-                    ),
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        property.photoColors.first.withValues(alpha: 0.9),
-                        context.isDarkMode
-                            ? const Color(0xFF243047)
-                            : const Color(0xFFF0F5FF),
-                      ],
-                    ),
-                  ),
-                  child: const Center(
-                    child: Icon(
-                      Icons.apartment_rounded,
-                      size: 56,
-                      color: Colors.white,
-                    ),
-                  ),
+                PropertyImageGallery(
+                  key: ValueKey('home_gallery_${property.id}'),
+                  imageUrls: property.imageUrls,
+                  onTap: onTap,
+                  limit: 3,
                 ),
                 Positioned(
                   right: 10,
@@ -869,6 +893,64 @@ class _PropertyCard extends StatelessWidget {
                         color: property.accentColor,
                       ),
                     ),
+                  ),
+                ),
+                Positioned(
+                  left: 10,
+                  top: 10,
+                  child: ListenableBuilder(
+                    listenable: PropertyComparisonController.instance,
+                    builder: (context, _) {
+                      final isSelected = PropertyComparisonController.instance
+                          .isSelected(property.id);
+                      final canAdd =
+                          PropertyComparisonController.instance.canAddMore ||
+                          isSelected;
+                      return GestureDetector(
+                        onTap: canAdd
+                            ? () {
+                              final controller = PropertyComparisonController.instance;
+                              controller.toggleProperty(property);
+                              final nowSelected = controller.isSelected(property.id);
+                              
+                              ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(nowSelected 
+                                    ? 'Added ${property.name} to comparison' 
+                                    : 'Removed ${property.name} from comparison'),
+                                  duration: const Duration(seconds: 2),
+                                  action: nowSelected ? SnackBarAction(
+                                    label: 'COMPARE',
+                                    onPressed: () {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute<void>(
+                                          builder: (_) => const PropertyComparisonScreen(),
+                                        ),
+                                      );
+                                    },
+                                  ) : null,
+                                ),
+                              );
+                            }
+                            : null,
+                        child: CircleAvatar(
+                          radius: 16,
+                          backgroundColor: isSelected
+                              ? context.homeuAccent
+                              : context.homeuCard,
+                          child: Icon(
+                            isSelected
+                                ? Icons.check_rounded
+                                : Icons.compare_arrows_rounded,
+                            size: 18,
+                            color: isSelected
+                                ? Colors.white
+                                : context.homeuAccent,
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ),
               ],
