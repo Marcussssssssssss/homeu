@@ -207,25 +207,9 @@ class _OwnerListingIllustration extends StatelessWidget {
       ),
       child: Stack(
         children: [
-          Center(
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: SizedBox(
-                width: 232,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: const [
-                    _ListingFormCard(),
-                    SizedBox(height: 12),
-                    _RequestCard(),
-                  ],
-                ),
-              ),
-            ),
-          ),
           Positioned(
-            left: 18,
-            top: 16,
+            left: 14,
+            top: 14,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
               decoration: BoxDecoration(
@@ -240,17 +224,38 @@ class _OwnerListingIllustration extends StatelessWidget {
                 ],
               ),
               child: Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.add_home_work_rounded, size: 16, color: accent),
-                  SizedBox(width: 6),
+                  Icon(Icons.add_home_work_rounded, size: 14, color: accent),
+                  const SizedBox(width: 4),
                   Text(
                     context.l10n.ownerNewListing,
                     style: TextStyle(
                       color: accent,
-                      fontWeight: FontWeight.w600,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ],
+              ),
+            ),
+          ),
+          Center(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 24),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: SizedBox(
+                  width: 232,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      _ListingFormCard(),
+                      SizedBox(height: 12),
+                      _RequestCard(),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),

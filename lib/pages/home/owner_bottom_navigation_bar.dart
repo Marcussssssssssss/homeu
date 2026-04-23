@@ -54,7 +54,7 @@ class HomeUOwnerBottomNavigationBar extends StatelessWidget {
           NavigationDestination(
             icon: const Icon(Icons.home_work_outlined),
             selectedIcon: const Icon(Icons.home_work_rounded),
-            label: isCompact ? 'My Properties' : 'Properties',
+            label: 'Properties',
           ),
           NavigationDestination(
             icon: Icon(Icons.inbox_outlined),

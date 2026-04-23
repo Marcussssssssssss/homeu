@@ -21,6 +21,7 @@ class HomeUSession {
   }
 
   static void logout() {
+    _registeredRole = null;
     _loggedInRole = null;
   }
 
@@ -32,4 +33,3 @@ class HomeUSession {
     return _loggedInRole == requiredRole;
   }
 }
-

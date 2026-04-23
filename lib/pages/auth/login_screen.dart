@@ -165,7 +165,10 @@ class _HomeULoginScreenState extends State<HomeULoginScreen> {
                               ),
                             ],
                           ),
-                          child: Image.asset('HomeU.png', fit: BoxFit.contain),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(16),
+                            child: Image.asset('HomeU.png', fit: BoxFit.contain),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 24),

@@ -71,11 +71,14 @@ class _HomeUSplashScreenState extends State<HomeUSplashScreen> {
                             ),
                           ],
                         ),
-                        child: Image.asset(
-                          'HomeU.png',
-                          width: logoSize,
-                          height: logoSize,
-                          fit: BoxFit.contain,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(20),
+                          child: Image.asset(
+                            'HomeU.png',
+                            width: logoSize,
+                            height: logoSize,
+                            fit: BoxFit.contain,
+                          ),
                         ),
                       ),
                       SizedBox(height: size.height * 0.04),
