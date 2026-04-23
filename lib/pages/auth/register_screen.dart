@@ -6,7 +6,7 @@ import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/core/localization/homeu_l10n.dart';
 import 'package:homeu/core/theme/homeu_app_theme.dart';
 import 'package:homeu/pages/home/home_tenant_shell_screen.dart';
-import 'package:homeu/pages/home/owner_dashboard_screen.dart';
+import 'package:homeu/pages/home/home_owner_shell_screen.dart';
 
 class HomeURegisterScreen extends StatefulWidget {
   const HomeURegisterScreen({super.key, this.registerController});
@@ -86,7 +86,7 @@ class _HomeURegisterScreenState extends State<HomeURegisterScreen> {
 
     HomeUSession.register(result.resolvedRole);
     final Widget destination = result.resolvedRole == HomeURole.owner
-        ? const HomeUOwnerDashboardScreen()
+        ? const HomeUOwnerShellScreen()
         : const HomeUTenantShellScreen();
 
     ScaffoldMessenger.of(context).showSnackBar(

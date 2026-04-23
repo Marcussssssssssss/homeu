@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../app/property/my_properties/my_properties_models.dart';
 import 'owner_add_property_screen.dart';
-
+import 'owner_viewing_availability_screen.dart';
 
 class HomeUOwnerPropertyDetailsScreen extends StatefulWidget {
   const HomeUOwnerPropertyDetailsScreen({super.key, required this.property});
@@ -12,8 +12,14 @@ class HomeUOwnerPropertyDetailsScreen extends StatefulWidget {
 }
 
 class _HomeUOwnerPropertyDetailsScreenState extends State<HomeUOwnerPropertyDetailsScreen> {
-  bool _isDayBooked(DateTime day) {
+  bool _isDayUnavailable(DateTime day) {
     final d = DateTime(day.year, day.month, day.day);
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    if (d.isBefore(today)) {
+      return true;
+    }
 
     for (final period in widget.property.bookedPeriods) {
       final startRaw = period['start']!;
@@ -31,7 +37,7 @@ class _HomeUOwnerPropertyDetailsScreenState extends State<HomeUOwnerPropertyDeta
 
   DateTime _getValidInitialDate() {
     DateTime checkDate = DateTime.now();
-    while (_isDayBooked(checkDate)) {
+    while (_isDayUnavailable(checkDate)) {
       checkDate = checkDate.add(const Duration(days: 1));
     }
     return checkDate;
@@ -83,10 +89,10 @@ class _HomeUOwnerPropertyDetailsScreenState extends State<HomeUOwnerPropertyDeta
                     child: hasImage
                         ? Image.network(p.coverImageUrl!, height: 200, fit: BoxFit.cover)
                         : Container(
-                      height: 200,
-                      color: const Color(0xFFEAF2FF),
-                      child: const Icon(Icons.image_not_supported, size: 48, color: Color(0xFF90A4C4)),
-                    ),
+                            height: 200,
+                            color: const Color(0xFFEAF2FF),
+                            child: const Icon(Icons.image_not_supported, size: 48, color: Color(0xFF90A4C4)),
+                          ),
                   ),
                   Padding(
                     padding: const EdgeInsets.all(16),
@@ -135,14 +141,13 @@ class _HomeUOwnerPropertyDetailsScreenState extends State<HomeUOwnerPropertyDeta
               ),
             ),
             const SizedBox(height: 24),
-
             const Text(
-              'Availability Calendar',
+              'Rental Occupancy',
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF1F314F)),
             ),
             const SizedBox(height: 4),
             const Text(
-              'Greyed-out dates are currently occupied.',
+              'Greyed-out dates are before today or currently occupied.',
               style: TextStyle(color: Color(0xFF667896), fontSize: 13),
             ),
             const SizedBox(height: 12),
@@ -163,10 +168,68 @@ class _HomeUOwnerPropertyDetailsScreenState extends State<HomeUOwnerPropertyDeta
                   initialDate: _getValidInitialDate(),
                   firstDate: DateTime(DateTime.now().year - 1),
                   lastDate: DateTime(DateTime.now().year + 3),
-                  selectableDayPredicate: (day) => !_isDayBooked(day),
-                  onDateChanged: (date) {
-                  },
+                  selectableDayPredicate: (day) => !_isDayUnavailable(day),
+                  onDateChanged: (date) {},
                 ),
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            const Text(
+              'Viewing Management',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF1F314F)),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: const [BoxShadow(color: Color(0x0A1E3A8A), blurRadius: 10, offset: Offset(0, 4))],
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFEAF2FF),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(Icons.meeting_room_rounded, color: Color(0xFF1E3A8A), size: 28),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Viewing Slots', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF1F314F))),
+                        const SizedBox(height: 4),
+                        const Text('Set dates and times for potential tenants to visit.', style: TextStyle(fontSize: 12, color: Color(0xFF667896))),
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton(
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => HomeUOwnerViewingAvailabilityScreen(
+                                    property: widget.property,
+                                  ),
+                                ),
+                              );
+                            },
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: const Color(0xFF1E3A8A),
+                              side: const BorderSide(color: Color(0xFF1E3A8A)),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            ),
+                            child: const Text('Manage Schedule'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -175,3 +238,4 @@ class _HomeUOwnerPropertyDetailsScreenState extends State<HomeUOwnerPropertyDeta
     );
   }
 }
+

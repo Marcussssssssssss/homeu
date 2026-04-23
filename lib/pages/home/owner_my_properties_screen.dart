@@ -10,7 +10,12 @@ import 'owner_bottom_navigation_bar.dart';
 import 'owner_property_details_screen.dart';
 
 class HomeUOwnerMyPropertiesScreen extends StatefulWidget {
-  const HomeUOwnerMyPropertiesScreen({super.key});
+  const HomeUOwnerMyPropertiesScreen({
+    super.key,
+    this.showBottomNavigationBar = true,
+  });
+
+  final bool showBottomNavigationBar;
 
   @override
   State<HomeUOwnerMyPropertiesScreen> createState() => _HomeUOwnerMyPropertiesScreenState();
@@ -41,35 +46,38 @@ class _HomeUOwnerMyPropertiesScreenState extends State<HomeUOwnerMyPropertiesScr
         title: const Text('My Properties'),
         backgroundColor: const Color(0xFFF6F8FC),
         elevation: 0,
+        automaticallyImplyLeading: false,
       ),
-      bottomNavigationBar: HomeUOwnerBottomNavigationBar(
-        selectedIndex: _selectedNavIndex,
-        onDestinationSelected: (index) {
-          if (index == _selectedNavIndex) return;
+      bottomNavigationBar: widget.showBottomNavigationBar
+          ? HomeUOwnerBottomNavigationBar(
+              selectedIndex: _selectedNavIndex,
+              onDestinationSelected: (index) {
+                if (index == _selectedNavIndex) return;
 
-          if (index == 0) {
-            Navigator.of(context).popUntil((route) => route.isFirst);
-            return;
-          }
-          if (index == 1) return;
-          if (index == 2) {
-            Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const HomeUOwnerBookingRequestsScreen()));
-            return;
-          }
-          if (index == 3) {
-            Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const HomeUOwnerAnalyticsScreen()));
-            return;
-          }
-          if (index == 4) {
-            Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const HomeUConversationListScreen()));
-            return;
-          }
-          if (index == 5) {
-            Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const HomeUProfileScreen(role: HomeURole.owner)));
-            return;
-          }
-        },
-      ),
+                if (index == 0) {
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                  return;
+                }
+                if (index == 1) return;
+                if (index == 2) {
+                  Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const HomeUOwnerBookingRequestsScreen()));
+                  return;
+                }
+                if (index == 3) {
+                  Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const HomeUOwnerAnalyticsScreen()));
+                  return;
+                }
+                if (index == 4) {
+                  Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const HomeUConversationListScreen()));
+                  return;
+                }
+                if (index == 5) {
+                  Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const HomeUProfileScreen(role: HomeURole.owner)));
+                  return;
+                }
+              },
+            )
+          : null,
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: const Color(0xFF1E3A8A),
         foregroundColor: Colors.white,

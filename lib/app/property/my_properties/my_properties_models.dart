@@ -41,9 +41,8 @@ class OwnerPropertyModel {
           return 'Active';
         }
 
-        // They have moved in, check if leaving soon
         final daysUntilMoveOut = moveOutDate!.difference(now).inDays;
-        if (daysUntilMoveOut <= 30) {
+        if (daysUntilMoveOut <= 14) {
           return 'Expiring Soon';
         }
 

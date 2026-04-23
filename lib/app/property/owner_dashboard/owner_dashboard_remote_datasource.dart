@@ -5,7 +5,7 @@ class OwnerDashboardRemoteDataSource {
   Future<DashboardData> fetchDashboardData(String ownerId) async {
     final dynamic propertiesResponse = await AppSupabase.client
         .from('properties')
-        .select('id, title, location_area, status')
+        .select('id, title, location_area, monthly_price, status, property_image(public_url), booking_requests(status, move_in_date, move_out_date, total_amount, created_at)')
         .eq('owner_id', ownerId)
         .neq('status', 'Archived')
         .order('created_at', ascending: false);
@@ -26,10 +26,12 @@ class OwnerDashboardRemoteDataSource {
 
     int activeListings = 0;
     int occupiedCount = 0;
-    for (var p in properties) {
+    for (final p in properties) {
       final status = p['status']?.toString() ?? '';
       if (status == 'Active' || status == 'Occupied') activeListings++;
-      if (status == 'Occupied') occupiedCount++;
+      if (_isCurrentlyOccupied(p)) {
+        occupiedCount++;
+      }
     }
 
     int pendingRequests = 0;
@@ -114,5 +116,68 @@ class OwnerDashboardRemoteDataSource {
       recentProperties: properties.take(3).toList(),
       recentRequests: recentRequests,
     );
+  }
+  bool _isCurrentlyOccupied(Map<String, dynamic> propertyRow) {
+    final bookings = propertyRow['booking_requests'];
+    if (bookings is! List) {
+      return (propertyRow['status']?.toString().trim().toLowerCase() ?? '') == 'occupied';
+    }
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final monthlyPrice = _parseNum(propertyRow['monthly_price']) ?? 0;
+
+    for (final booking in bookings.whereType<Map<String, dynamic>>()) {
+      final status = booking['status']?.toString().trim().toLowerCase() ?? '';
+      if (status == 'occupied') {
+        return true;
+      }
+      if (status != 'approved') {
+        continue;
+      }
+
+      final start = _parseDate(booking['move_in_date']) ?? _parseDate(booking['created_at']);
+      if (start == null) {
+        continue;
+      }
+
+      var end = _parseDate(booking['move_out_date']);
+      if (end == null) {
+        final totalAmount = _parseNum(booking['total_amount']) ?? 0;
+        final estimatedMonths = monthlyPrice > 0 ? (totalAmount / monthlyPrice).round() : 1;
+        final durationMonths = estimatedMonths > 0 ? estimatedMonths : 1;
+        end = DateTime(start.year, start.month + durationMonths, start.day);
+      }
+
+      if (!today.isBefore(start) && !today.isAfter(end)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  DateTime? _parseDate(dynamic value) {
+    if (value is DateTime) {
+      return DateTime(value.year, value.month, value.day);
+    }
+    if (value is String) {
+      final parsed = DateTime.tryParse(value);
+      if (parsed == null) {
+        return null;
+      }
+      return DateTime(parsed.year, parsed.month, parsed.day);
+    }
+    return null;
+  }
+
+  num? _parseNum(dynamic value) {
+    if (value is num) {
+      return value;
+    }
+    if (value is String) {
+      return num.tryParse(value);
+    }
+    return null;
   }
 }
