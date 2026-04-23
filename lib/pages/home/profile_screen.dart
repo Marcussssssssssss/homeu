@@ -13,7 +13,7 @@ import 'package:homeu/core/localization/homeu_l10n.dart';
 import 'package:homeu/core/theme/homeu_app_theme.dart';
 import 'package:homeu/pages/auth/login_screen.dart';
 import 'package:homeu/pages/home/favorites_screen.dart';
-import 'package:homeu/pages/home/update_password_screen.dart';
+import 'package:homeu/pages/home/change_password_screen.dart';
 
 class HomeUProfileScreen extends StatefulWidget {
   const HomeUProfileScreen({
@@ -537,9 +537,7 @@ class _HomeUProfileScreenState extends State<HomeUProfileScreen> {
                                 Navigator.of(context).push(
                                   MaterialPageRoute<void>(
                                     builder: (_) =>
-                                        const HomeUUpdatePasswordScreen(
-                                          isRecoveryFlow: false,
-                                        ),
+                                        const HomeUChangePasswordScreen(),
                                   ),
                                 );
                               },
