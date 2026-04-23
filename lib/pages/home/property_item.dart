@@ -20,6 +20,7 @@ class PropertyItem {
     this.createdAt,
     this.facilities = const <String>[],
     this.imageUrls = const <String>[],
+    this.ownerPhotoUrl,
   });
 
   final String id;
@@ -40,6 +41,7 @@ class PropertyItem {
   final DateTime? createdAt;
   final List<String> facilities;
   final List<String> imageUrls;
+  final String? ownerPhotoUrl;
 
   double get pricePerMonthValue {
     final normalized = pricePerMonth.replaceAll(RegExp(r'[^0-9.]'), '');

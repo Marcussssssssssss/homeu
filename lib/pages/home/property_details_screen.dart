@@ -7,6 +7,9 @@ import 'package:homeu/pages/home/booking_screen.dart';
 import 'package:homeu/pages/home/chat_screen.dart';
 import 'package:homeu/pages/home/property_item.dart';
 import 'package:homeu/pages/home/property_image_gallery.dart';
+import 'package:homeu/pages/home/viewing_screen.dart';
+
+import 'package:homeu/core/supabase/app_supabase.dart';
 
 class HomeUPropertyDetailsScreen extends StatefulWidget {
   const HomeUPropertyDetailsScreen({super.key, required this.property});
@@ -22,6 +25,17 @@ class _HomeUPropertyDetailsScreenState
     extends State<HomeUPropertyDetailsScreen> {
   final HomeUFavoritesController _favoritesController =
       HomeUFavoritesController.instance;
+  late Future<Map<String, dynamic>?> _ownerProfileFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _ownerProfileFuture = AppSupabase.client
+        .from('profiles')
+        .select('full_name, profile_image_url')
+        .eq('id', widget.property.ownerId)
+        .maybeSingle();
+  }
 
   @override
   void dispose() {
@@ -55,6 +69,9 @@ class _HomeUPropertyDetailsScreenState
     }
 
     final property = widget.property;
+    final currentUserId = AppSupabase.auth.currentUser?.id;
+    final isOwner = currentUserId == property.ownerId;
+
     debugPrint('[DEBUG] Details Page Build for ID: ${property.id}');
     debugPrint('[DEBUG] Total Images Received: ${property.imageUrls.length}');
     if (property.imageUrls.isNotEmpty) {
@@ -83,69 +100,71 @@ class _HomeUPropertyDetailsScreenState
             ),
             backgroundColor: context.colors.surface,
           ),
-          bottomNavigationBar: SafeArea(
-            minimum: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                SizedBox(
-                  width: double.infinity,
-                  height: 46,
-                  child: OutlinedButton(
-                    key: const Key('chat_with_owner_button'),
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) =>
-                              HomeUChatScreen.start(property: property),
+          bottomNavigationBar: isOwner 
+            ? null 
+            : SafeArea(
+                minimum: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      width: double.infinity,
+                      height: 46,
+                      child: OutlinedButton(
+                        key: const Key('schedule_viewing_button'),
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) =>
+                                  HomeUViewingScreen(property: property),
+                            ),
+                          );
+                        },
+                        style: OutlinedButton.styleFrom(
+                          side: const BorderSide(color: Color(0xFF1E3A8A)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
                         ),
-                      );
-                    },
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: Color(0xFF1E3A8A)),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                    ),
-                    child: const Text(
-                      'Chat with Owner',
-                      style: TextStyle(
-                        color: Color(0xFF1E3A8A),
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                SizedBox(
-                  width: double.infinity,
-                  height: 52,
-                  child: ElevatedButton(
-                    key: const Key('book_now_button'),
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute<void>(
-                          builder: (_) => HomeUBookingScreen(property: property),
+                        child: const Text(
+                          'Schedule Viewing',
+                          style: TextStyle(
+                            color: Color(0xFF1E3A8A),
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF1E3A8A),
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      textStyle: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
                       ),
                     ),
-                    child: const Text('Book Now'),
-                  ),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 52,
+                      child: ElevatedButton(
+                        key: const Key('book_now_button'),
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => HomeUBookingScreen(property: property),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF1E3A8A),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          textStyle: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        child: const Text('Book Now'),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
+              ),
           body: SafeArea(
             child: SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(16, 6, 16, 20),
@@ -216,7 +235,7 @@ class _HomeUPropertyDetailsScreenState
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: context.homeuAccent.withOpacity(0.14),
+                          color: context.homeuAccent.withValues(alpha: 0.14),
                           blurRadius: 12,
                           offset: const Offset(0, 4),
                         ),
@@ -317,66 +336,52 @@ class _HomeUPropertyDetailsScreenState
                       }).toList(),
                     ),
                   const SizedBox(height: 18),
-                  Text(
-                    'Owner Information',
-                    style: TextStyle(
-                      color: context.homeuPrimaryText,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
+                  if (!isOwner) ...[
+                    Text(
+                      'Owner Information',
+                      style: TextStyle(
+                        color: context.homeuPrimaryText,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 10),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: context.homeuCard,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: context.homeuAccent.withOpacity(0.14),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        const CircleAvatar(
-                          radius: 22,
-                          backgroundColor: Color(0x1F1E3A8A),
-                          child: Icon(
-                            Icons.person_rounded,
-                            color: Color(0xFF1E3A8A),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                property.ownerName,
-                                style: TextStyle(
-                                  color: context.homeuPrimaryText,
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              const SizedBox(height: 3),
-                              Text(
-                                property.ownerRole,
-                                style: TextStyle(
-                                  color: context.homeuMutedText,
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        IconButton(
-                          key: const Key('owner_contact_shortcut'),
-                          onPressed: () {
+                    const SizedBox(height: 10),
+                    FutureBuilder<Map<String, dynamic>?>(
+                      future: _ownerProfileFuture,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const SizedBox(
+                            height: 70,
+                            child: Center(
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                          );
+                        }
+
+                        if (snapshot.hasError) {
+                          debugPrint('Error fetching owner profile: ${snapshot.error}');
+                        }
+
+                        final data = snapshot.data;
+                        final String ownerName = (data?['full_name'] as String?)
+                                    ?.isNotEmpty ==
+                                true
+                            ? data!['full_name'] as String
+                            : property.ownerName;
+
+                        final String? avatarUrl = (data?['profile_image_url']
+                                    as String?)
+                                    ?.isNotEmpty ==
+                                true
+                            ? data!['profile_image_url'] as String
+                            : property.ownerPhotoUrl;
+
+                        final bool hasAvatar =
+                            avatarUrl != null && avatarUrl.isNotEmpty;
+
+                        return InkWell(
+                          onTap: () {
                             Navigator.of(context).push(
                               MaterialPageRoute<void>(
                                 builder: (_) => HomeUChatScreen.start(
@@ -385,12 +390,79 @@ class _HomeUPropertyDetailsScreenState
                               ),
                             );
                           },
-                          icon: const Icon(Icons.chat_bubble_outline_rounded),
-                          color: context.homeuAccent,
-                        ),
-                      ],
+                          borderRadius: BorderRadius.circular(16),
+                          child: Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: context.homeuCard,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: context.homeuAccent.withValues(alpha: 0.14),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              children: [
+                                CircleAvatar(
+                                  radius: 22,
+                                  backgroundColor:
+                                      context.homeuAccent.withValues(alpha: 0.12),
+                                  backgroundImage: hasAvatar
+                                      ? NetworkImage(avatarUrl)
+                                      : null,
+                                  child: !hasAvatar
+                                      ? Text(
+                                          ownerName.isNotEmpty
+                                              ? ownerName
+                                                  .substring(0, 1)
+                                                  .toUpperCase()
+                                              : 'P',
+                                          style: TextStyle(
+                                            color: context.homeuAccent,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        )
+                                      : null,
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        ownerName,
+                                        style: TextStyle(
+                                          color: context.homeuPrimaryText,
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 3),
+                                      Text(
+                                        property.ownerRole,
+                                        style: TextStyle(
+                                          color: context.homeuMutedText,
+                                          fontSize: 13,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Icon(
+                                  Icons.chat_bubble_outline_rounded,
+                                  color: context.homeuAccent,
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
                     ),
-                  ),
+                  ],
                 ],
               ),
             ),
