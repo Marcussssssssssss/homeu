@@ -3,9 +3,14 @@ import 'package:homeu/core/theme/homeu_app_theme.dart';
 import 'package:homeu/pages/onboarding/onboarding_screen_1.dart';
 
 class HomeUSplashScreen extends StatefulWidget {
-  const HomeUSplashScreen({super.key, this.redirectDelay = const Duration(seconds: 2)});
+  const HomeUSplashScreen({
+    super.key,
+    this.redirectDelay = const Duration(seconds: 2),
+    this.canRedirect = true,
+  });
 
   final Duration redirectDelay;
+  final bool canRedirect;
 
   @override
   State<HomeUSplashScreen> createState() => _HomeUSplashScreenState();
@@ -15,7 +20,9 @@ class _HomeUSplashScreenState extends State<HomeUSplashScreen> {
   @override
   void initState() {
     super.initState();
-    Future<void>.delayed(widget.redirectDelay, _goToOnboarding);
+    if (widget.canRedirect) {
+      Future<void>.delayed(widget.redirectDelay, _goToOnboarding);
+    }
   }
 
   void _goToOnboarding() {
@@ -211,4 +218,3 @@ class _HouseIllustration extends StatelessWidget {
     );
   }
 }
-
