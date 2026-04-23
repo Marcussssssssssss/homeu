@@ -27,6 +27,7 @@ class _HomeUStartupAuthGateState extends State<HomeUStartupAuthGate> {
   late HomeUStartupDestination _destination;
   StreamSubscription<AuthState>? _authSubscription;
   bool _hasOpenedRecoveryScreen = false;
+  bool _isRecoveringPassword = false;
 
   @override
   void initState() {
@@ -41,6 +42,7 @@ class _HomeUStartupAuthGateState extends State<HomeUStartupAuthGate> {
         if (mounted) {
           setState(() {
             _destination = HomeUStartupDestination.authFlow;
+            _isRecoveringPassword = true;
           });
         }
         _syncLocalSessionRole(HomeUStartupDestination.authFlow);
@@ -55,6 +57,7 @@ class _HomeUStartupAuthGateState extends State<HomeUStartupAuthGate> {
 
       if (authState.event == AuthChangeEvent.signedOut) {
         _hasOpenedRecoveryScreen = false;
+        _isRecoveringPassword = false;
       }
 
       setState(() {
@@ -95,10 +98,11 @@ class _HomeUStartupAuthGateState extends State<HomeUStartupAuthGate> {
         return;
       }
 
-      Navigator.of(context).push(
+      Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
         MaterialPageRoute<void>(
-          builder: (_) => const HomeUUpdatePasswordScreen(isRecoveryFlow: true),
+          builder: (_) => const HomeUUpdatePasswordScreen(),
         ),
+        (route) => false,
       );
     });
   }
@@ -106,7 +110,9 @@ class _HomeUStartupAuthGateState extends State<HomeUStartupAuthGate> {
   @override
   Widget build(BuildContext context) {
     return switch (_destination) {
-      HomeUStartupDestination.authFlow => const HomeUSplashScreen(),
+      HomeUStartupDestination.authFlow => HomeUSplashScreen(
+        canRedirect: !_isRecoveringPassword,
+      ),
       HomeUStartupDestination.tenantFlow => const HomeUTenantShellScreen(),
       HomeUStartupDestination.ownerFlow => const HomeUOwnerShellScreen(),
     };

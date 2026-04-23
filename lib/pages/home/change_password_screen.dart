@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:homeu/app/auth/homeu_auth_service.dart';
 import 'package:homeu/app/auth/update_password/update_password_controller.dart';
 import 'package:homeu/app/auth/update_password/update_password_models.dart';
 import 'package:homeu/app/auth/update_password/update_password_repository.dart';
 import 'package:homeu/core/localization/homeu_l10n.dart';
 import 'package:homeu/core/theme/homeu_app_theme.dart';
-import 'package:homeu/pages/auth/login_screen.dart';
 
-class HomeUUpdatePasswordScreen extends StatefulWidget {
-  const HomeUUpdatePasswordScreen({
+class HomeUChangePasswordScreen extends StatefulWidget {
+  const HomeUChangePasswordScreen({
     super.key,
     this.controller,
   });
@@ -16,16 +14,19 @@ class HomeUUpdatePasswordScreen extends StatefulWidget {
   final UpdatePasswordController? controller;
 
   @override
-  State<HomeUUpdatePasswordScreen> createState() =>
-      _HomeUUpdatePasswordScreenState();
+  State<HomeUChangePasswordScreen> createState() =>
+      _HomeUChangePasswordScreenState();
 }
 
-class _HomeUUpdatePasswordScreenState extends State<HomeUUpdatePasswordScreen> {
+class _HomeUChangePasswordScreenState extends State<HomeUChangePasswordScreen> {
   final _formKey = GlobalKey<FormState>();
+  final TextEditingController _currentPasswordController =
+      TextEditingController();
   final TextEditingController _newPasswordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
 
+  bool _obscureCurrentPassword = true;
   bool _obscureNewPassword = true;
   bool _obscureConfirmPassword = true;
   bool _isLoading = false;
@@ -36,9 +37,13 @@ class _HomeUUpdatePasswordScreenState extends State<HomeUUpdatePasswordScreen> {
   late final UpdatePasswordController _controller;
 
   bool get _isFormReady {
+    final currentPassword = _currentPasswordController.text.trim();
     final newPassword = _newPasswordController.text.trim();
     final confirmPassword = _confirmPasswordController.text.trim();
-
+    
+    if (currentPassword.isEmpty) {
+      return false;
+    }
     if (newPassword.isEmpty || confirmPassword.isEmpty) {
       return false;
     }
@@ -52,6 +57,7 @@ class _HomeUUpdatePasswordScreenState extends State<HomeUUpdatePasswordScreen> {
   void initState() {
     super.initState();
     _controller = widget.controller ?? UpdatePasswordController();
+    _currentPasswordController.addListener(_onFieldChanged);
     _newPasswordController.addListener(_onFieldChanged);
     _confirmPasswordController.addListener(_onFieldChanged);
   }
@@ -69,14 +75,16 @@ class _HomeUUpdatePasswordScreenState extends State<HomeUUpdatePasswordScreen> {
 
   @override
   void dispose() {
+    _currentPasswordController.removeListener(_onFieldChanged);
     _newPasswordController.removeListener(_onFieldChanged);
     _confirmPasswordController.removeListener(_onFieldChanged);
+    _currentPasswordController.dispose();
     _newPasswordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
   }
 
-  Future<void> _handleUpdatePassword() async {
+  Future<void> _handleChangePassword() async {
     if (_isLoading || !_isFormReady) {
       return;
     }
@@ -94,9 +102,10 @@ class _HomeUUpdatePasswordScreenState extends State<HomeUUpdatePasswordScreen> {
 
     final result = await _controller.submit(
       UpdatePasswordPayload(
+        currentPassword: _currentPasswordController.text.trim(),
         newPassword: _newPasswordController.text,
         confirmNewPassword: _confirmPasswordController.text,
-        isRecoveryFlow: true,
+        isRecoveryFlow: false,
       ),
     );
 
@@ -110,29 +119,13 @@ class _HomeUUpdatePasswordScreenState extends State<HomeUUpdatePasswordScreen> {
       _feedbackMessage = _resolveSubmissionMessage(result);
     });
 
-    if (!result.isSuccess) {
-      return;
+    if (result.isSuccess) {
+      Future.delayed(const Duration(seconds: 2), () {
+        if (mounted) {
+          Navigator.of(context).pop();
+        }
+      });
     }
-
-    try {
-      await HomeUAuthService.instance.signOut();
-    } catch (_) {
-      // Keep success routing resilient if remote sign-out fails.
-    }
-
-    if (!mounted) {
-      return;
-    }
-
-    await Future<void>.delayed(const Duration(milliseconds: 300));
-    if (!mounted) {
-      return;
-    }
-
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute<void>(builder: (_) => const HomeULoginScreen()),
-      (route) => false,
-    );
   }
 
   String _resolveSubmissionMessage(UpdatePasswordSubmissionResult result) {
@@ -144,6 +137,8 @@ class _HomeUUpdatePasswordScreenState extends State<HomeUUpdatePasswordScreen> {
 
   String _resolveFailureMessage(String message) {
     switch (message) {
+      case UpdatePasswordRepository.validationCurrentPasswordRequired:
+        return context.l10n.updatePasswordValidationCurrentRequired;
       case UpdatePasswordRepository.validationNewPasswordRequired:
         return context.l10n.updatePasswordValidationNewRequired;
       case UpdatePasswordRepository.validationConfirmPasswordRequired:
@@ -152,6 +147,12 @@ class _HomeUUpdatePasswordScreenState extends State<HomeUUpdatePasswordScreen> {
         return context.l10n.updatePasswordValidationMismatch;
       case UpdatePasswordRepository.validationMinLength:
         return context.l10n.updatePasswordValidationMinLength;
+      case UpdatePasswordRepository.errorCurrentPasswordIncorrect:
+        return context.l10n.updatePasswordErrorCurrentPasswordIncorrect;
+      case UpdatePasswordRepository.errorBackendNotInitialized:
+        return context.l10n.updatePasswordErrorBackendNotInitialized;
+      case UpdatePasswordRepository.errorVerifyCurrentPasswordUnavailable:
+        return context.l10n.updatePasswordErrorVerifyCurrentPasswordUnavailable;
       case UpdatePasswordRepository.errorSessionExpired:
         return context.l10n.updatePasswordErrorSessionExpired;
       case UpdatePasswordRepository.errorNewPasswordMustDiffer:
@@ -173,7 +174,7 @@ class _HomeUUpdatePasswordScreenState extends State<HomeUUpdatePasswordScreen> {
     return Scaffold(
       backgroundColor: context.colors.surface,
       appBar: AppBar(
-        title: Text(t.forgotPasswordTitle),
+        title: Text(t.profileUpdatePasswordTitle),
         backgroundColor: context.colors.surface,
       ),
       body: SafeArea(
@@ -199,7 +200,7 @@ class _HomeUUpdatePasswordScreenState extends State<HomeUUpdatePasswordScreen> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Text(
-                        t.forgotPasswordTitle,
+                        t.profileUpdatePasswordTitle,
                         style: TextStyle(
                           color: context.homeuPrimaryText,
                           fontSize: 26,
@@ -292,6 +293,26 @@ class _HomeUUpdatePasswordScreenState extends State<HomeUUpdatePasswordScreen> {
                         ),
                         child: Column(
                           children: [
+                            _PasswordInputField(
+                              key: const Key('current_password_field'),
+                              label: t.updatePasswordCurrentPasswordLabel,
+                              hintText: t.updatePasswordCurrentPasswordHint,
+                              controller: _currentPasswordController,
+                              validator: (value) {
+                                if (value == null || value.trim().isEmpty) {
+                                  return t.updatePasswordValidationCurrentRequired;
+                                }
+                                return null;
+                              },
+                              obscureText: _obscureCurrentPassword,
+                              onToggleVisibility: () {
+                                setState(() {
+                                  _obscureCurrentPassword =
+                                      !_obscureCurrentPassword;
+                                });
+                              },
+                            ),
+                            const SizedBox(height: 14),
                             _PasswordInputField(
                               key: const Key('new_password_field'),
                               label: t.updatePasswordNewPasswordLabel,
@@ -388,12 +409,11 @@ class _HomeUUpdatePasswordScreenState extends State<HomeUUpdatePasswordScreen> {
                             ],
                           ),
                         ),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 20),
                       SizedBox(
                         height: 52,
                         child: ElevatedButton(
-                          key: const Key('update_password_submit_button'),
-                          onPressed: canSubmit ? _handleUpdatePassword : null,
+                          onPressed: canSubmit ? _handleChangePassword : null,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: context.homeuAccent,
                             disabledBackgroundColor: context.homeuAccent
@@ -420,35 +440,6 @@ class _HomeUUpdatePasswordScreenState extends State<HomeUUpdatePasswordScreen> {
                                   ),
                                 )
                               : Text(t.profileUpdatePasswordTitle),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      SizedBox(
-                        height: 50,
-                        child: OutlinedButton(
-                          key: const Key('cancel_update_password_button'),
-                          onPressed: _isLoading
-                              ? null
-                              : () {
-                                  Navigator.of(context).pushAndRemoveUntil(
-                                    MaterialPageRoute<void>(
-                                      builder: (_) => const HomeULoginScreen(),
-                                    ),
-                                    (route) => false,
-                                  );
-                                },
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: context.homeuAccent,
-                            side: BorderSide(color: context.homeuSoftBorder),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
-                            ),
-                            textStyle: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          child: Text(t.registerBackToLogin),
                         ),
                       ),
                     ],
