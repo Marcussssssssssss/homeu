@@ -25,9 +25,10 @@ enum HomeUViewingFilterStatus {
 }
 
 class HomeUViewingHistoryScreen extends StatefulWidget {
-  const HomeUViewingHistoryScreen({super.key, this.initialViewings});
+  const HomeUViewingHistoryScreen({super.key, this.initialViewings, this.isStandalone = true});
 
   final List<ViewingRequest>? initialViewings;
+  final bool isStandalone;
 
   @override
   State<HomeUViewingHistoryScreen> createState() =>
@@ -42,6 +43,8 @@ class HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
   
   HomeUViewingFilterStatus _selectedStatus = HomeUViewingFilterStatus.all;
   Map<String, PropertyItem> _propertyById = const <String, PropertyItem>{};
+  final Set<String> _failedPropertyIds = <String>{};
+  bool _isFetchingProperties = false;
   String? _tenantId;
   Stream<List<ViewingRequest>>? _viewingStream;
 
@@ -62,6 +65,8 @@ class HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
   void refresh() {
     if (mounted) {
       setState(() {
+        _failedPropertyIds.clear();
+        _isFetchingProperties = false;
         _initStream();
       });
     }
@@ -83,18 +88,20 @@ class HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF6F8FC),
-      appBar: AppBar(
-        title: const Text(
-          'Viewing History',
-          style: TextStyle(
-            color: Color(0xFF0F172A),
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: const Color(0xFFF6F8FC),
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Color(0xFF0F172A)),
-      ),
+      appBar: widget.isStandalone
+          ? AppBar(
+              title: const Text(
+                'Viewing History',
+                style: TextStyle(
+                  color: Color(0xFF0F172A),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              backgroundColor: const Color(0xFFF6F8FC),
+              elevation: 0,
+              iconTheme: const IconThemeData(color: Color(0xFF0F172A)),
+            )
+          : null,
       body: SafeArea(
         child: Column(
           children: [
@@ -121,27 +128,60 @@ class HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
               ),
             ),
             Expanded(
-              child: StreamBuilder<List<ViewingRequest>>(
-                stream: _viewingStream,
-                builder: (context, snapshot) {
-                  if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  }
-
-                  final viewings = snapshot.data ?? [];
-
-                  if (viewings.isEmpty && snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-
-                  final filteredViewings = _filterViewings(viewings);
-
-                  if (filteredViewings.isEmpty) {
-                    return _buildEmptyState();
-                  }
-
-                  return _buildViewingList(filteredViewings);
+              child: RefreshIndicator(
+                onRefresh: () async {
+                  refresh();
                 },
+                color: const Color(0xFF1E3A8A),
+                child: StreamBuilder<List<ViewingRequest>>(
+                  stream: _viewingStream,
+                  builder: (context, snapshot) {
+                    if (snapshot.hasError) {
+                      return ListView(
+                        children: [
+                          Center(
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 40),
+                              child: Text('Error: ${snapshot.error}'),
+                            ),
+                          ),
+                        ],
+                      );
+                    }
+
+                    final viewings = snapshot.data ?? [];
+
+                    if (viewings.isEmpty && (snapshot.connectionState == ConnectionState.waiting || _isFetchingProperties)) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    // Ensure properties are loaded before showing the list
+                    final missingIds = viewings
+                        .map((v) => v.propertyId)
+                        .where((id) => !_propertyById.containsKey(id) && !_failedPropertyIds.contains(id))
+                        .toSet();
+
+                    if (missingIds.isNotEmpty) {
+                      // Schedule property loading for the next frame to avoid setState during build
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        _ensurePropertiesLoaded(viewings);
+                      });
+                      
+                      // Show loading if we don't have enough data to render cards correctly
+                      if (viewings.isNotEmpty) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                    }
+
+                    final filteredViewings = _filterViewings(viewings);
+
+                    if (filteredViewings.isEmpty) {
+                      return _buildEmptyState();
+                    }
+
+                    return _buildViewingList(filteredViewings);
+                  },
+                ),
               ),
             ),
           ],
@@ -158,8 +198,6 @@ class HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
   }
 
   Widget _buildViewingList(List<ViewingRequest> viewings) {
-    _ensurePropertiesLoaded(viewings);
-
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 20),
       itemCount: viewings.length,
@@ -210,16 +248,34 @@ class HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
   }
 
   void _ensurePropertiesLoaded(List<ViewingRequest> viewings) {
+    if (_isFetchingProperties) return;
+
     final missingIds = viewings
         .map((v) => v.propertyId)
-        .where((id) => !_propertyById.containsKey(id))
+        .where((id) => !_propertyById.containsKey(id) && !_failedPropertyIds.contains(id))
         .toSet();
 
     if (missingIds.isNotEmpty) {
+      setState(() => _isFetchingProperties = true);
+      
       _propertyRemoteDataSource.fetchPropertiesByIds(missingIds).then((newProperties) {
-        if (mounted && newProperties.isNotEmpty) {
+        if (mounted) {
           setState(() {
             _propertyById = {..._propertyById, ...newProperties};
+            // Identify IDs that were requested but not returned
+            for (final id in missingIds) {
+              if (!newProperties.containsKey(id)) {
+                _failedPropertyIds.add(id);
+              }
+            }
+            _isFetchingProperties = false;
+          });
+        }
+      }).catchError((_) {
+        if (mounted) {
+          setState(() {
+            _failedPropertyIds.addAll(missingIds);
+            _isFetchingProperties = false;
           });
         }
       });
@@ -379,7 +435,7 @@ class _ViewingHistoryCard extends StatelessWidget {
               top: 0,
               right: 0,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   color: showRentedKillSwitch ? const Color(0xFFEF4444) : _getStatusColor(statusEnum),
                   borderRadius: BorderRadius.circular(8),
@@ -387,9 +443,10 @@ class _ViewingHistoryCard extends StatelessWidget {
                 child: Text(
                   (showRentedKillSwitch ? 'Property Rented' : status).toUpperCase(),
                   style: const TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
                     color: Colors.white,
+                    letterSpacing: 0.5,
                   ),
                 ),
               ),

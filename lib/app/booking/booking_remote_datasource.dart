@@ -1,4 +1,5 @@
 import 'package:homeu/app/booking/booking_models.dart';
+import 'package:homeu/app/booking/payment_schedule_model.dart';
 import 'package:homeu/core/supabase/app_supabase.dart';
 
 class BookingRemoteDataSource {
@@ -105,6 +106,69 @@ class BookingRemoteDataSource {
         .from('booking_requests')
         .update({'status': 'Cancelled', 'updated_at': DateTime.now().toUtc().toIso8601String()})
         .eq('id', bookingId);
+  }
+
+  Future<List<PaymentSchedule>> getPaymentSchedules(String bookingId) async {
+    if (!AppSupabase.isInitialized) {
+      return const [];
+    }
+
+    final dynamic rows = await AppSupabase.client
+        .from('payment_schedules')
+        .select('*')
+        .eq('booking_id', bookingId)
+        .order('month_number', ascending: true);
+
+    if (rows is! List) {
+      return const [];
+    }
+
+    return rows
+        .whereType<Map<String, dynamic>>()
+        .map(PaymentSchedule.fromJson)
+        .toList();
+  }
+
+  Future<void> updatePaymentScheduleStatus(String scheduleId, String status, {String? paymentId}) async {
+    if (!AppSupabase.isInitialized) {
+      return;
+    }
+
+    final updates = {
+      'status': status,
+      'updated_at': DateTime.now().toUtc().toIso8601String(),
+    };
+    if (paymentId != null) {
+      updates['payment_id'] = paymentId;
+    }
+
+    await AppSupabase.client
+        .from('payment_schedules')
+        .update(updates)
+        .eq('id', scheduleId);
+  }
+
+  Future<List<BookingRequest>> getConflictingBookings(String propertyId) async {
+    if (!AppSupabase.isInitialized) {
+      return const [];
+    }
+
+    // A conflict is a booking that is 'Approved' or 'Paid' (represented as status/payment_status)
+    // We check both for robustness
+    final dynamic rows = await AppSupabase.client
+        .from('booking_requests')
+        .select('*')
+        .eq('property_id', propertyId)
+        .or('status.eq.Approved,status.eq.Paid,payment_status.eq.Paid,payment_status.eq.Fully Paid');
+
+    if (rows is! List) {
+      return const [];
+    }
+
+    return rows
+        .whereType<Map<String, dynamic>>()
+        .map(BookingRequest.fromJson)
+        .toList();
   }
 }
 

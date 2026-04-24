@@ -9,6 +9,8 @@ class BookingRequest {
     required this.updatedAt,
     required this.totalAmount,
     required this.paymentStatus,
+    this.moveInDate,
+    this.moveOutDate,
   });
 
   final String id;
@@ -20,6 +22,15 @@ class BookingRequest {
   final DateTime updatedAt;
   final double totalAmount;
   final String paymentStatus;
+  final DateTime? moveInDate;
+  final DateTime? moveOutDate;
+
+  int get durationInMonths {
+    if (moveInDate == null || moveOutDate == null) return 1;
+    // Calculate total months between moveInDate and moveOutDate
+    final months = (moveOutDate!.year - moveInDate!.year) * 12 + moveOutDate!.month - moveInDate!.month;
+    return months > 0 ? months : 1;
+  }
 
   factory BookingRequest.fromJson(Map<String, dynamic> json) {
     return BookingRequest(
@@ -34,6 +45,8 @@ class BookingRequest {
           DateTime.fromMillisecondsSinceEpoch(0),
       totalAmount: _parseDouble(json['total_amount'] ?? json['totalAmount']) ?? 0,
       paymentStatus: json['payment_status']?.toString() ?? json['paymentStatus']?.toString() ?? '',
+      moveInDate: _parseDateTime(json['move_in_date'] ?? json['moveInDate']),
+      moveOutDate: _parseDateTime(json['move_out_date'] ?? json['moveOutDate']),
     );
   }
 
@@ -48,6 +61,8 @@ class BookingRequest {
       'updated_at': updatedAt.toUtc().toIso8601String(),
       'total_amount': totalAmount,
       'payment_status': paymentStatus,
+      'move_in_date': moveInDate?.toUtc().toIso8601String(),
+      'move_out_date': moveOutDate?.toUtc().toIso8601String(),
     };
   }
 
@@ -61,6 +76,8 @@ class BookingRequest {
       'updated_at': updatedAt.toUtc().toIso8601String(),
       'total_amount': totalAmount,
       'payment_status': paymentStatus,
+      'move_in_date': moveInDate?.toUtc().toIso8601String(),
+      'move_out_date': moveOutDate?.toUtc().toIso8601String(),
     };
 
     if (id.isNotEmpty) {

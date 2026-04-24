@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
 import 'package:homeu/core/theme/homeu_app_theme.dart';
@@ -24,9 +25,127 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
   int _selectedDurationMonths = 6;
   DateTime _startDate = DateTime.now().add(const Duration(days: 3));
   bool _isSubmitting = false;
+  List<BookingRequest> _existingBookings = [];
+  bool _isLoadingAvailability = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAvailability();
+  }
+
+  Future<void> _loadAvailability() async {
+    setState(() => _isLoadingAvailability = true);
+    try {
+      final bookings = await _bookingRemoteDataSource.getConflictingBookings(widget.property.id);
+      // Sort bookings by move-in date
+      bookings.sort((a, b) => (a.moveInDate ?? DateTime(0)).compareTo(b.moveInDate ?? DateTime(0)));
+      
+      setState(() {
+        _existingBookings = bookings;
+        _isLoadingAvailability = false;
+        
+        final defaultStart = _normalizeDate(DateTime.now().add(const Duration(days: 3)));
+        // Find first available date if current start date is blocked
+        if (_isDateBlocked(defaultStart)) {
+          _startDate = _findFirstAvailableDate();
+        } else {
+          _startDate = defaultStart;
+        }
+      });
+    } catch (e) {
+      debugPrint('Error loading availability: $e');
+      setState(() => _isLoadingAvailability = false);
+    }
+  }
+
+  DateTime _normalizeDate(DateTime date) => DateTime(date.year, date.month, date.day);
+
+  bool _isDateBlocked(DateTime date) {
+    final d = _normalizeDate(date);
+    for (final b in _existingBookings) {
+      if (b.moveInDate == null || b.moveOutDate == null) continue;
+      final start = _normalizeDate(b.moveInDate!);
+      final end = _normalizeDate(b.moveOutDate!);
+      
+      if (!d.isBefore(start) && !d.isAfter(end)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  DateTime _findFirstAvailableDate() {
+    DateTime date = _normalizeDate(DateTime.now().add(const Duration(days: 1)));
+    while (_isDateBlocked(date)) {
+      date = date.add(const Duration(days: 1));
+    }
+    return date;
+  }
+
+  DateTime _calculateMoveOutDate(DateTime start, int months) {
+    int year = start.year + (start.month + months - 1) ~/ 12;
+    int month = (start.month + months - 1) % 12 + 1;
+    int day = start.day;
+
+    // Adjust day for months with fewer days (e.g., Jan 31 + 1 month = Feb 28/29)
+    int lastDayOfMonth = DateTime(year, month + 1, 0).day;
+    if (day > lastDayOfMonth) {
+      day = lastDayOfMonth;
+    }
+
+    return DateTime(year, month, day);
+  }
+
+  bool _hasDurationConflict(DateTime start, int months) {
+    final normalizedStart = _normalizeDate(start);
+    final end = _calculateMoveOutDate(normalizedStart, months);
+    
+    for (final b in _existingBookings) {
+      if (b.moveInDate == null || b.moveOutDate == null) continue;
+      final bStart = _normalizeDate(b.moveInDate!);
+      final bEnd = _normalizeDate(b.moveOutDate!);
+      
+      // Overlap formula: (StartA <= EndB) and (EndA >= StartB)
+      if (!normalizedStart.isAfter(bEnd) && !end.isBefore(bStart)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  BookingRequest? _getConflictBooking(DateTime start, int months) {
+    final normalizedStart = _normalizeDate(start);
+    final end = _calculateMoveOutDate(normalizedStart, months);
+    
+    for (final b in _existingBookings) {
+      if (b.moveInDate == null || b.moveOutDate == null) continue;
+      final bStart = _normalizeDate(b.moveInDate!);
+      final bEnd = _normalizeDate(b.moveOutDate!);
+      
+      if (!normalizedStart.isAfter(bEnd) && !end.isBefore(bStart)) {
+        return b;
+      }
+    }
+    return null;
+  }
+
+  BookingRequest? get _currentOccupancy {
+    final now = _normalizeDate(DateTime.now());
+    for (final b in _existingBookings) {
+      if (b.moveInDate == null || b.moveOutDate == null) continue;
+      final start = _normalizeDate(b.moveInDate!);
+      final end = _normalizeDate(b.moveOutDate!);
+      if (!now.isBefore(start) && !now.isAfter(end)) {
+        return b;
+      }
+    }
+    return null;
+  }
 
   double get _monthlyPrice => _extractPrice(widget.property.pricePerMonth);
   double get _totalPrice => _monthlyPrice * _selectedDurationMonths;
+  bool get _isDurationValid => !_hasDurationConflict(_startDate, _selectedDurationMonths);
 
   @override
   Widget build(BuildContext context) {
@@ -45,6 +164,14 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            if (!_isDurationValid)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: Text(
+                  'Conflict detected with an existing booking.',
+                  style: TextStyle(color: Colors.red, fontSize: 12, fontWeight: FontWeight.bold),
+                ),
+              ),
             Text(
               'Paying the booking fee locks this property. The remaining balance is due after owner approval.',
               textAlign: TextAlign.center,
@@ -60,14 +187,14 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
               height: 52,
               child: ElevatedButton(
                 key: const Key('confirm_booking_button'),
-                onPressed: _isSubmitting ? null : _confirmBooking,
+                onPressed: (_isSubmitting || !_isDurationValid || _isLoadingAvailability) ? null : _confirmBooking,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: context.homeuAccent,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                 ),
-                child: _isSubmitting
+                child: _isSubmitting || _isLoadingAvailability
                     ? const SizedBox(
                         width: 18,
                         height: 18,
@@ -168,6 +295,28 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
                 ),
               ),
               const SizedBox(height: 18),
+              if (!_isDurationValid)
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.red.withOpacity(0.3)),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.warning_amber_rounded, color: Colors.red),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Property is already booked starting from ${DateFormat('MMM dd, yyyy').format(_getConflictBooking(_startDate, _selectedDurationMonths)!.moveInDate!)}. Please choose a shorter duration or different start date.',
+                          style: TextStyle(color: Colors.red, fontSize: 13, fontWeight: FontWeight.w500),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               Text(
                 'Rental Duration',
                 style: TextStyle(
@@ -212,6 +361,26 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
                 ),
               ),
               const SizedBox(height: 10),
+              if (_currentOccupancy != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12.0),
+                  child: Row(
+                    children: [
+                      Icon(Icons.info_outline_rounded, size: 16, color: context.homeuAccent),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          'Property is occupied until ${DateFormat('MMM dd, yyyy').format(_currentOccupancy!.moveOutDate!)}',
+                          style: TextStyle(
+                            color: context.homeuAccent,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               InkWell(
                 key: const Key('start_date_picker_field'),
                 borderRadius: BorderRadius.circular(16),
@@ -346,6 +515,7 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
       initialDate: initialDate,
       firstDate: firstDate,
       lastDate: lastDate,
+      selectableDayPredicate: (date) => !_isDateBlocked(date),
     );
 
     if (pickedDate == null) {
@@ -380,7 +550,23 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
     setState(() => _isSubmitting = true);
 
     try {
+      // Race condition protection: Check availability one last time
+      final latestConflicts = await _bookingRemoteDataSource.getConflictingBookings(widget.property.id);
+      _existingBookings = latestConflicts;
+      
+      if (_hasDurationConflict(_startDate, _selectedDurationMonths)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Sorry, this duration was just booked by another tenant.')),
+        );
+        setState(() => _isSubmitting = false);
+        return;
+      }
+
       final now = DateTime.now().toUtc();
+      
+      // Calculate moveOutDate based on selected duration correctly
+      final moveOutDate = _calculateMoveOutDate(_startDate, _selectedDurationMonths);
+      
       final booking = BookingRequest(
         id: '',
         propertyId: widget.property.id,
@@ -391,9 +577,11 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
         updatedAt: now,
         totalAmount: _monthlyPrice, // Only 1 month as booking fee
         paymentStatus: 'Pending',
+        moveInDate: _startDate,
+        moveOutDate: moveOutDate,
       );
 
-      debugPrint('Booking submit: propertyId=${widget.property.id}, ownerId=${widget.property.ownerId}, tenantId=$tenantId');
+      debugPrint('Booking submit: propertyId=${widget.property.id}, ownerId=${widget.property.ownerId}, tenantId=$tenantId, duration=$_selectedDurationMonths');
 
       final created = await _bookingRemoteDataSource.createBooking(booking);
       if (!mounted) return;
