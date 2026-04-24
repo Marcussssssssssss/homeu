@@ -4,6 +4,7 @@ import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
 import 'package:homeu/core/theme/homeu_app_theme.dart';
 import 'package:homeu/app/property/property_remote_datasource.dart';
+import 'package:homeu/app/viewing/viewing_local_datasource.dart';
 import 'package:homeu/app/viewing/viewing_models.dart';
 import 'package:homeu/app/viewing/viewing_remote_datasource.dart';
 import 'package:homeu/core/supabase/app_supabase.dart';
@@ -19,6 +20,8 @@ enum HomeUViewingFilterStatus {
   completed,
   cancelled,
   rescheduleRequested,
+  slotTaken,
+  propertyRented,
 }
 
 class HomeUViewingHistoryScreen extends StatefulWidget {
@@ -28,35 +31,40 @@ class HomeUViewingHistoryScreen extends StatefulWidget {
 
   @override
   State<HomeUViewingHistoryScreen> createState() =>
-      _HomeUViewingHistoryScreenState();
+      HomeUViewingHistoryScreenState();
 }
 
-class _HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
+class HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
   final ViewingRemoteDataSource _viewingRemoteDataSource =
       const ViewingRemoteDataSource();
   final PropertyRemoteDataSource _propertyRemoteDataSource =
       const PropertyRemoteDataSource();
+  
   HomeUViewingFilterStatus _selectedStatus = HomeUViewingFilterStatus.all;
-  List<ViewingRequest> _viewings = const <ViewingRequest>[];
   Map<String, PropertyItem> _propertyById = const <String, PropertyItem>{};
-  bool _isLoading = true;
   String? _tenantId;
-  String? _loadError;
+  Stream<List<ViewingRequest>>? _viewingStream;
 
   @override
   void initState() {
     super.initState();
-    if (widget.initialViewings != null) {
-      _tenantId = 'preview-tenant';
-      _viewings = widget.initialViewings!;
-      _propertyById = {
-        for (final viewing in _viewings)
-          viewing.propertyId: _buildFallbackPropertyItem(viewing),
-      };
-      _isLoading = false;
-      return;
+    _initStream();
+  }
+
+  void _initStream() {
+    _tenantId = AppSupabase.auth.currentUser?.id;
+    if (_tenantId != null) {
+      _viewingStream = _viewingRemoteDataSource.viewingRequestsStream(_tenantId!);
     }
-    _loadViewings();
+  }
+
+  /// Forces a refresh of the stream. Useful for Tab Bar double-taps.
+  void refresh() {
+    if (mounted) {
+      setState(() {
+        _initStream();
+      });
+    }
   }
 
   @override
@@ -65,21 +73,27 @@ class _HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
       return const HomeURoleBlockedScreen(requiredRole: HomeURole.tenant);
     }
 
-    final visibleViewings = _viewings
-        .where((viewing) {
-          if (_selectedStatus == HomeUViewingFilterStatus.all) {
-            return true;
-          }
-          return _mapStatus(viewing.status) == _selectedStatus;
-        })
-        .toList(growable: false);
+    if (_tenantId == null) {
+      _initStream();
+    }
+
+    if (_tenantId == null) {
+      return const Scaffold(body: Center(child: Text('Please log in')));
+    }
 
     return Scaffold(
-      backgroundColor: context.colors.surface,
+      backgroundColor: const Color(0xFFF6F8FC),
       appBar: AppBar(
-        title: const Text('Viewing History'),
-        backgroundColor: context.colors.surface,
+        title: const Text(
+          'Viewing History',
+          style: TextStyle(
+            color: Color(0xFF0F172A),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: const Color(0xFFF6F8FC),
         elevation: 0,
+        iconTheme: const IconThemeData(color: Color(0xFF0F172A)),
       ),
       body: SafeArea(
         child: Column(
@@ -87,9 +101,14 @@ class _HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: HomeUStatusFilterChips<HomeUViewingFilterStatus>(
-                statuses: HomeUViewingFilterStatus.values
-                    .where((s) => s != HomeUViewingFilterStatus.pending)
-                    .toList(),
+                statuses: const [
+                  HomeUViewingFilterStatus.all,
+                  HomeUViewingFilterStatus.pending,
+                  HomeUViewingFilterStatus.approved,
+                  HomeUViewingFilterStatus.rejected,
+                  HomeUViewingFilterStatus.cancelled,
+                  HomeUViewingFilterStatus.completed,
+                ],
                 selected: _selectedStatus,
                 labelBuilder: _statusLabel,
                 keyBuilder: (status) =>
@@ -102,66 +121,28 @@ class _HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
               ),
             ),
             Expanded(
-              child: _isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : RefreshIndicator(
-                      onRefresh: _loadViewings,
-                      child: ListView.builder(
-                        padding: const EdgeInsets.fromLTRB(16, 4, 16, 20),
-                        itemCount: visibleViewings.length + (_loadError != null || visibleViewings.isEmpty ? 1 : 0),
-                        itemBuilder: (context, index) {
-                          if (_loadError != null && index == 0) {
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 24),
-                              child: Text(
-                                _loadError!,
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  color: Color(0xFFC53030),
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            );
-                          }
-                          if (visibleViewings.isEmpty && index == 0) {
-                            return Padding(
-                              padding: const EdgeInsets.only(top: 120),
-                              child: Text(
-                                _selectedStatus == HomeUViewingFilterStatus.all
-                                    ? 'No viewing requests yet.'
-                                    : 'No viewing requests found for this status.',
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  color: Color(0xFF667896),
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            );
-                          }
+              child: StreamBuilder<List<ViewingRequest>>(
+                stream: _viewingStream,
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  }
 
-                          final viewing = visibleViewings[index];
-                          final property =
-                              _propertyById[viewing.propertyId] ??
-                              _buildFallbackPropertyItem(viewing);
-                          
-                          return _ViewingHistoryCard(
-                            viewing: viewing,
-                            property: property,
-                            onTap: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute<void>(
-                                  builder: (_) => HomeUPropertyDetailsScreen(
-                                    property: property,
-                                  ),
-                                ),
-                              );
-                            },
-                          );
-                        },
-                      ),
-                    ),
+                  final viewings = snapshot.data ?? [];
+
+                  if (viewings.isEmpty && snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  final filteredViewings = _filterViewings(viewings);
+
+                  if (filteredViewings.isEmpty) {
+                    return _buildEmptyState();
+                  }
+
+                  return _buildViewingList(filteredViewings);
+                },
+              ),
             ),
           ],
         ),
@@ -169,64 +150,78 @@ class _HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
     );
   }
 
-  Future<void> _loadViewings() async {
-    if (!AppSupabase.isInitialized) {
-      if (!mounted) {
-        return;
-      }
-      setState(() {
-        _tenantId = null;
-        _viewings = const <ViewingRequest>[];
-        _propertyById = const <String, PropertyItem>{};
-        _loadError = 'Supabase is not initialized.';
-        _isLoading = false;
-      });
-      return;
+  List<ViewingRequest> _filterViewings(List<ViewingRequest> viewings) {
+    if (_selectedStatus == HomeUViewingFilterStatus.all) {
+      return viewings;
     }
+    return viewings.where((v) => _mapStatus(v.status) == _selectedStatus).toList();
+  }
 
-    final tenantId = AppSupabase.auth.currentUser?.id;
+  Widget _buildViewingList(List<ViewingRequest> viewings) {
+    _ensurePropertiesLoaded(viewings);
 
-    if (tenantId == null || tenantId.isEmpty) {
-      if (!mounted) {
-        return;
-      }
-      setState(() {
-        _tenantId = null;
-        _viewings = const <ViewingRequest>[];
-        _propertyById = const <String, PropertyItem>{};
-        _loadError = 'Please log in to view your viewing history.';
-        _isLoading = false;
-      });
-      return;
-    }
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(16, 4, 16, 20),
+      itemCount: viewings.length,
+      itemBuilder: (context, index) {
+        final viewing = viewings[index];
+        final property = _propertyById[viewing.propertyId] ?? _buildFallbackPropertyItem(viewing);
 
-    try {
-      final rows = await _viewingRemoteDataSource.getTenantViewingRequests(
-        tenantId,
-      );
-      final propertyById = await _propertyRemoteDataSource.fetchPropertiesByIds(
-        rows.map((viewing) => viewing.propertyId),
-      );
-      if (!mounted) {
-        return;
-      }
-      setState(() {
-        _tenantId = tenantId;
-        _viewings = rows;
-        _propertyById = propertyById;
-        _loadError = null;
-        _isLoading = false;
-      });
-    } catch (_) {
-      if (!mounted) {
-        return;
-      }
-      setState(() {
-        _tenantId = tenantId;
-        _viewings = const <ViewingRequest>[];
-        _propertyById = const <String, PropertyItem>{};
-        _loadError = 'Unable to load viewing history.';
-        _isLoading = false;
+        return _ViewingHistoryCard(
+          viewing: viewing,
+          property: property,
+          status: _statusLabel(_mapStatus(viewing.status)),
+          statusEnum: _mapStatus(viewing.status),
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => HomeUPropertyDetailsScreen(
+                  property: property,
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return ListView(
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 120),
+          child: Center(
+            child: Text(
+              _selectedStatus == HomeUViewingFilterStatus.all
+                  ? 'No viewing requests yet.'
+                  : 'No viewing requests found for this status.',
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Color(0xFF667896),
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void _ensurePropertiesLoaded(List<ViewingRequest> viewings) {
+    final missingIds = viewings
+        .map((v) => v.propertyId)
+        .where((id) => !_propertyById.containsKey(id))
+        .toSet();
+
+    if (missingIds.isNotEmpty) {
+      _propertyRemoteDataSource.fetchPropertiesByIds(missingIds).then((newProperties) {
+        if (mounted && newProperties.isNotEmpty) {
+          setState(() {
+            _propertyById = {..._propertyById, ...newProperties};
+          });
+        }
       });
     }
   }
@@ -265,6 +260,12 @@ class _HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
       case 'reschedulerequested':
       case 'reschedule requested':
         return HomeUViewingFilterStatus.rescheduleRequested;
+      case 'slot taken':
+      case 'slottaken':
+        return HomeUViewingFilterStatus.slotTaken;
+      case 'property rented':
+      case 'propertyrented':
+        return HomeUViewingFilterStatus.propertyRented;
       default:
         return HomeUViewingFilterStatus.pending;
     }
@@ -286,6 +287,10 @@ class _HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
         return 'Cancelled';
       case HomeUViewingFilterStatus.rescheduleRequested:
         return 'Rescheduled';
+      case HomeUViewingFilterStatus.slotTaken:
+        return 'Slot Taken';
+      case HomeUViewingFilterStatus.propertyRented:
+        return 'Property Rented';
     }
   }
 }
@@ -294,11 +299,15 @@ class _ViewingHistoryCard extends StatelessWidget {
   const _ViewingHistoryCard({
     required this.viewing,
     required this.property,
+    required this.status,
+    required this.statusEnum,
     this.onTap,
   });
 
   final ViewingRequest viewing;
   final PropertyItem property;
+  final String status;
+  final HomeUViewingFilterStatus statusEnum;
   final VoidCallback? onTap;
 
   @override
@@ -307,12 +316,17 @@ class _ViewingHistoryCard extends StatelessWidget {
     const grayBorder = Color(0xFFF1F5F9);
     final isPast = viewing.status.toLowerCase() == 'completed' || 
                    viewing.status.toLowerCase() == 'cancelled' ||
-                   viewing.status.toLowerCase() == 'rejected';
+                   viewing.status.toLowerCase() == 'rejected' ||
+                   viewing.status.toLowerCase() == 'slot taken' ||
+                   viewing.status.toLowerCase() == 'property rented';
+
+    final isRented = property.status.toLowerCase() == 'rented';
+    final showRentedKillSwitch = isRented && (viewing.status.toLowerCase() == 'pending' || viewing.status.toLowerCase() == 'approved');
 
     Widget cardContent = Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Image
+        // Image Section: 110x130
         ClipRRect(
           borderRadius: BorderRadius.circular(20),
           child: _buildImage(
@@ -322,7 +336,7 @@ class _ViewingHistoryCard extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 16),
-        // Info
+        // Info Section
         Expanded(
           child: _buildInfoSection(context, purpleAccent),
         ),
@@ -367,11 +381,11 @@ class _ViewingHistoryCard extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF10B981), // Premium Green badge
+                  color: showRentedKillSwitch ? const Color(0xFFEF4444) : _getStatusColor(statusEnum),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  viewing.status.toUpperCase(),
+                  (showRentedKillSwitch ? 'Property Rented' : status).toUpperCase(),
                   style: const TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
@@ -410,14 +424,15 @@ class _ViewingHistoryCard extends StatelessWidget {
   }
 
   Widget _buildInfoSection(BuildContext context, Color purpleAccent) {
-    final dateFormat = DateFormat('MMM d, yyyy');
+    final dateFormat = DateFormat('MMM d');
+    final dayFormat = DateFormat('EEEE');
     final timeFormat = DateFormat('hh:mm a');
     final scheduledAt = viewing.scheduledAt.toLocal();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Star rating above title
+        // Star rating
         Row(
           children: List.generate(5, (index) {
             return Icon(
@@ -428,9 +443,9 @@ class _ViewingHistoryCard extends StatelessWidget {
           }),
         ),
         const SizedBox(height: 6),
-        // Title (Property Name)
+        // Title
         Padding(
-          padding: const EdgeInsets.only(right: 60), // Avoid overlap with status badge
+          padding: const EdgeInsets.only(right: 60), 
           child: Text(
             property.name,
             style: const TextStyle(
@@ -444,7 +459,7 @@ class _ViewingHistoryCard extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        // Location with purple pin
+        // Location
         Row(
           children: [
             Icon(Icons.location_on, size: 16, color: purpleAccent),
@@ -464,19 +479,21 @@ class _ViewingHistoryCard extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 20),
-        // Viewing Details Row
+        // Details Row
         Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             _buildDetailColumn(
               'Viewing Date',
               dateFormat.format(scheduledAt),
+              dayFormat.format(scheduledAt),
               purpleAccent,
             ),
             const SizedBox(width: 14),
             _buildDetailColumn(
               'Viewing Time',
               timeFormat.format(scheduledAt),
+              'Scheduled',
               purpleAccent,
             ),
           ],
@@ -485,7 +502,7 @@ class _ViewingHistoryCard extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailColumn(String label, String value, Color accentColor) {
+  Widget _buildDetailColumn(String label, String value, String subValue, Color accentColor) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -506,24 +523,33 @@ class _ViewingHistoryCard extends StatelessWidget {
             color: Color(0xFF334155),
           ),
         ),
+        Text(
+          subValue,
+          style: const TextStyle(fontSize: 10, color: Color(0xFF94A3B8)),
+        ),
       ],
     );
   }
 
-  Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'approved':
-        return Colors.green;
-      case 'rejected':
-      case 'cancelled':
-      case 'canceled':
-        return Colors.red;
-      case 'completed':
-        return Colors.blue;
-      case 'pending':
-        return Colors.orange;
+  Color _getStatusColor(HomeUViewingFilterStatus status) {
+    switch (status) {
+      case HomeUViewingFilterStatus.approved:
+        return const Color(0xFF10B981); // Green
+      case HomeUViewingFilterStatus.pending:
+        return const Color(0xFF3B82F6); // Blue
+      case HomeUViewingFilterStatus.cancelled:
+        return const Color(0xFF94A3B8); // Muted Gray
+      case HomeUViewingFilterStatus.rejected:
+        return const Color(0xFFEF4444); // Red
+      case HomeUViewingFilterStatus.completed:
+        return const Color(0xFF6366F1); // Indigo
+      case HomeUViewingFilterStatus.rescheduleRequested:
+        return const Color(0xFFF59E0B); // Amber
+      case HomeUViewingFilterStatus.slotTaken:
+      case HomeUViewingFilterStatus.propertyRented:
+        return const Color(0xFFEF4444); // Red
       default:
-        return const Color(0xFF0F172A);
+        return const Color(0xFF1E3A8A);
     }
   }
 }

@@ -6,8 +6,8 @@ class ViewingRequest {
     required this.tenantId,
     required this.scheduledAt,
     required this.status,
-    required this.rescheduleTo,
-    required this.rescheduleReason,
+    this.rescheduleTo,
+    this.rescheduleReason,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -41,8 +41,9 @@ class ViewingRequest {
     );
   }
 
-  Map<String, dynamic> toInsertJson() {
-    final map = <String, dynamic>{
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
       'property_id': propertyId,
       'owner_id': ownerId,
       'tenant_id': tenantId,
@@ -53,11 +54,13 @@ class ViewingRequest {
       'created_at': createdAt.toUtc().toIso8601String(),
       'updated_at': updatedAt.toUtc().toIso8601String(),
     };
+  }
 
-    if (id.isNotEmpty) {
-      map['id'] = id;
+  Map<String, dynamic> toInsertJson() {
+    final map = toJson();
+    if (id.isEmpty) {
+      map.remove('id');
     }
-
     return map;
   }
 

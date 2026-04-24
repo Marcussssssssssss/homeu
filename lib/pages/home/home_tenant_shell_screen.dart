@@ -21,17 +21,19 @@ class HomeUTenantShellScreen extends StatefulWidget {
 class _HomeUTenantShellScreenState extends State<HomeUTenantShellScreen> {
   late int _currentIndex;
   late final List<Widget> _tabs;
+  final GlobalKey<State<HomeUViewingHistoryScreen>> _viewingHistoryKey =
+      GlobalKey<State<HomeUViewingHistoryScreen>>();
 
   @override
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex.clamp(0, 4);
-    _tabs = const [
-      HomeUHomePage(),
-      HomeUBookingHistoryScreen(),
-      HomeUViewingHistoryScreen(),
-      HomeUConversationListScreen(),
-      HomeUProfileScreen(role: HomeURole.tenant),
+    _tabs = [
+      const HomeUHomePage(),
+      const HomeUBookingHistoryScreen(),
+      HomeUViewingHistoryScreen(key: _viewingHistoryKey),
+      const HomeUConversationListScreen(),
+      const HomeUProfileScreen(role: HomeURole.tenant),
     ];
   }
 
@@ -48,6 +50,13 @@ class _HomeUTenantShellScreenState extends State<HomeUTenantShellScreen> {
         currentIndex: _currentIndex,
         onTap: (index) {
           if (index == _currentIndex) {
+            // If already on Viewing tab, trigger refresh
+            if (index == 2) {
+              final state = _viewingHistoryKey.currentState;
+              if (state is HomeUViewingHistoryScreenState) {
+                state.refresh();
+              }
+            }
             return;
           }
           setState(() {
