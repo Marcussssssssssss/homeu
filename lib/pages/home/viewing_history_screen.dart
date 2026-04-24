@@ -210,6 +210,7 @@ class HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
           property: property,
           status: _statusLabel(_mapStatus(viewing.status)),
           statusEnum: _mapStatus(viewing.status),
+          onCancel: () => _confirmCancelViewing(viewing),
           onTap: () {
             Navigator.of(context).push(
               MaterialPageRoute<void>(
@@ -222,6 +223,123 @@ class HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
         );
       },
     );
+  }
+
+  Future<void> _confirmCancelViewing(ViewingRequest viewing) async {
+    final confirmed = await showGeneralDialog<bool>(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: '',
+      barrierColor: Colors.black54,
+      transitionDuration: const Duration(milliseconds: 200),
+      pageBuilder: (context, anim1, anim2) => const SizedBox(),
+      transitionBuilder: (context, anim1, anim2, child) {
+        return Transform.scale(
+          scale: anim1.value,
+          child: FadeTransition(
+            opacity: anim1,
+            child: AlertDialog(
+              backgroundColor: context.homeuCard,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              contentPadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.redAccent.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.cancel_outlined,
+                      color: Colors.redAccent,
+                      size: 32,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Cancel Viewing',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: context.homeuPrimaryText,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Are you sure you want to cancel this viewing appointment?',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: context.homeuMutedText,
+                      fontSize: 14,
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  Column(
+                    children: [
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () => Navigator.pop(context, false),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: context.homeuAccent,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            elevation: 0,
+                          ),
+                          child: const Text(
+                            'Keep Appointment',
+                            style: TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        width: double.infinity,
+                        child: TextButton(
+                          onPressed: () => Navigator.pop(context, true),
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.redAccent,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                          ),
+                          child: const Text(
+                            'Confirm Cancellation',
+                            style: TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+
+    if (confirmed == true && mounted) {
+      try {
+        await _viewingRemoteDataSource.cancelViewing(
+          viewingId: viewing.id,
+          tenantId: _tenantId!,
+        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Viewing appointment cancelled')),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to cancel viewing: $e')),
+          );
+        }
+      }
+    }
   }
 
   Widget _buildEmptyState() {
@@ -358,6 +476,7 @@ class _ViewingHistoryCard extends StatelessWidget {
     required this.status,
     required this.statusEnum,
     this.onTap,
+    this.onCancel,
   });
 
   final ViewingRequest viewing;
@@ -365,6 +484,7 @@ class _ViewingHistoryCard extends StatelessWidget {
   final String status;
   final HomeUViewingFilterStatus statusEnum;
   final VoidCallback? onTap;
+  final VoidCallback? onCancel;
 
   @override
   Widget build(BuildContext context) {
@@ -379,6 +499,8 @@ class _ViewingHistoryCard extends StatelessWidget {
     final isRented = property.status.toLowerCase() == 'rented';
     final showRentedKillSwitch = isRented && (viewing.status.toLowerCase() == 'pending' || viewing.status.toLowerCase() == 'approved');
 
+    final bool showCancelButton = statusEnum == HomeUViewingFilterStatus.pending;
+
     Widget cardContent = Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -389,12 +511,16 @@ class _ViewingHistoryCard extends StatelessWidget {
             property.imageUrls.isNotEmpty ? property.imageUrls[0] : null,
             110,
             130,
+            applyGrayscale: isPast,
           ),
         ),
         const SizedBox(width: 16),
         // Info Section
         Expanded(
-          child: _buildInfoSection(context, purpleAccent),
+          child: Opacity(
+            opacity: isPast ? 0.6 : 1.0,
+            child: _buildInfoSection(context, purpleAccent, showCancelButton: showCancelButton),
+          ),
         ),
       ],
     );
@@ -457,30 +583,45 @@ class _ViewingHistoryCard extends StatelessWidget {
     );
   }
 
-  Widget _buildImage(String? url, double width, double height) {
+  Widget _buildImage(String? url, double width, double height, {bool applyGrayscale = false}) {
+    Widget image;
     if (url == null || url.isEmpty) {
-      return Container(
+      image = Container(
         width: width,
         height: height,
         color: const Color(0xFFF1F5F9),
         child: const Icon(Icons.image_outlined, color: Color(0xFF94A3B8), size: 24),
       );
-    }
-    return Image.network(
-      url,
-      width: width,
-      height: height,
-      fit: BoxFit.cover,
-      errorBuilder: (_, __, ___) => Container(
+    } else {
+      image = Image.network(
+        url,
         width: width,
         height: height,
-        color: const Color(0xFFF1F5F9),
-        child: const Icon(Icons.broken_image_outlined, color: Color(0xFF94A3B8), size: 24),
-      ),
-    );
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => Container(
+          width: width,
+          height: height,
+          color: const Color(0xFFF1F5F9),
+          child: const Icon(Icons.broken_image_outlined, color: Color(0xFF94A3B8), size: 24),
+        ),
+      );
+    }
+
+    if (applyGrayscale) {
+      return ColorFiltered(
+        colorFilter: const ColorFilter.matrix(<double>[
+          0.2126, 0.7152, 0.0722, 0, 0,
+          0.2126, 0.7152, 0.0722, 0, 0,
+          0.2126, 0.7152, 0.0722, 0, 0,
+          0,      0,      0,      1, 0,
+        ]),
+        child: image,
+      );
+    }
+    return image;
   }
 
-  Widget _buildInfoSection(BuildContext context, Color purpleAccent) {
+  Widget _buildInfoSection(BuildContext context, Color purpleAccent, {bool showCancelButton = false}) {
     final dateFormat = DateFormat('MMM d');
     final dayFormat = DateFormat('EEEE');
     final timeFormat = DateFormat('hh:mm a');
@@ -553,6 +694,21 @@ class _ViewingHistoryCard extends StatelessWidget {
               'Scheduled',
               purpleAccent,
             ),
+            if (showCancelButton) ...[
+              const Spacer(),
+              OutlinedButton(
+                onPressed: onCancel,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.redAccent,
+                  side: const BorderSide(color: Colors.redAccent, width: 1.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                  minimumSize: const Size(0, 28),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                ),
+                child: const Text('Cancel'),
+              ),
+            ],
           ],
         ),
       ],

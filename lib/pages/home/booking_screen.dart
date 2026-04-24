@@ -328,26 +328,50 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
               const SizedBox(height: 10),
               Wrap(
                 key: const Key('rental_duration_selector'),
-                spacing: 8,
-                runSpacing: 8,
+                spacing: 12,
+                runSpacing: 12,
                 children: _durationOptions.map((months) {
                   final bool isSelected = _selectedDurationMonths == months;
-                  return ChoiceChip(
-                    label: Text('$months month${months > 1 ? 's' : ''}'),
-                    selected: isSelected,
-                    onSelected: (_) {
+                  return InkWell(
+                    onTap: () {
                       setState(() {
                         _selectedDurationMonths = months;
                       });
                     },
-                    selectedColor: context.homeuAccent,
-                    labelStyle: TextStyle(
-                      color: isSelected ? Colors.white : context.homeuAccent,
-                      fontWeight: FontWeight.w700,
+                    borderRadius: BorderRadius.circular(24),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: isSelected ? const Color(0xFF1E3A8A) : Colors.white,
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(
+                          color: isSelected ? const Color(0xFF1E3A8A) : Colors.grey[300]!,
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (isSelected) ...[
+                            const Icon(
+                              Icons.check_rounded,
+                              color: Colors.white,
+                              size: 18,
+                            ),
+                            const SizedBox(width: 8),
+                          ],
+                          Text(
+                            '$months month${months > 1 ? 's' : ''}',
+                            style: TextStyle(
+                              color: isSelected ? Colors.white : context.homeuPrimaryText,
+                              fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    side: BorderSide(color: context.homeuSoftBorder),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                   );
                 }).toList(),
               ),

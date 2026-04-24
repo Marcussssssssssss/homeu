@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
 import 'package:homeu/core/theme/homeu_app_theme.dart';
+import 'package:homeu/core/config/app_env.dart';
 import 'package:homeu/app/booking/payment_models.dart';
 import 'package:homeu/app/booking/payment_remote_datasource.dart';
 import 'package:homeu/core/supabase/app_supabase.dart';
@@ -55,18 +56,44 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
   bool _isSubmittingPayment = false;
   Payment? _latestPayment;
   String? _selectedBank;
+  String? _selectedEWallet;
+
+  final List<Map<String, String>> _eWallets = [
+    {
+      'name': 'TNG eWallet',
+      'logo': '${AppEnv.supabaseUrl}/storage/v1/object/public/bankassets/tng-logo.jpg'
+    },
+  ];
 
   final List<Map<String, String>> _banks = [
-    {'name': 'Maybank', 'logo': 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Maybank_Logo.svg/2560px-Maybank_Logo.svg.png'},
-    {'name': 'CIMB Bank', 'logo': 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/CIMB_Logo.svg/1200px-CIMB_Logo.svg.png'},
-    {'name': 'Public Bank', 'logo': 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Public_Bank_Berhad_logo.svg/2560px-Public_Bank_Berhad_logo.svg.png'},
-    {'name': 'RHB Bank', 'logo': 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/RHB_Bank_logo.svg/2560px-RHB_Bank_logo.svg.png'},
-    {'name': 'Hong Leong Bank', 'logo': 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/Hong_Leong_Bank_logo.svg/2560px-Hong_Leong_Bank_logo.svg.png'},
+    {
+      'name': 'CIMB Bank',
+      'logo': '${AppEnv.supabaseUrl}/storage/v1/object/public/bankassets/cimb-bank-logo-vector.png'
+    },
+    {
+      'name': 'Maybank',
+      'logo': '${AppEnv.supabaseUrl}/storage/v1/object/public/bankassets/Maybank-logo.png'
+    },
+    {
+      'name': 'Public Bank',
+      'logo': '${AppEnv.supabaseUrl}/storage/v1/object/public/bankassets/public-bank-logo.png'
+    },
+    {
+      'name': 'RHB Bank',
+      'logo': '${AppEnv.supabaseUrl}/storage/v1/object/public/bankassets/rhb-bank-logo.png'
+    },
+    {
+      'name': 'Hong Leong Bank',
+      'logo': '${AppEnv.supabaseUrl}/storage/v1/object/public/bankassets/HLB-logo.webp'
+    },
   ];
 
   bool get _isFormValid {
     if (_selectedMethod == HomeUPaymentMethod.banking) {
       return _selectedBank != null;
+    }
+    if (_selectedMethod == HomeUPaymentMethod.ewallet) {
+      return _selectedEWallet != null;
     }
     if (_selectedMethod != HomeUPaymentMethod.card) return true;
 
@@ -220,9 +247,9 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
                   physics: const NeverScrollableScrollPhysics(),
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
-                    mainAxisSpacing: 10,
-                    crossAxisSpacing: 10,
-                    childAspectRatio: 2.2,
+                    mainAxisSpacing: 16,
+                    crossAxisSpacing: 16,
+                    childAspectRatio: 1.0,
                   ),
                   itemCount: _banks.length,
                   itemBuilder: (context, index) {
@@ -235,30 +262,69 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
                         });
                       },
                       borderRadius: BorderRadius.circular(12),
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 250),
+                        curve: Curves.easeInOut,
+                        padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: context.homeuCard,
+                          color: isSelected 
+                              ? const Color(0xFF1E3A8A).withOpacity(0.05) 
+                              : Colors.white,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: isSelected ? context.homeuAccent : context.homeuSoftBorder,
-                            width: isSelected ? 1.5 : 1,
+                            color: isSelected ? const Color(0xFF1E3A8A) : Colors.grey[200]!,
+                            width: isSelected ? 2.0 : 1.0,
                           ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(isSelected ? 0.08 : 0.04),
+                              blurRadius: isSelected ? 8 : 4,
+                              offset: isSelected ? const Offset(0, 4) : const Offset(0, 2),
+                            ),
+                          ],
                         ),
-                        child: Row(
+                        child: Stack(
+                          clipBehavior: Clip.none,
                           children: [
-                            Expanded(
-                              child: Text(
-                                bank['name']!,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                                  color: context.homeuPrimaryText,
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Expanded(
+                                  child: Center(
+                                    child: Image.network(
+                                      bank['logo']!,
+                                      fit: BoxFit.contain,
+                                      loadingBuilder: (context, child, loadingProgress) {
+                                        if (loadingProgress == null) return child;
+                                        return const Center(child: CircularProgressIndicator(strokeWidth: 2));
+                                      },
+                                      errorBuilder: (context, error, stackTrace) =>
+                                          const Icon(Icons.account_balance_rounded, color: Colors.grey, size: 32),
+                                    ),
+                                  ),
                                 ),
-                              ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  bank['name']!,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color: isSelected ? const Color(0xFF1E3A8A) : context.homeuPrimaryText,
+                                  ),
+                                ),
+                              ],
                             ),
                             if (isSelected)
-                              Icon(Icons.check_circle_rounded, color: context.homeuAccent, size: 18),
+                              const Positioned(
+                                top: -4,
+                                right: -4,
+                                child: Icon(
+                                  Icons.check_circle_rounded,
+                                  color: Color(0xFF1E3A8A),
+                                  size: 22,
+                                ),
+                              ),
                           ],
                         ),
                       ),
@@ -275,9 +341,111 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
                   setState(() {
                     _selectedMethod = HomeUPaymentMethod.ewallet;
                     _showCardBack = false;
+                    _selectedEWallet = 'TNG eWallet';
                   });
                 },
               ),
+              if (_selectedMethod == HomeUPaymentMethod.ewallet) ...[
+                const SizedBox(height: 14),
+                Text(
+                  'Select E-Wallet',
+                  style: TextStyle(
+                    color: context.homeuPrimaryText,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 16,
+                    crossAxisSpacing: 16,
+                    childAspectRatio: 1.0,
+                  ),
+                  itemCount: _eWallets.length,
+                  itemBuilder: (context, index) {
+                    final wallet = _eWallets[index];
+                    final isSelected = _selectedEWallet == wallet['name'];
+                    return InkWell(
+                      onTap: () {
+                        setState(() {
+                          _selectedEWallet = wallet['name'];
+                        });
+                      },
+                      borderRadius: BorderRadius.circular(12),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 250),
+                        curve: Curves.easeInOut,
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: isSelected 
+                              ? const Color(0xFF1E3A8A).withOpacity(0.05) 
+                              : Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: isSelected ? const Color(0xFF1E3A8A) : Colors.grey[200]!,
+                            width: isSelected ? 2.0 : 1.0,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(isSelected ? 0.08 : 0.04),
+                              blurRadius: isSelected ? 8 : 4,
+                              offset: isSelected ? const Offset(0, 4) : const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Expanded(
+                                  child: Center(
+                                    child: Image.network(
+                                      wallet['logo']!,
+                                      fit: BoxFit.contain,
+                                      loadingBuilder: (context, child, loadingProgress) {
+                                        if (loadingProgress == null) return child;
+                                        return const Center(child: CircularProgressIndicator(strokeWidth: 2));
+                                      },
+                                      errorBuilder: (context, error, stackTrace) =>
+                                          const Icon(Icons.account_balance_wallet_rounded, color: Colors.grey, size: 32),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  wallet['name']!,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color: isSelected ? const Color(0xFF1E3A8A) : context.homeuPrimaryText,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            if (isSelected)
+                              const Positioned(
+                                top: -4,
+                                right: -4,
+                                child: Icon(
+                                  Icons.check_circle_rounded,
+                                  color: Color(0xFF1E3A8A),
+                                  size: 22,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ],
               if (_selectedMethod == HomeUPaymentMethod.card) ...[
                 const SizedBox(height: 14),
                 _FlippingCardVisual(
@@ -410,7 +578,9 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
                       'Payment Method', 
                       _selectedMethod == HomeUPaymentMethod.banking && _selectedBank != null
                           ? 'Online Banking ($_selectedBank)'
-                          : _methodLabel(_selectedMethod)
+                          : _selectedMethod == HomeUPaymentMethod.ewallet && _selectedEWallet != null
+                              ? 'E-Wallet ($_selectedEWallet)'
+                              : _methodLabel(_selectedMethod)
                     ),
                     if (_latestPayment != null)
                       _summaryRow('Payment Status', _latestPayment!.status),
@@ -464,20 +634,24 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
 
   Widget _summaryRow(String label, String value, {bool emphasize = false}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             label,
             style: TextStyle(color: context.homeuMutedText, fontSize: 13),
           ),
-          const Spacer(),
-          Text(
-            value,
-            style: TextStyle(
-              color: emphasize ? context.homeuPrice : context.homeuPrimaryText,
-              fontSize: emphasize ? 16 : 13,
-              fontWeight: FontWeight.w700,
+          const SizedBox(width: 16),
+          Expanded(
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              style: TextStyle(
+                color: emphasize ? context.homeuPrice : context.homeuPrimaryText,
+                fontSize: emphasize ? 16 : 13,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
         ],
@@ -551,18 +725,106 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
       return;
     }
 
-    setState(() {
-      _isSubmittingPayment = true;
-    });
-
     try {
+      if (_selectedMethod == HomeUPaymentMethod.banking && _selectedBank == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please select a bank to continue.')),
+        );
+        return;
+      }
+
+      if (_selectedMethod == HomeUPaymentMethod.ewallet && _selectedEWallet == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please select an e-wallet to continue.')),
+        );
+        return;
+      }
+
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          backgroundColor: context.homeuCard,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Text(
+            'Confirm Payment',
+            style: TextStyle(
+              color: context.homeuPrimaryText,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Are you sure you want to proceed with this payment?',
+                style: TextStyle(color: context.homeuSecondaryText),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                decoration: BoxDecoration(
+                  color: context.colors.surface,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: context.homeuSoftBorder),
+                ),
+                child: Column(
+                  children: [
+                    _summaryRow('Amount', 'RM ${_formatCurrency(widget.totalPrice)}', emphasize: true),
+                    const Divider(height: 16),
+                    _summaryRow(
+                      'Method',
+                      _selectedMethod == HomeUPaymentMethod.banking
+                          ? 'Online Banking ($_selectedBank)'
+                          : _selectedMethod == HomeUPaymentMethod.ewallet
+                              ? 'E-Wallet ($_selectedEWallet)'
+                              : 'Credit / Debit Card',
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text(
+                'Cancel',
+                style: TextStyle(color: context.homeuMutedText),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: context.homeuAccent,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                elevation: 0,
+              ),
+              child: const Text('Confirm & Pay'),
+            ),
+          ],
+        ),
+      );
+
+      if (confirmed != true) return;
+
+      setState(() {
+        _isSubmittingPayment = true;
+      });
+
       Payment? payment;
       if (widget.isInstallment && widget.scheduleId != null) {
         payment = await _paymentRemoteDataSource.processInstallmentPayment(
           bookingId: widget.bookingId,
           scheduleId: widget.scheduleId!,
           payerId: payerId,
-          method: _methodLabel(_selectedMethod),
+          method: _selectedMethod == HomeUPaymentMethod.banking && _selectedBank != null
+              ? 'Online Banking ($_selectedBank)'
+              : _selectedMethod == HomeUPaymentMethod.ewallet && _selectedEWallet != null
+                  ? 'E-Wallet ($_selectedEWallet)'
+                  : _methodLabel(_selectedMethod),
           amount: widget.totalPrice,
           monthNumber: widget.monthNumber,
         );
@@ -570,7 +832,11 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
         payment = await _paymentRemoteDataSource.createPaymentSimulated(
           bookingId: widget.bookingId,
           payerId: payerId,
-          method: _methodLabel(_selectedMethod),
+          method: _selectedMethod == HomeUPaymentMethod.banking && _selectedBank != null
+              ? 'Online Banking ($_selectedBank)'
+              : _selectedMethod == HomeUPaymentMethod.ewallet && _selectedEWallet != null
+                  ? 'E-Wallet ($_selectedEWallet)'
+                  : _methodLabel(_selectedMethod),
           amount: widget.totalPrice,
           simulateSuccess: true,
         );
