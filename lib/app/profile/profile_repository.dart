@@ -17,6 +17,7 @@ class HomeUProfileRepository {
   final HomeUAuthService _authService;
   final HomeUProfileRemoteDataSource _remoteDataSource;
   final HomeUProfileLocalDataSource _localDataSource;
+
   static const List<String> _languageKeys = [
     'language_code',
     'preferred_language',
@@ -28,6 +29,10 @@ class HomeUProfileRepository {
     'preferred_theme',
     'theme',
     'appearance_mode',
+  ];
+  static const List<String> _biometricKeys = [
+    'biometric_login_enabled',
+    'biometric_enabled',
   ];
 
   String? get currentUserId => _authService.currentUserId;
@@ -216,6 +221,46 @@ class HomeUProfileRepository {
     );
   }
 
+  Future<bool> getBiometricEnabled({bool fallback = false}) async {
+    final userId = currentUserId;
+    if (userId == null || userId.isEmpty) {
+      return fallback;
+    }
+
+    final cached = await _localDataSource.getCachedPreferences(userId);
+    if (cached != null) {
+      return readBiometricEnabled(cached, fallback: fallback);
+    }
+
+    final latest = await fetchLatestPreferences();
+    return readBiometricEnabled(latest, fallback: fallback);
+  }
+
+  Future<Map<String, dynamic>> saveBiometricEnabled(bool enabled) async {
+    final userId = currentUserId;
+    if (userId == null || userId.isEmpty) {
+      throw StateError('No authenticated user found.');
+    }
+
+    final cached = await _localDataSource.getCachedPreferences(userId);
+    final latest = await _remoteDataSource.fetchUserPreferences(userId);
+    final basePreferences = <String, dynamic>{
+      if (cached != null) ...cached,
+      if (latest != null) ...latest,
+    };
+
+    final biometricKey = _detectKey(
+      basePreferences,
+      _biometricKeys,
+      'biometric_login_enabled',
+    );
+    return _savePreferencePatch(
+      userId: userId,
+      basePreferences: basePreferences,
+      patch: {biometricKey: enabled},
+    );
+  }
+
   String readLanguageCode(
     Map<String, dynamic>? preferences, {
     String fallback = 'en',
@@ -236,6 +281,28 @@ class HomeUProfileRepository {
       return fallback;
     }
     return value;
+  }
+
+  bool readBiometricEnabled(
+    Map<String, dynamic>? preferences, {
+    bool fallback = false,
+  }) {
+    if (preferences == null) {
+      return fallback;
+    }
+
+    for (final key in _biometricKeys) {
+      final value = preferences[key];
+      if (value is bool) {
+        return value;
+      }
+      if (value != null) {
+        final str = value.toString().toLowerCase();
+        return str == 'true' || str == '1';
+      }
+    }
+
+    return fallback;
   }
 
   Future<Map<String, dynamic>> _savePreferencePatch({

@@ -60,6 +60,7 @@ class HomeUAuthService {
 
   Future<void> signOut() async {
     if (AppSupabase.isInitialized) {
+      // Clear Supabase local persistence for this session
       await AppSupabase.auth.signOut();
     }
   }
