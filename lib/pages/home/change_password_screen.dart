@@ -120,11 +120,14 @@ class _HomeUChangePasswordScreenState extends State<HomeUChangePasswordScreen> {
     });
 
     if (result.isSuccess) {
-      Future.delayed(const Duration(seconds: 2), () {
-        if (mounted) {
-          Navigator.of(context).pop();
-        }
-      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.updatePasswordSuccessMessage),
+          backgroundColor: const Color(0xFF1F9254),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+      Navigator.of(context).pop();
     }
   }
 
