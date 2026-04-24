@@ -12,7 +12,7 @@ import 'package:homeu/pages/home/property_item.dart';
 import 'package:homeu/pages/home/widgets/booking_history_card.dart';
 import 'package:homeu/pages/home/widgets/status_filter_chips.dart';
 
-enum HomeUBookingStatus { pending, approved, rejected, completed }
+enum HomeUBookingStatus { all, pending, approved, rejected, completed }
 
 class HomeUBookingHistoryScreen extends StatefulWidget {
   const HomeUBookingHistoryScreen({super.key});
@@ -27,7 +27,7 @@ class _HomeUBookingHistoryScreenState extends State<HomeUBookingHistoryScreen> {
       const BookingRemoteDataSource();
   final  PropertyRemoteDataSource _propertyRemoteDataSource =
       const PropertyRemoteDataSource();
-  HomeUBookingStatus _selectedStatus = HomeUBookingStatus.approved;
+  HomeUBookingStatus _selectedStatus = HomeUBookingStatus.all;
   List<_BookingHistoryItem> _bookings = const <_BookingHistoryItem>[];
   bool _isLoading = true;
   String? _loadError;
@@ -45,37 +45,24 @@ class _HomeUBookingHistoryScreenState extends State<HomeUBookingHistoryScreen> {
     }
 
     final visibleBookings = _bookings
-        .where((item) => item.status == _selectedStatus)
+        .where((item) => _selectedStatus == HomeUBookingStatus.all || item.status == _selectedStatus)
         .toList();
     final t = context.l10n;
 
     return Scaffold(
-      backgroundColor: context.colors.surface,
+      backgroundColor: const Color(0xFFF6F8FC),
       appBar: AppBar(
         title: Text(t.bookingHistoryTitle),
-        backgroundColor: context.colors.surface,
+        backgroundColor: const Color(0xFFF6F8FC),
+        elevation: 0,
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(bottom: 14),
-                child: Text(
-                  t.bookingHistorySubtitle,
-                  style: TextStyle(
-                    color: context.homeuMutedText,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-              HomeUStatusFilterChips<HomeUBookingStatus>(
-                statuses: HomeUBookingStatus.values
-                    .where((s) => s != HomeUBookingStatus.pending)
-                    .toList(),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: HomeUStatusFilterChips<HomeUBookingStatus>(
+                statuses: HomeUBookingStatus.values,
                 selected: _selectedStatus,
                 labelBuilder: (status) => _statusLabel(context, status),
                 keyBuilder: (status) => Key('status_filter_${status.name}'),
@@ -85,61 +72,70 @@ class _HomeUBookingHistoryScreenState extends State<HomeUBookingHistoryScreen> {
                   });
                 },
               ),
-              const SizedBox(height: 14),
-              if (_isLoading)
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 20),
-                  child: Center(child: CircularProgressIndicator()),
-                ),
-              if (_loadError != null)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: Text(
-                    _loadError!,
-                    style: const TextStyle(
-                      color: Color(0xFFC53030),
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              if (!_isLoading && visibleBookings.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.only(bottom: 12),
-                  child: Text(
-                    'No bookings found for this status.',
-                    style: TextStyle(
-                      color: Color(0xFF667896),
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ...visibleBookings.map(
-                (booking) => BookingHistoryCard(
-                  hotelName: booking.propertyName,
-                  locationAddress: booking.location,
-                  checkInDate: booking.checkInDate,
-                  checkOutDate: booking.checkOutDate,
-                  totalPrice: booking.totalPrice,
-                  rating: booking.property.rating,
-                  imageUrls: booking.property.imageUrls,
-                  status: _statusLabel(context, booking.status),
-                  isPast: booking.status == HomeUBookingStatus.completed || 
-                          booking.status == HomeUBookingStatus.rejected,
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => HomeUPropertyDetailsScreen(
-                          property: booking.property,
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (_isLoading)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 20),
+                        child: Center(child: CircularProgressIndicator()),
+                      ),
+                    if (_loadError != null)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Text(
+                          _loadError!,
+                          style: const TextStyle(
+                            color: Color(0xFFC53030),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
-                    );
-                  },
+                    if (!_isLoading && visibleBookings.isEmpty)
+                      const Padding(
+                        padding: EdgeInsets.only(bottom: 12),
+                        child: Text(
+                          'No bookings found for this status.',
+                          style: TextStyle(
+                            color: Color(0xFF667896),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ...visibleBookings.map(
+                      (booking) => BookingHistoryCard(
+                        hotelName: booking.propertyName,
+                        locationAddress: booking.location,
+                        checkInDate: booking.checkInDate,
+                        checkOutDate: booking.checkOutDate,
+                        totalPrice: booking.totalPrice,
+                        rating: booking.property.rating,
+                        imageUrls: booking.property.imageUrls,
+                        status: _statusLabel(context, booking.status),
+                        isPast: booking.status == HomeUBookingStatus.completed || 
+                                booking.status == HomeUBookingStatus.rejected,
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => HomeUPropertyDetailsScreen(
+                                property: booking.property,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -148,6 +144,8 @@ class _HomeUBookingHistoryScreenState extends State<HomeUBookingHistoryScreen> {
   String _statusLabel(BuildContext context, HomeUBookingStatus status) {
     final t = context.l10n;
     switch (status) {
+      case HomeUBookingStatus.all:
+        return 'All';
       case HomeUBookingStatus.pending:
         return t.statusPending;
       case HomeUBookingStatus.approved:

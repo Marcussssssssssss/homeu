@@ -254,6 +254,7 @@ class PropertyRemoteDataSource {
       nearbyLandmarks:
           row['nearby_landmarks'] ?? 'Nearby landmarks not available.',
       createdAt: createdAt,
+      status: row['status']?.toString() ?? 'Active',
       facilities: facilities,
       imageUrls: imageUrls,
       ownerPhotoUrl: ownerProfile?.avatarUrl,

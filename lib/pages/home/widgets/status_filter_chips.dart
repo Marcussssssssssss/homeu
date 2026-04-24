@@ -32,12 +32,14 @@ class HomeUStatusFilterChips<T> extends StatelessWidget {
                   label: Text(labelBuilder(status)),
                   selected: isSelected,
                   onSelected: (_) => onSelected(status),
-                  selectedColor: context.homeuAccent,
+                  selectedColor: const Color(0xFF1E3A8A),
                   labelStyle: TextStyle(
-                    color: isSelected ? Colors.white : context.homeuAccent,
+                    color: isSelected ? Colors.white : const Color(0xFF1E3A8A),
                     fontWeight: FontWeight.w700,
                   ),
-                  side: BorderSide(color: context.homeuSoftBorder),
+                  side: BorderSide(
+                    color: isSelected ? const Color(0xFF1E3A8A) : context.homeuSoftBorder,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
