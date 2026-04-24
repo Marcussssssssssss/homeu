@@ -8,6 +8,7 @@ import 'package:homeu/app/booking/payment_models.dart';
 import 'package:homeu/app/booking/payment_remote_datasource.dart';
 import 'package:homeu/core/supabase/app_supabase.dart';
 import 'package:homeu/pages/home/property_item.dart';
+import 'package:homeu/pages/home/home_tenant_shell_screen.dart';
 
 enum HomeUPaymentMethod { card, banking, ewallet }
 
@@ -61,6 +62,8 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
       return const HomeURoleBlockedScreen(requiredRole: HomeURole.tenant);
     }
 
+    final bool isSuccess = _latestPayment?.status == 'Success';
+
     return Scaffold(
       backgroundColor: context.colors.surface,
       appBar: AppBar(
@@ -73,9 +76,9 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
           height: 52,
           child: ElevatedButton(
             key: const Key('pay_now_button'),
-            onPressed: _isSubmittingPayment ? null : _submitPayment,
+            onPressed: (_isSubmittingPayment || isSuccess) ? null : _submitPayment,
             style: ElevatedButton.styleFrom(
-              backgroundColor: context.homeuAccent,
+              backgroundColor: isSuccess ? Colors.grey : context.homeuAccent,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
@@ -86,7 +89,7 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
                     height: 18,
                     child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                   )
-                : const Text('Pay Now'),
+                : Text(isSuccess ? 'Payment Completed' : 'Pay Now'),
           ),
         ),
       ),
@@ -230,7 +233,7 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
                     if (_latestPayment != null)
                       _summaryRow('Payment Status', _latestPayment!.status),
                     const Divider(height: 18),
-                    _summaryRow('Total Amount', 'RM ${_formatCurrency(widget.totalPrice)}', emphasize: true),
+                    _summaryRow('Booking Fee (1 Month)', 'RM ${_formatCurrency(widget.totalPrice)}', emphasize: true),
                   ],
                 ),
               ),
@@ -372,13 +375,18 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Payment failed. Please try again.')),
         );
+        setState(() {
+          _isSubmittingPayment = false;
+        });
         return;
       }
+
+      final isSuccessful = payment.status == 'Success';
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            payment.status == 'Success'
+            isSuccessful
                 ? 'Payment completed successfully.'
                 : 'Payment failed. Please try again.',
           ),
@@ -386,6 +394,19 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
       );
 
       await _loadLatestPayment();
+
+      if (isSuccessful) {
+        await Future.delayed(const Duration(seconds: 2));
+        if (!mounted) return;
+
+        // Navigate to Home Dashboard (Tenant Shell) and clear stack
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute<void>(
+            builder: (_) => HomeUTenantShellScreen(),
+          ),
+          (route) => false,
+        );
+      }
     } catch (_) {
       if (!mounted) {
         return;

@@ -569,6 +569,15 @@ class _HomeUChatScreenState extends State<HomeUChatScreen> {
           tenantId: userId,
           ownerId: property.ownerId,
         );
+
+        if (conversation != null) {
+          // Inject context message
+          await _chatRemoteDataSource.sendMessage(
+            conversationId: conversation.id,
+            senderId: userId,
+            messageText: 'I am inquiring about: ${property.name}',
+          );
+        }
       }
 
       if (!mounted) {
