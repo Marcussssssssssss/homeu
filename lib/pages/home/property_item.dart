@@ -13,6 +13,7 @@ class PropertyItem {
     required this.ownerName,
     required this.ownerRole,
     required this.photoColors,
+    this.status = 'Active',
     this.propertyType = 'Any',
     this.roomType = 'Any',
     this.furnishing = 'Any',
@@ -34,6 +35,7 @@ class PropertyItem {
   final String ownerName;
   final String ownerRole;
   final List<Color> photoColors;
+  final String status;
   final String propertyType;
   final String roomType;
   final String furnishing;

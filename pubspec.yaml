@@ -44,6 +44,7 @@ dependencies:
   timezone: ^0.11.0
   image_picker: ^1.2.1
   flutter_secure_storage: ^10.0.0
+  local_auth: ^2.3.0
   flutter_map: ^8.3.0
   latlong2: ^0.9.0
   connectivity_plus: ^7.1.1
@@ -91,7 +92,7 @@ flutter:
   # example:
   # fonts:
   #   - family: Schyler
-  #     fonts:
+  #       fonts:
   #       - asset: fonts/Schyler-Regular.ttf
   #       - asset: fonts/Schyler-Italic.ttf
   #         style: italic

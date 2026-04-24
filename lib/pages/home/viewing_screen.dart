@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
 import 'package:homeu/core/theme/homeu_app_theme.dart';
+import 'package:homeu/app/viewing/viewing_local_datasource.dart';
 import 'package:homeu/app/viewing/viewing_models.dart';
 import 'package:homeu/app/viewing/viewing_remote_datasource.dart';
 import 'package:homeu/core/supabase/app_supabase.dart';
 import 'package:homeu/pages/home/property_item.dart';
+import 'package:uuid/uuid.dart';
 
 class HomeUViewingScreen extends StatefulWidget {
   const HomeUViewingScreen({super.key, required this.property});
@@ -18,9 +21,61 @@ class HomeUViewingScreen extends StatefulWidget {
 
 class _HomeUViewingScreenState extends State<HomeUViewingScreen> {
   final ViewingRemoteDataSource _viewingRemoteDataSource = const ViewingRemoteDataSource();
-  DateTime _selectedDate = DateTime.now().add(const Duration(days: 1));
-  TimeOfDay _selectedTime = const TimeOfDay(hour: 10, minute: 0);
+  
+  bool _isLoading = true;
   bool _isSubmitting = false;
+  List<Map<String, dynamic>> _availableSlots = [];
+  Map<String, dynamic>? _selectedSlot;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchAvailableSlots();
+  }
+
+  Future<void> _fetchAvailableSlots() async {
+    setState(() => _isLoading = true);
+    try {
+      // 1. Fetch available slots from owner_availabilities
+      final slotsResponse = await AppSupabase.client
+          .from('owner_availabilities')
+          .select()
+          .eq('property_id', widget.property.id)
+          .eq('status', 'Available')
+          .gte('start_time', DateTime.now().toUtc().toIso8601String());
+
+      final List<Map<String, dynamic>> slots = List<Map<String, dynamic>>.from(slotsResponse);
+
+      // 2. Cross-reference with existing approved viewings for buffer enforcement
+      final approvedViewingsResponse = await AppSupabase.client
+          .from('viewing_requests')
+          .select('scheduled_at')
+          .eq('property_id', widget.property.id)
+          .eq('status', 'Approved');
+      
+      final List<DateTime> approvedTimes = (approvedViewingsResponse as List)
+          .map((v) => DateTime.parse(v['scheduled_at'] as String).toLocal())
+          .toList();
+
+      // 3. Filter slots: Remove those within 30-min buffer of an approved viewing
+      final filteredSlots = slots.where((slot) {
+        final slotTime = DateTime.parse(slot['start_time'] as String).toLocal();
+        for (final approvedTime in approvedTimes) {
+          final difference = slotTime.difference(approvedTime).inMinutes.abs();
+          if (difference < 30) return false;
+        }
+        return true;
+      }).toList();
+
+      setState(() {
+        _availableSlots = filteredSlots;
+        _isLoading = false;
+      });
+    } catch (e) {
+      debugPrint('Error fetching slots: $e');
+      setState(() => _isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,378 +84,214 @@ class _HomeUViewingScreenState extends State<HomeUViewingScreen> {
     }
 
     return Scaffold(
-      backgroundColor: context.colors.surface,
+      backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title: const Text('Schedule Viewing'),
-        backgroundColor: context.colors.surface,
+        title: const Text('Schedule Viewing', style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: Colors.white,
         elevation: 0,
+        foregroundColor: const Color(0xFF0F172A),
       ),
-      bottomNavigationBar: SafeArea(
-        minimum: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+      bottomNavigationBar: _buildBottomBar(),
+      body: _isLoading 
+          ? const Center(child: CircularProgressIndicator())
+          : _availableSlots.isEmpty 
+              ? _buildNoSlotsState()
+              : _buildSlotList(),
+    );
+  }
+
+  Widget _buildSlotList() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildPropertyPreview(),
+          const SizedBox(height: 24),
+          const Text(
+            'Select an Available Slot',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Owners only display slots they are available for. Select one to proceed.',
+            style: TextStyle(fontSize: 13, color: Color(0xFF64748B)),
+          ),
+          const SizedBox(height: 16),
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: _availableSlots.length,
+            itemBuilder: (context, index) {
+              final slot = _availableSlots[index];
+              final startTime = DateTime.parse(slot['start_time'] as String).toLocal();
+              final isSelected = _selectedSlot == slot;
+
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: InkWell(
+                  onTap: () => setState(() => _selectedSlot = slot),
+                  borderRadius: BorderRadius.circular(16),
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: isSelected ? const Color(0xFFEFF6FF) : Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: isSelected ? const Color(0xFF3B82F6) : const Color(0xFFE2E8F0),
+                        width: isSelected ? 2 : 1,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: isSelected ? const Color(0xFF3B82F6) : const Color(0xFFF1F5F9),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.calendar_today_rounded,
+                            size: 18,
+                            color: isSelected ? Colors.white : const Color(0xFF64748B),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              DateFormat('EEEE, MMM d').format(startTime),
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                            ),
+                            Text(
+                              DateFormat('hh:mm a').format(startTime),
+                              style: const TextStyle(color: Color(0xFF64748B), fontSize: 13),
+                            ),
+                          ],
+                        ),
+                        const Spacer(),
+                        if (isSelected)
+                          const Icon(Icons.check_circle, color: Color(0xFF3B82F6)),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPropertyPreview() {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: Row(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: widget.property.imageUrls.isNotEmpty 
+              ? Image.network(widget.property.imageUrls[0], width: 60, height: 60, fit: BoxFit.cover)
+              : Container(width: 60, height: 60, color: const Color(0xFFF1F5F9)),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(widget.property.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text(widget.property.location, style: const TextStyle(fontSize: 12, color: Color(0xFF64748B))),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNoSlotsState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.event_busy_rounded, size: 64, color: Color(0xFFCBD5E1)),
+            const SizedBox(height: 16),
+            const Text(
+              'No Available Slots',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'The owner has not listed any availability for this property yet. Please check back later or contact the owner.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Color(0xFF64748B)),
+            ),
+            const SizedBox(height: 24),
+            TextButton(onPressed: () => Navigator.pop(context), child: const Text('Go Back')),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBottomBar() {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
         child: SizedBox(
           height: 52,
           child: ElevatedButton(
-            key: const Key('confirm_viewing_button'),
-            onPressed: _isSubmitting ? null : _confirmViewing,
+            onPressed: (_isSubmitting || _selectedSlot == null) ? null : _confirmViewing,
             style: ElevatedButton.styleFrom(
-              backgroundColor: context.homeuAccent,
+              backgroundColor: const Color(0xFF1E3A8A),
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+              disabledBackgroundColor: const Color(0xFFE2E8F0),
             ),
             child: _isSubmitting
-                ? const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                  )
-                : const Text('Confirm Viewing'),
-          ),
-        ),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 18),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Selected Property',
-                style: TextStyle(
-                  color: context.homeuPrimaryText,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: context.homeuCard,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: context.homeuCardShadow,
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 72,
-                      height: 64,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            widget.property.photoColors.first,
-                            context.isDarkMode ? const Color(0xFF1E2D44) : const Color(0xFFEAF2FF),
-                          ],
-                        ),
-                      ),
-                      child: const Icon(
-                        Icons.apartment_rounded,
-                        color: Colors.white,
-                        size: 34,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            widget.property.name,
-                            style: TextStyle(
-                              color: context.homeuPrimaryText,
-                              fontSize: 15,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            widget.property.location,
-                            style: TextStyle(
-                              color: context.homeuMutedText,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 18),
-              Text(
-                'Viewing Date',
-                style: TextStyle(
-                  color: context.homeuPrimaryText,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 10),
-              InkWell(
-                borderRadius: BorderRadius.circular(16),
-                onTap: _pickDate,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                  decoration: BoxDecoration(
-                    color: context.homeuCard,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: context.homeuSoftBorder),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.calendar_month_rounded, color: context.homeuAccent),
-                      const SizedBox(width: 8),
-                      Text(
-                        _formatDate(_selectedDate),
-                        style: TextStyle(
-                          color: context.homeuPrimaryText,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Viewing Time',
-                style: TextStyle(
-                  color: context.homeuPrimaryText,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              const SizedBox(height: 10),
-              InkWell(
-                borderRadius: BorderRadius.circular(16),
-                onTap: _pickTime,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                  decoration: BoxDecoration(
-                    color: context.homeuCard,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: context.homeuSoftBorder),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.schedule_rounded, color: context.homeuAccent),
-                      const SizedBox(width: 8),
-                      Text(
-                        _selectedTime.format(context),
-                        style: TextStyle(
-                          color: context.homeuPrimaryText,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: context.homeuCard,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: context.homeuCardShadow,
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    Text(
-                      'Scheduled For',
-                      style: TextStyle(
-                        color: context.homeuPrimaryText,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const Spacer(),
-                    Text(
-                      _formatDateTime(_combinedScheduledAt()),
-                      style: TextStyle(
-                        color: context.homeuAccent,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+                ? const CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
+                : const Text('Confirm Request', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
           ),
         ),
       ),
     );
-  }
-
-  Future<void> _pickDate() async {
-    final pickedDate = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate,
-      firstDate: DateTime.now(),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
-    );
-
-    if (pickedDate == null) {
-      return;
-    }
-
-    setState(() {
-      _selectedDate = pickedDate;
-    });
-  }
-
-  Future<void> _pickTime() async {
-    final pickedTime = await showTimePicker(context: context, initialTime: _selectedTime);
-    if (pickedTime == null) {
-      return;
-    }
-
-    setState(() {
-      _selectedTime = pickedTime;
-    });
   }
 
   Future<void> _confirmViewing() async {
-    if (!AppSupabase.isInitialized) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Supabase is not initialized. Please try again later.')),
-      );
-      return;
-    }
-
-    final tenantId = AppSupabase.auth.currentUser?.id;
-    if (tenantId == null || tenantId.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please log in to schedule viewing.')),
-      );
-      return;
-    }
-
-    if (!_isUuid(widget.property.id) || !_isUuid(widget.property.ownerId)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Demo property cannot schedule viewing')),
-      );
-      return;
-    }
-
     setState(() => _isSubmitting = true);
-
     try {
-      final hasActive = await _viewingRemoteDataSource.hasActiveViewingForProperty(
-        tenantId: tenantId,
-        propertyId: widget.property.id,
-      );
+      final tenantId = AppSupabase.auth.currentUser?.id;
+      final startTime = DateTime.parse(_selectedSlot!['start_time'] as String);
 
-      if (hasActive) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('You already have a viewing request for this property.')),
-        );
-        return;
-      }
-
-      final now = DateTime.now().toUtc();
       final request = ViewingRequest(
-        id: '',
+        id: const Uuid().v4(),
         propertyId: widget.property.id,
         ownerId: widget.property.ownerId,
-        tenantId: tenantId,
-        scheduledAt: _combinedScheduledAt(), // local time picked by user
+        tenantId: tenantId!,
+        scheduledAt: startTime,
         status: 'Pending',
-        rescheduleTo: null,
-        rescheduleReason: null,
-        createdAt: now,
-        updatedAt: now,
+        createdAt: DateTime.now().toUtc(),
+        updatedAt: DateTime.now().toUtc(),
       );
 
-      final created = await _viewingRemoteDataSource.createViewingRequest(request);
-      if (!mounted) return;
-
-      if (created == null || created.id.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Unable to submit viewing request. Please try again.')),
-        );
-        return;
-      }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Viewing request submitted')),
-      );
-      Navigator.of(context).pop(true);
-    } catch (e) {
-      debugPrint('Failed to submit viewing request: $e');
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to submit viewing request.')),
-      );
-    } finally {
+      await _viewingRemoteDataSource.createViewingRequest(request);
       if (mounted) {
-        setState(() => _isSubmitting = false);
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Request Sent!')));
+        Navigator.pop(context, true);
       }
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
     }
   }
-
-  DateTime _combinedScheduledAt() {
-    return DateTime(
-      _selectedDate.year,
-      _selectedDate.month,
-      _selectedDate.day,
-      _selectedTime.hour,
-      _selectedTime.minute,
-    );
-  }
-
-  bool _isUuid(String value) {
-    final exp = RegExp(
-        r'^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$'
-    );
-    return exp.hasMatch(value);
-  }
-
-  String _formatDate(DateTime date) {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-
-    return '${date.day} ${months[date.month - 1]} ${date.year}';
-  }
-
-  String _formatDateTime(DateTime date) {
-    final hour = date.hour % 12 == 0 ? 12 : date.hour % 12;
-    final minute = date.minute.toString().padLeft(2, '0');
-    final period = date.hour >= 12 ? 'PM' : 'AM';
-    return '${_formatDate(date)}, $hour:$minute $period';
-  }
 }
-
