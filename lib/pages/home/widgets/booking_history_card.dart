@@ -13,7 +13,9 @@ class BookingHistoryCard extends StatelessWidget {
     required this.imageUrls,
     required this.status,
     this.isPast = false,
+    this.propertyStatus,
     this.onTap,
+    this.onPaymentScheduleTap,
   });
 
   final String hotelName;
@@ -25,12 +27,18 @@ class BookingHistoryCard extends StatelessWidget {
   final List<String> imageUrls;
   final String status;
   final bool isPast;
+  final String? propertyStatus;
   final VoidCallback? onTap;
+  final VoidCallback? onPaymentScheduleTap;
 
   @override
   Widget build(BuildContext context) {
     const purpleAccent = Color(0xFF6366F1); // Muted purple-blue
     const grayBorder = Color(0xFFF1F5F9); // Light gray-100/200
+
+    final isPropertyRented = propertyStatus?.toLowerCase() == 'rented';
+    final isPendingOrApproved = status.toLowerCase() == 'pending' || status.toLowerCase() == 'approved';
+    final showRentedKillSwitch = isPropertyRented && isPendingOrApproved;
 
     Widget cardContent = Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -81,17 +89,18 @@ class BookingHistoryCard extends StatelessWidget {
               top: 0,
               right: 0,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF10B981), // Premium Green badge
+                  color: showRentedKillSwitch ? const Color(0xFF94A3B8) : _getStatusColor(status),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  status.toUpperCase(),
+                  (showRentedKillSwitch ? 'Cancelled' : status).toUpperCase(),
                   style: const TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
                     color: Colors.white,
+                    letterSpacing: 0.5,
                   ),
                 ),
               ),
@@ -100,6 +109,24 @@ class BookingHistoryCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status.trim().toLowerCase()) {
+      case 'approved':
+        return const Color(0xFF10B981); // Green (Matches Viewing)
+      case 'pending':
+        return const Color(0xFF3B82F6); // Blue
+      case 'rejected':
+        return const Color(0xFFEF4444); // Red (Matches Viewing)
+      case 'cancelled':
+      case 'canceled':
+        return const Color(0xFF94A3B8); // Muted Gray
+      case 'completed':
+        return const Color(0xFF6366F1); // Indigo (Matches Viewing)
+      default:
+        return const Color(0xFF1E3A8A);
+    }
   }
 
   Widget _buildImageSection() {
@@ -141,7 +168,7 @@ class BookingHistoryCard extends StatelessWidget {
 
   Widget _buildInfoSection(BuildContext context, Color purpleAccent) {
     final dateFormat = DateFormat('MMM d');
-    final dayFormat = DateFormat('EEEE');
+    final dayFormat = DateFormat('E'); // Short day name (e.g., Wed) to save horizontal space
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -189,15 +216,46 @@ class BookingHistoryCard extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 20),
+        if (onPaymentScheduleTap != null && !isPast && (status.toLowerCase() == 'approved' || status.toLowerCase() == 'paid'))
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: GestureDetector(
+              onTap: onPaymentScheduleTap,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: purpleAccent.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: purpleAccent.withOpacity(0.2)),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.receipt_long_outlined, size: 14, color: purpleAccent),
+                    const SizedBox(width: 6),
+                    Text(
+                      'VIEW PAYMENT SCHEDULE',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        color: purpleAccent,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        const SizedBox(height: 16),
         // Booking Stats Row
         Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             _buildDateColumn('Move-in', checkInDate, dateFormat, dayFormat, purpleAccent),
-            const SizedBox(width: 14),
+            const SizedBox(width: 8),
             _buildDateColumn('Move-out', checkOutDate, dateFormat, dayFormat, purpleAccent),
-            const Spacer(),
+            const Expanded(child: SizedBox.shrink()),
             // Pricing (Booking Fee)
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -206,12 +264,19 @@ class BookingHistoryCard extends StatelessWidget {
                   'Booking Fee',
                   style: TextStyle(fontSize: 10, color: Color(0xFF64748B), fontWeight: FontWeight.w500),
                 ),
-                Text(
-                  'RM ${totalPrice.toStringAsFixed(0)}',
-                  style: const TextStyle(
-                    fontSize: 24, // Larger price
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF0F172A),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 100),
+                  child: FittedBox(
+                    alignment: Alignment.centerRight,
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      'RM ${totalPrice.toStringAsFixed(0)}',
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF0F172A),
+                      ),
+                    ),
                   ),
                 ),
               ],

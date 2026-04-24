@@ -10,6 +10,8 @@ class Payment {
     required this.createdAt,
     required this.updatedAt,
     required this.transactionReference,
+    this.paymentScheduleId,
+    this.monthNumber,
   });
 
   final String id;
@@ -22,6 +24,8 @@ class Payment {
   final DateTime createdAt;
   final DateTime updatedAt;
   final String transactionReference;
+  final String? paymentScheduleId;
+  final int? monthNumber;
 
   factory Payment.fromJson(Map<String, dynamic> json) {
     return Payment(
@@ -41,6 +45,9 @@ class Payment {
       transactionReference: json['transaction_reference']?.toString() ??
           json['transactionReference']?.toString() ??
           '',
+      paymentScheduleId: json['payment_schedule_id']?.toString() ??
+          json['paymentScheduleId']?.toString(),
+      monthNumber: (json['month_number'] as num?)?.toInt(),
     );
   }
 
@@ -56,6 +63,8 @@ class Payment {
       'created_at': createdAt.toUtc().toIso8601String(),
       'updated_at': updatedAt.toUtc().toIso8601String(),
       'transaction_reference': transactionReference,
+      'payment_schedule_id': paymentScheduleId,
+      'month_number': monthNumber,
     };
   }
 
