@@ -11,6 +11,7 @@ class HomeUProfileLocalDataSource {
   static const _dbVersion = 1;
   static const _profileTable = 'cached_profiles';
   static const _preferenceTable = 'cached_user_preferences';
+  static const _globalSettingsTable = 'app_global_settings';
 
   Database? _database;
 
@@ -42,6 +43,13 @@ class HomeUProfileLocalDataSource {
             user_id TEXT PRIMARY KEY,
             raw_json TEXT NOT NULL,
             updated_at INTEGER NOT NULL
+          )
+        ''');
+
+        await db.execute('''
+          CREATE TABLE $_globalSettingsTable(
+            key TEXT PRIMARY KEY,
+            value TEXT NOT NULL
           )
         ''');
       },
@@ -116,9 +124,42 @@ class HomeUProfileLocalDataSource {
     );
   }
 
+  Future<String?> getGlobalSetting(String key) async {
+    final db = await database;
+    final rows = await db.query(
+      _globalSettingsTable,
+      where: 'key = ?',
+      whereArgs: [key],
+      limit: 1,
+    );
+
+    if (rows.isEmpty) {
+      return null;
+    }
+
+    return rows.first['value']?.toString();
+  }
+
+  Future<void> saveGlobalSetting(String key, String value) async {
+    final db = await database;
+    await db.insert(
+      _globalSettingsTable,
+      {'key': key, 'value': value},
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<void> clearAuthData() async {
+    final db = await database;
+    await db.delete(_profileTable);
+    await db.delete(_preferenceTable);
+    // Note: $_globalSettingsTable is NOT cleared to preserve theme/language
+  }
+
   Future<void> clearAll() async {
     final db = await database;
     await db.delete(_profileTable);
     await db.delete(_preferenceTable);
+    await db.delete(_globalSettingsTable);
   }
 }

@@ -260,8 +260,8 @@ class _HomeUProfileScreenState extends State<HomeUProfileScreen> {
         return t.themeLight;
       case ThemeMode.dark:
         return t.themeDark;
-      case ThemeMode.system:
-        return t.themeSystem;
+      default:
+        return t.themeLight;
     }
   }
 
@@ -272,7 +272,7 @@ class _HomeUProfileScreenState extends State<HomeUProfileScreen> {
       showDragHandle: true,
       backgroundColor: context.homeuCard,
       builder: (sheetContext) {
-        final options = [ThemeMode.system, ThemeMode.light, ThemeMode.dark];
+        final options = [ThemeMode.light, ThemeMode.dark];
         return SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -433,7 +433,7 @@ class _HomeUProfileScreenState extends State<HomeUProfileScreen> {
     }
 
     HomeUSession.logout();
-    await HomeUProfileLocalDataSource().clearAll();
+    await HomeUProfileLocalDataSource().clearAuthData();
 
     if (!mounted) {
       return;
@@ -453,7 +453,7 @@ class _HomeUProfileScreenState extends State<HomeUProfileScreen> {
       return HomeURoleBlockedScreen(requiredRole: widget.role);
     }
     return AnimatedBuilder(
-      animation: _profileController,
+      animation: Listenable.merge([_profileController, HomeUThemeController.instance]),
       builder: (context, _) {
         final t = context.l10n;
         final profile = _profileController.profile;
