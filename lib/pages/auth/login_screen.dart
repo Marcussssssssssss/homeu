@@ -3,6 +3,8 @@ import 'package:homeu/app/auth/login/login_controller.dart';
 import 'package:homeu/app/auth/login/login_models.dart';
 import 'package:homeu/app/auth/login/login_repository.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
+import 'package:homeu/app/auth/homeu_auth_service.dart';
+import 'package:homeu/app/auth/biometric_auth_service.dart';
 import 'package:homeu/core/localization/homeu_l10n.dart';
 import 'package:homeu/core/theme/homeu_app_theme.dart';
 import 'package:homeu/pages/home/home_tenant_shell_screen.dart';
@@ -25,6 +27,8 @@ class _HomeULoginScreenState extends State<HomeULoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
+  HomeURememberedUser? _rememberedUser;
+  bool _isBiometricAvailable = false;
 
   late final LoginController _loginController;
 
@@ -32,6 +36,31 @@ class _HomeULoginScreenState extends State<HomeULoginScreen> {
   void initState() {
     super.initState();
     _loginController = widget.loginController ?? LoginController();
+    _checkBiometricStatus();
+  }
+
+  Future<void> _checkBiometricStatus() async {
+    final authService = HomeUAuthService.instance;
+    final biometricService = BiometricAuthService.instance;
+
+    final user = await biometricService.getRememberedUser();
+    final hasSession = authService.hasActiveSession;
+    final currentUserId = authService.currentUserId;
+
+    // Show biometric quick login only if:
+    // 1. Biometric is enabled and a user is remembered locally
+    // 2. Hardware supports it
+    // 3. A valid Supabase session exists to unlock
+    // 4. The current session user matches the remembered user
+    if (user != null && hasSession && currentUserId == user.userId) {
+      final isSupported = await biometricService.isDeviceSupported();
+      if (isSupported && mounted) {
+        setState(() {
+          _rememberedUser = user;
+          _isBiometricAvailable = true;
+        });
+      }
+    }
   }
 
   @override
@@ -39,6 +68,49 @@ class _HomeULoginScreenState extends State<HomeULoginScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  void _navigateToHome(HomeURole role) {
+    HomeUSession.register(role);
+    final Widget destination = role == HomeURole.owner
+        ? const HomeUOwnerShellScreen()
+        : const HomeUTenantShellScreen();
+
+    Navigator.of(
+      context,
+    ).pushReplacement(MaterialPageRoute<void>(builder: (_) => destination));
+  }
+
+  Future<void> _handleBiometricLogin() async {
+    if (_isLoading) return;
+
+    final success = await BiometricAuthService.instance.authenticateWithBiometrics(
+      localizedReason: 'Authenticate to access HomeU',
+    );
+
+    if (success && mounted) {
+      if (HomeUAuthService.instance.hasActiveSession) {
+        final role = await HomeUAuthService.instance.fetchCurrentUserRole();
+        if (role != null) {
+          // Unlock the app locally
+          await BiometricAuthService.instance.setAppLocked(false);
+          _navigateToHome(role);
+          return;
+        }
+      }
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Session expired. Please login with email and password.')),
+      );
+      setState(() {
+        _isBiometricAvailable = false;
+        _rememberedUser = null;
+      });
+    } else if (!success && mounted) {
+       ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Biometric authentication failed or cancelled.')),
+      );
+    }
   }
 
   Future<void> _handleLogin() async {
@@ -76,15 +148,9 @@ class _HomeULoginScreenState extends State<HomeULoginScreen> {
       return;
     }
 
-    HomeUSession.register(result.role!);
-
-    final Widget destination = result.role == HomeURole.owner
-        ? const HomeUOwnerShellScreen()
-        : const HomeUTenantShellScreen();
-
-    Navigator.of(
-      context,
-    ).pushReplacement(MaterialPageRoute<void>(builder: (_) => destination));
+    // Success normal login: ensure app is not locked locally
+    await BiometricAuthService.instance.setAppLocked(false);
+    _navigateToHome(result.role!);
   }
 
   String _resolveLoginMessage(String message) {
@@ -194,6 +260,31 @@ class _HomeULoginScreenState extends State<HomeULoginScreen> {
                         ),
                       ),
                       const SizedBox(height: 28),
+                      if (_isBiometricAvailable && _rememberedUser != null) ...[
+                        _QuickLoginCard(
+                          name: _rememberedUser!.displayName,
+                          onPressed: _handleBiometricLogin,
+                        ),
+                        const SizedBox(height: 24),
+                        Row(
+                          children: [
+                            Expanded(child: Divider(color: context.homeuSoftBorder)),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              child: Text(
+                                'OR',
+                                style: TextStyle(
+                                  color: context.homeuMutedText,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            Expanded(child: Divider(color: context.homeuSoftBorder)),
+                          ],
+                        ),
+                        const SizedBox(height: 24),
+                      ],
                       _LabeledInput(
                         label: t.profileFieldEmail,
                         hintText: t.authEmailHint,
@@ -303,6 +394,62 @@ class _HomeULoginScreenState extends State<HomeULoginScreen> {
             );
           },
         ),
+      ),
+    );
+  }
+}
+
+class _QuickLoginCard extends StatelessWidget {
+  const _QuickLoginCard({required this.name, required this.onPressed});
+
+  final String name;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: context.homeuCard,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: context.homeuSoftBorder),
+        boxShadow: [
+          BoxShadow(
+            color: context.homeuAccent.withValues(alpha: 0.08),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Text(
+            'Continue as $name',
+            style: TextStyle(
+              color: context.homeuPrimaryText,
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: ElevatedButton.icon(
+              onPressed: onPressed,
+              icon: const Icon(Icons.fingerprint_rounded),
+              label: const Text('Use Biometrics'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: context.homeuAccent,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 0,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -7,6 +7,7 @@ class HomeUProfileController extends ChangeNotifier {
   static const String errorUpdateProfile = 'profile.error.update';
   static const String errorUploadAvatar = 'profile.error.upload_avatar';
   static const String errorSaveLanguage = 'profile.error.save_language';
+  static const String errorSaveBiometric = 'profile.error.save_biometric';
 
   HomeUProfileController({
     required HomeUProfileData initialProfile,
@@ -19,6 +20,7 @@ class HomeUProfileController extends ChangeNotifier {
   HomeUProfileData _profile;
   Map<String, dynamic>? _preferences;
   String _selectedLanguageCode = 'en';
+  bool _isBiometricLoginEnabled = false;
   bool _isLoading = false;
   bool _isSaving = false;
   String? _errorMessage;
@@ -27,6 +29,7 @@ class HomeUProfileController extends ChangeNotifier {
   HomeUProfileData get profile => _profile;
   Map<String, dynamic>? get preferences => _preferences;
   String get selectedLanguageCode => _selectedLanguageCode;
+  bool get isBiometricLoginEnabled => _isBiometricLoginEnabled;
   bool get isLoading => _isLoading;
   bool get isSaving => _isSaving;
   String? get errorMessage => _errorMessage;
@@ -49,6 +52,7 @@ class HomeUProfileController extends ChangeNotifier {
       if (cachedPreferences != null) {
         _preferences = cachedPreferences;
         _selectedLanguageCode = _extractLanguageCode(cachedPreferences);
+        _isBiometricLoginEnabled = _repository.readBiometricEnabled(cachedPreferences);
       }
 
       _safeNotifyListeners();
@@ -61,6 +65,7 @@ class HomeUProfileController extends ChangeNotifier {
       if (latestPreferences != null) {
         _preferences = latestPreferences;
         _selectedLanguageCode = _extractLanguageCode(latestPreferences);
+        _isBiometricLoginEnabled = _repository.readBiometricEnabled(latestPreferences);
       }
     } catch (_) {
       _errorMessage = errorRefreshProfile;
@@ -144,6 +149,29 @@ class HomeUProfileController extends ChangeNotifier {
       return true;
     } catch (_) {
       _errorMessage = errorSaveLanguage;
+      return false;
+    } finally {
+      _isSaving = false;
+      _safeNotifyListeners();
+    }
+  }
+
+  Future<bool> updateBiometricPreference(bool enabled) async {
+    if (_isSaving) {
+      return false;
+    }
+
+    _isSaving = true;
+    _errorMessage = null;
+    _safeNotifyListeners();
+
+    try {
+      final saved = await _repository.saveBiometricEnabled(enabled);
+      _preferences = saved;
+      _isBiometricLoginEnabled = _repository.readBiometricEnabled(saved);
+      return true;
+    } catch (_) {
+      _errorMessage = errorSaveBiometric;
       return false;
     } finally {
       _isSaving = false;

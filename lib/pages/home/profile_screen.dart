@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:homeu/app/auth/homeu_auth_service.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
+import 'package:homeu/app/auth/biometric_auth_service.dart';
 import 'package:homeu/app/profile/profile_controller.dart';
 import 'package:homeu/app/profile/profile_models.dart';
 import 'package:homeu/app/profile/profile_local_datasource.dart';
@@ -36,6 +37,7 @@ class _HomeUProfileScreenState extends State<HomeUProfileScreen> {
   final ImagePicker _imagePicker = ImagePicker();
   String? _localAvatarPath;
   int _avatarCacheBuster = DateTime.now().millisecondsSinceEpoch;
+  bool _isBiometricSupported = false;
 
   @override
   void initState() {
@@ -54,6 +56,16 @@ class _HomeUProfileScreenState extends State<HomeUProfileScreen> {
         widget.profileController ??
         HomeUProfileController(initialProfile: initialProfile);
     _profileController.loadProfile();
+    _checkBiometricSupport();
+  }
+
+  Future<void> _checkBiometricSupport() async {
+    final supported = await BiometricAuthService.instance.isDeviceSupported();
+    if (mounted) {
+      setState(() {
+        _isBiometricSupported = supported;
+      });
+    }
   }
 
   @override
@@ -62,6 +74,42 @@ class _HomeUProfileScreenState extends State<HomeUProfileScreen> {
       _profileController.dispose();
     }
     super.dispose();
+  }
+
+  Future<void> _toggleBiometric(bool value) async {
+    if (value) {
+      final canAuth = await BiometricAuthService.instance.canAuthenticate();
+      if (!canAuth) {
+        _showProfileFeedback('Biometric authentication is not available or not set up on this device.');
+        return;
+      }
+
+      final authenticated = await BiometricAuthService.instance.authenticateWithBiometrics(
+        localizedReason: 'Please authenticate to enable biometric login',
+      );
+
+      if (authenticated) {
+        final success = await _profileController.updateBiometricPreference(true);
+        if (success) {
+          await BiometricAuthService.instance.enableForUser(
+            userId: _profileController.profile.userId,
+            displayName: _profileController.profile.fullName.isNotEmpty
+                ? _profileController.profile.fullName
+                : _profileController.profile.email.split('@').first,
+            email: _profileController.profile.email,
+          );
+          _showProfileFeedback('Biometric login enabled successfully.');
+        } else {
+          _showProfileFeedback('Failed to update biometric preference.');
+        }
+      }
+    } else {
+      final success = await _profileController.updateBiometricPreference(false);
+      if (success) {
+        await BiometricAuthService.instance.disableAndForgetUser();
+        _showProfileFeedback('Biometric login disabled.');
+      }
+    }
   }
 
   Future<void> _openEditProfileSheet(HomeUProfileData profile) async {
@@ -211,13 +259,11 @@ class _HomeUProfileScreenState extends State<HomeUProfileScreen> {
       }
 
       if (uploaded) {
-        // Force the old avatar key out of the in-memory cache before rendering.
         if (previousRemoteAvatarUrl != null && previousRemoteAvatarUrl.isNotEmpty) {
           await NetworkImage(previousRemoteAvatarUrl).evict();
         }
 
         setState(() {
-          // Persisted URL from Supabase profile now becomes the source of truth.
           _localAvatarPath = null;
           _avatarCacheBuster = DateTime.now().millisecondsSinceEpoch;
         });
@@ -368,6 +414,8 @@ class _HomeUProfileScreenState extends State<HomeUProfileScreen> {
         return context.l10n.profileErrorUpload;
       case HomeUProfileController.errorSaveLanguage:
         return context.l10n.profileErrorLanguageSave;
+      case HomeUProfileController.errorSaveBiometric:
+        return 'Failed to save biometric preference';
       default:
         return context.l10n.profileErrorUpdate;
     }
@@ -426,10 +474,14 @@ class _HomeUProfileScreenState extends State<HomeUProfileScreen> {
   }
 
   Future<void> _handleLogout() async {
-    try {
-      await HomeUAuthService.instance.signOut();
-    } catch (_) {
-      // Keep logout resilient even if remote sign-out fails.
+    // If biometric is enabled, we just "lock" the app locally and return to Login screen.
+    // We do NOT call Supabase signOut() to keep the session valid for biometric re-entry.
+    if (_profileController.isBiometricLoginEnabled) {
+      await BiometricAuthService.instance.setAppLocked(true);
+    } else {
+      try {
+        await HomeUAuthService.instance.signOut();
+      } catch (_) {}
     }
 
     HomeUSession.logout();
@@ -554,7 +606,7 @@ class _HomeUProfileScreenState extends State<HomeUProfileScreen> {
                                 alpha: 0.14,
                               ),
                               blurRadius: 12,
-                              offset: Offset(0, 4),
+                              offset: const Offset(0, 4),
                             ),
                           ],
                         ),
@@ -599,6 +651,22 @@ class _HomeUProfileScreenState extends State<HomeUProfileScreen> {
                                   ? null
                                   : _openLanguageSheet,
                             ),
+                            if (_isBiometricSupported) ...[
+                              Divider(
+                                height: 1,
+                                color: context.homeuSectionDivider,
+                              ),
+                              _ProfileActionTile(
+                                icon: Icons.fingerprint_rounded,
+                                title: 'Biometric Login',
+                                subtitle: 'Unlock HomeU with biometrics',
+                                trailing: Switch(
+                                  value: _profileController.isBiometricLoginEnabled,
+                                  onChanged: (_profileController.isSaving || _profileController.isLoading) ? null : _toggleBiometric,
+                                  activeColor: context.homeuAccent,
+                                ),
+                              ),
+                            ],
                             Divider(
                               height: 1,
                               color: context.homeuSectionDivider,
@@ -731,7 +799,7 @@ class _ProfileHeaderCard extends StatelessWidget {
           BoxShadow(
             color: context.homeuAccent.withValues(alpha: 0.14),
             blurRadius: 12,
-            offset: Offset(0, 4),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -854,7 +922,7 @@ class _ProfileDetailsCard extends StatelessWidget {
           BoxShadow(
             color: context.homeuAccent.withValues(alpha: 0.14),
             blurRadius: 12,
-            offset: Offset(0, 4),
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -958,6 +1026,7 @@ class _ProfileActionTile extends StatelessWidget {
     required this.title,
     required this.subtitle,
     this.trailingText,
+    this.trailing,
     this.onTap,
   });
 
@@ -965,6 +1034,7 @@ class _ProfileActionTile extends StatelessWidget {
   final String title;
   final String subtitle;
   final String? trailingText;
+  final Widget? trailing;
   final VoidCallback? onTap;
 
   @override
@@ -1007,18 +1077,22 @@ class _ProfileActionTile extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            if (trailingText != null) ...[
-              Text(
-                trailingText!,
-                style: TextStyle(
-                  color: context.homeuSecondaryText,
-                  fontSize: 12.8,
-                  fontWeight: FontWeight.w600,
+            if (trailing != null)
+              trailing!
+            else ...[
+              if (trailingText != null) ...[
+                Text(
+                  trailingText!,
+                  style: TextStyle(
+                    color: context.homeuSecondaryText,
+                    fontSize: 12.8,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 6),
+                const SizedBox(width: 6),
+              ],
+              Icon(Icons.chevron_right_rounded, color: context.homeuAccent),
             ],
-            Icon(Icons.chevron_right_rounded, color: context.homeuAccent),
           ],
         ),
       ),
@@ -1073,7 +1147,7 @@ class _EditProfileSheetState extends State<_EditProfileSheet> {
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 18),
         decoration: BoxDecoration(
           color: context.homeuCard,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+          borderRadius: BorderRadius.vertical(top: const Radius.circular(22)),
         ),
         child: SafeArea(
           top: false,

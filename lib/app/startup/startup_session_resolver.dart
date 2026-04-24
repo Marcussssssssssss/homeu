@@ -1,5 +1,6 @@
 import 'package:homeu/app/auth/homeu_auth_service.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
+import 'package:homeu/app/auth/biometric_auth_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 enum HomeUStartupDestination {
@@ -22,7 +23,15 @@ class HomeUStartupSessionResolver {
   final Future<HomeURole?> Function()? _fetchCurrentUserRole;
 
   Future<HomeUStartupDestination> resolveInitialDestination() async {
-    if (!await _resolveHasActiveSession()) {
+    // If the app is marked as locked (biometric enabled and user "logged out"),
+    // we must stay in the auth flow (Login Screen) even if a session exists.
+    final isLocked = await BiometricAuthService.instance.isAppLocked();
+    if (isLocked) {
+      return HomeUStartupDestination.authFlow;
+    }
+
+    final hasSession = await _resolveHasActiveSession();
+    if (!hasSession) {
       return HomeUStartupDestination.authFlow;
     }
 
@@ -42,6 +51,13 @@ class HomeUStartupSessionResolver {
         if (session == null) {
           return HomeUStartupDestination.authFlow;
         }
+
+        // Even on state changes, respect the app lock
+        final isLocked = await BiometricAuthService.instance.isAppLocked();
+        if (isLocked) {
+          return HomeUStartupDestination.authFlow;
+        }
+
         final role = await _resolveCurrentUserRole();
         return _destinationForRole(role);
       default:
@@ -49,6 +65,12 @@ class HomeUStartupSessionResolver {
         if (!hasSession) {
           return HomeUStartupDestination.authFlow;
         }
+
+        final isLocked = await BiometricAuthService.instance.isAppLocked();
+        if (isLocked) {
+          return HomeUStartupDestination.authFlow;
+        }
+
         final role = await _resolveCurrentUserRole();
         return _destinationForRole(role);
     }
