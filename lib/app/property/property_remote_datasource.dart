@@ -180,7 +180,7 @@ class PropertyRemoteDataSource {
     try {
       final dynamic rows = await AppSupabase.client
           .from('profiles')
-          .select('id, full_name, role')
+          .select('id, full_name, role, avatar_url')
           .inFilter('id', ids);
 
       if (rows is! List) {
@@ -196,6 +196,7 @@ class PropertyRemoteDataSource {
         mapped[id] = _OwnerProfile(
           fullName: row['full_name']?.toString().trim() ?? '',
           role: row['role']?.toString().trim() ?? '',
+          avatarUrl: row['avatar_url']?.toString().trim(),
         );
       }
       return mapped;
@@ -255,6 +256,7 @@ class PropertyRemoteDataSource {
       createdAt: createdAt,
       facilities: facilities,
       imageUrls: imageUrls,
+      ownerPhotoUrl: ownerProfile?.avatarUrl,
       photoColors: const [
         Color(0xFF5D7FBF),
         Color(0xFF4A68A8),
@@ -279,8 +281,13 @@ class PropertyRemoteDataSource {
 }
 
 class _OwnerProfile {
-  const _OwnerProfile({required this.fullName, required this.role});
+  const _OwnerProfile({
+    required this.fullName,
+    required this.role,
+    this.avatarUrl,
+  });
 
   final String fullName;
   final String role;
+  final String? avatarUrl;
 }

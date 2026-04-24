@@ -238,5 +238,13 @@
   "chatOnline": "Dalam Talian",
   "chatOffline": "Luar Talian",
   "chatTypeMessageHint": "Taip mesej...",
-  "chatYesterday": "Semalam"
+  "chatYesterday": "Semalam",
+  "chatFilterAll": "Semua",
+  "chatFilterUnread": "Belum dibaca",
+  "chatFilterProperty": "Hartanah",
+  "chatFilterArchived": "Diarkibkan",
+  "chatAttachmentTitle": "Hantar Lampiran",
+  "chatAttachImage": "Imej",
+  "chatAttachCamera": "Kamera",
+  "chatAttachDocument": "Dokumen"
 }

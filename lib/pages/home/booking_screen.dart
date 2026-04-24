@@ -45,32 +45,16 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            SizedBox(
-              width: double.infinity,
-              height: 46,
-              child: OutlinedButton(
-                key: const Key('schedule_viewing_button'),
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => HomeUViewingScreen(property: widget.property),
-                    ),
-                  );
-                },
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Color(0xFF1E3A8A)),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                ),
-                child: const Text(
-                  'Schedule Viewing',
-                  style: TextStyle(
-                    color: Color(0xFF1E3A8A),
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
+            Text(
+              'Paying the booking fee locks this property. The remaining balance is due after owner approval.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: context.homeuMutedText,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             SizedBox(
               width: double.infinity,
               height: 52,
@@ -78,7 +62,7 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
                 key: const Key('confirm_booking_button'),
                 onPressed: _isSubmitting ? null : _confirmBooking,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1E3A8A),
+                  backgroundColor: context.homeuAccent,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
@@ -89,7 +73,7 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
                         height: 18,
                         child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                       )
-                    : const Text('Confirm Booking'),
+                    : Text('Pay Booking Fee (RM ${_formatCurrency(_monthlyPrice)})'),
               ),
             ),
           ],
@@ -402,10 +386,10 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
         propertyId: widget.property.id,
         ownerId: widget.property.ownerId,
         tenantId: tenantId,
-        status: 'Pending',
+        status: 'Awaiting Approval',
         createdAt: now,
         updatedAt: now,
-        totalAmount: _totalPrice,
+        totalAmount: _monthlyPrice, // Only 1 month as booking fee
         paymentStatus: 'Pending',
       );
 
@@ -428,7 +412,7 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
             property: widget.property,
             durationMonths: _selectedDurationMonths,
             startDate: _startDate,
-            totalPrice: _totalPrice,
+            totalPrice: _monthlyPrice, // Booking fee is 1 month
           ),
         ),
       );

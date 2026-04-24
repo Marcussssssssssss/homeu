@@ -1377,6 +1377,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unable to update password right now. Please try again.'**
   String get updatePasswordErrorGeneric;
+
+  /// No description provided for @chatTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Messages'**
+  String get chatTitle;
+
+  /// No description provided for @chatSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search messages...'**
+  String get chatSearchHint;
+
+  /// No description provided for @chatFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get chatFilterAll;
+
+  /// No description provided for @chatFilterUnread.
+  ///
+  /// In en, this message translates to:
+  /// **'Unread'**
+  String get chatFilterUnread;
+
+  /// No description provided for @chatFilterProperty.
+  ///
+  /// In en, this message translates to:
+  /// **'Property'**
+  String get chatFilterProperty;
+
+  /// No description provided for @chatFilterArchived.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived'**
+  String get chatFilterArchived;
+
+  /// No description provided for @chatYesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get chatYesterday;
+
+  /// No description provided for @chatOnline.
+  ///
+  /// In en, this message translates to:
+  /// **'Online'**
+  String get chatOnline;
+
+  /// No description provided for @chatOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline'**
+  String get chatOffline;
+
+  /// No description provided for @chatTypeMessageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Type a message...'**
+  String get chatTypeMessageHint;
+
+  /// No description provided for @chatAttachmentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Attachment'**
+  String get chatAttachmentTitle;
+
+  /// No description provided for @chatAttachImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Image'**
+  String get chatAttachImage;
+
+  /// No description provided for @chatAttachCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get chatAttachCamera;
+
+  /// No description provided for @chatAttachDocument.
+  ///
+  /// In en, this message translates to:
+  /// **'Document'**
+  String get chatAttachDocument;
 }
 
 class _AppLocalizationsDelegate
