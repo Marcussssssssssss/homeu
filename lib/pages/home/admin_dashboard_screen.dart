@@ -2,10 +2,55 @@ import 'package:flutter/material.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
 import 'package:homeu/core/theme/homeu_app_theme.dart';
-import 'package:homeu/core/localization/homeu_l10n.dart';
+import 'package:homeu/app/profile/admin_dashboard_models.dart';
+import 'package:homeu/app/profile/admin_dashboard_repository.dart';
+import 'package:homeu/pages/home/admin_owner_moderation_screen.dart';
+import 'package:homeu/pages/home/admin_management_screen.dart';
+import 'package:homeu/pages/home/admin_audit_logs_screen.dart';
 
-class HomeUAdminDashboardScreen extends StatelessWidget {
+class HomeUAdminDashboardScreen extends StatefulWidget {
   const HomeUAdminDashboardScreen({super.key});
+
+  @override
+  State<HomeUAdminDashboardScreen> createState() => _HomeUAdminDashboardScreenState();
+}
+
+class _HomeUAdminDashboardScreenState extends State<HomeUAdminDashboardScreen> {
+  final AdminDashboardRepository _repository = AdminDashboardRepository();
+  bool _isLoading = true;
+  AdminDashboardStats _stats = AdminDashboardStats.empty();
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDashboardData();
+  }
+
+  Future<void> _loadDashboardData() async {
+    if (!mounted) return;
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final stats = await _repository.fetchStats();
+      if (mounted) {
+        setState(() {
+          _stats = stats;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Failed to load system overview. Please check your connection.';
+          _isLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,107 +67,163 @@ class HomeUAdminDashboardScreen extends StatelessWidget {
         centerTitle: false,
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_none_rounded),
-            onPressed: () {},
+            icon: const Icon(Icons.refresh_rounded),
+            onPressed: _loadDashboardData,
           ),
           const SizedBox(width: 8),
         ],
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Welcome, Admin',
-                style: TextStyle(
-                  color: context.homeuPrimaryText,
-                  fontSize: 24,
-                  fontWeight: FontWeight.w700,
+        child: RefreshIndicator(
+          onRefresh: _loadDashboardData,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Welcome, Admin',
+                  style: TextStyle(
+                    color: context.homeuPrimaryText,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'System Overview',
-                style: TextStyle(
-                  color: context.homeuMutedText,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
+                const SizedBox(height: 4),
+                Text(
+                  'System Overview',
+                  style: TextStyle(
+                    color: context.homeuMutedText,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 24),
-              
-              // Summary Cards Grid
-              GridView.count(
-                crossAxisCount: 2,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                mainAxisSpacing: 16,
-                crossAxisSpacing: 16,
-                childAspectRatio: 1.4,
-                children: const [
-                  _SummaryCard(
-                    title: 'Total Users',
-                    value: '1,240',
-                    icon: Icons.people_outline_rounded,
-                    color: Colors.blue,
+                const SizedBox(height: 24),
+
+                if (_isLoading)
+                  const Center(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 40),
+                      child: CircularProgressIndicator(),
+                    ),
+                  )
+                else if (_errorMessage != null)
+                  _ErrorCard(message: _errorMessage!, onRetry: _loadDashboardData)
+                else
+                // Summary Cards Grid
+                  GridView.count(
+                    crossAxisCount: 2,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    mainAxisSpacing: 16,
+                    crossAxisSpacing: 16,
+                    childAspectRatio: 1.4,
+                    children: [
+                      _SummaryCard(
+                        title: 'Total Users',
+                        value: _stats.totalUsers.toString(),
+                        icon: Icons.people_outline_rounded,
+                        color: Colors.blue,
+                      ),
+                      _SummaryCard(
+                        title: 'Owners',
+                        value: _stats.totalOwners.toString(),
+                        icon: Icons.business_center_outlined,
+                        color: Colors.indigo,
+                      ),
+                      _SummaryCard(
+                        title: 'Tenants',
+                        value: _stats.totalTenants.toString(),
+                        icon: Icons.person_outline_rounded,
+                        color: Colors.teal,
+                      ),
+                      _SummaryCard(
+                        title: 'Complaints',
+                        value: _stats.totalComplaints.toString(),
+                        icon: Icons.report_problem_outlined,
+                        color: Colors.orange,
+                      ),
+                    ],
                   ),
-                  _SummaryCard(
-                    title: 'Owners',
-                    value: '450',
-                    icon: Icons.business_center_outlined,
-                    color: Colors.indigo,
+
+                const SizedBox(height: 32),
+
+                Text(
+                  'Management',
+                  style: TextStyle(
+                    color: context.homeuPrimaryText,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
                   ),
-                  _SummaryCard(
-                    title: 'Tenants',
-                    value: '790',
-                    icon: Icons.person_outline_rounded,
-                    color: Colors.teal,
-                  ),
-                  _SummaryCard(
-                    title: 'Complaints',
-                    value: '12',
-                    icon: Icons.report_problem_outlined,
-                    color: Colors.orange,
-                  ),
-                ],
-              ),
-              
-              const SizedBox(height: 32),
-              
-              Text(
-                'Management',
-                style: TextStyle(
-                  color: context.homeuPrimaryText,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
                 ),
-              ),
-              const SizedBox(height: 16),
-              
-              // Menu Options
-              _ManagementTile(
-                title: 'Owner Moderation',
-                subtitle: 'Review and flag owner activities',
-                icon: Icons.gavel_rounded,
-                onTap: () {},
-              ),
-              _ManagementTile(
-                title: 'Admin Management',
-                subtitle: 'Manage system administrators',
-                icon: Icons.admin_panel_settings_outlined,
-                onTap: () {},
-              ),
-              _ManagementTile(
-                title: 'Audit Logs',
-                subtitle: 'View system-wide activity logs',
-                icon: Icons.history_rounded,
-                onTap: () {},
-              ),
-            ],
+                const SizedBox(height: 16),
+
+                // Menu Options
+                _ManagementTile(
+                  title: 'Owner Moderation',
+                  subtitle: 'Review and flag owner activities',
+                  icon: Icons.gavel_rounded,
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const HomeUAdminOwnerModerationScreen()),
+                    );
+                  },
+                ),
+                _ManagementTile(
+                  title: 'Admin Management',
+                  subtitle: 'Manage system administrators',
+                  icon: Icons.admin_panel_settings_outlined,
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const HomeUAdminManagementScreen()),
+                    );
+                  },
+                ),
+                _ManagementTile(
+                  title: 'Audit Logs',
+                  subtitle: 'View system-wide activity logs',
+                  icon: Icons.history_rounded,
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const HomeUAdminAuditLogsScreen()),
+                    );
+                  },
+                ),
+              ],
+            ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _ErrorCard extends StatelessWidget {
+  const _ErrorCard({required this.message, required this.onRetry});
+  final String message;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.red.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.red.withValues(alpha: 0.1)),
+      ),
+      child: Column(
+        children: [
+          Text(message, textAlign: TextAlign.center, style: const TextStyle(color: Colors.red)),
+          const SizedBox(height: 12),
+          TextButton.icon(
+            onPressed: onRetry,
+            icon: const Icon(Icons.refresh, size: 18),
+            label: const Text('Retry'),
+          ),
+        ],
       ),
     );
   }
@@ -177,6 +278,7 @@ class _SummaryCard extends StatelessWidget {
                   fontWeight: FontWeight.w700,
                 ),
               ),
+              const SizedBox(height: 4),
               Text(
                 title,
                 style: TextStyle(
@@ -210,53 +312,56 @@ class _ManagementTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: context.homeuCard,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: context.homeuSoftBorder),
-          ),
-          child: Row(
-            children: [
-              CircleAvatar(
-                radius: 24,
-                backgroundColor: context.homeuAccent.withValues(alpha: 0.1),
-                child: Icon(icon, color: context.homeuAccent),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        color: context.homeuPrimaryText,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      style: TextStyle(
-                        color: context.homeuMutedText,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: context.homeuCard,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: context.homeuSoftBorder),
+            ),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 24,
+                  backgroundColor: context.homeuAccent.withValues(alpha: 0.1),
+                  child: Icon(icon, color: context.homeuAccent),
                 ),
-              ),
-              Icon(
-                Icons.chevron_right_rounded,
-                color: context.homeuMutedText,
-              ),
-            ],
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: TextStyle(
+                          color: context.homeuPrimaryText,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          color: context.homeuMutedText,
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: context.homeuMutedText,
+                ),
+              ],
+            ),
           ),
         ),
       ),
