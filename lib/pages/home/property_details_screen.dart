@@ -62,6 +62,189 @@ class _HomeUPropertyDetailsScreenState
     return Icons.check_circle_outline_rounded;
   }
 
+  Future<void> _showReportBottomSheet() async {
+    final currentUserId = AppSupabase.auth.currentUser?.id;
+    if (currentUserId == widget.property.ownerId) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('You cannot report your own property.')),
+      );
+      return;
+    }
+
+    String? selectedReason;
+    final reasons = [
+      'Fake or misleading advertisement',
+      'Suspicious owner',
+      'Wrong property details',
+      'Inappropriate content',
+      'Other',
+    ];
+    final descriptionController = TextEditingController();
+
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            return Container(
+              padding: EdgeInsets.fromLTRB(
+                16,
+                16,
+                16,
+                MediaQuery.of(context).viewInsets.bottom + 20,
+              ),
+              decoration: BoxDecoration(
+                color: context.homeuCard,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Center(
+                      child: Container(
+                        width: 40,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: context.homeuSoftBorder,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      'Report Listing',
+                      style: TextStyle(
+                        color: context.homeuPrimaryText,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Please select a reason for reporting this property.',
+                      style: TextStyle(
+                        color: context.homeuMutedText,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    ...reasons.map((reason) {
+                      final isSelected = selectedReason == reason;
+                      return ListTile(
+                        onTap: () => setSheetState(() => selectedReason = reason),
+                        contentPadding: EdgeInsets.zero,
+                        leading: Icon(
+                          isSelected ? Icons.radio_button_checked_rounded : Icons.radio_button_off_rounded,
+                          color: isSelected ? context.homeuAccent : context.homeuMutedText,
+                        ),
+                        title: Text(
+                          reason,
+                          style: TextStyle(
+                            color: isSelected ? context.homeuPrimaryText : context.homeuSecondaryText,
+                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: descriptionController,
+                      maxLines: 3,
+                      decoration: InputDecoration(
+                        hintText: 'Describe the issue (optional)',
+                        filled: true,
+                        fillColor: context.homeuRaisedCard,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: context.homeuSoftBorder),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: context.homeuSoftBorder),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => Navigator.pop(context),
+                            style: OutlinedButton.styleFrom(
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                            ),
+                            child: const Text('Cancel'),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: selectedReason == null
+                                ? null
+                                : () async {
+                                    final reason = selectedReason!;
+                                    final desc = descriptionController.text.trim();
+                                    Navigator.pop(context);
+                                    await _submitReport(reason, desc);
+                                  },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFEF4444),
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                            ),
+                            child: const Text('Submit Report'),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _submitReport(String reason, String description) async {
+    try {
+      final currentUserId = AppSupabase.auth.currentUser?.id;
+      if (currentUserId == null) return;
+
+      await AppSupabase.client.from('property_reports').insert({
+        'property_id': widget.property.id,
+        'owner_id': widget.property.ownerId,
+        'tenant_id': currentUserId,
+        'reason': reason,
+        'description': description,
+        'status': 'pending',
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Report submitted. Our admin team will review it.'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('Error submitting report: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to submit report. Please try again later.')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (!HomeUSession.canAccess(HomeURole.tenant)) {
@@ -99,6 +282,29 @@ class _HomeUPropertyDetailsScreenState
               ),
             ),
             backgroundColor: context.colors.surface,
+            actions: [
+              PopupMenuButton<String>(
+                icon: const Icon(Icons.more_vert_rounded),
+                onSelected: (value) {
+                  if (value == 'report') {
+                    _showReportBottomSheet();
+                  }
+                },
+                itemBuilder: (context) => [
+                  const PopupMenuItem(
+                    value: 'report',
+                    child: Row(
+                      children: [
+                        Icon(Icons.report_gmailerrorred_rounded, size: 20, color: Colors.redAccent),
+                        SizedBox(width: 8),
+                        Text('Report Listing'),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(width: 4),
+            ],
           ),
           bottomNavigationBar: isOwner 
             ? null 
