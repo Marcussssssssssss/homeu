@@ -7,7 +7,7 @@ enum HomeUStartupDestination {
   authFlow,
   tenantFlow,
   ownerFlow,
-  adminFlow,
+  adminFlow
 }
 
 class HomeUStartupSessionResolver {

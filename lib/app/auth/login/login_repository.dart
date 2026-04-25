@@ -101,6 +101,9 @@ class LoginRepository {
     if (role == 'owner') {
       return HomeURole.owner;
     }
+    if (role == 'admin') {
+      return HomeURole.admin;
+    }
     return null;
   }
 
