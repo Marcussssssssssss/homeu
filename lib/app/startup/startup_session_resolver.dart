@@ -1,12 +1,12 @@
 import 'package:homeu/app/auth/homeu_auth_service.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
-import 'package:homeu/app/auth/biometric_auth_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 enum HomeUStartupDestination {
   authFlow,
   tenantFlow,
   ownerFlow,
+  adminFlow,
 }
 
 class HomeUStartupSessionResolver {
@@ -98,6 +98,9 @@ class HomeUStartupSessionResolver {
     }
     if (role == HomeURole.tenant) {
       return HomeUStartupDestination.tenantFlow;
+    }
+    if (role == HomeURole.admin) {
+      return HomeUStartupDestination.adminFlow;
     }
     return HomeUStartupDestination.authFlow;
   }
