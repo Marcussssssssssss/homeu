@@ -29,16 +29,32 @@ class HomeUStatusFilterChips<T> extends StatelessWidget {
                 padding: const EdgeInsets.only(right: 8),
                 child: ChoiceChip(
                   key: keyBuilder?.call(status),
-                  label: Text(labelBuilder(status)),
+                  label: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (isSelected) ...[
+                        const Icon(
+                          Icons.check,
+                          color: Colors.white,
+                          size: 18,
+                        ),
+                        const SizedBox(width: 6),
+                      ],
+                      Text(labelBuilder(status)),
+                    ],
+                  ),
                   selected: isSelected,
                   onSelected: (_) => onSelected(status),
                   selectedColor: const Color(0xFF1E3A8A),
+                  backgroundColor: Colors.white,
+                  showCheckmark: false,
                   labelStyle: TextStyle(
                     color: isSelected ? Colors.white : const Color(0xFF1E3A8A),
-                    fontWeight: FontWeight.w700,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w700,
                   ),
                   side: BorderSide(
-                    color: isSelected ? const Color(0xFF1E3A8A) : context.homeuSoftBorder,
+                    color: isSelected ? const Color(0xFF1E3A8A) : const Color(0xFFE2E8F0),
+                    width: 1.5,
                   ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),

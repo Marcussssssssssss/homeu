@@ -25,15 +25,10 @@ class HomeUAppBottomNav extends StatelessWidget {
           selectedIcon: const Icon(Icons.home_rounded),
           label: t.navHome,
         ),
-        NavigationDestination(
-          icon: const Icon(Icons.book_online_outlined),
-          selectedIcon: const Icon(Icons.book_online_rounded),
-          label: t.navBookings,
-        ),
         const NavigationDestination(
-          icon: Icon(Icons.visibility_outlined),
-          selectedIcon: Icon(Icons.visibility_rounded),
-          label: 'Viewing',
+          icon: Icon(Icons.assignment_outlined),
+          selectedIcon: Icon(Icons.assignment_rounded),
+          label: 'Requests',
         ),
         const NavigationDestination(
           icon: Icon(Icons.chat_bubble_outline_rounded),
