@@ -16,7 +16,7 @@ class OwnerAnalyticsRemoteDataSource {
 
     final dynamic bookingsResponse = await AppSupabase.client
         .from('booking_requests')
-        .select('id, status, total_amount, payment_status, created_at')
+        .select('id, status, total_amount, payment_status, created_at, payments(amount, status, paid_at, created_at)')
         .eq('owner_id', ownerId);
 
     final List<Map<String, dynamic>> bookings = bookingsResponse is List
@@ -39,7 +39,9 @@ class OwnerAnalyticsRemoteDataSource {
 
     for (final p in properties) {
       final status = p['status']?.toString() ?? '';
-      if (status == 'Active' || status == 'Occupied') activeListings++;
+      if (status != 'Draft' && status != 'Archived') {
+        activeListings++;
+      }
 
       if (_isCurrentlyOccupied(p)) {
         occupiedCount++;
@@ -62,14 +64,23 @@ class OwnerAnalyticsRemoteDataSource {
     double totalNetEarnings = 0;
 
     for (var b in bookings) {
-      final status = b['status']?.toString() ?? '';
-      final paymentStatus = b['payment_status']?.toString() ?? 'Pending';
-      if (status == 'Approved' && paymentStatus == 'Paid' && b['created_at'] != null) {
-        final createdAt = DateTime.tryParse(b['created_at'].toString());
-        if (createdAt != null) {
-          totalNetEarnings += (b['total_amount'] as num?)?.toDouble() ?? 0.0;
-          if (earningsMap.containsKey(createdAt.month)) {
-            earningsMap[createdAt.month] = earningsMap[createdAt.month]! + ((b['total_amount'] as num?)?.toDouble() ?? 0.0);
+      final relatedPayments = b['payments'] as List<dynamic>? ?? [];
+
+      for (final payment in relatedPayments) {
+        if (payment is Map<String, dynamic>) {
+          final paymentStatus = payment['status']?.toString().toLowerCase() ?? '';
+
+          if (paymentStatus == 'paid' || paymentStatus == 'success' || paymentStatus == 'completed') {
+            final amount = (payment['amount'] as num?)?.toDouble() ?? 0.0;
+            totalNetEarnings += amount;
+
+            final dateString = payment['paid_at']?.toString() ?? payment['created_at']?.toString() ?? b['created_at']?.toString();
+            if (dateString != null) {
+              final date = DateTime.tryParse(dateString);
+              if (date != null && earningsMap.containsKey(date.month)) {
+                earningsMap[date.month] = earningsMap[date.month]! + amount;
+              }
+            }
           }
         }
       }
@@ -95,7 +106,7 @@ class OwnerAnalyticsRemoteDataSource {
       else if (type.contains('apartment')) apartmentCount++;
       else if (type.contains('room')) roomCount++;
       else if (type.contains('landed')) landedCount++;
-      else condoCount++; // Default fallback
+      else condoCount++;
     }
 
     int totalTypes = condoCount + apartmentCount + roomCount + landedCount;
@@ -121,37 +132,38 @@ class OwnerAnalyticsRemoteDataSource {
 
   bool _isCurrentlyOccupied(Map<String, dynamic> propertyRow) {
     final bookings = propertyRow['booking_requests'];
-    if (bookings is! List) {
-      return (propertyRow['status']?.toString().trim().toLowerCase() ?? '') == 'occupied';
+
+    if (bookings == null || bookings is! List || bookings.isEmpty) {
+      return false;
     }
 
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
+    final today = DateTime.now();
+    final todayDate = DateTime(today.year, today.month, today.day);
     final monthlyPrice = _parseNum(propertyRow['monthly_price']) ?? 0;
 
-    for (final booking in bookings.whereType<Map<String, dynamic>>()) {
-      final status = booking['status']?.toString().trim().toLowerCase() ?? '';
-      if (status == 'occupied') {
-        return true;
-      }
-      if (status != 'approved') {
+    for (final b in bookings) {
+      if (b is! Map) continue;
+
+      final status = b['status']?.toString().trim().toLowerCase() ?? '';
+
+      if (status != 'approved' && status != 'occupied' && status != 'completed') {
         continue;
       }
 
-      final start = _parseDate(booking['move_in_date']) ?? _parseDate(booking['created_at']);
-      if (start == null) {
-        continue;
-      }
+      DateTime? start = _parseDate(b['move_in_date']) ?? _parseDate(b['created_at']);
+      if (start == null) continue;
 
-      var end = _parseDate(booking['move_out_date']);
+      DateTime? end = _parseDate(b['move_out_date']);
       if (end == null) {
-        final totalAmount = _parseNum(booking['total_amount']) ?? 0;
+        final totalAmount = _parseNum(b['total_amount']) ?? 0;
         final estimatedMonths = monthlyPrice > 0 ? (totalAmount / monthlyPrice).round() : 1;
         final durationMonths = estimatedMonths > 0 ? estimatedMonths : 1;
         end = DateTime(start.year, start.month + durationMonths, start.day);
       }
 
-      if (!today.isBefore(start) && !today.isAfter(end)) {
+      final endDate = DateTime(end.year, end.month, end.day);
+
+      if (!todayDate.isAfter(endDate)) {
         return true;
       }
     }
@@ -160,15 +172,24 @@ class OwnerAnalyticsRemoteDataSource {
   }
 
   DateTime? _parseDate(dynamic value) {
-    if (value is DateTime) {
-      return DateTime(value.year, value.month, value.day);
-    }
+    if (value == null) return null;
+    if (value is DateTime) return DateTime(value.year, value.month, value.day);
+
     if (value is String) {
       final parsed = DateTime.tryParse(value);
-      if (parsed == null) {
-        return null;
+      if (parsed != null) {
+        return DateTime(parsed.year, parsed.month, parsed.day);
       }
-      return DateTime(parsed.year, parsed.month, parsed.day);
+
+      final parts = value.split('/');
+      if (parts.length == 3) {
+        final d = int.tryParse(parts[0]);
+        final m = int.tryParse(parts[1]);
+        final y = int.tryParse(parts[2]);
+        if (d != null && m != null && y != null) {
+          return DateTime(y, m, d);
+        }
+      }
     }
     return null;
   }

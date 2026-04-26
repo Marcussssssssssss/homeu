@@ -8,8 +8,10 @@ import 'package:homeu/pages/home/owner_bottom_navigation_bar.dart';
 import 'package:homeu/pages/home/conversation_list_screen.dart';
 import 'package:homeu/pages/home/profile_screen.dart';
 
+import '../../app/property/booking_request/booking_requests_controller.dart';
 import '../../app/property/my_properties/my_properties_models.dart';
 import '../../app/property/owner_dashboard/owner_dashboard_controller.dart';
+import 'owner_booking_request_details_screen.dart';
 import 'owner_my_properties_screen.dart';
 import 'owner_property_details_screen.dart';
 
@@ -282,8 +284,11 @@ class _HomeUOwnerDashboardScreenState extends State<HomeUOwnerDashboardScreen> {
                           if (widget.onNavigateToTab != null) {
                             widget.onNavigateToTab!(2);
                           } else {
-                            Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const HomeUOwnerBookingRequestsScreen()))
-                                .then((_) => _controller.loadDashboard());
+                            Navigator.of(context).push(
+                              MaterialPageRoute<void>(
+                                builder: (_) => const HomeUOwnerBookingRequestsScreen(initialTabIndex: 0),
+                              ),
+                            ).then((_) => _controller.loadDashboard());
                           }
                         },
                       )),
@@ -321,11 +326,13 @@ class _HomeUOwnerDashboardScreenState extends State<HomeUOwnerDashboardScreen> {
                         propertyName: req['propertyName'],
                         status: req['status'],
                         onTap: () {
-                          if (widget.onNavigateToTab != null) {
-                            widget.onNavigateToTab!(2);
-                          } else {
-                            Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const HomeUOwnerBookingRequestsScreen(initialTabIndex: 1)));
-                          }
+                          Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => const HomeUOwnerBookingRequestsScreen(
+                                initialTabIndex: 1,
+                              ),
+                            ),
+                          ).then((_) => _controller.loadDashboard());
                         },
                       )),
                   ],
