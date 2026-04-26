@@ -35,11 +35,22 @@ class BookingRequestModel {
 
     final num monthlyPrice = (property['monthly_price'] as num?) ?? 0;
     final num totalAmount = (json['total_amount'] as num?) ?? 0;
-    final DateTime? parsedStartDate = json['start_date'] != null
-        ? DateTime.tryParse(json['start_date'].toString())
+
+    final DateTime? parsedStartDate = json['move_in_date'] != null
+        ? DateTime.tryParse(json['move_in_date'].toString())
         : DateTime.tryParse((json['created_at'] ?? '').toString());
-    final int parsedDurationMonths = (json['duration_months'] as num?)?.toInt() ??
-        (monthlyPrice > 0 ? (totalAmount / monthlyPrice).round() : 0);
+
+    int calculatedDuration = 0;
+    if (parsedStartDate != null && json['move_out_date'] != null) {
+      final moveOutDate = DateTime.tryParse(json['move_out_date'].toString());
+      if (moveOutDate != null) {
+        calculatedDuration = (moveOutDate.year - parsedStartDate.year) * 12 + moveOutDate.month - parsedStartDate.month;
+      }
+    }
+
+    final int parsedDurationMonths = calculatedDuration > 0
+        ? calculatedDuration
+        : (monthlyPrice > 0 ? (totalAmount / monthlyPrice).round() : 0);
 
     return BookingRequestModel(
       id: json['id']?.toString() ?? '',

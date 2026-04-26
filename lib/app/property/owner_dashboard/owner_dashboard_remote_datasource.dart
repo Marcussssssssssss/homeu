@@ -18,7 +18,7 @@ class OwnerDashboardRemoteDataSource {
     // 2. Fetch Bookings
     final dynamic bookingsResponse = await AppSupabase.client
         .from('booking_requests')
-        .select('id, property_id, tenant_id, status, total_amount, payment_status, created_at')
+        .select('id, property_id, tenant_id, status, total_amount, payment_status, created_at, payments(amount, status)')
         .eq('owner_id', ownerId)
         .order('created_at', ascending: false);
 
@@ -38,7 +38,6 @@ class OwnerDashboardRemoteDataSource {
         ? List<Map<String, dynamic>>.from(viewingsResponse)
         : [];
 
-    // --- Analytics Logic ---
     int activeListings = 0;
     int occupiedCount = 0;
     for (final p in properties) {
@@ -60,35 +59,36 @@ class OwnerDashboardRemoteDataSource {
     // Process Bookings
     for (var b in bookings) {
       final status = b['status']?.toString() ?? '';
-      final paymentStatus = b['payment_status']?.toString() ?? 'Pending';
-
-      DateTime? createdAt;
-      if (b['created_at'] != null) {
-        createdAt = DateTime.tryParse(b['created_at'].toString());
-      }
 
       if (status == 'Pending' || status == 'Pending Decision') {
         pendingRequests++;
-      } else if (status == 'Approved') {
-        if (paymentStatus == 'Paid' && createdAt != null) {
-          if (createdAt.month == currentMonth && createdAt.year == currentYear) {
-            totalEarnings += (b['total_amount'] as num?)?.toDouble() ?? 0.0;
+      }
+
+      final relatedPayments = b['payments'] as List<dynamic>? ?? [];
+
+      for (final payment in relatedPayments) {
+        if (payment is Map<String, dynamic>) {
+          final paymentStatus = payment['status']?.toString().toLowerCase() ?? '';
+
+          if (paymentStatus == 'paid' || paymentStatus == 'success' || paymentStatus == 'completed') {
+            totalEarnings += (payment['amount'] as num?)?.toDouble() ?? 0.0;
           }
         }
       }
 
-      // Add tenant to our fetch list
+      // 3. Add tenant to our fetch list for the UI
       final tId = b['tenant_id']?.toString();
       if (tId != null && tId.isNotEmpty && !tenantIdsToFetch.contains(tId)) {
         tenantIdsToFetch.add(tId);
       }
     }
 
+
     // Process Viewings for Analytics and Tenant Names
     for (var v in viewings) {
       final status = v['status']?.toString() ?? '';
       if (status == 'Pending') {
-        pendingRequests++; // Add pending viewings to the dashboard total!
+        pendingRequests++;
       }
 
       // Add viewing tenants to our fetch list too
@@ -163,7 +163,7 @@ class OwnerDashboardRemoteDataSource {
       occupancyRate: occupancyRate,
       recentProperties: properties.take(3).toList(),
       recentRequests: recentRequests,
-      recentViewingRequests: recentViewingsList, // Safely mapped Strings!
+      recentViewingRequests: recentViewingsList,
     );
   }
 

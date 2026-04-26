@@ -568,16 +568,21 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
                       ),
                       TextButton(
                         onPressed: _isLoading ? null : () async {
-                          final LatLng? result = await Navigator.push(
+                          final result = await Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (context) => MapSelectionScreen(initialLocation: _selectedCoordinates),
                             ),
                           );
-                          if (result != null) {
+
+                          if (result != null && result is Map) {
                             setState(() {
-                              _selectedCoordinates = result;
+                              _selectedCoordinates = result['location'] as LatLng;
                               _locationError = false;
+
+                              if (result['address'] != null) {
+                                _addressController.text = result['address'] as String;
+                              }
                             });
                           }
                         },
@@ -585,26 +590,6 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
                       ),
                     ],
                   ),
-                ),
-              ),
-              const SizedBox(height: 14),
-              _SectionCard(
-                title: 'Availability Calendar',
-                child: Column(
-                  key: const Key('availability_calendar_section'),
-                  children: [
-                    _DateSelectorTile(
-                      label: 'Available From',
-                      value: _formatDate(_availableFrom),
-                      onTap: _isLoading ? () {} : () => _pickDate(isStart: true),
-                    ),
-                    const SizedBox(height: 10),
-                    _DateSelectorTile(
-                      label: 'Available Until',
-                      value: _formatDate(_availableUntil),
-                      onTap: _isLoading ? () {} : () => _pickDate(isStart: false),
-                    ),
-                  ],
                 ),
               ),
               const SizedBox(height: 14),
