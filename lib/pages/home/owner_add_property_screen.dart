@@ -568,16 +568,21 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
                       ),
                       TextButton(
                         onPressed: _isLoading ? null : () async {
-                          final LatLng? result = await Navigator.push(
+                          final result = await Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (context) => MapSelectionScreen(initialLocation: _selectedCoordinates),
                             ),
                           );
-                          if (result != null) {
+
+                          if (result != null && result is Map) {
                             setState(() {
-                              _selectedCoordinates = result;
+                              _selectedCoordinates = result['location'] as LatLng;
                               _locationError = false;
+
+                              if (result['address'] != null) {
+                                _addressController.text = result['address'] as String;
+                              }
                             });
                           }
                         },
