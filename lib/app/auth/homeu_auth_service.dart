@@ -55,6 +55,9 @@ class HomeUAuthService {
     if (role == 'tenant') {
       return HomeURole.tenant;
     }
+    if (role == 'admin') {
+      return HomeURole.admin;
+    }
     return null;
   }
 

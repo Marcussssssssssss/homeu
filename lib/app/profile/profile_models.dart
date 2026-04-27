@@ -22,6 +22,9 @@ class HomeUProfileData {
     this.profileImageUrl,
     this.riskStatus = HomeURiskStatus.normal,
     this.accountStatus = HomeUAccountStatus.active,
+    this.riskReason,
+    this.moderatedBy,
+    this.moderatedAt,
   });
 
   final String userId;
@@ -32,6 +35,9 @@ class HomeUProfileData {
   final String? profileImageUrl;
   final HomeURiskStatus riskStatus;
   final HomeUAccountStatus accountStatus;
+  final String? riskReason;
+  final String? moderatedBy;
+  final String? moderatedAt;
 
   HomeUProfileData copyWith({
     String? fullName,
@@ -41,6 +47,9 @@ class HomeUProfileData {
     String? profileImageUrl,
     HomeURiskStatus? riskStatus,
     HomeUAccountStatus? accountStatus,
+    String? riskReason,
+    String? moderatedBy,
+    String? moderatedAt,
   }) {
     return HomeUProfileData(
       userId: userId,
@@ -51,6 +60,9 @@ class HomeUProfileData {
       profileImageUrl: profileImageUrl ?? this.profileImageUrl,
       riskStatus: riskStatus ?? this.riskStatus,
       accountStatus: accountStatus ?? this.accountStatus,
+      riskReason: riskReason ?? this.riskReason,
+      moderatedBy: moderatedBy ?? this.moderatedBy,
+      moderatedAt: moderatedAt ?? this.moderatedAt,
     );
   }
 
@@ -78,6 +90,7 @@ class HomeUProfileData {
   Map<String, dynamic> toCacheMap() {
     return {
       'user_id': userId,
+      'id': userId,
       'full_name': fullName,
       'email': email,
       'phone_number': phoneNumber,
@@ -85,13 +98,17 @@ class HomeUProfileData {
       'profile_image_url': profileImageUrl,
       'risk_status': riskStatus.name,
       'account_status': accountStatus.name,
+      'risk_reason': riskReason,
+      'moderated_by': moderatedBy,
+      'moderated_at': moderatedAt,
       'updated_at': DateTime.now().millisecondsSinceEpoch,
     };
   }
 
   factory HomeUProfileData.fromCacheMap(Map<String, dynamic> map) {
+    final id = (map['id'] ?? map['user_id'])?.toString() ?? '';
     return HomeUProfileData(
-      userId: map['user_id']?.toString() ?? '',
+      userId: id,
       fullName: map['full_name']?.toString() ?? '',
       email: map['email']?.toString() ?? '',
       phoneNumber: map['phone_number']?.toString() ?? '',
@@ -99,6 +116,9 @@ class HomeUProfileData {
       profileImageUrl: map['profile_image_url']?.toString(),
       riskStatus: mapRiskStatus(map['risk_status']?.toString()),
       accountStatus: mapAccountStatus(map['account_status']?.toString()),
+      riskReason: map['risk_reason']?.toString(),
+      moderatedBy: map['moderated_by']?.toString(),
+      moderatedAt: map['moderated_at']?.toString(),
     );
   }
 }

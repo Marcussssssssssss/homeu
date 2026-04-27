@@ -8,7 +8,7 @@ class HomeUProfileLocalDataSource {
   HomeUProfileLocalDataSource();
 
   static const _dbName = 'homeu_local_cache.db';
-  static const _dbVersion = 1;
+  static const _dbVersion = 2;
   static const _profileTable = 'cached_profiles';
   static const _preferenceTable = 'cached_user_preferences';
   static const _globalSettingsTable = 'app_global_settings';
@@ -34,6 +34,8 @@ class HomeUProfileLocalDataSource {
             phone_number TEXT NOT NULL,
             role TEXT NOT NULL,
             profile_image_url TEXT,
+            risk_status TEXT NOT NULL DEFAULT 'normal',
+            account_status TEXT NOT NULL DEFAULT 'active',
             updated_at INTEGER NOT NULL
           )
         ''');
@@ -52,6 +54,12 @@ class HomeUProfileLocalDataSource {
             value TEXT NOT NULL
           )
         ''');
+      },
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 2) {
+          await db.execute('ALTER TABLE $_profileTable ADD COLUMN risk_status TEXT NOT NULL DEFAULT "normal"');
+          await db.execute('ALTER TABLE $_profileTable ADD COLUMN account_status TEXT NOT NULL DEFAULT "active"');
+        }
       },
     );
 

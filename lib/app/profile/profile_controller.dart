@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:homeu/app/auth/homeu_auth_service.dart';
 import 'package:homeu/app/profile/profile_models.dart';
 import 'package:homeu/app/profile/profile_repository.dart';
 
@@ -43,36 +44,66 @@ class HomeUProfileController extends ChangeNotifier {
     _errorMessage = null;
     _safeNotifyListeners();
 
+    final userId = HomeUAuthService.instance.currentUserId;
+    final userEmail = HomeUAuthService.instance.currentSession?.user.email;
+    
+    debugPrint('HomeUProfileController: [DEBUG] Loading profile for ID: $userId, Email: $userEmail');
+
+    // 1. Try to load from cache first
     try {
       final cachedProfile = await _repository.getCachedProfile();
       final cachedPreferences = await _repository.getCachedPreferences();
       if (cachedProfile != null) {
         _profile = cachedProfile;
+        debugPrint('HomeUProfileController: [DEBUG] Loaded profile from cache: ${_profile.fullName}');
       }
       if (cachedPreferences != null) {
         _preferences = cachedPreferences;
         _selectedLanguageCode = _extractLanguageCode(cachedPreferences);
         _isBiometricLoginEnabled = _repository.readBiometricEnabled(cachedPreferences);
       }
-
       _safeNotifyListeners();
+    } catch (e) {
+      debugPrint('HomeUProfileController: [WARNING] Cache load failed: $e');
+    }
 
+    // 2. Fetch latest profile from Remote
+    bool profileFetchFailed = false;
+    try {
       final latestProfile = await _repository.fetchLatestProfile();
-      final latestPreferences = await _repository.fetchLatestPreferences();
       if (latestProfile != null) {
         _profile = latestProfile;
+        debugPrint('HomeUProfileController: [DEBUG] Remote profile fetch success: ${_profile.fullName}');
+      } else {
+        debugPrint('HomeUProfileController: [WARNING] Remote profile fetch returned null');
+        // If we have no profile at all (cached or remote), we count it as a failure
+        if (_profile.fullName.isEmpty) profileFetchFailed = true;
       }
+    } catch (e) {
+      debugPrint('HomeUProfileController: [ERROR] Remote profile fetch failed: $e');
+      profileFetchFailed = true;
+    }
+
+    // 3. Fetch latest preferences from Remote (Independent from profile)
+    try {
+      final latestPreferences = await _repository.fetchLatestPreferences();
       if (latestPreferences != null) {
         _preferences = latestPreferences;
         _selectedLanguageCode = _extractLanguageCode(latestPreferences);
         _isBiometricLoginEnabled = _repository.readBiometricEnabled(latestPreferences);
+        debugPrint('HomeUProfileController: [DEBUG] Remote preferences fetch success');
       }
-    } catch (_) {
-      _errorMessage = errorRefreshProfile;
-    } finally {
-      _isLoading = false;
-      _safeNotifyListeners();
+    } catch (e) {
+      debugPrint('HomeUProfileController: [WARNING] Remote preferences fetch failed (Silently ignored): $e');
+      // We don't mark as errorRefreshProfile if only preferences fail
     }
+
+    if (profileFetchFailed) {
+      _errorMessage = errorRefreshProfile;
+    }
+
+    _isLoading = false;
+    _safeNotifyListeners();
   }
 
   Future<bool> updateProfile({
@@ -97,7 +128,8 @@ class HomeUProfileController extends ChangeNotifier {
       );
       _profile = updated;
       return true;
-    } catch (_) {
+    } catch (e) {
+      debugPrint('HomeUProfileController: [ERROR] updateProfile failed: $e');
       _errorMessage = errorUpdateProfile;
       return false;
     } finally {
@@ -124,7 +156,8 @@ class HomeUProfileController extends ChangeNotifier {
       );
       _profile = updated;
       return true;
-    } catch (_) {
+    } catch (e) {
+      debugPrint('HomeUProfileController: [ERROR] uploadAvatar failed: $e');
       _errorMessage = errorUploadAvatar;
       return false;
     } finally {
@@ -147,7 +180,8 @@ class HomeUProfileController extends ChangeNotifier {
       _preferences = saved;
       _selectedLanguageCode = _extractLanguageCode(saved);
       return true;
-    } catch (_) {
+    } catch (e) {
+      debugPrint('HomeUProfileController: [ERROR] updateLanguagePreference failed: $e');
       _errorMessage = errorSaveLanguage;
       return false;
     } finally {
@@ -170,7 +204,8 @@ class HomeUProfileController extends ChangeNotifier {
       _preferences = saved;
       _isBiometricLoginEnabled = _repository.readBiometricEnabled(saved);
       return true;
-    } catch (_) {
+    } catch (e) {
+      debugPrint('HomeUProfileController: [ERROR] updateBiometricPreference failed: $e');
       _errorMessage = errorSaveBiometric;
       return false;
     } finally {
