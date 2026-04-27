@@ -238,6 +238,12 @@ abstract class AppLocalizations {
   /// **'Owner'**
   String get profileRoleOwner;
 
+  /// No description provided for @profileRoleAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin'**
+  String get profileRoleAdmin;
+
   /// No description provided for @profileRoleTenant.
   ///
   /// In en, this message translates to:
@@ -321,6 +327,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Role'**
   String get profileFieldRole;
+
+  /// No description provided for @profileFieldAccountStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Account Status'**
+  String get profileFieldAccountStatus;
+
+  /// No description provided for @profileFieldRiskStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Risk Status'**
+  String get profileFieldRiskStatus;
+
+  /// No description provided for @profileAccountStatusActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get profileAccountStatusActive;
+
+  /// No description provided for @profileAccountStatusSuspended.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspended'**
+  String get profileAccountStatusSuspended;
+
+  /// No description provided for @profileAccountStatusRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed'**
+  String get profileAccountStatusRemoved;
+
+  /// No description provided for @profileRiskStatusNormal.
+  ///
+  /// In en, this message translates to:
+  /// **'Normal'**
+  String get profileRiskStatusNormal;
+
+  /// No description provided for @profileRiskStatusSuspicious.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspicious'**
+  String get profileRiskStatusSuspicious;
+
+  /// No description provided for @profileRiskStatusHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'High Risk'**
+  String get profileRiskStatusHigh;
 
   /// No description provided for @profileEditSheetTitle.
   ///

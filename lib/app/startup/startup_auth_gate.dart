@@ -5,7 +5,7 @@ import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/startup/startup_session_resolver.dart';
 import 'package:homeu/pages/home/home_tenant_shell_screen.dart';
 import 'package:homeu/pages/home/home_owner_shell_screen.dart';
-import 'package:homeu/pages/home/admin_dashboard_screen.dart';
+import 'package:homeu/pages/home/home_admin_shell_screen.dart';
 import 'package:homeu/pages/home/update_password_screen.dart';
 import 'package:homeu/pages/splash_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -119,7 +119,7 @@ class _HomeUStartupAuthGateState extends State<HomeUStartupAuthGate> {
       ),
       HomeUStartupDestination.tenantFlow => const HomeUTenantShellScreen(),
       HomeUStartupDestination.ownerFlow => const HomeUOwnerShellScreen(),
-      HomeUStartupDestination.adminFlow => const HomeUAdminDashboardScreen(),
+      HomeUStartupDestination.adminFlow => const HomeUAdminShellScreen(),
     };
   }
 }
