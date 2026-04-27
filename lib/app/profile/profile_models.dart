@@ -1,16 +1,8 @@
 import 'package:homeu/app/auth/homeu_session.dart';
 
-enum HomeURiskStatus {
-  normal,
-  suspicious,
-  highRisk,
-}
+enum HomeURiskStatus { normal, suspicious, highRisk }
 
-enum HomeUAccountStatus {
-  active,
-  suspended,
-  removed,
-}
+enum HomeUAccountStatus { active, suspended, removed }
 
 class HomeUProfileData {
   const HomeUProfileData({
@@ -70,7 +62,7 @@ class HomeUProfileData {
     final lower = role?.trim().toLowerCase();
     if (lower == 'owner') return HomeURole.owner;
     if (lower == 'admin') return HomeURole.admin;
-    return HomeURole.tenant;
+    return HomeUSession.loggedInRole ?? HomeURole.tenant;
   }
 
   static HomeURiskStatus mapRiskStatus(String? status) {
@@ -90,7 +82,6 @@ class HomeUProfileData {
   Map<String, dynamic> toCacheMap() {
     return {
       'user_id': userId,
-      'id': userId,
       'full_name': fullName,
       'email': email,
       'phone_number': phoneNumber,
@@ -107,13 +98,20 @@ class HomeUProfileData {
 
   factory HomeUProfileData.fromCacheMap(Map<String, dynamic> map) {
     final id = (map['id'] ?? map['user_id'])?.toString() ?? '';
+    final fullName = map['full_name']?.toString() ?? '';
+    final email = map['email']?.toString() ?? '';
+    final phone = map['phone_number']?.toString() ?? '';
+    final profileImageUrl = map['profile_image_url']?.toString();
     return HomeUProfileData(
       userId: id,
-      fullName: map['full_name']?.toString() ?? '',
-      email: map['email']?.toString() ?? '',
-      phoneNumber: map['phone_number']?.toString() ?? '',
+      fullName: fullName,
+      email: email,
+      phoneNumber: phone,
       role: mapRole(map['role']?.toString()),
-      profileImageUrl: map['profile_image_url']?.toString(),
+      profileImageUrl:
+          profileImageUrl != null && profileImageUrl.trim().isNotEmpty
+          ? profileImageUrl
+          : null,
       riskStatus: mapRiskStatus(map['risk_status']?.toString()),
       accountStatus: mapAccountStatus(map['account_status']?.toString()),
       riskReason: map['risk_reason']?.toString(),

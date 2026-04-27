@@ -23,7 +23,14 @@ class HomeUAuthService {
     return AppSupabase.auth.onAuthStateChange;
   }
 
-  String? get currentUserId => currentSession?.user.id;
+  User? get currentUser {
+    if (!AppSupabase.isInitialized) {
+      return null;
+    }
+    return AppSupabase.auth.currentUser ?? currentSession?.user;
+  }
+
+  String? get currentUserId => currentUser?.id;
 
   Future<HomeURole?> fetchCurrentUserRole() async {
     final userId = currentUserId;

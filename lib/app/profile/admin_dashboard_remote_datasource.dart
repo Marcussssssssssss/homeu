@@ -57,4 +57,25 @@ class AdminDashboardRemoteDataSource {
       return 0;
     }
   }
+
+  Future<int> fetchPendingComplaints() async {
+    if (!AppSupabase.isInitialized) {
+      return 0;
+    }
+
+    try {
+      final dynamic response = await AppSupabase.client
+          .from('property_reports')
+          .select('report_id')
+          .eq('status', 'pending');
+
+      if (response is List) {
+        return response.length;
+      }
+
+      return 0;
+    } catch (_) {
+      return 0;
+    }
+  }
 }

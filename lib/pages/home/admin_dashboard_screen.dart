@@ -7,12 +7,21 @@ import 'package:homeu/app/profile/admin_dashboard_repository.dart';
 import 'package:homeu/pages/home/admin_owner_moderation_screen.dart';
 import 'package:homeu/pages/home/admin_management_screen.dart';
 import 'package:homeu/pages/home/admin_audit_logs_screen.dart';
+import 'package:homeu/pages/home/profile_screen.dart';
 
 class HomeUAdminDashboardScreen extends StatefulWidget {
-  const HomeUAdminDashboardScreen({super.key});
+  const HomeUAdminDashboardScreen({
+    super.key,
+    this.showBottomNavigationBar = true,
+    this.onNavigateToTab,
+  });
+
+  final bool showBottomNavigationBar;
+  final ValueChanged<int>? onNavigateToTab;
 
   @override
-  State<HomeUAdminDashboardScreen> createState() => _HomeUAdminDashboardScreenState();
+  State<HomeUAdminDashboardScreen> createState() =>
+      _HomeUAdminDashboardScreenState();
 }
 
 class _HomeUAdminDashboardScreenState extends State<HomeUAdminDashboardScreen> {
@@ -45,11 +54,49 @@ class _HomeUAdminDashboardScreenState extends State<HomeUAdminDashboardScreen> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _errorMessage = 'Failed to load system overview. Please check your connection.';
+          _errorMessage =
+              'Failed to load system overview. Please check your connection.';
           _isLoading = false;
         });
       }
     }
+  }
+
+  void _openAdminProfile() {
+    if (widget.onNavigateToTab != null) {
+      widget.onNavigateToTab!(4);
+      return;
+    }
+
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => const HomeUProfileScreen(role: HomeURole.admin),
+      ),
+    );
+  }
+
+  void _openReportsModeration() {
+    if (widget.onNavigateToTab != null) {
+      widget.onNavigateToTab!(1);
+      return;
+    }
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => const HomeUAdminReportsModerationScreen(),
+      ),
+    );
+  }
+
+  void _openAuditLogs() {
+    if (widget.onNavigateToTab != null) {
+      widget.onNavigateToTab!(3);
+      return;
+    }
+
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const HomeUAdminAuditLogsScreen()),
+    );
   }
 
   @override
@@ -109,9 +156,12 @@ class _HomeUAdminDashboardScreenState extends State<HomeUAdminDashboardScreen> {
                     ),
                   )
                 else if (_errorMessage != null)
-                  _ErrorCard(message: _errorMessage!, onRetry: _loadDashboardData)
+                  _ErrorCard(
+                    message: _errorMessage!,
+                    onRetry: _loadDashboardData,
+                  )
                 else
-                // Summary Cards Grid
+                  // Summary Cards Grid
                   GridView.count(
                     crossAxisCount: 2,
                     shrinkWrap: true,
@@ -139,8 +189,8 @@ class _HomeUAdminDashboardScreenState extends State<HomeUAdminDashboardScreen> {
                         color: Colors.teal,
                       ),
                       _SummaryCard(
-                        title: 'Complaints',
-                        value: _stats.totalComplaints.toString(),
+                        title: 'Pending Reports',
+                        value: _stats.pendingComplaints.toString(),
                         icon: Icons.report_problem_outlined,
                         color: Colors.orange,
                       ),
@@ -161,14 +211,11 @@ class _HomeUAdminDashboardScreenState extends State<HomeUAdminDashboardScreen> {
 
                 // Menu Options
                 _ManagementTile(
-                  title: 'Owner Moderation',
-                  subtitle: 'Review and flag owner activities',
+                  title: 'Reports & Moderation',
+                  subtitle:
+                      '${_stats.pendingComplaints} pending of ${_stats.totalComplaints} total complaints',
                   icon: Icons.gavel_rounded,
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const HomeUAdminOwnerModerationScreen()),
-                    );
-                  },
+                  onTap: _openReportsModeration,
                 ),
                 _ManagementTile(
                   title: 'Admin Management',
@@ -176,7 +223,9 @@ class _HomeUAdminDashboardScreenState extends State<HomeUAdminDashboardScreen> {
                   icon: Icons.admin_panel_settings_outlined,
                   onTap: () {
                     Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const HomeUAdminManagementScreen()),
+                      MaterialPageRoute(
+                        builder: (_) => const HomeUAdminManagementScreen(),
+                      ),
                     );
                   },
                 ),
@@ -184,11 +233,7 @@ class _HomeUAdminDashboardScreenState extends State<HomeUAdminDashboardScreen> {
                   title: 'Audit Logs',
                   subtitle: 'View system-wide activity logs',
                   icon: Icons.history_rounded,
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const HomeUAdminAuditLogsScreen()),
-                    );
-                  },
+                  onTap: _openAuditLogs,
                 ),
               ],
             ),
@@ -216,7 +261,11 @@ class _ErrorCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Text(message, textAlign: TextAlign.center, style: const TextStyle(color: Colors.red)),
+          Text(
+            message,
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: Colors.red),
+          ),
           const SizedBox(height: 12),
           TextButton.icon(
             onPressed: onRetry,
@@ -263,9 +312,7 @@ class _SummaryCard extends StatelessWidget {
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Icon(icon, color: color, size: 24),
-            ],
+            children: [Icon(icon, color: color, size: 24)],
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,

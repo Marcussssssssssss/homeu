@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/profile/profile_models.dart';
 import 'package:homeu/core/supabase/app_supabase.dart';
@@ -15,29 +16,62 @@ class HomeUProfileRemoteDataSource {
     required String fallbackEmail,
   }) async {
     if (!AppSupabase.isInitialized) {
+      debugPrint('HomeUProfileRemoteDataSource: Supabase not initialized.');
       return null;
     }
 
-    final dynamic row = await AppSupabase.client
-        .from('profiles')
-        .select('id, full_name, email, phone_number, role, profile_image_url')
-        .eq('id', userId)
-        .maybeSingle();
+    debugPrint('HomeUProfileRemoteDataSource: fetchProfile(id=$userId)');
+    final dynamic row;
+    try {
+      row = await AppSupabase.client
+          .from('profiles')
+          .select(
+            'id, full_name, email, phone_number, role, profile_image_url, '
+            'risk_status, account_status, risk_reason, moderated_by, moderated_at',
+          )
+          .eq('id', userId)
+          .maybeSingle();
+    } catch (e) {
+      debugPrint(
+        'HomeUProfileRemoteDataSource: Supabase profile fetch error: $e',
+      );
+      rethrow;
+    }
 
     if (row is! Map<String, dynamic>) {
+      debugPrint(
+        'HomeUProfileRemoteDataSource: No profile found for id=$userId',
+      );
       return null;
     }
 
-    return HomeUProfileData(
-      userId: userId,
-      fullName: row['full_name']?.toString() ?? '',
-      email: (row['email']?.toString().trim().isNotEmpty ?? false)
-          ? row['email'].toString()
-          : fallbackEmail,
-      phoneNumber: row['phone_number']?.toString() ?? '',
-      role: HomeUProfileData.mapRole(row['role']?.toString()),
-      profileImageUrl: row['profile_image_url']?.toString(),
-    );
+    try {
+      final imageUrl = row['profile_image_url']?.toString();
+      return HomeUProfileData(
+        userId: userId,
+        fullName: row['full_name']?.toString() ?? '',
+        email: (row['email']?.toString().trim().isNotEmpty ?? false)
+            ? row['email'].toString()
+            : fallbackEmail,
+        phoneNumber: row['phone_number']?.toString() ?? '',
+        role: HomeUProfileData.mapRole(row['role']?.toString()),
+        profileImageUrl: imageUrl != null && imageUrl.trim().isNotEmpty
+            ? imageUrl
+            : null,
+        riskStatus: HomeUProfileData.mapRiskStatus(
+          row['risk_status']?.toString(),
+        ),
+        accountStatus: HomeUProfileData.mapAccountStatus(
+          row['account_status']?.toString(),
+        ),
+        riskReason: row['risk_reason']?.toString(),
+        moderatedBy: row['moderated_by']?.toString(),
+        moderatedAt: row['moderated_at']?.toString(),
+      );
+    } catch (e) {
+      debugPrint('HomeUProfileRemoteDataSource: Profile parsing error: $e');
+      rethrow;
+    }
   }
 
   Future<Map<String, dynamic>?> fetchUserPreferences(String userId) async {
@@ -66,10 +100,7 @@ class HomeUProfileRemoteDataSource {
       return Map<String, dynamic>.from(preferences);
     }
 
-    final payload = <String, dynamic>{
-      'user_id': userId,
-      ...preferences,
-    };
+    final payload = <String, dynamic>{'user_id': userId, ...preferences};
 
     final dynamic row = await AppSupabase.client
         .from('user_preferences')
@@ -102,10 +133,14 @@ class HomeUProfileRemoteDataSource {
         .from('profiles')
         .update(payload)
         .eq('id', userId)
-        .select('id, full_name, email, phone_number, role, profile_image_url')
+        .select(
+          'id, full_name, email, phone_number, role, profile_image_url, '
+          'risk_status, account_status, risk_reason, moderated_by, moderated_at',
+        )
         .single();
 
     final map = row as Map<String, dynamic>;
+    final imageUrl = map['profile_image_url']?.toString();
     return HomeUProfileData(
       userId: userId,
       fullName: map['full_name']?.toString() ?? fullName,
@@ -113,8 +148,21 @@ class HomeUProfileRemoteDataSource {
           ? map['email'].toString()
           : fallbackEmail,
       phoneNumber: map['phone_number']?.toString() ?? phoneNumber,
-      role: map['role'] == null ? fallbackRole : HomeUProfileData.mapRole(map['role'].toString()),
-      profileImageUrl: map['profile_image_url']?.toString(),
+      role: map['role'] == null
+          ? fallbackRole
+          : HomeUProfileData.mapRole(map['role'].toString()),
+      profileImageUrl: imageUrl != null && imageUrl.trim().isNotEmpty
+          ? imageUrl
+          : null,
+      riskStatus: HomeUProfileData.mapRiskStatus(
+        map['risk_status']?.toString(),
+      ),
+      accountStatus: HomeUProfileData.mapAccountStatus(
+        map['account_status']?.toString(),
+      ),
+      riskReason: map['risk_reason']?.toString(),
+      moderatedBy: map['moderated_by']?.toString(),
+      moderatedAt: map['moderated_at']?.toString(),
     );
   }
 
@@ -125,13 +173,16 @@ class HomeUProfileRemoteDataSource {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     final avatarStoragePath = '$userId/avatar_$timestamp.jpg';
 
-    await AppSupabase.client.storage.from(_avatarBucket).upload(
+    await AppSupabase.client.storage
+        .from(_avatarBucket)
+        .upload(
           avatarStoragePath,
           File(filePath),
           fileOptions: const FileOptions(contentType: 'image/jpeg'),
         );
 
-    return AppSupabase.client.storage.from(_avatarBucket).getPublicUrl(avatarStoragePath);
+    return AppSupabase.client.storage
+        .from(_avatarBucket)
+        .getPublicUrl(avatarStoragePath);
   }
 }
-

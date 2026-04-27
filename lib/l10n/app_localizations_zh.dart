@@ -80,6 +80,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get profileRoleOwner => '房东';
 
   @override
+  String get profileRoleAdmin => '管理员';
+
+  @override
   String get profileRoleTenant => '租客';
 
   @override
@@ -120,6 +123,30 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get profileFieldRole => '角色';
+
+  @override
+  String get profileFieldAccountStatus => '账号状态';
+
+  @override
+  String get profileFieldRiskStatus => '风险状态';
+
+  @override
+  String get profileAccountStatusActive => '正常';
+
+  @override
+  String get profileAccountStatusSuspended => '已停用';
+
+  @override
+  String get profileAccountStatusRemoved => '已移除';
+
+  @override
+  String get profileRiskStatusNormal => '正常';
+
+  @override
+  String get profileRiskStatusSuspicious => '可疑';
+
+  @override
+  String get profileRiskStatusHigh => '高风险';
 
   @override
   String get profileEditSheetTitle => '编辑资料';

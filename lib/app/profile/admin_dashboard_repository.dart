@@ -13,12 +13,14 @@ class AdminDashboardRepository {
     final totalOwners = await _remoteDataSource.fetchTotalByRole('owner');
     final totalTenants = await _remoteDataSource.fetchTotalByRole('tenant');
     final totalComplaints = await _remoteDataSource.fetchTotalComplaints();
+    final pendingComplaints = await _remoteDataSource.fetchPendingComplaints();
 
     return AdminDashboardStats(
       totalUsers: totalUsers,
       totalOwners: totalOwners,
       totalTenants: totalTenants,
       totalComplaints: totalComplaints,
+      pendingComplaints: pendingComplaints,
     );
   }
 }

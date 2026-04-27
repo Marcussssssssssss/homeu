@@ -9,7 +9,7 @@ import 'package:homeu/core/localization/homeu_l10n.dart';
 import 'package:homeu/core/theme/homeu_app_theme.dart';
 import 'package:homeu/pages/home/home_tenant_shell_screen.dart';
 import 'package:homeu/pages/home/home_owner_shell_screen.dart';
-import 'package:homeu/pages/home/admin_dashboard_screen.dart';
+import 'package:homeu/pages/home/home_admin_shell_screen.dart';
 import 'package:homeu/pages/auth/register_screen.dart';
 
 import 'forgot_password_screen.dart';
@@ -78,7 +78,7 @@ class _HomeULoginScreenState extends State<HomeULoginScreen> {
     Widget destination;
     if (role == HomeURole.admin) {
       debugPrint('HomeULoginScreen: [DEBUG] Destination: Admin Dashboard');
-      destination = const HomeUAdminDashboardScreen();
+      destination = const HomeUAdminShellScreen();
     } else if (role == HomeURole.owner) {
       debugPrint('HomeULoginScreen: [DEBUG] Destination: Owner Shell');
       destination = const HomeUOwnerShellScreen();

@@ -9,7 +9,11 @@ class HomeURoleBlockedScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final roleLabel = requiredRole == HomeURole.owner ? 'Owner' : 'Tenant';
+    final roleLabel = switch (requiredRole) {
+      HomeURole.owner => 'Owner',
+      HomeURole.admin => 'Admin',
+      HomeURole.tenant => 'Tenant',
+    };
 
     return Scaffold(
       appBar: AppBar(title: const Text('Access Restricted')),
@@ -19,7 +23,11 @@ class HomeURoleBlockedScreen extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.lock_outline_rounded, size: 46, color: Color(0xFF1E3A8A)),
+              const Icon(
+                Icons.lock_outline_rounded,
+                size: 46,
+                color: Color(0xFF1E3A8A),
+              ),
               const SizedBox(height: 12),
               Text(
                 'This page is available to $roleLabel users only.',
@@ -44,7 +52,9 @@ class HomeURoleBlockedScreen extends StatelessWidget {
               ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute<void>(builder: (_) => const HomeULoginScreen()),
+                    MaterialPageRoute<void>(
+                      builder: (_) => const HomeULoginScreen(),
+                    ),
                     (route) => false,
                   );
                 },
@@ -57,4 +67,3 @@ class HomeURoleBlockedScreen extends StatelessWidget {
     );
   }
 }
-
