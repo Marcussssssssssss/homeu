@@ -37,3 +37,17 @@ If values remain placeholders, app UI still starts, but Supabase is skipped safe
 flutter pub get
 flutter run
 ```
+
+### Property Report RLS (Supabase)
+
+`public.property_reports` insert requires an authenticated tenant and `tenant_id = auth.uid()`.
+
+```sql
+-- Allow authenticated users to insert reports only for themselves.
+create policy "tenant_can_insert_own_property_report"
+on public.property_reports
+for insert
+to authenticated
+with check (tenant_id = auth.uid());
+```
+

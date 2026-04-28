@@ -82,6 +82,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileRoleOwner => 'Owner';
 
   @override
+  String get profileRoleAdmin => 'Admin';
+
+  @override
   String get profileRoleTenant => 'Tenant';
 
   @override
@@ -123,6 +126,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileFieldRole => 'Role';
+
+  @override
+  String get profileFieldAccountStatus => 'Account Status';
+
+  @override
+  String get profileFieldRiskStatus => 'Risk Status';
+
+  @override
+  String get profileAccountStatusActive => 'Active';
+
+  @override
+  String get profileAccountStatusSuspended => 'Suspended';
+
+  @override
+  String get profileAccountStatusRemoved => 'Removed';
+
+  @override
+  String get profileRiskStatusNormal => 'Normal';
+
+  @override
+  String get profileRiskStatusSuspicious => 'Suspicious';
+
+  @override
+  String get profileRiskStatusHigh => 'High Risk';
 
   @override
   String get profileEditSheetTitle => 'Edit Profile';

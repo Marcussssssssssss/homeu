@@ -1,16 +1,8 @@
 import 'package:homeu/app/auth/homeu_session.dart';
 
-enum HomeURiskStatus {
-  normal,
-  suspicious,
-  highRisk,
-}
+enum HomeURiskStatus { normal, suspicious, highRisk }
 
-enum HomeUAccountStatus {
-  active,
-  suspended,
-  removed,
-}
+enum HomeUAccountStatus { active, suspended, removed }
 
 class HomeUProfileData {
   const HomeUProfileData({
@@ -22,6 +14,9 @@ class HomeUProfileData {
     this.profileImageUrl,
     this.riskStatus = HomeURiskStatus.normal,
     this.accountStatus = HomeUAccountStatus.active,
+    this.riskReason,
+    this.moderatedBy,
+    this.moderatedAt,
   });
 
   final String userId;
@@ -32,6 +27,9 @@ class HomeUProfileData {
   final String? profileImageUrl;
   final HomeURiskStatus riskStatus;
   final HomeUAccountStatus accountStatus;
+  final String? riskReason;
+  final String? moderatedBy;
+  final String? moderatedAt;
 
   HomeUProfileData copyWith({
     String? fullName,
@@ -41,6 +39,9 @@ class HomeUProfileData {
     String? profileImageUrl,
     HomeURiskStatus? riskStatus,
     HomeUAccountStatus? accountStatus,
+    String? riskReason,
+    String? moderatedBy,
+    String? moderatedAt,
   }) {
     return HomeUProfileData(
       userId: userId,
@@ -51,6 +52,9 @@ class HomeUProfileData {
       profileImageUrl: profileImageUrl ?? this.profileImageUrl,
       riskStatus: riskStatus ?? this.riskStatus,
       accountStatus: accountStatus ?? this.accountStatus,
+      riskReason: riskReason ?? this.riskReason,
+      moderatedBy: moderatedBy ?? this.moderatedBy,
+      moderatedAt: moderatedAt ?? this.moderatedAt,
     );
   }
 
@@ -58,7 +62,7 @@ class HomeUProfileData {
     final lower = role?.trim().toLowerCase();
     if (lower == 'owner') return HomeURole.owner;
     if (lower == 'admin') return HomeURole.admin;
-    return HomeURole.tenant;
+    return HomeUSession.loggedInRole ?? HomeURole.tenant;
   }
 
   static HomeURiskStatus mapRiskStatus(String? status) {
@@ -85,20 +89,34 @@ class HomeUProfileData {
       'profile_image_url': profileImageUrl,
       'risk_status': riskStatus.name,
       'account_status': accountStatus.name,
+      'risk_reason': riskReason,
+      'moderated_by': moderatedBy,
+      'moderated_at': moderatedAt,
       'updated_at': DateTime.now().millisecondsSinceEpoch,
     };
   }
 
   factory HomeUProfileData.fromCacheMap(Map<String, dynamic> map) {
+    final id = (map['id'] ?? map['user_id'])?.toString() ?? '';
+    final fullName = map['full_name']?.toString() ?? '';
+    final email = map['email']?.toString() ?? '';
+    final phone = map['phone_number']?.toString() ?? '';
+    final profileImageUrl = map['profile_image_url']?.toString();
     return HomeUProfileData(
-      userId: map['user_id']?.toString() ?? '',
-      fullName: map['full_name']?.toString() ?? '',
-      email: map['email']?.toString() ?? '',
-      phoneNumber: map['phone_number']?.toString() ?? '',
+      userId: id,
+      fullName: fullName,
+      email: email,
+      phoneNumber: phone,
       role: mapRole(map['role']?.toString()),
-      profileImageUrl: map['profile_image_url']?.toString(),
+      profileImageUrl:
+          profileImageUrl != null && profileImageUrl.trim().isNotEmpty
+          ? profileImageUrl
+          : null,
       riskStatus: mapRiskStatus(map['risk_status']?.toString()),
       accountStatus: mapAccountStatus(map['account_status']?.toString()),
+      riskReason: map['risk_reason']?.toString(),
+      moderatedBy: map['moderated_by']?.toString(),
+      moderatedAt: map['moderated_at']?.toString(),
     );
   }
 }

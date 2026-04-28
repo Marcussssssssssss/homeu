@@ -3,6 +3,7 @@ import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/profile/profile_local_datasource.dart';
 import 'package:homeu/app/profile/profile_models.dart';
 import 'package:homeu/app/profile/profile_remote_datasource.dart';
+import 'package:flutter/foundation.dart';
 
 class HomeUProfileRepository {
   HomeUProfileRepository({
@@ -37,7 +38,10 @@ class HomeUProfileRepository {
 
   String? get currentUserId => _authService.currentUserId;
 
-  String get currentUserEmail => _authService.currentSession?.user.email ?? '';
+  String get currentUserEmail =>
+      _authService.currentUser?.email ??
+      _authService.currentSession?.user.email ??
+      '';
 
   Future<HomeUProfileData?> getCachedProfile() async {
     final userId = currentUserId;
@@ -58,16 +62,32 @@ class HomeUProfileRepository {
   Future<HomeUProfileData?> fetchLatestProfile() async {
     final userId = currentUserId;
     if (userId == null || userId.isEmpty) {
+      debugPrint(
+        'HomeUProfileRepository: currentUserId is null/empty during profile fetch.',
+      );
       return null;
     }
 
+    debugPrint(
+      'HomeUProfileRepository: Fetching remote profile for id=$userId',
+    );
     final profile = await _remoteDataSource.fetchProfile(
       userId: userId,
       fallbackEmail: currentUserEmail,
     );
 
     if (profile != null) {
-      await _localDataSource.saveProfile(profile);
+      debugPrint(
+        'HomeUProfileRepository: Remote profile success (role=${profile.role.name}). '
+        'Saving to cache.',
+      );
+      try {
+        await _localDataSource.saveProfile(profile);
+      } catch (e) {
+        debugPrint('HomeUProfileRepository: SQLite cache save error: $e');
+      }
+    } else {
+      debugPrint('HomeUProfileRepository: Remote profile returned null.');
     }
 
     return profile;
@@ -81,10 +101,14 @@ class HomeUProfileRepository {
 
     final preferences = await _remoteDataSource.fetchUserPreferences(userId);
     if (preferences != null) {
-      await _localDataSource.savePreferences(
-        userId: userId,
-        preferences: preferences,
-      );
+      try {
+        await _localDataSource.savePreferences(
+          userId: userId,
+          preferences: preferences,
+        );
+      } catch (e) {
+        debugPrint('HomeUProfileRepository: SQLite preferences save error: $e');
+      }
     }
 
     return preferences;
@@ -110,7 +134,13 @@ class HomeUProfileRepository {
       fallbackRole: fallbackRole,
     );
 
-    await _localDataSource.saveProfile(updated);
+    try {
+      await _localDataSource.saveProfile(updated);
+    } catch (e) {
+      debugPrint(
+        'HomeUProfileRepository: SQLite cache save error after updateProfile: $e',
+      );
+    }
     return updated;
   }
 
@@ -139,7 +169,13 @@ class HomeUProfileRepository {
       fallbackRole: fallbackRole,
     );
 
-    await _localDataSource.saveProfile(updated);
+    try {
+      await _localDataSource.saveProfile(updated);
+    } catch (e) {
+      debugPrint(
+        'HomeUProfileRepository: SQLite cache save error after avatar upload: $e',
+      );
+    }
     return updated;
   }
 

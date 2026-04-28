@@ -8,7 +8,7 @@ class HomeUProfileLocalDataSource {
   HomeUProfileLocalDataSource();
 
   static const _dbName = 'homeu_local_cache.db';
-  static const _dbVersion = 1;
+  static const _dbVersion = 3;
   static const _profileTable = 'cached_profiles';
   static const _preferenceTable = 'cached_user_preferences';
   static const _globalSettingsTable = 'app_global_settings';
@@ -34,6 +34,11 @@ class HomeUProfileLocalDataSource {
             phone_number TEXT NOT NULL,
             role TEXT NOT NULL,
             profile_image_url TEXT,
+            risk_status TEXT NOT NULL DEFAULT 'normal',
+            account_status TEXT NOT NULL DEFAULT 'active',
+            risk_reason TEXT,
+            moderated_by TEXT,
+            moderated_at TEXT,
             updated_at INTEGER NOT NULL
           )
         ''');
@@ -52,6 +57,42 @@ class HomeUProfileLocalDataSource {
             value TEXT NOT NULL
           )
         ''');
+      },
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 2) {
+          await _addColumnIfNotExists(
+            db: db,
+            table: _profileTable,
+            column: 'risk_status',
+            definition: 'TEXT NOT NULL DEFAULT "normal"',
+          );
+          await _addColumnIfNotExists(
+            db: db,
+            table: _profileTable,
+            column: 'account_status',
+            definition: 'TEXT NOT NULL DEFAULT "active"',
+          );
+        }
+        if (oldVersion < 3) {
+          await _addColumnIfNotExists(
+            db: db,
+            table: _profileTable,
+            column: 'risk_reason',
+            definition: 'TEXT',
+          );
+          await _addColumnIfNotExists(
+            db: db,
+            table: _profileTable,
+            column: 'moderated_by',
+            definition: 'TEXT',
+          );
+          await _addColumnIfNotExists(
+            db: db,
+            table: _profileTable,
+            column: 'moderated_at',
+            definition: 'TEXT',
+          );
+        }
       },
     );
 
@@ -113,15 +154,11 @@ class HomeUProfileLocalDataSource {
     required Map<String, dynamic> preferences,
   }) async {
     final db = await database;
-    await db.insert(
-      _preferenceTable,
-      {
-        'user_id': userId,
-        'raw_json': jsonEncode(preferences),
-        'updated_at': DateTime.now().millisecondsSinceEpoch,
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await db.insert(_preferenceTable, {
+      'user_id': userId,
+      'raw_json': jsonEncode(preferences),
+      'updated_at': DateTime.now().millisecondsSinceEpoch,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   Future<String?> getGlobalSetting(String key) async {
@@ -142,11 +179,10 @@ class HomeUProfileLocalDataSource {
 
   Future<void> saveGlobalSetting(String key, String value) async {
     final db = await database;
-    await db.insert(
-      _globalSettingsTable,
-      {'key': key, 'value': value},
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await db.insert(_globalSettingsTable, {
+      'key': key,
+      'value': value,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   Future<void> clearAuthData() async {
@@ -161,5 +197,20 @@ class HomeUProfileLocalDataSource {
     await db.delete(_profileTable);
     await db.delete(_preferenceTable);
     await db.delete(_globalSettingsTable);
+  }
+
+  Future<void> _addColumnIfNotExists({
+    required Database db,
+    required String table,
+    required String column,
+    required String definition,
+  }) async {
+    final columns = await db.rawQuery('PRAGMA table_info($table)');
+    final exists = columns.any(
+      (entry) => entry['name']?.toString().trim() == column,
+    );
+    if (!exists) {
+      await db.execute('ALTER TABLE $table ADD COLUMN $column $definition');
+    }
   }
 }
