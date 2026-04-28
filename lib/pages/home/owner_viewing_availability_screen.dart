@@ -28,12 +28,10 @@ class _HomeUOwnerViewingAvailabilityScreenState extends State<HomeUOwnerViewingA
   }
 
   bool _isDayUnavailable(DateTime day) {
-    // Use UTC to treat year/month/day as fixed wall time, avoiding timezone shifts.
     final d = DateTime.utc(day.year, day.month, day.day);
     final now = DateTime.now();
     final today = DateTime.utc(now.year, now.month, now.day);
 
-    // 1. Block past dates
     if (d.isBefore(today)) return true;
 
     for (final period in widget.property.bookedPeriods) {
@@ -50,7 +48,6 @@ class _HomeUOwnerViewingAvailabilityScreenState extends State<HomeUOwnerViewingA
     for (final slot in _slots) {
       final status = slot['status'];
       if (status == 'Booked' || status == 'Approved') {
-        // Parse without .toLocal() to keep the selected wall time.
         final slotDate = DateTime.parse(slot['start_time']);
         final sd = DateTime.utc(slotDate.year, slotDate.month, slotDate.day);
         if (d.isAtSameMomentAs(sd)) {
@@ -72,7 +69,21 @@ class _HomeUOwnerViewingAvailabilityScreenState extends State<HomeUOwnerViewingA
 
   Future<void> _fetchSlots() async {
     setState(() => _isLoading = true);
+
+    final now = DateTime.now();
+    final nowWall = DateTime.utc(now.year, now.month, now.day, now.hour, now.minute);
+
     try {
+      try {
+        await AppSupabase.client
+            .from('owner_availabilities')
+            .delete()
+            .eq('property_id', widget.property.id)
+            .lt('end_time', nowWall.toIso8601String());
+      } catch (e) {
+        debugPrint('Auto-cleanup DB failed: $e');
+      }
+
       final response = await AppSupabase.client
           .from('owner_availabilities')
           .select()
@@ -83,17 +94,21 @@ class _HomeUOwnerViewingAvailabilityScreenState extends State<HomeUOwnerViewingA
       final List<Map<String, dynamic>> validSlots = [];
       final List<String> slotsToDelete = [];
 
-      final now = DateTime.now();
-      final nowWall = DateTime.utc(now.year, now.month, now.day, now.hour, now.minute);
-
       for (final slot in fetchedSlots) {
-        // Parse without .toLocal() to maintain fixed wall time.
         final startTime = DateTime.parse(slot['start_time']);
+
+        final endTimeRaw = slot['end_time'];
+        final endTime = endTimeRaw != null ? DateTime.parse(endTimeRaw) : startTime;
         final status = slot['status'];
 
-        if (status == 'Available') {
-          bool isExpired = startTime.isBefore(nowWall);
+        if (endTime.isBefore(nowWall)) {
+          if (status == 'Available') {
+            slotsToDelete.add(slot['id'].toString());
+          }
+          continue;
+        }
 
+        if (status == 'Available') {
           bool isOccupied = false;
           for (final period in widget.property.bookedPeriods) {
             final startRaw = period['start']!;
@@ -108,7 +123,7 @@ class _HomeUOwnerViewingAvailabilityScreenState extends State<HomeUOwnerViewingA
             }
           }
 
-          if (isExpired || isOccupied) {
+          if (isOccupied) {
             slotsToDelete.add(slot['id'].toString());
             continue;
           }
@@ -137,7 +152,6 @@ class _HomeUOwnerViewingAvailabilityScreenState extends State<HomeUOwnerViewingA
   }
 
   Future<void> _addSlot() async {
-    // Use DateTime.utc to store the selected numbers as a fixed wall time in the DB.
     final startDateTime = DateTime.utc(
       _selectedDate.year, _selectedDate.month, _selectedDate.day,
       _startTime.hour, _startTime.minute,
@@ -194,7 +208,7 @@ class _HomeUOwnerViewingAvailabilityScreenState extends State<HomeUOwnerViewingA
       });
 
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Viewing slot added!')));
-      await _fetchSlots(); // Refresh list
+      await _fetchSlots();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to add slot.')));
     } finally {
@@ -211,7 +225,6 @@ class _HomeUOwnerViewingAvailabilityScreenState extends State<HomeUOwnerViewingA
     }
   }
 
-  // --- UI FORMATTING HELPERS ---
   String _formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year}';
   }
@@ -222,7 +235,7 @@ class _HomeUOwnerViewingAvailabilityScreenState extends State<HomeUOwnerViewingA
     return '$hour:$minute $period';
   }
   String _formatDateTimeString(String isoString) {
-    // Parse the ISO string and use it directly without .toLocal() to avoid timezone shifts.
+
     final date = DateTime.parse(isoString);
     final time = TimeOfDay.fromDateTime(date);
     return '${_formatDate(date)} at ${_formatTime(time)}';
@@ -359,7 +372,7 @@ class _HomeUOwnerViewingAvailabilityScreenState extends State<HomeUOwnerViewingA
                         style: TextStyle(color: isBooked ? Colors.green : Colors.grey.shade600, fontWeight: isBooked ? FontWeight.bold : FontWeight.normal),
                       ),
                       trailing: isBooked
-                          ? null // Hide delete button if already booked
+                          ? null
                           : IconButton(
                         icon: const Icon(Icons.delete_outline_rounded, color: Colors.red),
                         onPressed: () => _deleteSlot(slot['id']),

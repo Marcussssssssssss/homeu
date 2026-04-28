@@ -124,7 +124,7 @@ class _HomeUOwnerDashboardScreenState extends State<HomeUOwnerDashboardScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Hello, ${widget.ownerName}',
+                      'Hello, ${data.ownerName}',
                       style: const TextStyle(color: Color(0xFF1E3A8A), fontSize: 28, fontWeight: FontWeight.w700),
                     ),
                     const SizedBox(height: 6),
