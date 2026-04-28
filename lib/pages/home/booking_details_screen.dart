@@ -285,11 +285,11 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
 
     try {
       Payment? payment;
-      if (schedule.monthNumber == 1) {
-        payment = await _paymentDs.getLatestPayment(widget.booking.id);
-      } else {
-        payment = await _paymentDs.getPaymentByScheduleId(schedule.id);
-      }
+      // Fetch payment specifically by month_number and booking_id to avoid "latest payment" issues
+      payment = await _paymentDs.getPaymentByMonthAndBooking(
+        bookingId: widget.booking.id,
+        monthNumber: schedule.monthNumber,
+      );
       
       if (!mounted) return;
       Navigator.pop(context); // Pop loading
