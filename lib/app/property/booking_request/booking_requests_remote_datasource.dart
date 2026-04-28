@@ -141,7 +141,7 @@ class BookingRequestsRemoteDataSource {
         if (idsToCancel.isNotEmpty) {
           await AppSupabase.client
               .from('booking_requests')
-              .update({'status': 'Cancelled'})
+              .update({'status': 'Rejected'})
               .inFilter('id', idsToCancel);
         }
       }
