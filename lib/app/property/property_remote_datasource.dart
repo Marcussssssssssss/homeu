@@ -26,6 +26,9 @@ class PropertyRemoteDataSource {
 
     final propertyRows = rows.whereType<Map<String, dynamic>>().toList();
 
+    final propertyIds = propertyRows.map((row) => row['id']?.toString() ?? '').toList();
+    final highRiskMap = await _fetchHighRiskReportStatus(propertyIds);
+
     final ownerProfiles = await _fetchOwnerProfiles(
       propertyRows.map((row) => row['owner_id']?.toString() ?? ''),
     );
@@ -38,6 +41,7 @@ class PropertyRemoteDataSource {
         row,
         ownerProfiles,
         imageMap[propertyId] ?? const <String>[],
+        hasHighRiskReport: highRiskMap[propertyId] ?? false,
       );
       return property;
     }).where((property) => !property.isOwnerRestricted).toList();
@@ -70,6 +74,10 @@ class PropertyRemoteDataSource {
     }
 
     final propertyRows = rows.whereType<Map<String, dynamic>>().toList();
+    
+    final propertyIdsList = propertyRows.map((row) => row['id']?.toString() ?? '').toList();
+    final highRiskMap = await _fetchHighRiskReportStatus(propertyIdsList);
+
     final ownerProfiles = await _fetchOwnerProfiles(
       propertyRows.map((row) => row['owner_id']?.toString() ?? ''),
     );
@@ -83,6 +91,7 @@ class PropertyRemoteDataSource {
         row,
         ownerProfiles,
         imageMap[propertyId] ?? const <String>[],
+        hasHighRiskReport: highRiskMap[propertyId] ?? false,
       );
       if (property.id.isNotEmpty) {
         mapped[property.id] = property;
@@ -90,6 +99,31 @@ class PropertyRemoteDataSource {
     }
 
     return mapped;
+  }
+
+  Future<Map<String, bool>> _fetchHighRiskReportStatus(List<String> propertyIds) async {
+    if (propertyIds.isEmpty) return {};
+    
+    try {
+      final dynamic rows = await AppSupabase.client
+          .from('property_reports')
+          .select('property_id')
+          .inFilter('property_id', propertyIds)
+          .eq('risk_level', 'high')
+          .neq('status', 'dismissed');
+          
+      if (rows is List) {
+        final Map<String, bool> highRiskMap = {};
+        for (final row in rows.whereType<Map<String, dynamic>>()) {
+          final pid = row['property_id']?.toString();
+          if (pid != null) highRiskMap[pid] = true;
+        }
+        return highRiskMap;
+      }
+    } catch (e) {
+      debugPrint('Error fetching high risk reports: $e');
+    }
+    return {};
   }
 
   Future<Map<String, List<String>>> _fetchPropertyImages(
@@ -178,8 +212,9 @@ class PropertyRemoteDataSource {
   PropertyItem _mapRowToPropertyItem(
     Map<String, dynamic> row,
     Map<String, _OwnerProfile> ownerProfiles,
-    List<String> imageUrls,
-  ) {
+    List<String> imageUrls, {
+    bool hasHighRiskReport = false,
+  }) {
     final monthlyPrice = row['monthly_price'];
     final priceText = monthlyPrice == null
         ? 'RM 0 / month'
@@ -248,6 +283,7 @@ class PropertyRemoteDataSource {
       ownerAccountStatus:
           ownerProfile?.accountStatus ?? HomeUAccountStatus.active,
       ownerRiskReason: ownerProfile?.riskReason,
+      hasHighRiskReport: hasHighRiskReport,
       photoColors: const [
         Color(0xFF5D7FBF),
         Color(0xFF4A68A8),

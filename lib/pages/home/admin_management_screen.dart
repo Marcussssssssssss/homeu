@@ -4,6 +4,7 @@ import 'package:homeu/app/auth/role_access_widget.dart';
 import 'package:homeu/core/theme/homeu_app_theme.dart';
 import 'package:homeu/core/supabase/app_supabase.dart';
 import 'package:homeu/app/profile/profile_models.dart';
+import 'package:homeu/pages/home/create_admin_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class HomeUAdminManagementScreen extends StatefulWidget {
@@ -62,41 +63,20 @@ class _HomeUAdminManagementScreenState extends State<HomeUAdminManagementScreen>
     }
   }
 
-  Future<void> _promoteUserToAdmin(String email) async {
-    try {
-      final dynamic userRow = await AppSupabase.client
-          .from('profiles')
-          .select('id, full_name')
-          .eq('email', email)
-          .maybeSingle();
+  Future<void> _openCreateAdmin() async {
+    final created = await Navigator.of(context).push<bool>(
+      MaterialPageRoute<bool>(builder: (_) => const HomeUCreateAdminScreen()),
+    );
 
-      if (userRow == null) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('User with this email not found in HomeU.')),
-          );
-        }
-        return;
-      }
+    if (!mounted) {
+      return;
+    }
 
-      final userId = userRow['id'];
-      final fullName = userRow['full_name'] ?? 'Unknown';
-
-      await AppSupabase.client
-          .from('profiles')
-          .update({'role': 'admin', 'account_status': 'active'})
-          .eq('id', userId);
-
-      await _logAction('admin_created', userId, 'Promoted $fullName ($email) to Admin role.');
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('$fullName promoted to Admin successfully.')),
-        );
-        _fetchAdmins();
-      }
-    } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+    if (created == true) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Admin account created successfully.')),
+      );
+      _fetchAdmins();
     }
   }
 
@@ -210,7 +190,7 @@ class _HomeUAdminManagementScreenState extends State<HomeUAdminManagementScreen>
         elevation: 0,
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showAddAdminDialog(),
+        onPressed: _openCreateAdmin,
         backgroundColor: context.homeuAccent,
         icon: const Icon(Icons.add, color: Colors.white),
         label: const Text('Add Admin', style: TextStyle(color: Colors.white)),
@@ -237,43 +217,7 @@ class _HomeUAdminManagementScreenState extends State<HomeUAdminManagementScreen>
     );
   }
 
-  void _showAddAdminDialog() {
-    final emailController = TextEditingController();
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Add New Admin'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text('Promote an existing user to Admin by entering their email address.'),
-            const SizedBox(height: 16),
-            TextField(
-              controller: emailController,
-              decoration: const InputDecoration(
-                labelText: 'User Email',
-                border: OutlineInputBorder(),
-              ),
-              keyboardType: TextInputType.emailAddress,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-          ElevatedButton(
-            onPressed: () {
-              final email = emailController.text.trim();
-              if (email.isNotEmpty) {
-                Navigator.pop(context);
-                _promoteUserToAdmin(email);
-              }
-            },
-            child: const Text('Add Admin'),
-          ),
-        ],
-      ),
-    );
-  }
+
 }
 
 class _AdminUserCard extends StatelessWidget {
