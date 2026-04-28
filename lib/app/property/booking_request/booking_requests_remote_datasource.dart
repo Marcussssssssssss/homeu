@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart';
-import 'package:homeu/app/booking/payment_remote_datasource.dart';
 import 'package:homeu/core/supabase/app_supabase.dart';
 import 'booking_request_models.dart';
 
@@ -141,7 +139,7 @@ class BookingRequestsRemoteDataSource {
         if (idsToCancel.isNotEmpty) {
           await AppSupabase.client
               .from('booking_requests')
-              .update({'status': 'Cancelled'})
+              .update({'status': 'Rejected'})
               .inFilter('id', idsToCancel);
         }
       }

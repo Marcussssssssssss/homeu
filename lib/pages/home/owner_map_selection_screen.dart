@@ -20,6 +20,7 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
   final MapController _mapController = MapController();
   final TextEditingController _searchController = TextEditingController();
   bool _isSearching = false;
+  bool _isFetchingAddress = false;
 
   final LatLng _defaultCenter = const LatLng(3.1390, 101.6869);
 
@@ -27,6 +28,9 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
   void initState() {
     super.initState();
     _pickedLocation = widget.initialLocation;
+    if (_pickedLocation != null) {
+      _getAddressFromLatLng(_pickedLocation!);
+    }
   }
 
   Future<void> _searchAddress(String query) async {
@@ -39,7 +43,7 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
       );
       final response = await http.get(
         url,
-        headers: {'User-Agent': 'HomeU_App'},
+        headers: {'User-Agent': 'HomeU_App/1.0 (contact@homeu.com)'},
       );
 
       if (response.statusCode == 200) {
@@ -70,13 +74,14 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
   }
 
   Future<void> _getAddressFromLatLng(LatLng point) async {
+    setState(() => _isFetchingAddress = true);
     try {
       final url = Uri.parse(
         'https://nominatim.openstreetmap.org/reverse?lat=${point.latitude}&lon=${point.longitude}&format=json',
       );
       final response = await http.get(
         url,
-        headers: {'User-Agent': 'HomeU_App'},
+        headers: {'User-Agent': 'HomeU_App/1.0 (contact@homeu.com)'},
       );
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -89,6 +94,8 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
       }
     } catch (e) {
       debugPrint('Reverse geocode error: $e');
+    } finally {
+      if (mounted) setState(() => _isFetchingAddress = false);
     }
   }
 
@@ -102,10 +109,13 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
         actions: [
           if (_pickedLocation != null)
             TextButton.icon(
-              onPressed: () {
-                Navigator.of(
-                  context,
-                ).pop({'location': _pickedLocation, 'address': _pickedAddress});
+              onPressed: _isFetchingAddress
+                  ? null
+                  : () {
+                Navigator.of(context).pop({
+                  'location': _pickedLocation,
+                  'address': _pickedAddress
+                });
               },
               icon: const Icon(Icons.check, color: Color(0xFF1E3A8A)),
               label: const Text(

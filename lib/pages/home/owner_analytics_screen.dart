@@ -47,46 +47,29 @@ class _HomeUOwnerAnalyticsScreenState extends State<HomeUOwnerAnalyticsScreen> {
   String _monthLabel(BuildContext context, int month) {
     final t = context.l10n;
     switch (month) {
-      case 1:
-        return t.monthShortJan;
-      case 2:
-        return t.monthShortFeb;
-      case 3:
-        return t.monthShortMar;
-      case 4:
-        return t.monthShortApr;
-      case 5:
-        return t.monthShortMay;
-      case 6:
-        return t.monthShortJun;
-      case 7:
-        return 'Jul';
-      case 8:
-        return 'Aug';
-      case 9:
-        return 'Sep';
-      case 10:
-        return 'Oct';
-      case 11:
-        return 'Nov';
-      case 12:
-        return 'Dec';
-      default:
-        return month.toString();
+      case 1: return t.monthShortJan;
+      case 2: return t.monthShortFeb;
+      case 3: return t.monthShortMar;
+      case 4: return t.monthShortApr;
+      case 5: return t.monthShortMay;
+      case 6: return t.monthShortJun;
+      case 7: return 'Jul';
+      case 8: return 'Aug';
+      case 9: return 'Sep';
+      case 10: return 'Oct';
+      case 11: return 'Nov';
+      case 12: return 'Dec';
+      default: return month.toString();
     }
   }
 
   String _rentalTypeLabel(BuildContext context, OwnerRentalType type) {
     final t = context.l10n;
     switch (type) {
-      case OwnerRentalType.condo:
-        return t.rentalTypeCondo;
-      case OwnerRentalType.apartment:
-        return t.rentalTypeApartment;
-      case OwnerRentalType.room:
-        return t.rentalTypeRoom;
-      case OwnerRentalType.landed:
-        return t.rentalTypeLanded;
+      case OwnerRentalType.condo: return t.rentalTypeCondo;
+      case OwnerRentalType.apartment: return t.rentalTypeApartment;
+      case OwnerRentalType.room: return t.rentalTypeRoom;
+      case OwnerRentalType.landed: return t.rentalTypeLanded;
     }
   }
 
@@ -105,54 +88,43 @@ class _HomeUOwnerAnalyticsScreenState extends State<HomeUOwnerAnalyticsScreen> {
       ),
       bottomNavigationBar: widget.showBottomNavigationBar
           ? HomeUOwnerBottomNavigationBar(
-              selectedIndex: _selectedNavIndex,
-              onDestinationSelected: (index) {
-                if (index == _selectedNavIndex) return;
+        selectedIndex: _selectedNavIndex,
+        onDestinationSelected: (index) {
+          if (index == _selectedNavIndex) return;
 
-                if (index == 0) {
-                  Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(
-                      builder: (_) => const HomeUOwnerDashboardScreen(),
-                    ),
-                    (route) => false,
-                  );
-                  return;
-                }
-                if (index == 1) {
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(
-                      builder: (_) => const HomeUOwnerMyPropertiesScreen(),
-                    ),
-                  );
-                  return;
-                }
-                if (index == 2) {
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(
-                      builder: (_) => const HomeUOwnerBookingRequestsScreen(),
-                    ),
-                  );
-                  return;
-                }
-                if (index == 4) {
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute<void>(
-                      builder: (_) => const HomeUConversationListScreen(),
-                    ),
-                  );
-                  return;
-                }
-                if (index == 5) {
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute<void>(
-                      builder: (_) =>
-                          const HomeUProfileScreen(role: HomeURole.owner),
-                    ),
-                  );
-                  return;
-                }
-              },
-            )
+          if (index == 0) {
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (_) => const HomeUOwnerDashboardScreen()),
+                  (route) => false,
+            );
+            return;
+          }
+          if (index == 1) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (_) => const HomeUOwnerMyPropertiesScreen()),
+            );
+            return;
+          }
+          if (index == 2) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (_) => const HomeUOwnerBookingRequestsScreen()),
+            );
+            return;
+          }
+          if (index == 4) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute<void>(builder: (_) => const HomeUConversationListScreen()),
+            );
+            return;
+          }
+          if (index == 5) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute<void>(builder: (_) => const HomeUProfileScreen(role: HomeURole.owner)),
+            );
+            return;
+          }
+        },
+      )
           : null,
       body: SafeArea(
         child: RefreshIndicator(
@@ -162,9 +134,7 @@ class _HomeUOwnerAnalyticsScreenState extends State<HomeUOwnerAnalyticsScreen> {
             listenable: _controller,
             builder: (context, _) {
               if (_controller.isLoading) {
-                return Center(
-                  child: CircularProgressIndicator(color: context.homeuAccent),
-                );
+                return Center(child: CircularProgressIndicator(color: context.homeuAccent));
               }
 
               if (_controller.errorMessage != null) {
@@ -172,11 +142,7 @@ class _HomeUOwnerAnalyticsScreenState extends State<HomeUOwnerAnalyticsScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(
-                        Icons.error_outline,
-                        color: Colors.red,
-                        size: 40,
-                      ),
+                      const Icon(Icons.error_outline, color: Colors.red, size: 40),
                       const SizedBox(height: 16),
                       Text(_controller.errorMessage!),
                       TextButton(
@@ -190,14 +156,10 @@ class _HomeUOwnerAnalyticsScreenState extends State<HomeUOwnerAnalyticsScreen> {
 
               final data = _controller.data!;
 
-              // Calculate max value for the bar chart scaling
               double maxMonthlyValue = 1.0;
               if (data.monthlyEarnings.isNotEmpty) {
-                maxMonthlyValue = data.monthlyEarnings
-                    .map((e) => e.value)
-                    .reduce((a, b) => a > b ? a : b);
-                if (maxMonthlyValue == 0)
-                  maxMonthlyValue = 1.0; // Prevent divide by zero
+                maxMonthlyValue = data.monthlyEarnings.map((e) => e.value).reduce((a, b) => a > b ? a : b);
+                if (maxMonthlyValue == 0) maxMonthlyValue = 1.0;
               }
 
               return SingleChildScrollView(
@@ -215,6 +177,8 @@ class _HomeUOwnerAnalyticsScreenState extends State<HomeUOwnerAnalyticsScreen> {
                       ),
                     ),
                     const SizedBox(height: 12),
+
+                    // --- ORIGINAL STAT CARDS ---
                     Row(
                       children: [
                         Expanded(
@@ -243,6 +207,34 @@ class _HomeUOwnerAnalyticsScreenState extends State<HomeUOwnerAnalyticsScreen> {
                       ],
                     ),
                     const SizedBox(height: 14),
+
+                    // --- NEW FINANCIAL HIGHLIGHTS ---
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _FinancialHighlightCard(
+                            title: 'Projected (30 Days)', // Change to l10n string later
+                            amount: data.projectedRevenue,
+                            icon: Icons.upcoming_rounded,
+                            iconColor: Colors.blue.shade600,
+                            bgColor: Colors.blue.shade50,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _FinancialHighlightCard(
+                            title: 'Overdue Payments', // Change to l10n string later
+                            amount: data.overduePayments,
+                            icon: Icons.warning_rounded,
+                            iconColor: data.overduePayments > 0 ? Colors.red.shade600 : Colors.green.shade600,
+                            bgColor: data.overduePayments > 0 ? Colors.red.shade50 : Colors.green.shade50,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+
+                    // --- ORIGINAL MONTHLY EARNINGS CHART ---
                     Container(
                       key: const Key('monthly_earnings_bar_chart'),
                       padding: const EdgeInsets.all(14),
@@ -266,54 +258,112 @@ class _HomeUOwnerAnalyticsScreenState extends State<HomeUOwnerAnalyticsScreen> {
                               children: data.monthlyEarnings
                                   .map(
                                     (entry) => Expanded(
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 4,
-                                        ),
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.end,
-                                          children: [
-                                            Expanded(
-                                              child: Align(
-                                                alignment:
-                                                    Alignment.bottomCenter,
-                                                child: Container(
-                                                  height:
-                                                      130 *
-                                                      (entry.value /
-                                                          maxMonthlyValue),
-                                                  decoration: BoxDecoration(
-                                                    color: context.homeuAccent,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          8,
-                                                        ),
-                                                  ),
-                                                ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                                    child: Column(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        Expanded(
+                                          child: Align(
+                                            alignment: Alignment.bottomCenter,
+                                            child: Container(
+                                              height: 130 * (entry.value / maxMonthlyValue),
+                                              decoration: BoxDecoration(
+                                                color: context.homeuAccent,
+                                                borderRadius: BorderRadius.circular(8),
                                               ),
                                             ),
-                                            const SizedBox(height: 8),
-                                            Text(
-                                              _monthLabel(context, entry.month),
-                                              style: TextStyle(
-                                                color: context.homeuMutedText,
-                                                fontSize: 11,
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                            ),
-                                          ],
+                                          ),
                                         ),
-                                      ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          _monthLabel(context, entry.month),
+                                          style: TextStyle(
+                                            color: context.homeuMutedText,
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                  )
-                                  .toList(),
+                                  ),
+                                ),
+                              ).toList(),
                             ),
                           ),
                         ],
                       ),
                     ),
                     const SizedBox(height: 14),
+
+                    // --- NEW PAYMENT COLLECTION PIE CHART ---
+                    Container(
+                      key: const Key('payment_collection_pie_chart'),
+                      padding: const EdgeInsets.all(14),
+                      decoration: _cardDecoration(context),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Invoice Collection Rate', // Change to l10n string later
+                            style: TextStyle(
+                              color: context.homeuPrimaryText,
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              SizedBox(
+                                width: 130,
+                                height: 130,
+                                child: CustomPaint(
+                                  painter: _CollectionPieChartPainter(data.paymentCollection),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  children: data.paymentCollection
+                                      .map(
+                                        (slice) => Padding(
+                                      padding: const EdgeInsets.only(bottom: 8),
+                                      child: Row(
+                                        children: [
+                                          Container(
+                                            width: 10,
+                                            height: 10,
+                                            decoration: BoxDecoration(
+                                              color: slice.color,
+                                              shape: BoxShape.circle,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            child: Text(
+                                              '${slice.status} (${slice.percent}%)',
+                                              style: TextStyle(
+                                                color: context.homeuPrimaryText,
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ).toList(),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+
+                    // --- ORIGINAL RENTAL DISTRIBUTION PIE CHART ---
                     Container(
                       key: const Key('rental_type_pie_chart'),
                       padding: const EdgeInsets.all(14),
@@ -336,9 +386,7 @@ class _HomeUOwnerAnalyticsScreenState extends State<HomeUOwnerAnalyticsScreen> {
                                 width: 130,
                                 height: 130,
                                 child: CustomPaint(
-                                  painter: _PieChartPainter(
-                                    data.rentalDistribution,
-                                  ),
+                                  painter: _PieChartPainter(data.rentalDistribution),
                                 ),
                               ),
                               const SizedBox(width: 12),
@@ -347,36 +395,32 @@ class _HomeUOwnerAnalyticsScreenState extends State<HomeUOwnerAnalyticsScreen> {
                                   children: data.rentalDistribution
                                       .map(
                                         (slice) => Padding(
-                                          padding: const EdgeInsets.only(
-                                            bottom: 8,
+                                      padding: const EdgeInsets.only(bottom: 8),
+                                      child: Row(
+                                        children: [
+                                          Container(
+                                            width: 10,
+                                            height: 10,
+                                            decoration: BoxDecoration(
+                                              color: slice.color,
+                                              shape: BoxShape.circle,
+                                            ),
                                           ),
-                                          child: Row(
-                                            children: [
-                                              Container(
-                                                width: 10,
-                                                height: 10,
-                                                decoration: BoxDecoration(
-                                                  color: slice.color,
-                                                  shape: BoxShape.circle,
-                                                ),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            child: Text(
+                                              '${_rentalTypeLabel(context, slice.type)} (${slice.percent}%)',
+                                              style: TextStyle(
+                                                color: context.homeuPrimaryText,
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w600,
                                               ),
-                                              const SizedBox(width: 8),
-                                              Expanded(
-                                                child: Text(
-                                                  '${_rentalTypeLabel(context, slice.type)} (${slice.percent}%)',
-                                                  style: TextStyle(
-                                                    color: context
-                                                        .homeuPrimaryText,
-                                                    fontSize: 12,
-                                                    fontWeight: FontWeight.w600,
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
+                                            ),
                                           ),
-                                        ),
-                                      )
-                                      .toList(),
+                                        ],
+                                      ),
+                                    ),
+                                  ).toList(),
                                 ),
                               ),
                             ],
@@ -456,21 +500,91 @@ class _OwnerAnalyticsStatCard extends StatelessWidget {
   }
 }
 
+// --- NEW WIDGET FOR FINANCIAL HIGHLIGHTS ---
+class _FinancialHighlightCard extends StatelessWidget {
+  const _FinancialHighlightCard({
+    required this.title,
+    required this.amount,
+    required this.icon,
+    required this.iconColor,
+    required this.bgColor,
+  });
+
+  final String title;
+  final double amount;
+  final IconData icon;
+  final Color iconColor;
+  final Color bgColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: context.homeuCard,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: context.homeuSoftBorder),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: bgColor,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, color: iconColor, size: 18),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    color: context.homeuMutedText,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            'RM ${amount.toStringAsFixed(0)}',
+            style: TextStyle(
+              color: context.homeuPrimaryText,
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _PieChartPainter extends CustomPainter {
   _PieChartPainter(this.slices);
-
   final List<RentalTypeData> slices;
 
   @override
   void paint(Canvas canvas, Size size) {
     final total = slices.fold<int>(0, (sum, item) => sum + item.percent);
     if (total == 0) return;
-
     final center = Offset(size.width / 2, size.height / 2);
     final radius = math.min(size.width, size.height) / 2;
     final rect = Rect.fromCircle(center: center, radius: radius);
     final paint = Paint()..style = PaintingStyle.fill;
-
     double startAngle = -math.pi / 2;
     for (final slice in slices) {
       final sweep = (slice.percent / total) * (2 * math.pi);
@@ -478,7 +592,6 @@ class _PieChartPainter extends CustomPainter {
       canvas.drawArc(rect, startAngle, sweep, true, paint);
       startAngle += sweep;
     }
-
     canvas.drawCircle(
       center,
       radius * 0.42,
@@ -488,6 +601,38 @@ class _PieChartPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _PieChartPainter oldDelegate) {
+    return oldDelegate.slices != slices;
+  }
+}
+
+class _CollectionPieChartPainter extends CustomPainter {
+  _CollectionPieChartPainter(this.slices);
+  final List<PaymentCollectionData> slices;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final total = slices.fold<int>(0, (sum, item) => sum + item.percent);
+    if (total == 0) return;
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = math.min(size.width, size.height) / 2;
+    final rect = Rect.fromCircle(center: center, radius: radius);
+    final paint = Paint()..style = PaintingStyle.fill;
+    double startAngle = -math.pi / 2;
+    for (final slice in slices) {
+      final sweep = (slice.percent / total) * (2 * math.pi);
+      paint.color = slice.color;
+      canvas.drawArc(rect, startAngle, sweep, true, paint);
+      startAngle += sweep;
+    }
+    canvas.drawCircle(
+      center,
+      radius * 0.42,
+      Paint()..color = const Color(0xFFF6F8FC),
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _CollectionPieChartPainter oldDelegate) {
     return oldDelegate.slices != slices;
   }
 }
