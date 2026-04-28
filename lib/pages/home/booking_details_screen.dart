@@ -8,6 +8,8 @@ import 'package:homeu/app/booking/payment_schedule_model.dart';
 import 'package:homeu/core/supabase/app_supabase.dart';
 import 'package:homeu/pages/home/payment_screen.dart';
 import 'package:homeu/pages/home/property_item.dart';
+import 'package:homeu/pages/home/dialogs/booking_receipt_dialog.dart';
+import 'package:homeu/app/booking/payment_models.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class BookingDetailsScreen extends StatefulWidget {
@@ -232,12 +234,24 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(
-                'RM ${schedule.amount.toStringAsFixed(2)}', 
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: isPaid || isNextToPay ? Colors.black : Colors.grey,
-                ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (isPaid)
+                    IconButton(
+                      visualDensity: VisualDensity.compact,
+                      onPressed: () => _showReceiptForSchedule(schedule),
+                      icon: const Icon(Icons.receipt_long_outlined, size: 20, color: Color(0xFF6366F1)),
+                      tooltip: 'View Receipt',
+                    ),
+                  Text(
+                    'RM ${schedule.amount.toStringAsFixed(2)}', 
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: isPaid || isNextToPay ? Colors.black : Colors.grey,
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 4),
               if (isPaid)
@@ -260,5 +274,44 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
         ],
       ),
     );
+  }
+
+  Future<void> _showReceiptForSchedule(PaymentSchedule schedule) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      Payment? payment;
+      if (schedule.monthNumber == 1) {
+        payment = await _paymentDs.getLatestPayment(widget.booking.id);
+      } else {
+        payment = await _paymentDs.getPaymentByScheduleId(schedule.id);
+      }
+      
+      if (!mounted) return;
+      Navigator.pop(context); // Pop loading
+
+      if (payment == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No receipt found for this payment.')),
+        );
+        return;
+      }
+
+      await BookingReceiptDialog.show(
+        context: context,
+        payment: payment,
+        property: widget.property,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      Navigator.pop(context); // Pop loading
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error loading receipt: $e')),
+      );
+    }
   }
 }

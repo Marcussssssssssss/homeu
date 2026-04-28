@@ -102,6 +102,25 @@ class PaymentRemoteDataSource {
     return Payment.fromJson(row);
   }
 
+  Future<Payment?> getPaymentByScheduleId(String scheduleId) async {
+    if (!AppSupabase.isInitialized) {
+      return null;
+    }
+
+    final dynamic row = await AppSupabase.client
+        .from('payments')
+        .select('*')
+        .eq('payment_schedule_id', scheduleId)
+        .limit(1)
+        .maybeSingle();
+
+    if (row is! Map<String, dynamic>) {
+      return null;
+    }
+
+    return Payment.fromJson(row);
+  }
+
   Future<Payment?> processInstallmentPayment({
     required String bookingId,
     required String scheduleId,

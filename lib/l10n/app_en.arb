@@ -255,5 +255,23 @@
   "chatAttachmentTitle": "Send Attachment",
   "chatAttachImage": "Image",
   "chatAttachCamera": "Camera",
-  "chatAttachDocument": "Document"
+  "chatAttachDocument": "Document",
+  "receiptTitle": "Payment Receipt",
+  "receiptSuccess": "Payment Successful",
+  "receiptTransactionId": "Transaction ID",
+  "receiptProperty": "Property",
+  "receiptLocation": "Location",
+  "receiptPaymentDate": "Payment Date",
+  "receiptPaymentMethod": "Payment Method",
+  "receiptInstallment": "Installment",
+  "receiptMonth": "Month {number}",
+  "@receiptMonth": {
+    "placeholders": {
+      "number": {}
+    }
+  },
+  "receiptTotalAmount": "Total Amount",
+  "receiptDownload": "Download",
+  "receiptShare": "Share",
+  "receiptFooter": "Thank you for using HomeU!"
 }

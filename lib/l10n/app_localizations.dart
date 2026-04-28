@@ -1515,6 +1515,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Document'**
   String get chatAttachDocument;
+
+  /// No description provided for @receiptTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Receipt'**
+  String get receiptTitle;
+
+  /// No description provided for @receiptSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Successful'**
+  String get receiptSuccess;
+
+  /// No description provided for @receiptTransactionId.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction ID'**
+  String get receiptTransactionId;
+
+  /// No description provided for @receiptProperty.
+  ///
+  /// In en, this message translates to:
+  /// **'Property'**
+  String get receiptProperty;
+
+  /// No description provided for @receiptLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get receiptLocation;
+
+  /// No description provided for @receiptPaymentDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Date'**
+  String get receiptPaymentDate;
+
+  /// No description provided for @receiptPaymentMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Method'**
+  String get receiptPaymentMethod;
+
+  /// No description provided for @receiptInstallment.
+  ///
+  /// In en, this message translates to:
+  /// **'Installment'**
+  String get receiptInstallment;
+
+  /// No description provided for @receiptMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Month {number}'**
+  String receiptMonth(Object number);
+
+  /// No description provided for @receiptTotalAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Amount'**
+  String get receiptTotalAmount;
+
+  /// No description provided for @receiptDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Download'**
+  String get receiptDownload;
+
+  /// No description provided for @receiptShare.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get receiptShare;
+
+  /// No description provided for @receiptFooter.
+  ///
+  /// In en, this message translates to:
+  /// **'Thank you for using HomeU!'**
+  String get receiptFooter;
 }
 
 class _AppLocalizationsDelegate

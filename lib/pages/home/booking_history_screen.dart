@@ -12,6 +12,8 @@ import 'package:homeu/pages/home/property_details_screen.dart';
 import 'package:homeu/pages/home/property_item.dart';
 import 'package:homeu/pages/home/widgets/booking_history_card.dart';
 import 'package:homeu/pages/home/widgets/status_filter_chips.dart';
+import 'package:homeu/pages/home/dialogs/booking_receipt_dialog.dart';
+import 'package:homeu/app/booking/payment_remote_datasource.dart';
 
 enum HomeUBookingStatus { all, pending, approved, rejected, completed }
 
@@ -30,6 +32,8 @@ class _HomeUBookingHistoryScreenState extends State<HomeUBookingHistoryScreen> {
       const BookingRemoteDataSource();
   final  PropertyRemoteDataSource _propertyRemoteDataSource =
       const PropertyRemoteDataSource();
+  final PaymentRemoteDataSource _paymentRemoteDataSource =
+      const PaymentRemoteDataSource();
   HomeUBookingStatus _selectedStatus = HomeUBookingStatus.all;
   List<_BookingHistoryItem> _bookings = const <_BookingHistoryItem>[];
   bool _isLoading = true;
@@ -148,6 +152,9 @@ class _HomeUBookingHistoryScreenState extends State<HomeUBookingHistoryScreen> {
                         onPaymentScheduleTap: () {
                           _navigateToDetails(context, booking);
                         },
+                        onReceiptTap: (booking.status == HomeUBookingStatus.approved || booking.status == HomeUBookingStatus.completed) 
+                            ? () => _showReceipt(context, booking) 
+                            : null,
                       ),
                     ),
                   ],
@@ -179,6 +186,40 @@ class _HomeUBookingHistoryScreenState extends State<HomeUBookingHistoryScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _showReceipt(BuildContext context, _BookingHistoryItem booking) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      final payment = await _paymentRemoteDataSource.getLatestPayment(booking.id);
+      
+      if (!mounted) return;
+      Navigator.pop(context); // Pop loading
+
+      if (payment == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No receipt found for this booking.')),
+        );
+        return;
+      }
+
+      await BookingReceiptDialog.show(
+        context: context,
+        payment: payment,
+        property: booking.property,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      Navigator.pop(context); // Pop loading
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error loading receipt: $e')),
+      );
+    }
   }
 
   String _statusLabel(BuildContext context, HomeUBookingStatus status) {
