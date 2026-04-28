@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:homeu/core/theme/homeu_app_theme.dart';
 
 class BookingHistoryCard extends StatelessWidget {
   const BookingHistoryCard({
@@ -335,44 +336,42 @@ class BookingHistoryCard extends StatelessWidget {
             );
           }),
         const SizedBox(height: 16),
-        // Booking Stats Row
+        // Booking Stats Row: Move-in, Move-out, and Booking Fee aligned
         Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
+            Expanded(child: _buildDateColumn('Move-in', checkInDate, dateFormat, dayFormat, purpleAccent)),
+            const SizedBox(width: 8),
+            Expanded(child: _buildDateColumn('Move-out', checkOutDate, dateFormat, dayFormat, purpleAccent)),
+            const SizedBox(width: 8),
             Expanded(
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(child: _buildDateColumn('Move-in', checkInDate, dateFormat, dayFormat, purpleAccent)),
-                  const SizedBox(width: 4),
-                  Expanded(child: _buildDateColumn('Move-out', checkOutDate, dateFormat, dayFormat, purpleAccent)),
-                ],
-              ),
-            ),
-            const SizedBox(width: 12),
-            // Pricing (Booking Fee)
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                const Text(
-                  'Booking Fee',
-                  style: TextStyle(fontSize: 10, color: Color(0xFF64748B), fontWeight: FontWeight.w500),
-                ),
-                ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 90),
-                  child: FittedBox(
-                    alignment: Alignment.centerRight,
+                  Text(
+                    'Booking Fee',
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: purpleAccent,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  FittedBox(
                     fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
                     child: Text(
                       'RM ${totalPrice.toStringAsFixed(0)}',
-                      style: const TextStyle(
-                        fontSize: 20,
+                      style: TextStyle(
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF0F172A),
+                        color: purpleAccent,
                       ),
                     ),
                   ),
-                ),
-              ],
+                  const Text('', style: TextStyle(fontSize: 10)), // Placeholder to match date column height
+                ],
+              ),
             ),
           ],
         ),
