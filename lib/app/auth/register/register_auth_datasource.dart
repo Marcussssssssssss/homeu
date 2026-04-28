@@ -14,14 +14,9 @@ class RegisterAuthDataSource {
     return AppSupabase.auth.signUp(
       email: email,
       password: password,
-      data: {
-        'full_name': fullName,
-        'phone_number': phoneNumber,
-        'role': role,
-      },
+      data: {'full_name': fullName, 'phone_number': phoneNumber, 'role': role},
     );
   }
-
 
   Future<String?> fetchProfileRole(String userId) async {
     final dynamic row = await AppSupabase.client
@@ -40,4 +35,3 @@ class RegisterAuthDataSource {
     return null;
   }
 }
-

@@ -8,10 +8,12 @@ class HomeUOwnerPropertyDetailsScreen extends StatefulWidget {
   final OwnerPropertyModel property;
 
   @override
-  State<HomeUOwnerPropertyDetailsScreen> createState() => _HomeUOwnerPropertyDetailsScreenState();
+  State<HomeUOwnerPropertyDetailsScreen> createState() =>
+      _HomeUOwnerPropertyDetailsScreenState();
 }
 
-class _HomeUOwnerPropertyDetailsScreenState extends State<HomeUOwnerPropertyDetailsScreen> {
+class _HomeUOwnerPropertyDetailsScreenState
+    extends State<HomeUOwnerPropertyDetailsScreen> {
   bool _isDayUnavailable(DateTime day) {
     final d = DateTime(day.year, day.month, day.day);
     final now = DateTime.now();
@@ -28,7 +30,9 @@ class _HomeUOwnerPropertyDetailsScreenState extends State<HomeUOwnerPropertyDeta
       final s = DateTime(startRaw.year, startRaw.month, startRaw.day);
       final e = DateTime(endRaw.year, endRaw.month, endRaw.day);
 
-      if (d.isAtSameMomentAs(s) || d.isAtSameMomentAs(e) || (d.isAfter(s) && d.isBefore(e))) {
+      if (d.isAtSameMomentAs(s) ||
+          d.isAtSameMomentAs(e) ||
+          (d.isAfter(s) && d.isBefore(e))) {
         return true;
       }
     }
@@ -59,13 +63,15 @@ class _HomeUOwnerPropertyDetailsScreenState extends State<HomeUOwnerPropertyDeta
         backgroundColor: const Color(0xFF1E3A8A),
         foregroundColor: Colors.white,
         icon: const Icon(Icons.edit_note_rounded, size: 22),
-        label: const Text('Edit Property', style: TextStyle(fontWeight: FontWeight.w600)),
+        label: const Text(
+          'Edit Property',
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
         onPressed: () {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (_) => HomeUOwnerAddPropertyScreen(
-                propertyId: widget.property.id,
-              ),
+              builder: (_) =>
+                  HomeUOwnerAddPropertyScreen(propertyId: widget.property.id),
             ),
           );
         },
@@ -79,20 +85,36 @@ class _HomeUOwnerPropertyDetailsScreenState extends State<HomeUOwnerPropertyDeta
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
-                boxShadow: const [BoxShadow(color: Color(0x0A1E3A8A), blurRadius: 10, offset: Offset(0, 4))],
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x0A1E3A8A),
+                    blurRadius: 10,
+                    offset: Offset(0, 4),
+                  ),
+                ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   ClipRRect(
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                    child: hasImage
-                        ? Image.network(p.coverImageUrl!, height: 200, fit: BoxFit.cover)
-                        : Container(
-                      height: 200,
-                      color: const Color(0xFFEAF2FF),
-                      child: const Icon(Icons.image_not_supported, size: 48, color: Color(0xFF90A4C4)),
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(16),
                     ),
+                    child: hasImage
+                        ? Image.network(
+                            p.coverImageUrl!,
+                            height: 200,
+                            fit: BoxFit.cover,
+                          )
+                        : Container(
+                            height: 200,
+                            color: const Color(0xFFEAF2FF),
+                            child: const Icon(
+                              Icons.image_not_supported,
+                              size: 48,
+                              color: Color(0xFF90A4C4),
+                            ),
+                          ),
                   ),
                   Padding(
                     padding: const EdgeInsets.all(16),
@@ -105,18 +127,29 @@ class _HomeUOwnerPropertyDetailsScreenState extends State<HomeUOwnerPropertyDeta
                             Expanded(
                               child: Text(
                                 p.title,
-                                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF1F314F)),
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF1F314F),
+                                ),
                               ),
                             ),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 6,
+                              ),
                               decoration: BoxDecoration(
                                 color: const Color(0xFFEAF2FF),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
                                 p.displayStatus,
-                                style: const TextStyle(color: Color(0xFF1E3A8A), fontSize: 12, fontWeight: FontWeight.bold),
+                                style: const TextStyle(
+                                  color: Color(0xFF1E3A8A),
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ],
@@ -127,13 +160,20 @@ class _HomeUOwnerPropertyDetailsScreenState extends State<HomeUOwnerPropertyDeta
                           children: [
                             const Padding(
                               padding: EdgeInsets.only(top: 2.0),
-                              child: Icon(Icons.location_on_rounded, size: 16, color: Color(0xFF667896)),
+                              child: Icon(
+                                Icons.location_on_rounded,
+                                size: 16,
+                                color: Color(0xFF667896),
+                              ),
                             ),
                             const SizedBox(width: 4),
                             Expanded(
                               child: Text(
                                 p.locationArea,
-                                style: const TextStyle(color: Color(0xFF667896), fontSize: 14),
+                                style: const TextStyle(
+                                  color: Color(0xFF667896),
+                                  fontSize: 14,
+                                ),
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                               ),
@@ -143,7 +183,11 @@ class _HomeUOwnerPropertyDetailsScreenState extends State<HomeUOwnerPropertyDeta
                         const SizedBox(height: 12),
                         Text(
                           'RM ${p.monthlyPrice} / month',
-                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Color(0xFF1E3A8A)),
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF1E3A8A),
+                          ),
                         ),
                       ],
                     ),
@@ -154,7 +198,11 @@ class _HomeUOwnerPropertyDetailsScreenState extends State<HomeUOwnerPropertyDeta
             const SizedBox(height: 24),
             const Text(
               'Rental Occupancy',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF1F314F)),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1F314F),
+              ),
             ),
             const SizedBox(height: 4),
             const Text(
@@ -166,7 +214,13 @@ class _HomeUOwnerPropertyDetailsScreenState extends State<HomeUOwnerPropertyDeta
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
-                boxShadow: const [BoxShadow(color: Color(0x0A1E3A8A), blurRadius: 10, offset: Offset(0, 4))],
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x0A1E3A8A),
+                    blurRadius: 10,
+                    offset: Offset(0, 4),
+                  ),
+                ],
               ),
               child: Theme(
                 data: Theme.of(context).copyWith(
@@ -188,7 +242,11 @@ class _HomeUOwnerPropertyDetailsScreenState extends State<HomeUOwnerPropertyDeta
 
             const Text(
               'Viewing Management',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF1F314F)),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1F314F),
+              ),
             ),
             const SizedBox(height: 12),
             Container(
@@ -196,7 +254,13 @@ class _HomeUOwnerPropertyDetailsScreenState extends State<HomeUOwnerPropertyDeta
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
-                boxShadow: const [BoxShadow(color: Color(0x0A1E3A8A), blurRadius: 10, offset: Offset(0, 4))],
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x0A1E3A8A),
+                    blurRadius: 10,
+                    offset: Offset(0, 4),
+                  ),
+                ],
               ),
               child: Row(
                 children: [
@@ -206,16 +270,33 @@ class _HomeUOwnerPropertyDetailsScreenState extends State<HomeUOwnerPropertyDeta
                       color: const Color(0xFFEAF2FF),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(Icons.meeting_room_rounded, color: Color(0xFF1E3A8A), size: 28),
+                    child: const Icon(
+                      Icons.meeting_room_rounded,
+                      color: Color(0xFF1E3A8A),
+                      size: 28,
+                    ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Viewing Slots', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF1F314F))),
+                        const Text(
+                          'Viewing Slots',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                            color: Color(0xFF1F314F),
+                          ),
+                        ),
                         const SizedBox(height: 4),
-                        const Text('Set dates and times for potential tenants to visit.', style: TextStyle(fontSize: 12, color: Color(0xFF667896))),
+                        const Text(
+                          'Set dates and times for potential tenants to visit.',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF667896),
+                          ),
+                        ),
                         const SizedBox(height: 12),
                         SizedBox(
                           width: double.infinity,
@@ -223,16 +304,19 @@ class _HomeUOwnerPropertyDetailsScreenState extends State<HomeUOwnerPropertyDeta
                             onPressed: () {
                               Navigator.of(context).push(
                                 MaterialPageRoute(
-                                  builder: (_) => HomeUOwnerViewingAvailabilityScreen(
-                                    property: widget.property,
-                                  ),
+                                  builder: (_) =>
+                                      HomeUOwnerViewingAvailabilityScreen(
+                                        property: widget.property,
+                                      ),
                                 ),
                               );
                             },
                             style: OutlinedButton.styleFrom(
                               foregroundColor: const Color(0xFF1E3A8A),
                               side: const BorderSide(color: Color(0xFF1E3A8A)),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
                             ),
                             child: const Text('Manage Schedule'),
                           ),
@@ -249,4 +333,3 @@ class _HomeUOwnerPropertyDetailsScreenState extends State<HomeUOwnerPropertyDeta
     );
   }
 }
-

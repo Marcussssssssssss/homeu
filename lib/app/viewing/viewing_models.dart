@@ -26,17 +26,29 @@ class ViewingRequest {
   factory ViewingRequest.fromJson(Map<String, dynamic> json) {
     return ViewingRequest(
       id: json['id']?.toString() ?? '',
-      propertyId: json['property_id']?.toString() ?? json['propertyId']?.toString() ?? '',
-      ownerId: json['owner_id']?.toString() ?? json['ownerId']?.toString() ?? '',
-      tenantId: json['tenant_id']?.toString() ?? json['tenantId']?.toString() ?? '',
-      scheduledAt: _parseDateTime(json['scheduled_at'] ?? json['scheduledAt']) ??
+      propertyId:
+          json['property_id']?.toString() ??
+          json['propertyId']?.toString() ??
+          '',
+      ownerId:
+          json['owner_id']?.toString() ?? json['ownerId']?.toString() ?? '',
+      tenantId:
+          json['tenant_id']?.toString() ?? json['tenantId']?.toString() ?? '',
+      scheduledAt:
+          _parseDateTime(json['scheduled_at'] ?? json['scheduledAt']) ??
           DateTime.fromMillisecondsSinceEpoch(0),
       status: json['status']?.toString() ?? '',
-      rescheduleTo: _parseDateTime(json['reschedule_to'] ?? json['rescheduleTo']),
-      rescheduleReason: json['reschedule_reason']?.toString() ?? json['rescheduleReason']?.toString(),
-      createdAt: _parseDateTime(json['created_at'] ?? json['createdAt']) ??
+      rescheduleTo: _parseDateTime(
+        json['reschedule_to'] ?? json['rescheduleTo'],
+      ),
+      rescheduleReason:
+          json['reschedule_reason']?.toString() ??
+          json['rescheduleReason']?.toString(),
+      createdAt:
+          _parseDateTime(json['created_at'] ?? json['createdAt']) ??
           DateTime.fromMillisecondsSinceEpoch(0),
-      updatedAt: _parseDateTime(json['updated_at'] ?? json['updatedAt']) ??
+      updatedAt:
+          _parseDateTime(json['updated_at'] ?? json['updatedAt']) ??
           DateTime.fromMillisecondsSinceEpoch(0),
     );
   }
@@ -78,4 +90,3 @@ class ViewingRequest {
     return null;
   }
 }
-

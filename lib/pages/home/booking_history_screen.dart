@@ -30,7 +30,7 @@ class HomeUBookingHistoryScreen extends StatefulWidget {
 class _HomeUBookingHistoryScreenState extends State<HomeUBookingHistoryScreen> {
   final BookingRemoteDataSource _bookingRemoteDataSource =
       const BookingRemoteDataSource();
-  final  PropertyRemoteDataSource _propertyRemoteDataSource =
+  final PropertyRemoteDataSource _propertyRemoteDataSource =
       const PropertyRemoteDataSource();
   final PaymentRemoteDataSource _paymentRemoteDataSource =
       const PaymentRemoteDataSource();
@@ -52,7 +52,11 @@ class _HomeUBookingHistoryScreenState extends State<HomeUBookingHistoryScreen> {
     }
 
     final visibleBookings = _bookings
-        .where((item) => _selectedStatus == HomeUBookingStatus.all || item.status == _selectedStatus)
+        .where(
+          (item) =>
+              _selectedStatus == HomeUBookingStatus.all ||
+              item.status == _selectedStatus,
+        )
         .toList();
     final t = context.l10n;
 
@@ -144,16 +148,19 @@ class _HomeUBookingHistoryScreenState extends State<HomeUBookingHistoryScreen> {
                         imageUrls: booking.property.imageUrls,
                         status: _statusLabel(context, booking.status),
                         propertyStatus: booking.property.status,
-                        isPast: booking.status == HomeUBookingStatus.completed || 
-                                booking.status == HomeUBookingStatus.rejected,
+                        isPast:
+                            booking.status == HomeUBookingStatus.completed ||
+                            booking.status == HomeUBookingStatus.rejected,
                         onTap: () {
                           _navigateToDetails(context, booking);
                         },
                         onPaymentScheduleTap: () {
                           _navigateToDetails(context, booking);
                         },
-                        onReceiptTap: (booking.status == HomeUBookingStatus.approved || booking.status == HomeUBookingStatus.completed) 
-                            ? () => _showReceipt(context, booking) 
+                        onReceiptTap:
+                            (booking.status == HomeUBookingStatus.approved ||
+                                booking.status == HomeUBookingStatus.completed)
+                            ? () => _showReceipt(context, booking)
                             : null,
                       ),
                     ),
@@ -188,7 +195,10 @@ class _HomeUBookingHistoryScreenState extends State<HomeUBookingHistoryScreen> {
     );
   }
 
-  Future<void> _showReceipt(BuildContext context, _BookingHistoryItem booking) async {
+  Future<void> _showReceipt(
+    BuildContext context,
+    _BookingHistoryItem booking,
+  ) async {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -196,8 +206,10 @@ class _HomeUBookingHistoryScreenState extends State<HomeUBookingHistoryScreen> {
     );
 
     try {
-      final payment = await _paymentRemoteDataSource.getLatestPayment(booking.id);
-      
+      final payment = await _paymentRemoteDataSource.getLatestPayment(
+        booking.id,
+      );
+
       if (!mounted) return;
       Navigator.pop(context); // Pop loading
 
@@ -216,9 +228,9 @@ class _HomeUBookingHistoryScreenState extends State<HomeUBookingHistoryScreen> {
     } catch (e) {
       if (!mounted) return;
       Navigator.pop(context); // Pop loading
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error loading receipt: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error loading receipt: $e')));
     }
   }
 
@@ -306,7 +318,8 @@ class _HomeUBookingHistoryScreenState extends State<HomeUBookingHistoryScreen> {
 
     // Use the actual dates from the database if available
     final checkIn = booking.moveInDate ?? booking.createdAt;
-    final checkOut = booking.moveOutDate ?? checkIn.add(const Duration(days: 30));
+    final checkOut =
+        booking.moveOutDate ?? checkIn.add(const Duration(days: 30));
 
     return _BookingHistoryItem(
       id: booking.id,

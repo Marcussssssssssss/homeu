@@ -11,4 +11,3 @@ class LoginController {
     return _repository.login(payload);
   }
 }
-

@@ -26,7 +26,8 @@ class HomeUOwnerBookingRequestsScreen extends StatefulWidget {
       _HomeUOwnerBookingRequestsScreenState();
 }
 
-class _HomeUOwnerBookingRequestsScreenState extends State<HomeUOwnerBookingRequestsScreen> {
+class _HomeUOwnerBookingRequestsScreenState
+    extends State<HomeUOwnerBookingRequestsScreen> {
   late final BookingRequestsController _bookingController;
   late final ViewingRequestsController _viewingController;
 
@@ -85,8 +86,10 @@ class _HomeUOwnerBookingRequestsScreenState extends State<HomeUOwnerBookingReque
                   if (index == _selectedNavIndex) return;
                   if (index == 0) {
                     Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(builder: (_) => const HomeUOwnerDashboardScreen()),
-                          (route) => false,
+                      MaterialPageRoute(
+                        builder: (_) => const HomeUOwnerDashboardScreen(),
+                      ),
+                      (route) => false,
                     );
                     return;
                   }
@@ -310,16 +313,28 @@ class _HomeUOwnerBookingRequestsScreenState extends State<HomeUOwnerBookingReque
                                     children: [
                                       CircleAvatar(
                                         radius: 18,
-                                        backgroundColor: const Color(0xFFEAF2FF),
-                                        backgroundImage: (request.tenantProfileUrl != null && request.tenantProfileUrl!.isNotEmpty)
-                                            ? NetworkImage(request.tenantProfileUrl!)
+                                        backgroundColor: const Color(
+                                          0xFFEAF2FF,
+                                        ),
+                                        backgroundImage:
+                                            (request.tenantProfileUrl != null &&
+                                                request
+                                                    .tenantProfileUrl!
+                                                    .isNotEmpty)
+                                            ? NetworkImage(
+                                                request.tenantProfileUrl!,
+                                              )
                                             : null,
-                                        child: (request.tenantProfileUrl == null || request.tenantProfileUrl!.isEmpty)
+                                        child:
+                                            (request.tenantProfileUrl == null ||
+                                                request
+                                                    .tenantProfileUrl!
+                                                    .isEmpty)
                                             ? const Icon(
-                                          Icons.person_rounded,
-                                          color: Color(0xFF1E3A8A),
-                                          size: 20,
-                                        )
+                                                Icons.person_rounded,
+                                                color: Color(0xFF1E3A8A),
+                                                size: 20,
+                                              )
                                             : null,
                                       ),
                                       const SizedBox(width: 10),
@@ -576,7 +591,9 @@ class _HomeUOwnerBookingRequestsScreenState extends State<HomeUOwnerBookingReque
                           final isPending = request.status == 'Pending';
                           final isApproved = request.status == 'Approved';
 
-                          final isPastViewingTime = DateTime.now().isAfter(request.scheduledAt);
+                          final isPastViewingTime = DateTime.now().isAfter(
+                            request.scheduledAt,
+                          );
 
                           final timeStr =
                               "${request.scheduledAt.hour % 12 == 0 ? 12 : request.scheduledAt.hour % 12}:${request.scheduledAt.minute.toString().padLeft(2, '0')} ${request.scheduledAt.hour >= 12 ? 'PM' : 'AM'}";
@@ -602,15 +619,23 @@ class _HomeUOwnerBookingRequestsScreenState extends State<HomeUOwnerBookingReque
                                     CircleAvatar(
                                       radius: 18,
                                       backgroundColor: const Color(0xFFEAF2FF),
-                                      backgroundImage: (request.tenantProfileUrl != null && request.tenantProfileUrl!.isNotEmpty)
-                                          ? NetworkImage(request.tenantProfileUrl!)
+                                      backgroundImage:
+                                          (request.tenantProfileUrl != null &&
+                                              request
+                                                  .tenantProfileUrl!
+                                                  .isNotEmpty)
+                                          ? NetworkImage(
+                                              request.tenantProfileUrl!,
+                                            )
                                           : null,
-                                      child: (request.tenantProfileUrl == null || request.tenantProfileUrl!.isEmpty)
+                                      child:
+                                          (request.tenantProfileUrl == null ||
+                                              request.tenantProfileUrl!.isEmpty)
                                           ? const Icon(
-                                        Icons.person_rounded,
-                                        color: Color(0xFF1E3A8A),
-                                        size: 20,
-                                      )
+                                              Icons.person_rounded,
+                                              color: Color(0xFF1E3A8A),
+                                              size: 20,
+                                            )
                                           : null,
                                     ),
                                     const SizedBox(width: 10),

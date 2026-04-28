@@ -25,7 +25,9 @@ class PaymentRemoteDataSource {
       // 1. Verify booking exists
       final bookingData = await AppSupabase.client
           .from('booking_requests')
-          .select('id, tenant_id, owner_id, move_in_date, move_out_date, total_amount')
+          .select(
+            'id, tenant_id, owner_id, move_in_date, move_out_date, total_amount',
+          )
           .eq('id', bookingId)
           .maybeSingle();
 
@@ -35,16 +37,21 @@ class PaymentRemoteDataSource {
 
       // Check for required fields
       if (bookingData['tenant_id'] == null || bookingData['owner_id'] == null) {
-        throw Exception('Incomplete booking data: tenant_id or owner_id is missing.');
+        throw Exception(
+          'Incomplete booking data: tenant_id or owner_id is missing.',
+        );
       }
 
       // 2. Update booking status to Pending
       debugPrint('[PAYMENT] Updating booking status to Pending...');
-      await AppSupabase.client.from('booking_requests').update({
-        'status': 'Pending',
-        'payment_status': bookingPaymentStatus,
-        'updated_at': now.toIso8601String(),
-      }).eq('id', bookingId);
+      await AppSupabase.client
+          .from('booking_requests')
+          .update({
+            'status': 'Pending',
+            'payment_status': bookingPaymentStatus,
+            'updated_at': now.toIso8601String(),
+          })
+          .eq('id', bookingId);
 
       // 3. Create the payment record
       // Based on new schema, Month 1 (Booking Fee) is created first.
@@ -62,7 +69,8 @@ class PaymentRemoteDataSource {
             'payer_id': payerId,
             'method': method,
             'status': simulateSuccess ? 'Success' : 'Failed',
-            'amount': amount, // Requirement: Ensure total_amount is sent as a double
+            'amount':
+                amount, // Requirement: Ensure total_amount is sent as a double
             'paid_at': simulateSuccess ? now.toIso8601String() : null,
             'created_at': now.toIso8601String(),
             'updated_at': now.toIso8601String(),
@@ -171,10 +179,7 @@ class PaymentRemoteDataSource {
       // Remove Circular Logic: Do not attempt to update a payment_id inside the payment_schedules table.
       await AppSupabase.client
           .from('payment_schedules')
-          .update({
-            'status': 'Paid',
-            'updated_at': now.toIso8601String(),
-          })
+          .update({'status': 'Paid', 'updated_at': now.toIso8601String()})
           .eq('id', scheduleId);
 
       // 3. Sync Booking Status
@@ -183,17 +188,22 @@ class PaymentRemoteDataSource {
           .select('status')
           .eq('booking_id', bookingId);
 
-      final allPaid = schedulesData.isNotEmpty && schedulesData.every((s) {
-        final status = s['status']?.toString().toLowerCase();
-        return status == 'paid';
-      });
-      
+      final allPaid =
+          schedulesData.isNotEmpty &&
+          schedulesData.every((s) {
+            final status = s['status']?.toString().toLowerCase();
+            return status == 'paid';
+          });
+
       final bookingPaymentStatus = allPaid ? 'Fully Paid' : 'Partially Paid';
 
-      await AppSupabase.client.from('booking_requests').update({
-        'payment_status': bookingPaymentStatus,
-        'updated_at': now.toIso8601String(),
-      }).eq('id', bookingId);
+      await AppSupabase.client
+          .from('booking_requests')
+          .update({
+            'payment_status': bookingPaymentStatus,
+            'updated_at': now.toIso8601String(),
+          })
+          .eq('id', bookingId);
 
       return payment;
     } catch (e) {
@@ -203,7 +213,8 @@ class PaymentRemoteDataSource {
   }
 
   String _buildTransactionReference(DateTime nowUtc) {
-    final stamp = '${nowUtc.year.toString().padLeft(4, '0')}'
+    final stamp =
+        '${nowUtc.year.toString().padLeft(4, '0')}'
         '${nowUtc.month.toString().padLeft(2, '0')}'
         '${nowUtc.day.toString().padLeft(2, '0')}'
         '${nowUtc.hour.toString().padLeft(2, '0')}'
@@ -214,4 +225,3 @@ class PaymentRemoteDataSource {
     return 'HOMEU-$stamp-$random6';
   }
 }
-

@@ -47,29 +47,46 @@ class _HomeUOwnerAnalyticsScreenState extends State<HomeUOwnerAnalyticsScreen> {
   String _monthLabel(BuildContext context, int month) {
     final t = context.l10n;
     switch (month) {
-      case 1: return t.monthShortJan;
-      case 2: return t.monthShortFeb;
-      case 3: return t.monthShortMar;
-      case 4: return t.monthShortApr;
-      case 5: return t.monthShortMay;
-      case 6: return t.monthShortJun;
-      case 7: return 'Jul';
-      case 8: return 'Aug';
-      case 9: return 'Sep';
-      case 10: return 'Oct';
-      case 11: return 'Nov';
-      case 12: return 'Dec';
-      default: return month.toString();
+      case 1:
+        return t.monthShortJan;
+      case 2:
+        return t.monthShortFeb;
+      case 3:
+        return t.monthShortMar;
+      case 4:
+        return t.monthShortApr;
+      case 5:
+        return t.monthShortMay;
+      case 6:
+        return t.monthShortJun;
+      case 7:
+        return 'Jul';
+      case 8:
+        return 'Aug';
+      case 9:
+        return 'Sep';
+      case 10:
+        return 'Oct';
+      case 11:
+        return 'Nov';
+      case 12:
+        return 'Dec';
+      default:
+        return month.toString();
     }
   }
 
   String _rentalTypeLabel(BuildContext context, OwnerRentalType type) {
     final t = context.l10n;
     switch (type) {
-      case OwnerRentalType.condo: return t.rentalTypeCondo;
-      case OwnerRentalType.apartment: return t.rentalTypeApartment;
-      case OwnerRentalType.room: return t.rentalTypeRoom;
-      case OwnerRentalType.landed: return t.rentalTypeLanded;
+      case OwnerRentalType.condo:
+        return t.rentalTypeCondo;
+      case OwnerRentalType.apartment:
+        return t.rentalTypeApartment;
+      case OwnerRentalType.room:
+        return t.rentalTypeRoom;
+      case OwnerRentalType.landed:
+        return t.rentalTypeLanded;
     }
   }
 
@@ -88,43 +105,54 @@ class _HomeUOwnerAnalyticsScreenState extends State<HomeUOwnerAnalyticsScreen> {
       ),
       bottomNavigationBar: widget.showBottomNavigationBar
           ? HomeUOwnerBottomNavigationBar(
-        selectedIndex: _selectedNavIndex,
-        onDestinationSelected: (index) {
-          if (index == _selectedNavIndex) return;
+              selectedIndex: _selectedNavIndex,
+              onDestinationSelected: (index) {
+                if (index == _selectedNavIndex) return;
 
-          if (index == 0) {
-            Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(builder: (_) => const HomeUOwnerDashboardScreen()),
-                  (route) => false,
-            );
-            return;
-          }
-          if (index == 1) {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (_) => const HomeUOwnerMyPropertiesScreen()),
-            );
-            return;
-          }
-          if (index == 2) {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (_) => const HomeUOwnerBookingRequestsScreen()),
-            );
-            return;
-          }
-          if (index == 4) {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute<void>(builder: (_) => const HomeUConversationListScreen()),
-            );
-            return;
-          }
-          if (index == 5) {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute<void>(builder: (_) => const HomeUProfileScreen(role: HomeURole.owner)),
-            );
-            return;
-          }
-        },
-      )
+                if (index == 0) {
+                  Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(
+                      builder: (_) => const HomeUOwnerDashboardScreen(),
+                    ),
+                    (route) => false,
+                  );
+                  return;
+                }
+                if (index == 1) {
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(
+                      builder: (_) => const HomeUOwnerMyPropertiesScreen(),
+                    ),
+                  );
+                  return;
+                }
+                if (index == 2) {
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(
+                      builder: (_) => const HomeUOwnerBookingRequestsScreen(),
+                    ),
+                  );
+                  return;
+                }
+                if (index == 4) {
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const HomeUConversationListScreen(),
+                    ),
+                  );
+                  return;
+                }
+                if (index == 5) {
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute<void>(
+                      builder: (_) =>
+                          const HomeUProfileScreen(role: HomeURole.owner),
+                    ),
+                  );
+                  return;
+                }
+              },
+            )
           : null,
       body: SafeArea(
         child: RefreshIndicator(
@@ -134,7 +162,9 @@ class _HomeUOwnerAnalyticsScreenState extends State<HomeUOwnerAnalyticsScreen> {
             listenable: _controller,
             builder: (context, _) {
               if (_controller.isLoading) {
-                return Center(child: CircularProgressIndicator(color: context.homeuAccent));
+                return Center(
+                  child: CircularProgressIndicator(color: context.homeuAccent),
+                );
               }
 
               if (_controller.errorMessage != null) {
@@ -142,7 +172,11 @@ class _HomeUOwnerAnalyticsScreenState extends State<HomeUOwnerAnalyticsScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.error_outline, color: Colors.red, size: 40),
+                      const Icon(
+                        Icons.error_outline,
+                        color: Colors.red,
+                        size: 40,
+                      ),
                       const SizedBox(height: 16),
                       Text(_controller.errorMessage!),
                       TextButton(
@@ -159,8 +193,11 @@ class _HomeUOwnerAnalyticsScreenState extends State<HomeUOwnerAnalyticsScreen> {
               // Calculate max value for the bar chart scaling
               double maxMonthlyValue = 1.0;
               if (data.monthlyEarnings.isNotEmpty) {
-                maxMonthlyValue = data.monthlyEarnings.map((e) => e.value).reduce((a, b) => a > b ? a : b);
-                if (maxMonthlyValue == 0) maxMonthlyValue = 1.0; // Prevent divide by zero
+                maxMonthlyValue = data.monthlyEarnings
+                    .map((e) => e.value)
+                    .reduce((a, b) => a > b ? a : b);
+                if (maxMonthlyValue == 0)
+                  maxMonthlyValue = 1.0; // Prevent divide by zero
               }
 
               return SingleChildScrollView(
@@ -229,37 +266,48 @@ class _HomeUOwnerAnalyticsScreenState extends State<HomeUOwnerAnalyticsScreen> {
                               children: data.monthlyEarnings
                                   .map(
                                     (entry) => Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        Expanded(
-                                          child: Align(
-                                            alignment: Alignment.bottomCenter,
-                                            child: Container(
-                                              height: 130 * (entry.value / maxMonthlyValue),
-                                              decoration: BoxDecoration(
-                                                color: context.homeuAccent,
-                                                borderRadius: BorderRadius.circular(8),
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 4,
+                                        ),
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.end,
+                                          children: [
+                                            Expanded(
+                                              child: Align(
+                                                alignment:
+                                                    Alignment.bottomCenter,
+                                                child: Container(
+                                                  height:
+                                                      130 *
+                                                      (entry.value /
+                                                          maxMonthlyValue),
+                                                  decoration: BoxDecoration(
+                                                    color: context.homeuAccent,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          8,
+                                                        ),
+                                                  ),
+                                                ),
                                               ),
                                             ),
-                                          ),
+                                            const SizedBox(height: 8),
+                                            Text(
+                                              _monthLabel(context, entry.month),
+                                              style: TextStyle(
+                                                color: context.homeuMutedText,
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                        const SizedBox(height: 8),
-                                        Text(
-                                          _monthLabel(context, entry.month),
-                                          style: TextStyle(
-                                            color: context.homeuMutedText,
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
-                                      ],
+                                      ),
                                     ),
-                                  ),
-                                ),
-                              ).toList(),
+                                  )
+                                  .toList(),
                             ),
                           ),
                         ],
@@ -288,7 +336,9 @@ class _HomeUOwnerAnalyticsScreenState extends State<HomeUOwnerAnalyticsScreen> {
                                 width: 130,
                                 height: 130,
                                 child: CustomPaint(
-                                  painter: _PieChartPainter(data.rentalDistribution),
+                                  painter: _PieChartPainter(
+                                    data.rentalDistribution,
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: 12),
@@ -297,32 +347,36 @@ class _HomeUOwnerAnalyticsScreenState extends State<HomeUOwnerAnalyticsScreen> {
                                   children: data.rentalDistribution
                                       .map(
                                         (slice) => Padding(
-                                      padding: const EdgeInsets.only(bottom: 8),
-                                      child: Row(
-                                        children: [
-                                          Container(
-                                            width: 10,
-                                            height: 10,
-                                            decoration: BoxDecoration(
-                                              color: slice.color,
-                                              shape: BoxShape.circle,
-                                            ),
+                                          padding: const EdgeInsets.only(
+                                            bottom: 8,
                                           ),
-                                          const SizedBox(width: 8),
-                                          Expanded(
-                                            child: Text(
-                                              '${_rentalTypeLabel(context, slice.type)} (${slice.percent}%)',
-                                              style: TextStyle(
-                                                color: context.homeuPrimaryText,
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.w600,
+                                          child: Row(
+                                            children: [
+                                              Container(
+                                                width: 10,
+                                                height: 10,
+                                                decoration: BoxDecoration(
+                                                  color: slice.color,
+                                                  shape: BoxShape.circle,
+                                                ),
                                               ),
-                                            ),
+                                              const SizedBox(width: 8),
+                                              Expanded(
+                                                child: Text(
+                                                  '${_rentalTypeLabel(context, slice.type)} (${slice.percent}%)',
+                                                  style: TextStyle(
+                                                    color: context
+                                                        .homeuPrimaryText,
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
                                           ),
-                                        ],
-                                      ),
-                                    ),
-                                  ).toList(),
+                                        ),
+                                      )
+                                      .toList(),
                                 ),
                               ),
                             ],

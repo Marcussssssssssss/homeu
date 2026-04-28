@@ -27,21 +27,27 @@ class BookingReceiptDialog extends StatelessWidget {
   }) async {
     return showDialog<void>(
       context: context,
-      builder: (context) => BookingReceiptDialog(
-        payment: payment,
-        property: property,
-      ),
+      builder: (context) =>
+          BookingReceiptDialog(payment: payment, property: property),
     );
   }
 
-  Future<Uint8List> _generatePdf(PdfPageFormat format, BuildContext context) async {
+  Future<Uint8List> _generatePdf(
+    PdfPageFormat format,
+    BuildContext context,
+  ) async {
     final pdf = pw.Document();
     final l10n = context.l10n;
     final dateFormat = DateFormat('dd MMM yyyy, hh:mm a');
-    final currencyFormat = NumberFormat.currency(symbol: 'RM ', decimalDigits: 2);
+    final currencyFormat = NumberFormat.currency(
+      symbol: 'RM ',
+      decimalDigits: 2,
+    );
 
     // Malaysia Timezone Offset: UTC +8
-    final DateTime displayTime = (payment.paidAt ?? payment.createdAt).toUtc().add(const Duration(hours: 8));
+    final DateTime displayTime = (payment.paidAt ?? payment.createdAt)
+        .toUtc()
+        .add(const Duration(hours: 8));
 
     pdf.addPage(
       pw.Page(
@@ -55,14 +61,31 @@ class BookingReceiptDialog extends StatelessWidget {
                 child: pw.Row(
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
-                    pw.Text(l10n.receiptTitle, style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
-                    pw.Text(l10n.statusApproved.toUpperCase(), style: pw.TextStyle(fontSize: 18, color: PdfColors.green, fontWeight: pw.FontWeight.bold)),
+                    pw.Text(
+                      l10n.receiptTitle,
+                      style: pw.TextStyle(
+                        fontSize: 24,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                    pw.Text(
+                      l10n.statusApproved.toUpperCase(),
+                      style: pw.TextStyle(
+                        fontSize: 18,
+                        color: PdfColors.green,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
                   ],
                 ),
               ),
               pw.SizedBox(height: 20),
-              pw.Text('${l10n.receiptTransactionId}: ${payment.transactionReference}'),
-              pw.Text('${l10n.receiptPaymentDate}: ${dateFormat.format(displayTime)}'),
+              pw.Text(
+                '${l10n.receiptTransactionId}: ${payment.transactionReference}',
+              ),
+              pw.Text(
+                '${l10n.receiptPaymentDate}: ${dateFormat.format(displayTime)}',
+              ),
               pw.SizedBox(height: 20),
               pw.Divider(),
               pw.SizedBox(height: 10),
@@ -70,20 +93,41 @@ class BookingReceiptDialog extends StatelessWidget {
               _pdfRow(l10n.receiptLocation, property.location),
               _pdfRow(l10n.receiptPaymentMethod, payment.method),
               if (payment.monthNumber != null)
-                _pdfRow(l10n.receiptInstallment, l10n.receiptMonth(payment.monthNumber!)),
+                _pdfRow(
+                  l10n.receiptInstallment,
+                  l10n.receiptMonth(payment.monthNumber!),
+                ),
               pw.SizedBox(height: 20),
               pw.Divider(),
               pw.SizedBox(height: 10),
               pw.Row(
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
-                  pw.Text(l10n.receiptTotalAmount, style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
-                  pw.Text(currencyFormat.format(payment.amount), style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
+                  pw.Text(
+                    l10n.receiptTotalAmount,
+                    style: pw.TextStyle(
+                      fontSize: 16,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                  ),
+                  pw.Text(
+                    currencyFormat.format(payment.amount),
+                    style: pw.TextStyle(
+                      fontSize: 18,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                  ),
                 ],
               ),
               pw.SizedBox(height: 40),
               pw.Center(
-                child: pw.Text(l10n.receiptFooter, style: pw.TextStyle(fontStyle: pw.FontStyle.italic, color: PdfColors.grey)),
+                child: pw.Text(
+                  l10n.receiptFooter,
+                  style: pw.TextStyle(
+                    fontStyle: pw.FontStyle.italic,
+                    color: PdfColors.grey,
+                  ),
+                ),
               ),
             ],
           );
@@ -111,10 +155,15 @@ class BookingReceiptDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final dateFormat = DateFormat('dd MMM yyyy, hh:mm a');
-    final currencyFormat = NumberFormat.currency(symbol: 'RM ', decimalDigits: 2);
-    
+    final currencyFormat = NumberFormat.currency(
+      symbol: 'RM ',
+      decimalDigits: 2,
+    );
+
     // Malaysia Timezone Offset: UTC +8
-    final DateTime displayTime = (payment.paidAt ?? payment.createdAt).toUtc().add(const Duration(hours: 8));
+    final DateTime displayTime = (payment.paidAt ?? payment.createdAt)
+        .toUtc()
+        .add(const Duration(hours: 8));
 
     return Dialog(
       backgroundColor: Colors.transparent,
@@ -125,7 +174,9 @@ class BookingReceiptDialog extends StatelessWidget {
           children: [
             Container(
               decoration: BoxDecoration(
-                color: context.isDarkMode ? const Color(0xFF1E293B) : Colors.white,
+                color: context.isDarkMode
+                    ? const Color(0xFF1E293B)
+                    : Colors.white,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
@@ -142,7 +193,9 @@ class BookingReceiptDialog extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(vertical: 30),
                     width: double.infinity,
                     decoration: BoxDecoration(
-                      color: context.isDarkMode ? const Color(0xFF064E3B).withOpacity(0.3) : const Color(0xFFF0FDF4),
+                      color: context.isDarkMode
+                          ? const Color(0xFF064E3B).withOpacity(0.3)
+                          : const Color(0xFFF0FDF4),
                       borderRadius: const BorderRadius.only(
                         topLeft: Radius.circular(20),
                         topRight: Radius.circular(20),
@@ -168,14 +221,18 @@ class BookingReceiptDialog extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: context.isDarkMode ? const Color(0xFF4ADE80) : const Color(0xFF166534),
+                            color: context.isDarkMode
+                                ? const Color(0xFF4ADE80)
+                                : const Color(0xFF166534),
                           ),
                         ),
                         Text(
                           '${l10n.receiptTransactionId}: ${payment.transactionReference}',
                           style: TextStyle(
                             fontSize: 12,
-                            color: context.isDarkMode ? const Color(0xFF4ADE80).withOpacity(0.7) : const Color(0xFF166534).withOpacity(0.7),
+                            color: context.isDarkMode
+                                ? const Color(0xFF4ADE80).withOpacity(0.7)
+                                : const Color(0xFF166534).withOpacity(0.7),
                           ),
                         ),
                       ],
@@ -188,18 +245,40 @@ class BookingReceiptDialog extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildInfoRow(l10n.receiptProperty, property.name, context),
-                        _buildInfoRow(l10n.receiptLocation, property.location, context),
-                        _buildInfoRow(l10n.receiptPaymentDate, dateFormat.format(displayTime), context),
-                        _buildInfoRow(l10n.receiptPaymentMethod, payment.method, context),
+                        _buildInfoRow(
+                          l10n.receiptProperty,
+                          property.name,
+                          context,
+                        ),
+                        _buildInfoRow(
+                          l10n.receiptLocation,
+                          property.location,
+                          context,
+                        ),
+                        _buildInfoRow(
+                          l10n.receiptPaymentDate,
+                          dateFormat.format(displayTime),
+                          context,
+                        ),
+                        _buildInfoRow(
+                          l10n.receiptPaymentMethod,
+                          payment.method,
+                          context,
+                        ),
                         if (payment.monthNumber != null)
-                          _buildInfoRow(l10n.receiptInstallment, l10n.receiptMonth(payment.monthNumber!), context),
+                          _buildInfoRow(
+                            l10n.receiptInstallment,
+                            l10n.receiptMonth(payment.monthNumber!),
+                            context,
+                          ),
 
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 20),
                           child: CustomPaint(
                             size: const Size(double.infinity, 1),
-                            painter: _DashedLinePainter(color: context.homeuSectionDivider),
+                            painter: _DashedLinePainter(
+                              color: context.homeuSectionDivider,
+                            ),
                           ),
                         ),
 
@@ -232,10 +311,18 @@ class BookingReceiptDialog extends StatelessWidget {
                         Expanded(
                           child: OutlinedButton.icon(
                             onPressed: () async {
-                              final pdfBytes = await _generatePdf(PdfPageFormat.a4, context);
-                              await Printing.layoutPdf(onLayout: (format) => pdfBytes);
+                              final pdfBytes = await _generatePdf(
+                                PdfPageFormat.a4,
+                                context,
+                              );
+                              await Printing.layoutPdf(
+                                onLayout: (format) => pdfBytes,
+                              );
                             },
-                            icon: const Icon(Icons.file_download_outlined, size: 20),
+                            icon: const Icon(
+                              Icons.file_download_outlined,
+                              size: 20,
+                            ),
                             label: Text(l10n.receiptDownload),
                             style: OutlinedButton.styleFrom(
                               foregroundColor: context.homeuAccent,
@@ -251,16 +338,21 @@ class BookingReceiptDialog extends StatelessWidget {
                         Expanded(
                           child: ElevatedButton.icon(
                             onPressed: () async {
-                              final pdfBytes = await _generatePdf(PdfPageFormat.a4, context);
+                              final pdfBytes = await _generatePdf(
+                                PdfPageFormat.a4,
+                                context,
+                              );
                               await Share.shareXFiles(
                                 [
                                   XFile.fromData(
                                     pdfBytes,
-                                    name: 'Receipt_${payment.transactionReference}.pdf',
+                                    name:
+                                        'Receipt_${payment.transactionReference}.pdf',
                                     mimeType: 'application/pdf',
                                   ),
                                 ],
-                                subject: '${l10n.receiptTitle} - ${property.name}',
+                                subject:
+                                    '${l10n.receiptTitle} - ${property.name}',
                               );
                             },
                             icon: const Icon(Icons.share_outlined, size: 20),

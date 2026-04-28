@@ -8,9 +8,11 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 class RegisterRepository {
   static const String successLocalMode = 'register.success.local_mode';
-  static const String successAccountCreated = 'register.success.account_created';
+  static const String successAccountCreated =
+      'register.success.account_created';
 
-  static const String errorSignUpIncomplete = 'register.error.signup_incomplete';
+  static const String errorSignUpIncomplete =
+      'register.error.signup_incomplete';
   static const String errorDuplicateEmail = 'register.error.duplicate_email';
   static const String errorProfileUnavailable =
       'register.error.profile_unavailable';
@@ -132,4 +134,3 @@ class RegisterRepository {
     return errorGeneric;
   }
 }
-

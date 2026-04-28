@@ -7,15 +7,18 @@ import 'package:homeu/core/supabase/app_supabase.dart';
 import 'package:homeu/core/theme/homeu_app_theme.dart';
 import 'package:homeu/pages/home/chat_screen.dart';
 import 'package:intl/intl.dart';
+
 class HomeUAdminReportsModerationScreen extends StatefulWidget {
   const HomeUAdminReportsModerationScreen({super.key});
   @override
   State<HomeUAdminReportsModerationScreen> createState() =>
       _HomeUAdminReportsModerationScreenState();
 }
+
 class _HomeUAdminReportsModerationScreenState
     extends State<HomeUAdminReportsModerationScreen> {
-  final ChatRemoteDataSource _chatRemoteDataSource = const ChatRemoteDataSource();
+  final ChatRemoteDataSource _chatRemoteDataSource =
+      const ChatRemoteDataSource();
   static const List<Map<String, String>> _statusFilters = <Map<String, String>>[
     {'key': 'all', 'label': 'All'},
     {'key': 'pending', 'label': 'Pending'},
@@ -37,6 +40,7 @@ class _HomeUAdminReportsModerationScreenState
     super.initState();
     _loadReports();
   }
+
   Future<void> _loadReports() async {
     if (!mounted) {
       return;
@@ -64,13 +68,19 @@ class _HomeUAdminReportsModerationScreenState
         if (tenantId.isNotEmpty) tenantIds.add(tenantId);
         if (propertyId.isNotEmpty) propertyIds.add(propertyId);
       }
-      final profileIds = <String>{...ownerIds, ...tenantIds}.toList(growable: false);
+      final profileIds = <String>{
+        ...ownerIds,
+        ...tenantIds,
+      }.toList(growable: false);
       final propertyIdList = propertyIds.toList(growable: false);
-      Map<String, Map<String, dynamic>> profilesById = const <String, Map<String, dynamic>>{};
+      Map<String, Map<String, dynamic>> profilesById =
+          const <String, Map<String, dynamic>>{};
       if (profileIds.isNotEmpty) {
         final dynamic profileRows = await AppSupabase.client
             .from('profiles')
-            .select('id, full_name, email, risk_status, account_status, risk_reason')
+            .select(
+              'id, full_name, email, risk_status, account_status, risk_reason',
+            )
             .inFilter('id', profileIds);
         if (profileRows is List) {
           profilesById = {
@@ -88,7 +98,8 @@ class _HomeUAdminReportsModerationScreenState
         if (propertyRows is List) {
           propertyTitles = {
             for (final row in propertyRows.whereType<Map<String, dynamic>>())
-              row['id']?.toString() ?? '': row['title']?.toString() ?? 'Unknown listing',
+              row['id']?.toString() ?? '':
+                  row['title']?.toString() ?? 'Unknown listing',
           };
         }
       }
@@ -98,33 +109,44 @@ class _HomeUAdminReportsModerationScreenState
         if (ownerId.isEmpty) continue;
         ownerReportCount[ownerId] = (ownerReportCount[ownerId] ?? 0) + 1;
       }
-      final mappedReports = rows.map((row) {
-        final ownerId = row['owner_id']?.toString() ?? '';
-        final tenantId = row['tenant_id']?.toString() ?? '';
-        final propertyId = row['property_id']?.toString() ?? '';
-        final ownerProfile = profilesById[ownerId] ?? const <String, dynamic>{};
-        final tenantProfile = profilesById[tenantId] ?? const <String, dynamic>{};
-        return _ReportRecord(
-          reportId: row['report_id']?.toString() ?? 'Unknown',
-          propertyId: propertyId,
-          ownerId: ownerId,
-          tenantId: tenantId,
-          propertyTitle:
-              propertyTitles[propertyId] ?? 'Property #${propertyId.isNotEmpty ? propertyId : 'N/A'}',
-          ownerName: ownerProfile['full_name']?.toString() ?? 'Unknown owner',
-          ownerEmail: ownerProfile['email']?.toString() ?? '-',
-          tenantName: tenantProfile['full_name']?.toString() ?? 'Unknown reporter',
-          tenantEmail: tenantProfile['email']?.toString() ?? '-',
-          reason: row['reason']?.toString() ?? '-',
-          description: row['description']?.toString() ?? '',
-          status: _normalizeReportStatus(row['status']?.toString()),
-          createdAt: _parseDate(row['created_at']) ?? DateTime.now(),
-          ownerRiskStatus: _toRiskStatus(ownerProfile['risk_status']?.toString()),
-          ownerAccountStatus: _toAccountStatus(ownerProfile['account_status']?.toString()),
-          ownerRiskReason: ownerProfile['risk_reason']?.toString(),
-          previousReportCount: ownerReportCount[ownerId] ?? 0,
-        );
-      }).toList(growable: false);
+      final mappedReports = rows
+          .map((row) {
+            final ownerId = row['owner_id']?.toString() ?? '';
+            final tenantId = row['tenant_id']?.toString() ?? '';
+            final propertyId = row['property_id']?.toString() ?? '';
+            final ownerProfile =
+                profilesById[ownerId] ?? const <String, dynamic>{};
+            final tenantProfile =
+                profilesById[tenantId] ?? const <String, dynamic>{};
+            return _ReportRecord(
+              reportId: row['report_id']?.toString() ?? 'Unknown',
+              propertyId: propertyId,
+              ownerId: ownerId,
+              tenantId: tenantId,
+              propertyTitle:
+                  propertyTitles[propertyId] ??
+                  'Property #${propertyId.isNotEmpty ? propertyId : 'N/A'}',
+              ownerName:
+                  ownerProfile['full_name']?.toString() ?? 'Unknown owner',
+              ownerEmail: ownerProfile['email']?.toString() ?? '-',
+              tenantName:
+                  tenantProfile['full_name']?.toString() ?? 'Unknown reporter',
+              tenantEmail: tenantProfile['email']?.toString() ?? '-',
+              reason: row['reason']?.toString() ?? '-',
+              description: row['description']?.toString() ?? '',
+              status: _normalizeReportStatus(row['status']?.toString()),
+              createdAt: _parseDate(row['created_at']) ?? DateTime.now(),
+              ownerRiskStatus: _toRiskStatus(
+                ownerProfile['risk_status']?.toString(),
+              ),
+              ownerAccountStatus: _toAccountStatus(
+                ownerProfile['account_status']?.toString(),
+              ),
+              ownerRiskReason: ownerProfile['risk_reason']?.toString(),
+              previousReportCount: ownerReportCount[ownerId] ?? 0,
+            );
+          })
+          .toList(growable: false);
       if (!mounted) {
         return;
       }
@@ -140,31 +162,37 @@ class _HomeUAdminReportsModerationScreenState
         _reports = const <_ReportRecord>[];
         _isLoading = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to load reports: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to load reports: $e')));
     }
   }
+
   List<_ReportRecord> get _filteredReports {
-    final filtered = _reports.where((report) {
-      if (!_matchesSelectedFilter(report)) return false;
-      if (_searchQuery.trim().isEmpty) return true;
-      final q = _searchQuery.trim().toLowerCase();
-      return report.propertyTitle.toLowerCase().contains(q) ||
-          report.ownerName.toLowerCase().contains(q) ||
-          report.ownerEmail.toLowerCase().contains(q) ||
-          report.tenantName.toLowerCase().contains(q) ||
-          report.reason.toLowerCase().contains(q) ||
-          report.shortReportId.toLowerCase().contains(q) ||
-          report.reportId.toLowerCase().contains(q);
-    }).toList(growable: false);
+    final filtered = _reports
+        .where((report) {
+          if (!_matchesSelectedFilter(report)) return false;
+          if (_searchQuery.trim().isEmpty) return true;
+          final q = _searchQuery.trim().toLowerCase();
+          return report.propertyTitle.toLowerCase().contains(q) ||
+              report.ownerName.toLowerCase().contains(q) ||
+              report.ownerEmail.toLowerCase().contains(q) ||
+              report.tenantName.toLowerCase().contains(q) ||
+              report.reason.toLowerCase().contains(q) ||
+              report.shortReportId.toLowerCase().contains(q) ||
+              report.reportId.toLowerCase().contains(q);
+        })
+        .toList(growable: false);
     filtered.sort((a, b) {
-      final byStatus = _statusPriority(a.status).compareTo(_statusPriority(b.status));
+      final byStatus = _statusPriority(
+        a.status,
+      ).compareTo(_statusPriority(b.status));
       if (byStatus != 0) return byStatus;
       return b.createdAt.compareTo(a.createdAt);
     });
     return filtered;
   }
+
   bool _matchesSelectedFilter(_ReportRecord report) {
     switch (_selectedFilterKey) {
       case 'pending':
@@ -184,14 +212,19 @@ class _HomeUAdminReportsModerationScreenState
         return true;
     }
   }
+
   String _filterLabelForKey(String key) {
-    for (final filter in <Map<String, String>>[..._statusFilters, ..._ownerFilters]) {
+    for (final filter in <Map<String, String>>[
+      ..._statusFilters,
+      ..._ownerFilters,
+    ]) {
       if (filter['key'] == key) {
         return filter['label'] ?? 'All';
       }
     }
     return 'All';
   }
+
   Future<void> _showFilterBottomSheet() async {
     String tempFilterKey = _selectedFilterKey;
     await showModalBottomSheet<void>(
@@ -212,7 +245,10 @@ class _HomeUAdminReportsModerationScreenState
               padding: EdgeInsets.fromLTRB(16, 16, 16, 12 + bottomInset),
               child: StatefulBuilder(
                 builder: (context, setSheetState) {
-                  Widget buildSection({required String title, required List<Map<String, String>> filters}) {
+                  Widget buildSection({
+                    required String title,
+                    required List<Map<String, String>> filters,
+                  }) {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -238,18 +274,26 @@ class _HomeUAdminReportsModerationScreenState
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(
                                 color: isSelected
-                                    ? context.homeuAccent.withValues(alpha: 0.35)
+                                    ? context.homeuAccent.withValues(
+                                        alpha: 0.35,
+                                      )
                                     : context.homeuSoftBorder,
                               ),
                             ),
                             child: ListTile(
                               dense: true,
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 10),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                              ),
                               title: Text(label),
                               trailing: isSelected
-                                  ? Icon(Icons.check_circle_rounded, color: context.homeuAccent)
+                                  ? Icon(
+                                      Icons.check_circle_rounded,
+                                      color: context.homeuAccent,
+                                    )
                                   : null,
-                              onTap: () => setSheetState(() => tempFilterKey = key),
+                              onTap: () =>
+                                  setSheetState(() => tempFilterKey = key),
                             ),
                           );
                         }),
@@ -275,9 +319,15 @@ class _HomeUAdminReportsModerationScreenState
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              buildSection(title: 'Report Status', filters: _statusFilters),
+                              buildSection(
+                                title: 'Report Status',
+                                filters: _statusFilters,
+                              ),
                               const SizedBox(height: 10),
-                              buildSection(title: 'Owner Status / Risk', filters: _ownerFilters),
+                              buildSection(
+                                title: 'Owner Status / Risk',
+                                filters: _ownerFilters,
+                              ),
                               const SizedBox(height: 16),
                             ],
                           ),
@@ -298,7 +348,9 @@ class _HomeUAdminReportsModerationScreenState
                           Expanded(
                             child: ElevatedButton(
                               onPressed: () {
-                                setState(() => _selectedFilterKey = tempFilterKey);
+                                setState(
+                                  () => _selectedFilterKey = tempFilterKey,
+                                );
                                 Navigator.of(sheetContext).pop();
                               },
                               child: const Text('Apply Filter'),
@@ -316,6 +368,7 @@ class _HomeUAdminReportsModerationScreenState
       },
     );
   }
+
   Future<void> _openReportDetails(_ReportRecord report) async {
     final result = await Navigator.of(context).push<String?>(
       MaterialPageRoute<String?>(
@@ -380,6 +433,7 @@ class _HomeUAdminReportsModerationScreenState
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result)));
     await _loadReports();
   }
+
   Future<String?> _contactOwner(_ReportRecord report) async {
     final adminId = AppSupabase.auth.currentUser?.id;
     if (adminId == null) {
@@ -387,7 +441,9 @@ class _HomeUAdminReportsModerationScreenState
     }
     if (report.propertyId.isEmpty || report.ownerId.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Missing owner or property context for chat.')),
+        const SnackBar(
+          content: Text('Missing owner or property context for chat.'),
+        ),
       );
       return null;
     }
@@ -402,7 +458,8 @@ class _HomeUAdminReportsModerationScreenState
       }
       Navigator.of(context).push(
         MaterialPageRoute<void>(
-          builder: (_) => HomeUChatScreen.fromConversation(conversation: conversation),
+          builder: (_) =>
+              HomeUChatScreen.fromConversation(conversation: conversation),
         ),
       );
       return null;
@@ -410,12 +467,13 @@ class _HomeUAdminReportsModerationScreenState
       if (!mounted) {
         return null;
       }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Unable to open chat: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Unable to open chat: $e')));
       return null;
     }
   }
+
   Future<String?> _moderateOwner(
     _ReportRecord report, {
     required String action,
@@ -437,7 +495,10 @@ class _HomeUAdminReportsModerationScreenState
       if (nextStatus != null) 'account_status': _accountToDb(nextStatus),
     };
     try {
-      await AppSupabase.client.from('profiles').update(profileUpdate).eq('id', report.ownerId);
+      await AppSupabase.client
+          .from('profiles')
+          .update(profileUpdate)
+          .eq('id', report.ownerId);
       await AppSupabase.client
           .from('property_reports')
           .update({
@@ -463,12 +524,13 @@ class _HomeUAdminReportsModerationScreenState
       if (!mounted) {
         return null;
       }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Moderation update failed: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Moderation update failed: $e')));
       return null;
     }
   }
+
   Future<String?> _updateReportStatus(
     _ReportRecord report, {
     required String nextStatus,
@@ -483,11 +545,14 @@ class _HomeUAdminReportsModerationScreenState
     final now = DateTime.now().toUtc().toIso8601String();
     try {
       if (report.ownerId.isNotEmpty) {
-        await AppSupabase.client.from('profiles').update({
-          'risk_reason': reason,
-          'moderated_by': admin?.id,
-          'moderated_at': now,
-        }).eq('id', report.ownerId);
+        await AppSupabase.client
+            .from('profiles')
+            .update({
+              'risk_reason': reason,
+              'moderated_by': admin?.id,
+              'moderated_at': now,
+            })
+            .eq('id', report.ownerId);
       }
       await AppSupabase.client
           .from('property_reports')
@@ -513,12 +578,13 @@ class _HomeUAdminReportsModerationScreenState
       if (!mounted) {
         return null;
       }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Report update failed: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Report update failed: $e')));
       return null;
     }
   }
+
   Future<void> _insertAudit({
     required String action,
     required _ReportRecord report,
@@ -538,6 +604,7 @@ class _HomeUAdminReportsModerationScreenState
       'created_at': DateTime.now().toUtc().toIso8601String(),
     });
   }
+
   Future<String?> _askReasonAndConfirm(String actionLabel) async {
     final reason = await showDialog<String>(
       context: context,
@@ -545,6 +612,7 @@ class _HomeUAdminReportsModerationScreenState
     );
     return reason;
   }
+
   @override
   Widget build(BuildContext context) {
     if (!HomeUSession.canAccess(HomeURole.admin)) {
@@ -582,14 +650,19 @@ class _HomeUAdminReportsModerationScreenState
                           fillColor: context.homeuCard,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: context.homeuSoftBorder),
+                            borderSide: BorderSide(
+                              color: context.homeuSoftBorder,
+                            ),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: context.homeuSoftBorder),
+                            borderSide: BorderSide(
+                              color: context.homeuSoftBorder,
+                            ),
                           ),
                         ),
-                        onChanged: (value) => setState(() => _searchQuery = value),
+                        onChanged: (value) =>
+                            setState(() => _searchQuery = value),
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -603,7 +676,10 @@ class _HomeUAdminReportsModerationScreenState
                       ),
                       child: IconButton(
                         tooltip: 'Filter reports',
-                        icon: Icon(Icons.filter_list_rounded, color: context.homeuAccent),
+                        icon: Icon(
+                          Icons.filter_list_rounded,
+                          color: context.homeuAccent,
+                        ),
                         onPressed: _showFilterBottomSheet,
                       ),
                     ),
@@ -623,8 +699,12 @@ class _HomeUAdminReportsModerationScreenState
                     const SizedBox(width: 8),
                     Chip(
                       label: Text(_filterLabelForKey(_selectedFilterKey)),
-                      backgroundColor: context.homeuAccent.withValues(alpha: 0.12),
-                      side: BorderSide(color: context.homeuAccent.withValues(alpha: 0.25)),
+                      backgroundColor: context.homeuAccent.withValues(
+                        alpha: 0.12,
+                      ),
+                      side: BorderSide(
+                        color: context.homeuAccent.withValues(alpha: 0.25),
+                      ),
                       labelStyle: TextStyle(
                         color: context.homeuPrimaryText,
                         fontSize: 12,
@@ -654,7 +734,9 @@ class _HomeUAdminReportsModerationScreenState
                               Center(
                                 child: Text(
                                   'No reports match the current filters.',
-                                  style: TextStyle(color: context.homeuMutedText),
+                                  style: TextStyle(
+                                    color: context.homeuMutedText,
+                                  ),
                                 ),
                               ),
                             ],
@@ -676,6 +758,7 @@ class _HomeUAdminReportsModerationScreenState
       ),
     );
   }
+
   String _riskToDb(HomeURiskStatus value) {
     switch (value) {
       case HomeURiskStatus.normal:
@@ -686,6 +769,7 @@ class _HomeUAdminReportsModerationScreenState
         return 'high_risk';
     }
   }
+
   String _accountToDb(HomeUAccountStatus value) {
     switch (value) {
       case HomeUAccountStatus.active:
@@ -696,6 +780,7 @@ class _HomeUAdminReportsModerationScreenState
         return 'removed';
     }
   }
+
   HomeURiskStatus _toRiskStatus(String? value) {
     final normalized = (value ?? '').trim().toLowerCase().replaceAll('-', '_');
     if (normalized == 'high_risk' || normalized == 'highrisk') {
@@ -706,17 +791,20 @@ class _HomeUAdminReportsModerationScreenState
     }
     return HomeURiskStatus.normal;
   }
+
   HomeUAccountStatus _toAccountStatus(String? value) {
     final normalized = (value ?? '').trim().toLowerCase();
     if (normalized == 'suspended') return HomeUAccountStatus.suspended;
     if (normalized == 'removed') return HomeUAccountStatus.removed;
     return HomeUAccountStatus.active;
   }
+
   String _normalizeReportStatus(String? status) {
     final normalized = (status ?? 'pending').trim().toLowerCase();
     const allowed = {'pending', 'reviewed', 'dismissed', 'action_taken'};
     return allowed.contains(normalized) ? normalized : 'pending';
   }
+
   int _statusPriority(String status) {
     switch (status) {
       case 'pending':
@@ -731,6 +819,7 @@ class _HomeUAdminReportsModerationScreenState
         return 4;
     }
   }
+
   String _riskLabel(HomeURiskStatus status) {
     switch (status) {
       case HomeURiskStatus.normal:
@@ -741,6 +830,7 @@ class _HomeUAdminReportsModerationScreenState
         return 'High Risk';
     }
   }
+
   String _accountLabel(HomeUAccountStatus status) {
     switch (status) {
       case HomeUAccountStatus.active:
@@ -751,12 +841,14 @@ class _HomeUAdminReportsModerationScreenState
         return 'Removed';
     }
   }
+
   DateTime? _parseDate(dynamic value) {
     if (value is DateTime) return value;
     if (value is String) return DateTime.tryParse(value);
     return null;
   }
 }
+
 class _ReportRecord {
   const _ReportRecord({
     required this.reportId,
@@ -849,7 +941,9 @@ class _ReportDetailsScreenState extends State<_ReportDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     final report = widget.report;
-    final dateText = DateFormat('MMM d, yyyy HH:mm').format(report.createdAt.toLocal());
+    final dateText = DateFormat(
+      'MMM d, yyyy HH:mm',
+    ).format(report.createdAt.toLocal());
 
     return Scaffold(
       backgroundColor: context.colors.surface,
@@ -907,7 +1001,9 @@ class _ReportDetailsScreenState extends State<_ReportDetailsScreen> {
                 _InfoRowData(label: 'Reason', value: report.reason),
                 _InfoRowData(
                   label: 'Description',
-                  value: report.description.trim().isEmpty ? '-' : report.description.trim(),
+                  value: report.description.trim().isEmpty
+                      ? '-'
+                      : report.description.trim(),
                 ),
                 _InfoRowData(label: 'Status', value: report.status),
               ],
@@ -1044,7 +1140,9 @@ class _ReportCard extends StatelessWidget {
   final VoidCallback onTap;
   @override
   Widget build(BuildContext context) {
-    final createdLabel = DateFormat('MMM d, yyyy HH:mm').format(report.createdAt.toLocal());
+    final createdLabel = DateFormat(
+      'MMM d, yyyy HH:mm',
+    ).format(report.createdAt.toLocal());
     return Card(
       margin: const EdgeInsets.only(top: 10),
       color: context.homeuCard,
@@ -1081,14 +1179,36 @@ class _ReportCard extends StatelessWidget {
                 report.propertyTitle,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(color: context.homeuPrimaryText, fontWeight: FontWeight.w700),
+                style: TextStyle(
+                  color: context.homeuPrimaryText,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
               const SizedBox(height: 4),
-              Text('Owner: ${report.ownerName} (${report.ownerEmail})', style: TextStyle(color: context.homeuSecondaryText, fontSize: 12.5)),
+              Text(
+                'Owner: ${report.ownerName} (${report.ownerEmail})',
+                style: TextStyle(
+                  color: context.homeuSecondaryText,
+                  fontSize: 12.5,
+                ),
+              ),
               const SizedBox(height: 2),
-              Text('Reporter: ${report.tenantName} (${report.tenantEmail})', style: TextStyle(color: context.homeuSecondaryText, fontSize: 12.5)),
+              Text(
+                'Reporter: ${report.tenantName} (${report.tenantEmail})',
+                style: TextStyle(
+                  color: context.homeuSecondaryText,
+                  fontSize: 12.5,
+                ),
+              ),
               const SizedBox(height: 6),
-              Text('Reason: ${report.reason}', style: TextStyle(color: context.homeuPrimaryText, fontSize: 13.3, fontWeight: FontWeight.w600)),
+              Text(
+                'Reason: ${report.reason}',
+                style: TextStyle(
+                  color: context.homeuPrimaryText,
+                  fontSize: 13.3,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
               const SizedBox(height: 8),
               Row(
                 children: [
@@ -1096,7 +1216,13 @@ class _ReportCard extends StatelessWidget {
                   const SizedBox(width: 8),
                   _AccountStatusBadge(status: report.ownerAccountStatus),
                   const Spacer(),
-                  Text(createdLabel, style: TextStyle(color: context.homeuMutedText, fontSize: 11.5)),
+                  Text(
+                    createdLabel,
+                    style: TextStyle(
+                      color: context.homeuMutedText,
+                      fontSize: 11.5,
+                    ),
+                  ),
                 ],
               ),
             ],
@@ -1106,6 +1232,7 @@ class _ReportCard extends StatelessWidget {
     );
   }
 }
+
 class _StatusBadge extends StatelessWidget {
   const _StatusBadge({required this.status});
   final String status;
@@ -1124,11 +1251,16 @@ class _StatusBadge extends StatelessWidget {
       ),
       child: Text(
         status.replaceAll('_', ' ').toUpperCase(),
-        style: TextStyle(color: color, fontSize: 10.5, fontWeight: FontWeight.w800),
+        style: TextStyle(
+          color: color,
+          fontSize: 10.5,
+          fontWeight: FontWeight.w800,
+        ),
       ),
     );
   }
 }
+
 class _RiskStatusBadge extends StatelessWidget {
   const _RiskStatusBadge({required this.risk});
   final HomeURiskStatus risk;
@@ -1150,10 +1282,18 @@ class _RiskStatusBadge extends StatelessWidget {
         color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(999),
       ),
-      child: Text(label, style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.w700)),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: color,
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
     );
   }
 }
+
 class _AccountStatusBadge extends StatelessWidget {
   const _AccountStatusBadge({required this.status});
   final HomeUAccountStatus status;
@@ -1175,10 +1315,18 @@ class _AccountStatusBadge extends StatelessWidget {
         color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(999),
       ),
-      child: Text(label, style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.w700)),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: color,
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
     );
   }
 }
+
 class _InfoCard extends StatelessWidget {
   const _InfoCard({required this.title, required this.rows});
   final String title;
@@ -1196,7 +1344,13 @@ class _InfoCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: TextStyle(color: context.homeuPrimaryText, fontWeight: FontWeight.w700)),
+          Text(
+            title,
+            style: TextStyle(
+              color: context.homeuPrimaryText,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
           const SizedBox(height: 10),
           for (int i = 0; i < rows.length; i++) ...[
             _InfoRow(row: rows[i]),
@@ -1207,11 +1361,13 @@ class _InfoCard extends StatelessWidget {
     );
   }
 }
+
 class _InfoRowData {
   const _InfoRowData({required this.label, required this.value});
   final String label;
   final String value;
 }
+
 class _InfoRow extends StatelessWidget {
   const _InfoRow({required this.row});
   final _InfoRowData row;
@@ -1224,19 +1380,28 @@ class _InfoRow extends StatelessWidget {
           width: 110,
           child: Text(
             row.label,
-            style: TextStyle(color: context.homeuMutedText, fontSize: 12, fontWeight: FontWeight.w600),
+            style: TextStyle(
+              color: context.homeuMutedText,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
         Expanded(
           child: Text(
             row.value,
-            style: TextStyle(color: context.homeuPrimaryText, fontSize: 12.5, fontWeight: FontWeight.w600),
+            style: TextStyle(
+              color: context.homeuPrimaryText,
+              fontSize: 12.5,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
       ],
     );
   }
 }
+
 class _ActionChip extends StatelessWidget {
   const _ActionChip({
     required this.label,
@@ -1361,4 +1526,3 @@ class _ModerationReasonConfirmDialogState
     );
   }
 }
-

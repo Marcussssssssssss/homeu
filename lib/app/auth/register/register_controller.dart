@@ -11,4 +11,3 @@ class RegisterController {
     return _repository.register(payload);
   }
 }
-

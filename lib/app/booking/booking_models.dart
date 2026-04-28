@@ -28,23 +28,37 @@ class BookingRequest {
   int get durationInMonths {
     if (moveInDate == null || moveOutDate == null) return 1;
     // Calculate total months between moveInDate and moveOutDate
-    final months = (moveOutDate!.year - moveInDate!.year) * 12 + moveOutDate!.month - moveInDate!.month;
+    final months =
+        (moveOutDate!.year - moveInDate!.year) * 12 +
+        moveOutDate!.month -
+        moveInDate!.month;
     return months > 0 ? months : 1;
   }
 
   factory BookingRequest.fromJson(Map<String, dynamic> json) {
     return BookingRequest(
       id: json['id']?.toString() ?? '',
-      propertyId: json['property_id']?.toString() ?? json['propertyId']?.toString() ?? '',
-      ownerId: json['owner_id']?.toString() ?? json['ownerId']?.toString() ?? '',
-      tenantId: json['tenant_id']?.toString() ?? json['tenantId']?.toString() ?? '',
+      propertyId:
+          json['property_id']?.toString() ??
+          json['propertyId']?.toString() ??
+          '',
+      ownerId:
+          json['owner_id']?.toString() ?? json['ownerId']?.toString() ?? '',
+      tenantId:
+          json['tenant_id']?.toString() ?? json['tenantId']?.toString() ?? '',
       status: json['status']?.toString() ?? '',
-      createdAt: _parseDateTime(json['created_at'] ?? json['createdAt']) ??
+      createdAt:
+          _parseDateTime(json['created_at'] ?? json['createdAt']) ??
           DateTime.fromMillisecondsSinceEpoch(0),
-      updatedAt: _parseDateTime(json['updated_at'] ?? json['updatedAt']) ??
+      updatedAt:
+          _parseDateTime(json['updated_at'] ?? json['updatedAt']) ??
           DateTime.fromMillisecondsSinceEpoch(0),
-      totalAmount: _parseDouble(json['total_amount'] ?? json['totalAmount']) ?? 0,
-      paymentStatus: json['payment_status']?.toString() ?? json['paymentStatus']?.toString() ?? '',
+      totalAmount:
+          _parseDouble(json['total_amount'] ?? json['totalAmount']) ?? 0,
+      paymentStatus:
+          json['payment_status']?.toString() ??
+          json['paymentStatus']?.toString() ??
+          '',
       moveInDate: _parseDateTime(json['move_in_date'] ?? json['moveInDate']),
       moveOutDate: _parseDateTime(json['move_out_date'] ?? json['moveOutDate']),
     );
@@ -107,4 +121,3 @@ class BookingRequest {
     return null;
   }
 }
-

@@ -4,7 +4,9 @@ import 'viewing_request_models.dart';
 class ViewingRequestsRemoteDataSource {
   const ViewingRequestsRemoteDataSource();
 
-  Future<List<ViewingRequestModel>> fetchOwnerViewingRequests(String ownerId) async {
+  Future<List<ViewingRequestModel>> fetchOwnerViewingRequests(
+    String ownerId,
+  ) async {
     final dynamic response = await AppSupabase.client
         .from('viewing_requests')
         .select('''
@@ -20,7 +22,9 @@ class ViewingRequestsRemoteDataSource {
 
     if (response is! List) return const <ViewingRequestModel>[];
 
-    final viewingRows = response.whereType<Map<String, dynamic>>().toList(growable: false);
+    final viewingRows = response.whereType<Map<String, dynamic>>().toList(
+      growable: false,
+    );
     if (viewingRows.isEmpty) return const <ViewingRequestModel>[];
 
     final tenantIds = viewingRows
@@ -40,24 +44,27 @@ class ViewingRequestsRemoteDataSource {
       if (profilesResponse is List) {
         profilesById = {
           for (final row in profilesResponse.whereType<Map<String, dynamic>>())
-            if ((row['id']?.toString() ?? '').isNotEmpty) row['id'].toString(): row,
+            if ((row['id']?.toString() ?? '').isNotEmpty)
+              row['id'].toString(): row,
         };
       }
     }
 
-    return viewingRows.map((row) {
-      final tenantId = row['tenant_id']?.toString() ?? '';
-      final tenant = profilesById[tenantId];
-      return ViewingRequestModel.fromJson({
-        ...row,
-        'profiles': {
-          'full_name': tenant?['full_name'],
-          'email': tenant?['email'],
-          'phone_number': tenant?['phone_number'],
-          'profile_image_url': tenant?['profile_image_url'],
-        },
-      });
-    }).toList(growable: false);
+    return viewingRows
+        .map((row) {
+          final tenantId = row['tenant_id']?.toString() ?? '';
+          final tenant = profilesById[tenantId];
+          return ViewingRequestModel.fromJson({
+            ...row,
+            'profiles': {
+              'full_name': tenant?['full_name'],
+              'email': tenant?['email'],
+              'phone_number': tenant?['phone_number'],
+              'profile_image_url': tenant?['profile_image_url'],
+            },
+          });
+        })
+        .toList(growable: false);
   }
 
   Future<void> updateViewingStatus(String viewingId, String newStatus) async {
@@ -65,6 +72,5 @@ class ViewingRequestsRemoteDataSource {
         .from('viewing_requests')
         .update({'status': newStatus})
         .eq('id', viewingId);
-
   }
 }

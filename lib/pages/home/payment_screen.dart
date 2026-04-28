@@ -43,9 +43,10 @@ class HomeUPaymentScreen extends StatefulWidget {
 }
 
 class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
-  final PaymentRemoteDataSource _paymentRemoteDataSource = const PaymentRemoteDataSource();
+  final PaymentRemoteDataSource _paymentRemoteDataSource =
+      const PaymentRemoteDataSource();
   HomeUPaymentMethod _selectedMethod = HomeUPaymentMethod.card;
-  
+
   final TextEditingController _cardNumberController = TextEditingController();
   final TextEditingController _expiryController = TextEditingController();
   final TextEditingController _cvvController = TextEditingController();
@@ -53,7 +54,7 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
   final FocusNode _cardNumberFocus = FocusNode();
   final FocusNode _expiryFocus = FocusNode();
   final FocusNode _cvvFocus = FocusNode();
-  
+
   bool _showCardBack = false;
   bool _isSubmittingPayment = false;
   Payment? _latestPayment;
@@ -63,30 +64,36 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
   final List<Map<String, String>> _eWallets = [
     {
       'name': 'TNG eWallet',
-      'logo': '${AppEnv.supabaseUrl}/storage/v1/object/public/bankassets/tng-logo.jpg'
+      'logo':
+          '${AppEnv.supabaseUrl}/storage/v1/object/public/bankassets/tng-logo.jpg',
     },
   ];
 
   final List<Map<String, String>> _banks = [
     {
       'name': 'CIMB Bank',
-      'logo': '${AppEnv.supabaseUrl}/storage/v1/object/public/bankassets/cimb-bank-logo-vector.png'
+      'logo':
+          '${AppEnv.supabaseUrl}/storage/v1/object/public/bankassets/cimb-bank-logo-vector.png',
     },
     {
       'name': 'Maybank',
-      'logo': '${AppEnv.supabaseUrl}/storage/v1/object/public/bankassets/Maybank-logo.png'
+      'logo':
+          '${AppEnv.supabaseUrl}/storage/v1/object/public/bankassets/Maybank-logo.png',
     },
     {
       'name': 'Public Bank',
-      'logo': '${AppEnv.supabaseUrl}/storage/v1/object/public/bankassets/public-bank-logo.png'
+      'logo':
+          '${AppEnv.supabaseUrl}/storage/v1/object/public/bankassets/public-bank-logo.png',
     },
     {
       'name': 'RHB Bank',
-      'logo': '${AppEnv.supabaseUrl}/storage/v1/object/public/bankassets/rhb-bank-logo.png'
+      'logo':
+          '${AppEnv.supabaseUrl}/storage/v1/object/public/bankassets/rhb-bank-logo.png',
     },
     {
       'name': 'Hong Leong Bank',
-      'logo': '${AppEnv.supabaseUrl}/storage/v1/object/public/bankassets/HLB-logo.webp'
+      'logo':
+          '${AppEnv.supabaseUrl}/storage/v1/object/public/bankassets/HLB-logo.webp',
     },
   ];
 
@@ -103,7 +110,9 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
     final expiry = _expiryController.text;
     final cvv = _cvvController.text;
 
-    return cardNum.length == 16 && _getExpiryError(expiry) == null && cvv.length == 3;
+    return cardNum.length == 16 &&
+        _getExpiryError(expiry) == null &&
+        cvv.length == 3;
   }
 
   String? _getExpiryError(String value) {
@@ -142,7 +151,7 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
     if (!widget.isInstallment) {
       _loadLatestPayment();
     }
-    
+
     _cardNumberController.addListener(() => setState(() {}));
     _expiryController.addListener(() => setState(() {}));
     _cvvController.addListener(() => setState(() {}));
@@ -179,18 +188,30 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
           height: 52,
           child: ElevatedButton(
             key: const Key('pay_now_button'),
-            onPressed: (_isSubmittingPayment || isSuccess || !_isFormValid) ? null : _submitPayment,
+            onPressed: (_isSubmittingPayment || isSuccess || !_isFormValid)
+                ? null
+                : _submitPayment,
             style: ElevatedButton.styleFrom(
-              backgroundColor: (isSuccess || !_isFormValid) ? Colors.grey : context.homeuAccent,
+              backgroundColor: (isSuccess || !_isFormValid)
+                  ? Colors.grey
+                  : context.homeuAccent,
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              textStyle: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+              ),
             ),
             child: _isSubmittingPayment
                 ? const SizedBox(
                     width: 18,
                     height: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
+                    ),
                   )
                 : Text(isSuccess ? 'Payment Completed' : 'Pay Now'),
           ),
@@ -269,19 +290,25 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
                         curve: Curves.easeInOut,
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: isSelected 
-                              ? const Color(0xFF1E3A8A).withOpacity(0.05) 
+                          color: isSelected
+                              ? const Color(0xFF1E3A8A).withOpacity(0.05)
                               : Colors.white,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: isSelected ? const Color(0xFF1E3A8A) : Colors.grey[200]!,
+                            color: isSelected
+                                ? const Color(0xFF1E3A8A)
+                                : Colors.grey[200]!,
                             width: isSelected ? 2.0 : 1.0,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(isSelected ? 0.08 : 0.04),
+                              color: Colors.black.withOpacity(
+                                isSelected ? 0.08 : 0.04,
+                              ),
                               blurRadius: isSelected ? 8 : 4,
-                              offset: isSelected ? const Offset(0, 4) : const Offset(0, 2),
+                              offset: isSelected
+                                  ? const Offset(0, 4)
+                                  : const Offset(0, 2),
                             ),
                           ],
                         ),
@@ -296,12 +323,23 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
                                     child: Image.network(
                                       bank['logo']!,
                                       fit: BoxFit.contain,
-                                      loadingBuilder: (context, child, loadingProgress) {
-                                        if (loadingProgress == null) return child;
-                                        return const Center(child: CircularProgressIndicator(strokeWidth: 2));
-                                      },
-                                      errorBuilder: (context, error, stackTrace) =>
-                                          const Icon(Icons.account_balance_rounded, color: Colors.grey, size: 32),
+                                      loadingBuilder:
+                                          (context, child, loadingProgress) {
+                                            if (loadingProgress == null)
+                                              return child;
+                                            return const Center(
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                              ),
+                                            );
+                                          },
+                                      errorBuilder:
+                                          (context, error, stackTrace) =>
+                                              const Icon(
+                                                Icons.account_balance_rounded,
+                                                color: Colors.grey,
+                                                size: 32,
+                                              ),
                                     ),
                                   ),
                                 ),
@@ -312,7 +350,9 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
                                   style: TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w600,
-                                    color: isSelected ? const Color(0xFF1E3A8A) : context.homeuPrimaryText,
+                                    color: isSelected
+                                        ? const Color(0xFF1E3A8A)
+                                        : context.homeuPrimaryText,
                                   ),
                                 ),
                               ],
@@ -383,19 +423,25 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
                         curve: Curves.easeInOut,
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: isSelected 
-                              ? const Color(0xFF1E3A8A).withOpacity(0.05) 
+                          color: isSelected
+                              ? const Color(0xFF1E3A8A).withOpacity(0.05)
                               : Colors.white,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: isSelected ? const Color(0xFF1E3A8A) : Colors.grey[200]!,
+                            color: isSelected
+                                ? const Color(0xFF1E3A8A)
+                                : Colors.grey[200]!,
                             width: isSelected ? 2.0 : 1.0,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(isSelected ? 0.08 : 0.04),
+                              color: Colors.black.withOpacity(
+                                isSelected ? 0.08 : 0.04,
+                              ),
                               blurRadius: isSelected ? 8 : 4,
-                              offset: isSelected ? const Offset(0, 4) : const Offset(0, 2),
+                              offset: isSelected
+                                  ? const Offset(0, 4)
+                                  : const Offset(0, 2),
                             ),
                           ],
                         ),
@@ -410,12 +456,27 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
                                     child: Image.network(
                                       wallet['logo']!,
                                       fit: BoxFit.contain,
-                                      loadingBuilder: (context, child, loadingProgress) {
-                                        if (loadingProgress == null) return child;
-                                        return const Center(child: CircularProgressIndicator(strokeWidth: 2));
-                                      },
-                                      errorBuilder: (context, error, stackTrace) =>
-                                          const Icon(Icons.account_balance_wallet_rounded, color: Colors.grey, size: 32),
+                                      loadingBuilder:
+                                          (context, child, loadingProgress) {
+                                            if (loadingProgress == null)
+                                              return child;
+                                            return const Center(
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                              ),
+                                            );
+                                          },
+                                      errorBuilder:
+                                          (
+                                            context,
+                                            error,
+                                            stackTrace,
+                                          ) => const Icon(
+                                            Icons
+                                                .account_balance_wallet_rounded,
+                                            color: Colors.grey,
+                                            size: 32,
+                                          ),
                                     ),
                                   ),
                                 ),
@@ -426,7 +487,9 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
                                   style: TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w600,
-                                    color: isSelected ? const Color(0xFF1E3A8A) : context.homeuPrimaryText,
+                                    color: isSelected
+                                        ? const Color(0xFF1E3A8A)
+                                        : context.homeuPrimaryText,
                                   ),
                                 ),
                               ],
@@ -476,10 +539,15 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
                     const _CardNumberFormatter(),
                   ],
                   decoration: _fieldDecoration(
-                    context, 
-                    'Card Number', 
+                    context,
+                    'Card Number',
                     '1234 5678 9012 3456',
-                    errorText: _cardNumberController.text.isNotEmpty && _cardNumberController.text.replaceAll(' ', '').length < 16
+                    errorText:
+                        _cardNumberController.text.isNotEmpty &&
+                            _cardNumberController.text
+                                    .replaceAll(' ', '')
+                                    .length <
+                                16
                         ? 'Enter a valid 16-digit card number'
                         : null,
                   ),
@@ -507,8 +575,8 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
                           const _ExpiryFormatter(),
                         ],
                         decoration: _fieldDecoration(
-                          context, 
-                          'Expiry', 
+                          context,
+                          'Expiry',
                           'MM/YY',
                           errorText: _getExpiryError(_expiryController.text),
                         ),
@@ -534,10 +602,12 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
                           LengthLimitingTextInputFormatter(3),
                         ],
                         decoration: _fieldDecoration(
-                          context, 
-                          'CVV', 
+                          context,
+                          'CVV',
                           '***',
-                          errorText: _cvvController.text.isNotEmpty && _cvvController.text.length < 3
+                          errorText:
+                              _cvvController.text.isNotEmpty &&
+                                  _cvvController.text.length < 3
                               ? 'Invalid'
                               : null,
                         ),
@@ -575,24 +645,31 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
                     const SizedBox(height: 10),
                     _summaryRow('Property', widget.property.name),
                     _summaryRow('Start Date', _formatDate(widget.startDate)),
-                    _summaryRow('Duration', widget.isInstallment ? 'Monthly Rent' : '${widget.durationMonths} months'),
                     _summaryRow(
-                      'Payment Method', 
-                      _selectedMethod == HomeUPaymentMethod.banking && _selectedBank != null
+                      'Duration',
+                      widget.isInstallment
+                          ? 'Monthly Rent'
+                          : '${widget.durationMonths} months',
+                    ),
+                    _summaryRow(
+                      'Payment Method',
+                      _selectedMethod == HomeUPaymentMethod.banking &&
+                              _selectedBank != null
                           ? 'Online Banking ($_selectedBank)'
-                          : _selectedMethod == HomeUPaymentMethod.ewallet && _selectedEWallet != null
-                              ? 'E-Wallet ($_selectedEWallet)'
-                              : _methodLabel(_selectedMethod)
+                          : _selectedMethod == HomeUPaymentMethod.ewallet &&
+                                _selectedEWallet != null
+                          ? 'E-Wallet ($_selectedEWallet)'
+                          : _methodLabel(_selectedMethod),
                     ),
                     if (_latestPayment != null)
                       _summaryRow('Payment Status', _latestPayment!.status),
                     const Divider(height: 18),
                     _summaryRow(
-                      widget.isInstallment 
-                          ? 'Rent Payment (Month ${widget.monthNumber})' 
-                          : 'Booking Fee (1 Month)', 
-                      'RM ${_formatCurrency(widget.totalPrice)}', 
-                      emphasize: true
+                      widget.isInstallment
+                          ? 'Rent Payment (Month ${widget.monthNumber})'
+                          : 'Booking Fee (1 Month)',
+                      'RM ${_formatCurrency(widget.totalPrice)}',
+                      emphasize: true,
                     ),
                   ],
                 ),
@@ -604,7 +681,12 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
     );
   }
 
-  InputDecoration _fieldDecoration(BuildContext context, String label, String hint, {String? errorText}) {
+  InputDecoration _fieldDecoration(
+    BuildContext context,
+    String label,
+    String hint, {
+    String? errorText,
+  }) {
     return InputDecoration(
       labelText: label,
       hintText: hint,
@@ -650,7 +732,9 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
               value,
               textAlign: TextAlign.right,
               style: TextStyle(
-                color: emphasize ? context.homeuPrice : context.homeuPrimaryText,
+                color: emphasize
+                    ? context.homeuPrice
+                    : context.homeuPrimaryText,
                 fontSize: emphasize ? 16 : 13,
                 fontWeight: FontWeight.w700,
               ),
@@ -701,7 +785,9 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
       return;
     }
 
-    final payment = await _paymentRemoteDataSource.getLatestPayment(widget.bookingId);
+    final payment = await _paymentRemoteDataSource.getLatestPayment(
+      widget.bookingId,
+    );
     if (!mounted) {
       return;
     }
@@ -714,7 +800,9 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
   Future<void> _submitPayment() async {
     if (!AppSupabase.isInitialized) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Supabase is not initialized. Please try again later.')),
+        const SnackBar(
+          content: Text('Supabase is not initialized. Please try again later.'),
+        ),
       );
       return;
     }
@@ -728,16 +816,20 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
     }
 
     try {
-      if (_selectedMethod == HomeUPaymentMethod.banking && _selectedBank == null) {
+      if (_selectedMethod == HomeUPaymentMethod.banking &&
+          _selectedBank == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Please select a bank to continue.')),
         );
         return;
       }
 
-      if (_selectedMethod == HomeUPaymentMethod.ewallet && _selectedEWallet == null) {
+      if (_selectedMethod == HomeUPaymentMethod.ewallet &&
+          _selectedEWallet == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select an e-wallet to continue.')),
+          const SnackBar(
+            content: Text('Please select an e-wallet to continue.'),
+          ),
         );
         return;
       }
@@ -746,7 +838,9 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
         context: context,
         builder: (context) => AlertDialog(
           backgroundColor: context.homeuCard,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
           title: Text(
             'Confirm Payment',
             style: TextStyle(
@@ -764,7 +858,10 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
               ),
               const SizedBox(height: 16),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 16,
+                ),
                 decoration: BoxDecoration(
                   color: context.colors.surface,
                   borderRadius: BorderRadius.circular(12),
@@ -772,15 +869,19 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
                 ),
                 child: Column(
                   children: [
-                    _summaryRow('Amount', 'RM ${_formatCurrency(widget.totalPrice)}', emphasize: true),
+                    _summaryRow(
+                      'Amount',
+                      'RM ${_formatCurrency(widget.totalPrice)}',
+                      emphasize: true,
+                    ),
                     const Divider(height: 16),
                     _summaryRow(
                       'Method',
                       _selectedMethod == HomeUPaymentMethod.banking
                           ? 'Online Banking ($_selectedBank)'
                           : _selectedMethod == HomeUPaymentMethod.ewallet
-                              ? 'E-Wallet ($_selectedEWallet)'
-                              : 'Credit / Debit Card',
+                          ? 'E-Wallet ($_selectedEWallet)'
+                          : 'Credit / Debit Card',
                     ),
                   ],
                 ),
@@ -800,8 +901,13 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: context.homeuAccent,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 elevation: 0,
               ),
               child: const Text('Confirm & Pay'),
@@ -822,11 +928,14 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
           bookingId: widget.bookingId,
           scheduleId: widget.scheduleId!,
           payerId: payerId,
-          method: _selectedMethod == HomeUPaymentMethod.banking && _selectedBank != null
+          method:
+              _selectedMethod == HomeUPaymentMethod.banking &&
+                  _selectedBank != null
               ? 'Online Banking ($_selectedBank)'
-              : _selectedMethod == HomeUPaymentMethod.ewallet && _selectedEWallet != null
-                  ? 'E-Wallet ($_selectedEWallet)'
-                  : _methodLabel(_selectedMethod),
+              : _selectedMethod == HomeUPaymentMethod.ewallet &&
+                    _selectedEWallet != null
+              ? 'E-Wallet ($_selectedEWallet)'
+              : _methodLabel(_selectedMethod),
           amount: widget.totalPrice,
           monthNumber: widget.monthNumber,
         );
@@ -834,11 +943,14 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
         payment = await _paymentRemoteDataSource.createPaymentSimulated(
           bookingId: widget.bookingId,
           payerId: payerId,
-          method: _selectedMethod == HomeUPaymentMethod.banking && _selectedBank != null
+          method:
+              _selectedMethod == HomeUPaymentMethod.banking &&
+                  _selectedBank != null
               ? 'Online Banking ($_selectedBank)'
-              : _selectedMethod == HomeUPaymentMethod.ewallet && _selectedEWallet != null
-                  ? 'E-Wallet ($_selectedEWallet)'
-                  : _methodLabel(_selectedMethod),
+              : _selectedMethod == HomeUPaymentMethod.ewallet &&
+                    _selectedEWallet != null
+              ? 'E-Wallet ($_selectedEWallet)'
+              : _methodLabel(_selectedMethod),
           amount: widget.totalPrice,
           simulateSuccess: true,
         );
@@ -875,21 +987,19 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
       if (isSuccessful) {
         if (widget.isInstallment) {
           if (!mounted) return;
-          
+
           await _showSuccessWithReceipt(payment!);
-          
+
           if (!mounted) return;
           Navigator.of(context).pop(true);
         } else {
           if (!mounted) return;
           await _showSuccessWithReceipt(payment!);
-          
+
           if (!mounted) return;
           // Navigate to Home Dashboard (Tenant Shell) and clear stack for initial booking fee
           Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute<void>(
-              builder: (_) => HomeUTenantShellScreen(),
-            ),
+            MaterialPageRoute<void>(builder: (_) => HomeUTenantShellScreen()),
             (route) => false,
           );
         }
@@ -903,16 +1013,24 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
         SnackBar(
           content: Text('Payment failed: $e'),
           duration: const Duration(seconds: 5),
-          action: SnackBarAction(label: 'Details', onPressed: () {
-            showDialog(
-              context: context,
-              builder: (context) => AlertDialog(
-                title: const Text('Error Details'),
-                content: SingleChildScrollView(child: Text(e.toString())),
-                actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('OK'))],
-              ),
-            );
-          }),
+          action: SnackBarAction(
+            label: 'Details',
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('Error Details'),
+                  content: SingleChildScrollView(child: Text(e.toString())),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('OK'),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
         ),
       );
     } finally {
@@ -934,7 +1052,11 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.check_circle_rounded, color: Color(0xFF10B981), size: 64),
+            const Icon(
+              Icons.check_circle_rounded,
+              color: Color(0xFF10B981),
+              size: 64,
+            ),
             const SizedBox(height: 16),
             Text(
               'Payment Successful!',
@@ -958,7 +1080,9 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: context.homeuAccent,
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
                 child: const Text('View Receipt'),
@@ -1047,7 +1171,9 @@ class _PaymentMethodTile extends StatelessWidget {
                 ),
               ),
               Icon(
-                selected ? Icons.radio_button_checked_rounded : Icons.radio_button_off_rounded,
+                selected
+                    ? Icons.radio_button_checked_rounded
+                    : Icons.radio_button_off_rounded,
                 color: context.homeuAccent,
               ),
             ],
@@ -1083,7 +1209,10 @@ class _FlippingCardVisual extends StatelessWidget {
         switchInCurve: Curves.easeInOut,
         switchOutCurve: Curves.easeInOut,
         transitionBuilder: (child, animation) {
-          final rotation = Tween<double>(begin: math.pi / 2, end: 0).animate(animation);
+          final rotation = Tween<double>(
+            begin: math.pi / 2,
+            end: 0,
+          ).animate(animation);
 
           return AnimatedBuilder(
             animation: rotation,
@@ -1153,7 +1282,13 @@ class _CardFrontFace extends StatelessWidget {
             children: [
               Icon(Icons.credit_card_rounded, color: Colors.white),
               Spacer(),
-              Text('HomeU Pay', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+              Text(
+                'HomeU Pay',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
             ],
           ),
           const Spacer(),
@@ -1172,21 +1307,41 @@ class _CardFrontFace extends StatelessWidget {
             children: [
               Text(
                 'CARD HOLDER',
-                style: TextStyle(color: Color(0xCCE9EEFF), fontSize: 10, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                  color: Color(0xCCE9EEFF),
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               Spacer(),
               Text(
                 'EXPIRES',
-                style: TextStyle(color: Color(0xCCE9EEFF), fontSize: 10, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                  color: Color(0xCCE9EEFF),
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ],
           ),
           const SizedBox(height: 3),
           Row(
             children: [
-              const Text('TENANT NAME', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+              const Text(
+                'TENANT NAME',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
               const Spacer(),
-              Text(displayExpiry, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+              Text(
+                displayExpiry,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
             ],
           ),
         ],
@@ -1216,10 +1371,14 @@ class _CardBackFace extends StatelessWidget {
               key: const Key('cvv_highlight_area'),
               height: 38,
               decoration: BoxDecoration(
-                color: showCvvHighlight ? const Color(0xFFE8F2FF) : const Color(0xFFF4F7FD),
+                color: showCvvHighlight
+                    ? const Color(0xFFE8F2FF)
+                    : const Color(0xFFF4F7FD),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: showCvvHighlight ? const Color(0xFF10B981) : const Color(0x331E3A8A),
+                  color: showCvvHighlight
+                      ? const Color(0xFF10B981)
+                      : const Color(0x331E3A8A),
                   width: showCvvHighlight ? 1.4 : 1,
                 ),
               ),
@@ -1256,7 +1415,10 @@ class _CardBackFace extends StatelessWidget {
 class _CardNumberFormatter extends TextInputFormatter {
   const _CardNumberFormatter();
   @override
-  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
     final text = newValue.text.replaceAll(' ', '');
     final buffer = StringBuffer();
     for (int i = 0; i < text.length; i++) {
@@ -1275,7 +1437,10 @@ class _CardNumberFormatter extends TextInputFormatter {
 class _ExpiryFormatter extends TextInputFormatter {
   const _ExpiryFormatter();
   @override
-  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
     final text = newValue.text.replaceAll('/', '');
     final buffer = StringBuffer();
     for (int i = 0; i < text.length; i++) {
@@ -1290,7 +1455,3 @@ class _ExpiryFormatter extends TextInputFormatter {
     );
   }
 }
-
-
-
-

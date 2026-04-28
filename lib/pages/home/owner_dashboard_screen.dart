@@ -28,7 +28,8 @@ class HomeUOwnerDashboardScreen extends StatefulWidget {
   final ValueChanged<int>? onNavigateToTab;
 
   @override
-  State<HomeUOwnerDashboardScreen> createState() => _HomeUOwnerDashboardScreenState();
+  State<HomeUOwnerDashboardScreen> createState() =>
+      _HomeUOwnerDashboardScreenState();
 }
 
 class _HomeUOwnerDashboardScreenState extends State<HomeUOwnerDashboardScreen> {
@@ -58,33 +59,54 @@ class _HomeUOwnerDashboardScreenState extends State<HomeUOwnerDashboardScreen> {
       backgroundColor: const Color(0xFFF6F8FC),
       bottomNavigationBar: widget.showBottomNavigationBar
           ? HomeUOwnerBottomNavigationBar(
-        selectedIndex: _selectedNavIndex,
-        onDestinationSelected: (index) {
-          if (index == 1) {
-            Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const HomeUOwnerMyPropertiesScreen()));
-            return;
-          }
-          if (index == 2) {
-            Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const HomeUOwnerBookingRequestsScreen()));
-            return;
-          }
-          if (index == 3) {
-            Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const HomeUOwnerAnalyticsScreen()));
-            return;
-          }
-          if (index == 4) {
-            Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const HomeUConversationListScreen()));
-            return;
-          }
-          if (index == 5) {
-            Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const HomeUProfileScreen(role: HomeURole.owner)));
-            return;
-          }
-          setState(() {
-            _selectedNavIndex = index;
-          });
-        },
-      )
+              selectedIndex: _selectedNavIndex,
+              onDestinationSelected: (index) {
+                if (index == 1) {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const HomeUOwnerMyPropertiesScreen(),
+                    ),
+                  );
+                  return;
+                }
+                if (index == 2) {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const HomeUOwnerBookingRequestsScreen(),
+                    ),
+                  );
+                  return;
+                }
+                if (index == 3) {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const HomeUOwnerAnalyticsScreen(),
+                    ),
+                  );
+                  return;
+                }
+                if (index == 4) {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const HomeUConversationListScreen(),
+                    ),
+                  );
+                  return;
+                }
+                if (index == 5) {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) =>
+                          const HomeUProfileScreen(role: HomeURole.owner),
+                    ),
+                  );
+                  return;
+                }
+                setState(() {
+                  _selectedNavIndex = index;
+                });
+              },
+            )
           : null,
       body: SafeArea(
         child: RefreshIndicator(
@@ -94,7 +116,9 @@ class _HomeUOwnerDashboardScreenState extends State<HomeUOwnerDashboardScreen> {
             listenable: _controller,
             builder: (context, _) {
               if (_controller.isLoading) {
-                return const Center(child: CircularProgressIndicator(color: Color(0xFF1E3A8A)));
+                return const Center(
+                  child: CircularProgressIndicator(color: Color(0xFF1E3A8A)),
+                );
               }
 
               if (_controller.errorMessage != null) {
@@ -102,7 +126,11 @@ class _HomeUOwnerDashboardScreenState extends State<HomeUOwnerDashboardScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.error_outline, color: Colors.red, size: 40),
+                      const Icon(
+                        Icons.error_outline,
+                        color: Colors.red,
+                        size: 40,
+                      ),
                       const SizedBox(height: 16),
                       Text(_controller.errorMessage!),
                       TextButton(
@@ -124,24 +152,39 @@ class _HomeUOwnerDashboardScreenState extends State<HomeUOwnerDashboardScreen> {
                   children: [
                     Text(
                       'Hello, ${widget.ownerName}',
-                      style: const TextStyle(color: Color(0xFF1E3A8A), fontSize: 28, fontWeight: FontWeight.w700),
+                      style: const TextStyle(
+                        color: Color(0xFF1E3A8A),
+                        fontSize: 28,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                     const SizedBox(height: 6),
                     const Text(
                       'Manage listings, requests, and performance from one place.',
-                      style: TextStyle(color: Color(0xFF50617F), fontSize: 14, fontWeight: FontWeight.w500),
+                      style: TextStyle(
+                        color: Color(0xFF50617F),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                     const SizedBox(height: 14),
                     SizedBox(
                       height: 48,
                       child: ElevatedButton.icon(
                         onPressed: () {
-                          Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const HomeUOwnerAddPropertyScreen()));
+                          Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) =>
+                                  const HomeUOwnerAddPropertyScreen(),
+                            ),
+                          );
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF1E3A8A),
                           foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
                         ),
                         icon: const Icon(Icons.add_business_rounded),
                         label: const Text('Add Property'),
@@ -154,7 +197,13 @@ class _HomeUOwnerDashboardScreenState extends State<HomeUOwnerDashboardScreen> {
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(16),
-                        boxShadow: const [BoxShadow(color: Color(0x141E3A8A), blurRadius: 12, offset: Offset(0, 4))],
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Color(0x141E3A8A),
+                            blurRadius: 12,
+                            offset: Offset(0, 4),
+                          ),
+                        ],
                       ),
                       child: Row(
                         children: [
@@ -162,34 +211,78 @@ class _HomeUOwnerDashboardScreenState extends State<HomeUOwnerDashboardScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text('Total Earnings', style: TextStyle(color: Color(0xFF667896), fontSize: 13, fontWeight: FontWeight.w600)),
+                                const Text(
+                                  'Total Earnings',
+                                  style: TextStyle(
+                                    color: Color(0xFF667896),
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                                 const SizedBox(height: 6),
                                 Text(
                                   'RM ${data.totalEarnings.toStringAsFixed(0)}',
-                                  style: const TextStyle(color: Color(0xFF1E3A8A), fontSize: 30, fontWeight: FontWeight.w700),
+                                  style: const TextStyle(
+                                    color: Color(0xFF1E3A8A),
+                                    fontSize: 30,
+                                    fontWeight: FontWeight.w700,
+                                  ),
                                 ),
                               ],
                             ),
                           ),
-                          const Icon(Icons.trending_up_rounded, color: Color(0xFF10B981), size: 34),
+                          const Icon(
+                            Icons.trending_up_rounded,
+                            color: Color(0xFF10B981),
+                            size: 34,
+                          ),
                         ],
                       ),
                     ),
                     const SizedBox(height: 14),
-                    const Text('Quick Stats', style: TextStyle(color: Color(0xFF1F314F), fontSize: 16, fontWeight: FontWeight.w700)),
+                    const Text(
+                      'Quick Stats',
+                      style: TextStyle(
+                        color: Color(0xFF1F314F),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                     const SizedBox(height: 10),
 
                     Row(
                       children: [
-                        Expanded(child: _OwnerStatCard(label: 'Active Listings', value: '${data.activeListings}')),
+                        Expanded(
+                          child: _OwnerStatCard(
+                            label: 'Active Listings',
+                            value: '${data.activeListings}',
+                          ),
+                        ),
                         const SizedBox(width: 8),
-                        Expanded(child: _OwnerStatCard(label: 'Pending Requests', value: '${data.pendingRequests}')),
+                        Expanded(
+                          child: _OwnerStatCard(
+                            label: 'Pending Requests',
+                            value: '${data.pendingRequests}',
+                          ),
+                        ),
                         const SizedBox(width: 8),
-                        Expanded(child: _OwnerStatCard(label: 'Occupancy', value: data.occupancyRate)),
+                        Expanded(
+                          child: _OwnerStatCard(
+                            label: 'Occupancy',
+                            value: data.occupancyRate,
+                          ),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 16),
-                    const Text('Recent Properties', style: TextStyle(color: Color(0xFF1F314F), fontSize: 16, fontWeight: FontWeight.w700)),
+                    const Text(
+                      'Recent Properties',
+                      style: TextStyle(
+                        color: Color(0xFF1F314F),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                     const SizedBox(height: 10),
 
                     if (data.recentProperties.isEmpty)
@@ -204,7 +297,11 @@ class _HomeUOwnerDashboardScreenState extends State<HomeUOwnerDashboardScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.home_work_outlined, size: 48, color: Colors.grey.shade300),
+                            Icon(
+                              Icons.home_work_outlined,
+                              size: 48,
+                              color: Colors.grey.shade300,
+                            ),
                             const SizedBox(height: 12),
                             const Text(
                               'No properties listed yet',
@@ -217,7 +314,12 @@ class _HomeUOwnerDashboardScreenState extends State<HomeUOwnerDashboardScreen> {
                             const SizedBox(height: 12),
                             TextButton.icon(
                               onPressed: () {
-                                Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const HomeUOwnerAddPropertyScreen()));
+                                Navigator.of(context).push(
+                                  MaterialPageRoute<void>(
+                                    builder: (_) =>
+                                        const HomeUOwnerAddPropertyScreen(),
+                                  ),
+                                );
                               },
                               icon: const Icon(Icons.add, size: 18),
                               label: const Text('Add your first property'),
@@ -233,7 +335,9 @@ class _HomeUOwnerDashboardScreenState extends State<HomeUOwnerDashboardScreen> {
                         final propertyModel = OwnerPropertyModel.fromJson(prop);
 
                         return _OwnerPropertyCard(
-                          propertyName: propertyModel.title.isEmpty ? 'Untitled' : propertyModel.title,
+                          propertyName: propertyModel.title.isEmpty
+                              ? 'Untitled'
+                              : propertyModel.title,
                           location: propertyModel.locationArea,
                           status: propertyModel.displayStatus,
                           onTap: () {
@@ -250,7 +354,14 @@ class _HomeUOwnerDashboardScreenState extends State<HomeUOwnerDashboardScreen> {
 
                     const SizedBox(height: 12),
 
-                    const Text('Recent Booking Requests', style: TextStyle(color: Color(0xFF1F314F), fontSize: 16, fontWeight: FontWeight.w700)),
+                    const Text(
+                      'Recent Booking Requests',
+                      style: TextStyle(
+                        color: Color(0xFF1F314F),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                     const SizedBox(height: 10),
 
                     if (data.recentRequests.isEmpty)
@@ -265,38 +376,60 @@ class _HomeUOwnerDashboardScreenState extends State<HomeUOwnerDashboardScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.inbox_rounded, size: 48, color: Colors.grey.shade300),
+                            Icon(
+                              Icons.inbox_rounded,
+                              size: 48,
+                              color: Colors.grey.shade300,
+                            ),
                             const SizedBox(height: 12),
                             const Text(
                               'No active booking requests',
-                              style: TextStyle(color: Color(0xFF667896), fontSize: 14, fontWeight: FontWeight.w500),
+                              style: TextStyle(
+                                color: Color(0xFF667896),
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ],
                         ),
                       )
                     else
-                      ...data.recentRequests.map((req) => _RequestCard(
-                        requestKey: Key('req_${req['id']}'),
-                        tenantName: req['tenantName'],
-                        tenantProfileUrl: req['profile_image_url'],
-                        propertyName: req['propertyName'],
-                        status: req['status'],
-                        onTap: () {
-                          if (widget.onNavigateToTab != null) {
-                            widget.onNavigateToTab!(2);
-                          } else {
-                            Navigator.of(context).push(
-                              MaterialPageRoute<void>(
-                                builder: (_) => const HomeUOwnerBookingRequestsScreen(initialTabIndex: 0),
-                              ),
-                            ).then((_) => _controller.loadDashboard());
-                          }
-                        },
-                      )),
+                      ...data.recentRequests.map(
+                        (req) => _RequestCard(
+                          requestKey: Key('req_${req['id']}'),
+                          tenantName: req['tenantName'],
+                          tenantProfileUrl: req['profile_image_url'],
+                          propertyName: req['propertyName'],
+                          status: req['status'],
+                          onTap: () {
+                            if (widget.onNavigateToTab != null) {
+                              widget.onNavigateToTab!(2);
+                            } else {
+                              Navigator.of(context)
+                                  .push(
+                                    MaterialPageRoute<void>(
+                                      builder: (_) =>
+                                          const HomeUOwnerBookingRequestsScreen(
+                                            initialTabIndex: 0,
+                                          ),
+                                    ),
+                                  )
+                                  .then((_) => _controller.loadDashboard());
+                            }
+                          },
+                        ),
+                      ),
 
                     const SizedBox(height: 16),
 
-                    const Text('Recent Viewing Requests', style: TextStyle(color: Color(0xFF1F314F), fontSize: 16, fontWeight: FontWeight.w700)),
+                    const Text(
+                      'Recent Viewing Requests',
+                      style: TextStyle(
+                        color: Color(0xFF1F314F),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                     const SizedBox(height: 10),
 
                     if (data.recentViewingRequests.isEmpty)
@@ -311,32 +444,45 @@ class _HomeUOwnerDashboardScreenState extends State<HomeUOwnerDashboardScreen> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.visibility_outlined, size: 48, color: Colors.grey.shade300),
+                            Icon(
+                              Icons.visibility_outlined,
+                              size: 48,
+                              color: Colors.grey.shade300,
+                            ),
                             const SizedBox(height: 12),
                             const Text(
                               'No active viewing requests',
-                              style: TextStyle(color: Color(0xFF667896), fontSize: 14, fontWeight: FontWeight.w500),
+                              style: TextStyle(
+                                color: Color(0xFF667896),
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ],
                         ),
                       )
                     else
-                      ...data.recentViewingRequests.map((req) => _ViewingRequestCard(
-                        requestKey: Key('view_${req['id']}'),
-                        tenantName: req['tenantName'],
-                        tenantProfileUrl: req['profile_image_url'],
-                        propertyName: req['propertyName'],
-                        status: req['status'],
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute<void>(
-                              builder: (_) => const HomeUOwnerBookingRequestsScreen(
-                                initialTabIndex: 1,
-                              ),
-                            ),
-                          ).then((_) => _controller.loadDashboard());
-                        },
-                      )),
+                      ...data.recentViewingRequests.map(
+                        (req) => _ViewingRequestCard(
+                          requestKey: Key('view_${req['id']}'),
+                          tenantName: req['tenantName'],
+                          tenantProfileUrl: req['profile_image_url'],
+                          propertyName: req['propertyName'],
+                          status: req['status'],
+                          onTap: () {
+                            Navigator.of(context)
+                                .push(
+                                  MaterialPageRoute<void>(
+                                    builder: (_) =>
+                                        const HomeUOwnerBookingRequestsScreen(
+                                          initialTabIndex: 1,
+                                        ),
+                                  ),
+                                )
+                                .then((_) => _controller.loadDashboard());
+                          },
+                        ),
+                      ),
                   ],
                 ),
               );
@@ -435,7 +581,11 @@ class _OwnerPropertyCard extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(14),
           boxShadow: const [
-            BoxShadow(color: Color(0x141E3A8A), blurRadius: 10, offset: Offset(0, 3)),
+            BoxShadow(
+              color: Color(0x141E3A8A),
+              blurRadius: 10,
+              offset: Offset(0, 3),
+            ),
           ],
         ),
         child: Row(
@@ -452,12 +602,20 @@ class _OwnerPropertyCard extends StatelessWidget {
                 children: [
                   Text(
                     propertyName,
-                    style: const TextStyle(color: Color(0xFF1F314F), fontSize: 14, fontWeight: FontWeight.w700),
+                    style: const TextStyle(
+                      color: Color(0xFF1F314F),
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   const SizedBox(height: 3),
                   Text(
                     location,
-                    style: const TextStyle(color: Color(0xFF667896), fontSize: 12, fontWeight: FontWeight.w500),
+                    style: const TextStyle(
+                      color: Color(0xFF667896),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ],
               ),
@@ -470,7 +628,11 @@ class _OwnerPropertyCard extends StatelessWidget {
               ),
               child: Text(
                 status,
-                style: TextStyle(color: statusColor, fontSize: 12, fontWeight: FontWeight.w700),
+                style: TextStyle(
+                  color: statusColor,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
           ],
@@ -499,7 +661,10 @@ class _RequestCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isPending = status == 'Pending' || status == 'Pending Decision' || status == 'Awaiting Response';
+    final isPending =
+        status == 'Pending' ||
+        status == 'Pending Decision' ||
+        status == 'Awaiting Response';
     final isApproved = status == 'Approved';
 
     Color badgeColor;
@@ -527,7 +692,11 @@ class _RequestCard extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
           boxShadow: const [
-            BoxShadow(color: Color(0x141E3A8A), blurRadius: 10, offset: Offset(0, 4)),
+            BoxShadow(
+              color: Color(0x141E3A8A),
+              blurRadius: 10,
+              offset: Offset(0, 4),
+            ),
           ],
         ),
         child: Column(
@@ -538,29 +707,45 @@ class _RequestCard extends StatelessWidget {
                 CircleAvatar(
                   radius: 18,
                   backgroundColor: const Color(0xFFEAF2FF),
-                  backgroundImage: (tenantProfileUrl != null && tenantProfileUrl!.isNotEmpty)
+                  backgroundImage:
+                      (tenantProfileUrl != null && tenantProfileUrl!.isNotEmpty)
                       ? NetworkImage(tenantProfileUrl!)
                       : null,
                   child: (tenantProfileUrl == null || tenantProfileUrl!.isEmpty)
-                      ? const Icon(Icons.person_rounded, color: Color(0xFF1E3A8A), size: 20)
+                      ? const Icon(
+                          Icons.person_rounded,
+                          color: Color(0xFF1E3A8A),
+                          size: 20,
+                        )
                       : null,
                 ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     tenantName,
-                    style: const TextStyle(color: Color(0xFF1F314F), fontSize: 15, fontWeight: FontWeight.w700),
+                    style: const TextStyle(
+                      color: Color(0xFF1F314F),
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: badgeColor,
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Text(
                     status,
-                    style: TextStyle(color: textColor, fontSize: 11, fontWeight: FontWeight.w700),
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               ],
@@ -568,21 +753,37 @@ class _RequestCard extends StatelessWidget {
             const SizedBox(height: 12),
             const Text(
               'Property',
-              style: TextStyle(color: Color(0xFF667896), fontSize: 11, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                color: Color(0xFF667896),
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+              ),
             ),
             const SizedBox(height: 2),
             Text(
               propertyName,
-              style: const TextStyle(color: Color(0xFF1F314F), fontSize: 14, fontWeight: FontWeight.w700),
+              style: const TextStyle(
+                color: Color(0xFF1F314F),
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+              ),
             ),
             const SizedBox(height: 10),
             const Row(
               children: [
-                Icon(Icons.chevron_right_rounded, color: Color(0xFF1E3A8A), size: 20),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: Color(0xFF1E3A8A),
+                  size: 20,
+                ),
                 SizedBox(width: 2),
                 Text(
                   'Tap to review request',
-                  style: TextStyle(color: Color(0xFF1E3A8A), fontSize: 12, fontWeight: FontWeight.w700),
+                  style: TextStyle(
+                    color: Color(0xFF1E3A8A),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ],
             ),
@@ -640,7 +841,11 @@ class _ViewingRequestCard extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
           boxShadow: const [
-            BoxShadow(color: Color(0x141E3A8A), blurRadius: 10, offset: Offset(0, 4)),
+            BoxShadow(
+              color: Color(0x141E3A8A),
+              blurRadius: 10,
+              offset: Offset(0, 4),
+            ),
           ],
         ),
         child: Column(
@@ -651,29 +856,45 @@ class _ViewingRequestCard extends StatelessWidget {
                 CircleAvatar(
                   radius: 18,
                   backgroundColor: const Color(0xFFEAF2FF),
-                  backgroundImage: (tenantProfileUrl != null && tenantProfileUrl!.isNotEmpty)
+                  backgroundImage:
+                      (tenantProfileUrl != null && tenantProfileUrl!.isNotEmpty)
                       ? NetworkImage(tenantProfileUrl!)
                       : null,
                   child: (tenantProfileUrl == null || tenantProfileUrl!.isEmpty)
-                      ? const Icon(Icons.person_rounded, color: Color(0xFF1E3A8A), size: 20)
+                      ? const Icon(
+                          Icons.person_rounded,
+                          color: Color(0xFF1E3A8A),
+                          size: 20,
+                        )
                       : null,
                 ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     tenantName,
-                    style: const TextStyle(color: Color(0xFF1F314F), fontSize: 15, fontWeight: FontWeight.w700),
+                    style: const TextStyle(
+                      color: Color(0xFF1F314F),
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: badgeColor,
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Text(
                     status,
-                    style: TextStyle(color: textColor, fontSize: 11, fontWeight: FontWeight.w700),
+                    style: TextStyle(
+                      color: textColor,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               ],
@@ -681,21 +902,37 @@ class _ViewingRequestCard extends StatelessWidget {
             const SizedBox(height: 12),
             const Text(
               'Property',
-              style: TextStyle(color: Color(0xFF667896), fontSize: 11, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                color: Color(0xFF667896),
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+              ),
             ),
             const SizedBox(height: 2),
             Text(
               propertyName,
-              style: const TextStyle(color: Color(0xFF1F314F), fontSize: 14, fontWeight: FontWeight.w700),
+              style: const TextStyle(
+                color: Color(0xFF1F314F),
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+              ),
             ),
             const SizedBox(height: 10),
             const Row(
               children: [
-                Icon(Icons.visibility_outlined, color: Color(0xFF1E3A8A), size: 18),
+                Icon(
+                  Icons.visibility_outlined,
+                  color: Color(0xFF1E3A8A),
+                  size: 18,
+                ),
                 SizedBox(width: 6),
                 Text(
                   'Tap to review viewing',
-                  style: TextStyle(color: Color(0xFF1E3A8A), fontSize: 12, fontWeight: FontWeight.w700),
+                  style: TextStyle(
+                    color: Color(0xFF1E3A8A),
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ],
             ),

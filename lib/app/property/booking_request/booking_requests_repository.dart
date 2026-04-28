@@ -6,8 +6,9 @@ class BookingRequestsRepository {
   BookingRequestsRepository({
     HomeUAuthService? authService,
     BookingRequestsRemoteDataSource? remoteDataSource,
-  })  : _authService = authService ?? HomeUAuthService.instance,
-        _remoteDataSource = remoteDataSource ?? const BookingRequestsRemoteDataSource();
+  }) : _authService = authService ?? HomeUAuthService.instance,
+       _remoteDataSource =
+           remoteDataSource ?? const BookingRequestsRemoteDataSource();
 
   final HomeUAuthService _authService;
   final BookingRequestsRemoteDataSource _remoteDataSource;

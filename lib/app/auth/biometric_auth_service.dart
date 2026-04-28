@@ -17,7 +17,7 @@ class HomeURememberedUser {
   });
 }
 
-/// Service for handling biometric authentication hardware interaction 
+/// Service for handling biometric authentication hardware interaction
 /// and secure local storage of biometric-related state.
 class BiometricAuthService {
   BiometricAuthService._();
@@ -56,7 +56,9 @@ class BiometricAuthService {
 
   /// Triggers the system biometric authentication prompt.
   /// Returns true if authentication succeeded.
-  Future<bool> authenticateWithBiometrics({required String localizedReason}) async {
+  Future<bool> authenticateWithBiometrics({
+    required String localizedReason,
+  }) async {
     try {
       if (!await canAuthenticate()) return false;
 
@@ -64,16 +66,15 @@ class BiometricAuthService {
         localizedReason: localizedReason,
         options: const AuthenticationOptions(
           stickyAuth: true,
-          biometricOnly: false, // Supports face, fingerprint, or device credentials fallback
+          biometricOnly:
+              false, // Supports face, fingerprint, or device credentials fallback
         ),
         authMessages: const [
           AndroidAuthMessages(
             signInTitle: 'HomeU Biometric Login',
             cancelButton: 'Cancel',
           ),
-          IOSAuthMessages(
-            cancelButton: 'Cancel',
-          ),
+          IOSAuthMessages(cancelButton: 'Cancel'),
         ],
       );
     } on PlatformException {

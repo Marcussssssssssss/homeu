@@ -39,7 +39,8 @@ class BookingHistoryCard extends StatelessWidget {
     const grayBorder = Color(0xFFF1F5F9); // Light gray-100/200
 
     final isPropertyRented = propertyStatus?.toLowerCase() == 'rented';
-    final isPendingOrApproved = status.toLowerCase() == 'pending' || status.toLowerCase() == 'approved';
+    final isPendingOrApproved =
+        status.toLowerCase() == 'pending' || status.toLowerCase() == 'approved';
     final showRentedKillSwitch = isPropertyRented && isPendingOrApproved;
 
     Widget cardContent = Row(
@@ -49,19 +50,33 @@ class BookingHistoryCard extends StatelessWidget {
         _buildImageSection(),
         const SizedBox(width: 16),
         // Right Section: Info
-        Expanded(
-          child: _buildInfoSection(context, purpleAccent),
-        ),
+        Expanded(child: _buildInfoSection(context, purpleAccent)),
       ],
     );
 
     if (isPast) {
       cardContent = ColorFiltered(
         colorFilter: const ColorFilter.matrix(<double>[
-          0.2126, 0.7152, 0.0722, 0, 0,
-          0.2126, 0.7152, 0.0722, 0, 0,
-          0.2126, 0.7152, 0.0722, 0, 0,
-          0,      0,      0,      1, 0,
+          0.2126,
+          0.7152,
+          0.0722,
+          0,
+          0,
+          0.2126,
+          0.7152,
+          0.0722,
+          0,
+          0,
+          0.2126,
+          0.7152,
+          0.0722,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
         ]),
         child: cardContent,
       );
@@ -94,7 +109,9 @@ class BookingHistoryCard extends StatelessWidget {
                 constraints: const BoxConstraints(maxWidth: 80),
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: showRentedKillSwitch ? const Color(0xFF94A3B8) : _getStatusColor(status),
+                  color: showRentedKillSwitch
+                      ? const Color(0xFF94A3B8)
+                      : _getStatusColor(status),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: FittedBox(
@@ -155,7 +172,11 @@ class BookingHistoryCard extends StatelessWidget {
         width: width,
         height: height,
         color: const Color(0xFFF1F5F9),
-        child: const Icon(Icons.image_outlined, color: Color(0xFF94A3B8), size: 24),
+        child: const Icon(
+          Icons.image_outlined,
+          color: Color(0xFF94A3B8),
+          size: 24,
+        ),
       );
     }
     return Image.network(
@@ -167,14 +188,20 @@ class BookingHistoryCard extends StatelessWidget {
         width: width,
         height: height,
         color: const Color(0xFFF1F5F9),
-        child: const Icon(Icons.broken_image_outlined, color: Color(0xFF94A3B8), size: 24),
+        child: const Icon(
+          Icons.broken_image_outlined,
+          color: Color(0xFF94A3B8),
+          size: 24,
+        ),
       ),
     );
   }
 
   Widget _buildInfoSection(BuildContext context, Color purpleAccent) {
     final dateFormat = DateFormat('MMM d');
-    final dayFormat = DateFormat('E'); // Short day name (e.g., Wed) to save horizontal space
+    final dayFormat = DateFormat(
+      'E',
+    ); // Short day name (e.g., Wed) to save horizontal space
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -185,14 +212,18 @@ class BookingHistoryCard extends StatelessWidget {
             return Icon(
               Icons.star,
               size: 14,
-              color: index < rating.floor() ? const Color(0xFFF59E0B) : const Color(0xFFE2E8F0),
+              color: index < rating.floor()
+                  ? const Color(0xFFF59E0B)
+                  : const Color(0xFFE2E8F0),
             );
           }),
         ),
         const SizedBox(height: 6),
         // Title (Property Name)
         Padding(
-          padding: const EdgeInsets.only(right: 70), // Leave room for status badge
+          padding: const EdgeInsets.only(
+            right: 70,
+          ), // Leave room for status badge
           child: Text(
             hotelName,
             style: const TextStyle(
@@ -226,7 +257,11 @@ class BookingHistoryCard extends StatelessWidget {
           ],
         ),
         // Action Buttons Row (Payment Schedule & Receipt)
-        if ((onPaymentScheduleTap != null && !isPast && (status.toLowerCase() == 'approved' || status.toLowerCase() == 'paid')) || onReceiptTap != null)
+        if ((onPaymentScheduleTap != null &&
+                !isPast &&
+                (status.toLowerCase() == 'approved' ||
+                    status.toLowerCase() == 'paid')) ||
+            onReceiptTap != null)
           Padding(
             padding: const EdgeInsets.only(top: 8),
             child: Wrap(
@@ -234,20 +269,32 @@ class BookingHistoryCard extends StatelessWidget {
               runSpacing: 8,
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                if (onPaymentScheduleTap != null && !isPast && (status.toLowerCase() == 'approved' || status.toLowerCase() == 'paid'))
+                if (onPaymentScheduleTap != null &&
+                    !isPast &&
+                    (status.toLowerCase() == 'approved' ||
+                        status.toLowerCase() == 'paid'))
                   GestureDetector(
                     onTap: onPaymentScheduleTap,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: purpleAccent.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: purpleAccent.withOpacity(0.2)),
+                        border: Border.all(
+                          color: purpleAccent.withOpacity(0.2),
+                        ),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.receipt_long_outlined, size: 14, color: purpleAccent),
+                          Icon(
+                            Icons.receipt_long_outlined,
+                            size: 14,
+                            color: purpleAccent,
+                          ),
                           const SizedBox(width: 6),
                           const Text(
                             'VIEW PAYMENT SCHEDULE',
@@ -266,16 +313,25 @@ class BookingHistoryCard extends StatelessWidget {
                   GestureDetector(
                     onTap: onReceiptTap,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: const Color(0xFF10B981).withOpacity(0.1),
                         borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: const Color(0xFF10B981).withOpacity(0.2)),
+                        border: Border.all(
+                          color: const Color(0xFF10B981).withOpacity(0.2),
+                        ),
                       ),
                       child: const Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.receipt_outlined, size: 14, color: Color(0xFF10B981)),
+                          Icon(
+                            Icons.receipt_outlined,
+                            size: 14,
+                            color: Color(0xFF10B981),
+                          ),
                           const SizedBox(width: 6),
                           Text(
                             'RECEIPT',
@@ -301,9 +357,25 @@ class BookingHistoryCard extends StatelessWidget {
             Expanded(
               child: Row(
                 children: [
-                  Expanded(child: _buildDateColumn('Move-in', checkInDate, dateFormat, dayFormat, purpleAccent)),
+                  Expanded(
+                    child: _buildDateColumn(
+                      'Move-in',
+                      checkInDate,
+                      dateFormat,
+                      dayFormat,
+                      purpleAccent,
+                    ),
+                  ),
                   const SizedBox(width: 4),
-                  Expanded(child: _buildDateColumn('Move-out', checkOutDate, dateFormat, dayFormat, purpleAccent)),
+                  Expanded(
+                    child: _buildDateColumn(
+                      'Move-out',
+                      checkOutDate,
+                      dateFormat,
+                      dayFormat,
+                      purpleAccent,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -314,7 +386,11 @@ class BookingHistoryCard extends StatelessWidget {
               children: [
                 const Text(
                   'Booking Fee',
-                  style: TextStyle(fontSize: 10, color: Color(0xFF64748B), fontWeight: FontWeight.w500),
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: Color(0xFF64748B),
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
                 ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 90),
@@ -340,7 +416,12 @@ class BookingHistoryCard extends StatelessWidget {
   }
 
   Widget _buildDateColumn(
-      String label, DateTime date, DateFormat df, DateFormat ddf, Color accentColor) {
+    String label,
+    DateTime date,
+    DateFormat df,
+    DateFormat ddf,
+    Color accentColor,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

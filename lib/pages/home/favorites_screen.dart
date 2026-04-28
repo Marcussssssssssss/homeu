@@ -71,7 +71,9 @@ class HomeUFavoritesScreen extends StatelessWidget {
                       color: context.homeuCard,
                       child: ListTile(
                         title: Text(property.name),
-                        subtitle: Text('${property.location} • ${property.pricePerMonth}'),
+                        subtitle: Text(
+                          '${property.location} • ${property.pricePerMonth}',
+                        ),
                         trailing: IconButton(
                           key: Key('remove_favorite_${property.id}'),
                           icon: const Icon(Icons.favorite_rounded),
@@ -83,7 +85,9 @@ class HomeUFavoritesScreen extends StatelessWidget {
                         onTap: () {
                           Navigator.of(context).push(
                             MaterialPageRoute<void>(
-                              builder: (_) => HomeUPropertyDetailsScreen(property: property),
+                              builder: (_) => HomeUPropertyDetailsScreen(
+                                property: property,
+                              ),
                             ),
                           );
                         },
@@ -96,4 +100,3 @@ class HomeUFavoritesScreen extends StatelessWidget {
     );
   }
 }
-

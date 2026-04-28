@@ -25,7 +25,11 @@ enum HomeUViewingFilterStatus {
 }
 
 class HomeUViewingHistoryScreen extends StatefulWidget {
-  const HomeUViewingHistoryScreen({super.key, this.initialViewings, this.isStandalone = true});
+  const HomeUViewingHistoryScreen({
+    super.key,
+    this.initialViewings,
+    this.isStandalone = true,
+  });
 
   final List<ViewingRequest>? initialViewings;
   final bool isStandalone;
@@ -40,7 +44,7 @@ class HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
       const ViewingRemoteDataSource();
   final PropertyRemoteDataSource _propertyRemoteDataSource =
       const PropertyRemoteDataSource();
-  
+
   HomeUViewingFilterStatus _selectedStatus = HomeUViewingFilterStatus.all;
   Map<String, PropertyItem> _propertyById = const <String, PropertyItem>{};
   final Set<String> _failedPropertyIds = <String>{};
@@ -57,7 +61,9 @@ class HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
   void _initStream() {
     _tenantId = AppSupabase.auth.currentUser?.id;
     if (_tenantId != null) {
-      _viewingStream = _viewingRemoteDataSource.viewingRequestsStream(_tenantId!);
+      _viewingStream = _viewingRemoteDataSource.viewingRequestsStream(
+        _tenantId!,
+      );
     }
   }
 
@@ -151,14 +157,20 @@ class HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
 
                     final viewings = snapshot.data ?? [];
 
-                    if (viewings.isEmpty && (snapshot.connectionState == ConnectionState.waiting || _isFetchingProperties)) {
+                    if (viewings.isEmpty &&
+                        (snapshot.connectionState == ConnectionState.waiting ||
+                            _isFetchingProperties)) {
                       return const Center(child: CircularProgressIndicator());
                     }
 
                     // Ensure properties are loaded before showing the list
                     final missingIds = viewings
                         .map((v) => v.propertyId)
-                        .where((id) => !_propertyById.containsKey(id) && !_failedPropertyIds.contains(id))
+                        .where(
+                          (id) =>
+                              !_propertyById.containsKey(id) &&
+                              !_failedPropertyIds.contains(id),
+                        )
                         .toSet();
 
                     if (missingIds.isNotEmpty) {
@@ -166,7 +178,7 @@ class HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
                       WidgetsBinding.instance.addPostFrameCallback((_) {
                         _ensurePropertiesLoaded(viewings);
                       });
-                      
+
                       // Show loading if we don't have enough data to render cards correctly
                       if (viewings.isNotEmpty) {
                         return const Center(child: CircularProgressIndicator());
@@ -194,7 +206,9 @@ class HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
     if (_selectedStatus == HomeUViewingFilterStatus.all) {
       return viewings;
     }
-    return viewings.where((v) => _mapStatus(v.status) == _selectedStatus).toList();
+    return viewings
+        .where((v) => _mapStatus(v.status) == _selectedStatus)
+        .toList();
   }
 
   Widget _buildViewingList(List<ViewingRequest> viewings) {
@@ -203,7 +217,9 @@ class HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
       itemCount: viewings.length,
       itemBuilder: (context, index) {
         final viewing = viewings[index];
-        final property = _propertyById[viewing.propertyId] ?? _buildFallbackPropertyItem(viewing);
+        final property =
+            _propertyById[viewing.propertyId] ??
+            _buildFallbackPropertyItem(viewing);
 
         return _ViewingHistoryCard(
           viewing: viewing,
@@ -214,9 +230,7 @@ class HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
           onTap: () {
             Navigator.of(context).push(
               MaterialPageRoute<void>(
-                builder: (_) => HomeUPropertyDetailsScreen(
-                  property: property,
-                ),
+                builder: (_) => HomeUPropertyDetailsScreen(property: property),
               ),
             );
           },
@@ -240,7 +254,9 @@ class HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
             opacity: anim1,
             child: AlertDialog(
               backgroundColor: context.homeuCard,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
               contentPadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -287,7 +303,9 @@ class HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
                             backgroundColor: context.homeuAccent,
                             foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                             elevation: 0,
                           ),
                           child: const Text(
@@ -370,33 +388,40 @@ class HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
 
     final missingIds = viewings
         .map((v) => v.propertyId)
-        .where((id) => !_propertyById.containsKey(id) && !_failedPropertyIds.contains(id))
+        .where(
+          (id) =>
+              !_propertyById.containsKey(id) &&
+              !_failedPropertyIds.contains(id),
+        )
         .toSet();
 
     if (missingIds.isNotEmpty) {
       setState(() => _isFetchingProperties = true);
-      
-      _propertyRemoteDataSource.fetchPropertiesByIds(missingIds).then((newProperties) {
-        if (mounted) {
-          setState(() {
-            _propertyById = {..._propertyById, ...newProperties};
-            // Identify IDs that were requested but not returned
-            for (final id in missingIds) {
-              if (!newProperties.containsKey(id)) {
-                _failedPropertyIds.add(id);
-              }
+
+      _propertyRemoteDataSource
+          .fetchPropertiesByIds(missingIds)
+          .then((newProperties) {
+            if (mounted) {
+              setState(() {
+                _propertyById = {..._propertyById, ...newProperties};
+                // Identify IDs that were requested but not returned
+                for (final id in missingIds) {
+                  if (!newProperties.containsKey(id)) {
+                    _failedPropertyIds.add(id);
+                  }
+                }
+                _isFetchingProperties = false;
+              });
             }
-            _isFetchingProperties = false;
+          })
+          .catchError((_) {
+            if (mounted) {
+              setState(() {
+                _failedPropertyIds.addAll(missingIds);
+                _isFetchingProperties = false;
+              });
+            }
           });
-        }
-      }).catchError((_) {
-        if (mounted) {
-          setState(() {
-            _failedPropertyIds.addAll(missingIds);
-            _isFetchingProperties = false;
-          });
-        }
-      });
     }
   }
 
@@ -490,16 +515,21 @@ class _ViewingHistoryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     const purpleAccent = Color(0xFF6366F1);
     const grayBorder = Color(0xFFF1F5F9);
-    final isPast = viewing.status.toLowerCase() == 'completed' ||
-                   viewing.status.toLowerCase() == 'cancelled' ||
-                   viewing.status.toLowerCase() == 'rejected' ||
-                   viewing.status.toLowerCase() == 'slot taken' ||
-                   viewing.status.toLowerCase() == 'property rented';
+    final isPast =
+        viewing.status.toLowerCase() == 'completed' ||
+        viewing.status.toLowerCase() == 'cancelled' ||
+        viewing.status.toLowerCase() == 'rejected' ||
+        viewing.status.toLowerCase() == 'slot taken' ||
+        viewing.status.toLowerCase() == 'property rented';
 
     final isRented = property.status.toLowerCase() == 'rented';
-    final showRentedKillSwitch = isRented && (viewing.status.toLowerCase() == 'pending' || viewing.status.toLowerCase() == 'approved');
+    final showRentedKillSwitch =
+        isRented &&
+        (viewing.status.toLowerCase() == 'pending' ||
+            viewing.status.toLowerCase() == 'approved');
 
-    final bool showCancelButton = statusEnum == HomeUViewingFilterStatus.pending;
+    final bool showCancelButton =
+        statusEnum == HomeUViewingFilterStatus.pending;
 
     Widget cardContent = Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -519,7 +549,11 @@ class _ViewingHistoryCard extends StatelessWidget {
         Expanded(
           child: Opacity(
             opacity: isPast ? 0.6 : 1.0,
-            child: _buildInfoSection(context, purpleAccent, showCancelButton: showCancelButton),
+            child: _buildInfoSection(
+              context,
+              purpleAccent,
+              showCancelButton: showCancelButton,
+            ),
           ),
         ),
       ],
@@ -528,10 +562,26 @@ class _ViewingHistoryCard extends StatelessWidget {
     if (isPast) {
       cardContent = ColorFiltered(
         colorFilter: const ColorFilter.matrix(<double>[
-          0.2126, 0.7152, 0.0722, 0, 0,
-          0.2126, 0.7152, 0.0722, 0, 0,
-          0.2126, 0.7152, 0.0722, 0, 0,
-          0,      0,      0,      1, 0,
+          0.2126,
+          0.7152,
+          0.0722,
+          0,
+          0,
+          0.2126,
+          0.7152,
+          0.0722,
+          0,
+          0,
+          0.2126,
+          0.7152,
+          0.0722,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
         ]),
         child: cardContent,
       );
@@ -561,13 +611,19 @@ class _ViewingHistoryCard extends StatelessWidget {
               top: 0,
               right: 0,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
-                  color: showRentedKillSwitch ? const Color(0xFFEF4444) : _getStatusColor(statusEnum),
+                  color: showRentedKillSwitch
+                      ? const Color(0xFFEF4444)
+                      : _getStatusColor(statusEnum),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  (showRentedKillSwitch ? 'Property Rented' : status).toUpperCase(),
+                  (showRentedKillSwitch ? 'Property Rented' : status)
+                      .toUpperCase(),
                   style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
@@ -583,14 +639,23 @@ class _ViewingHistoryCard extends StatelessWidget {
     );
   }
 
-  Widget _buildImage(String? url, double width, double height, {bool applyGrayscale = false}) {
+  Widget _buildImage(
+    String? url,
+    double width,
+    double height, {
+    bool applyGrayscale = false,
+  }) {
     Widget image;
     if (url == null || url.isEmpty) {
       image = Container(
         width: width,
         height: height,
         color: const Color(0xFFF1F5F9),
-        child: const Icon(Icons.image_outlined, color: Color(0xFF94A3B8), size: 24),
+        child: const Icon(
+          Icons.image_outlined,
+          color: Color(0xFF94A3B8),
+          size: 24,
+        ),
       );
     } else {
       image = Image.network(
@@ -602,7 +667,11 @@ class _ViewingHistoryCard extends StatelessWidget {
           width: width,
           height: height,
           color: const Color(0xFFF1F5F9),
-          child: const Icon(Icons.broken_image_outlined, color: Color(0xFF94A3B8), size: 24),
+          child: const Icon(
+            Icons.broken_image_outlined,
+            color: Color(0xFF94A3B8),
+            size: 24,
+          ),
         ),
       );
     }
@@ -610,10 +679,26 @@ class _ViewingHistoryCard extends StatelessWidget {
     if (applyGrayscale) {
       return ColorFiltered(
         colorFilter: const ColorFilter.matrix(<double>[
-          0.2126, 0.7152, 0.0722, 0, 0,
-          0.2126, 0.7152, 0.0722, 0, 0,
-          0.2126, 0.7152, 0.0722, 0, 0,
-          0,      0,      0,      1, 0,
+          0.2126,
+          0.7152,
+          0.0722,
+          0,
+          0,
+          0.2126,
+          0.7152,
+          0.0722,
+          0,
+          0,
+          0.2126,
+          0.7152,
+          0.0722,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
         ]),
         child: image,
       );
@@ -621,7 +706,11 @@ class _ViewingHistoryCard extends StatelessWidget {
     return image;
   }
 
-  Widget _buildInfoSection(BuildContext context, Color purpleAccent, {bool showCancelButton = false}) {
+  Widget _buildInfoSection(
+    BuildContext context,
+    Color purpleAccent, {
+    bool showCancelButton = false,
+  }) {
     final dateFormat = DateFormat('MMM d');
     final dayFormat = DateFormat('EEEE');
     final timeFormat = DateFormat('hh:mm a');
@@ -636,7 +725,9 @@ class _ViewingHistoryCard extends StatelessWidget {
             return Icon(
               Icons.star,
               size: 14,
-              color: index < property.rating.floor() ? const Color(0xFFF59E0B) : const Color(0xFFE2E8F0),
+              color: index < property.rating.floor()
+                  ? const Color(0xFFF59E0B)
+                  : const Color(0xFFE2E8F0),
             );
           }),
         ),
@@ -701,10 +792,18 @@ class _ViewingHistoryCard extends StatelessWidget {
                 style: OutlinedButton.styleFrom(
                   foregroundColor: Colors.redAccent,
                   side: const BorderSide(color: Colors.redAccent, width: 1.0),
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 0,
+                  ),
                   minimumSize: const Size(0, 28),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  textStyle: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 child: const Text('Cancel'),
               ),
@@ -715,7 +814,12 @@ class _ViewingHistoryCard extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailColumn(String label, String value, String subValue, Color accentColor) {
+  Widget _buildDetailColumn(
+    String label,
+    String value,
+    String subValue,
+    Color accentColor,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

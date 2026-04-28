@@ -42,4 +42,3 @@ class HomeUFavoritesController extends ChangeNotifier {
     notifyListeners();
   }
 }
-

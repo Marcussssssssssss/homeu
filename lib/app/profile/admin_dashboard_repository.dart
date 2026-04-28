@@ -2,9 +2,9 @@ import 'package:homeu/app/profile/admin_dashboard_models.dart';
 import 'package:homeu/app/profile/admin_dashboard_remote_datasource.dart';
 
 class AdminDashboardRepository {
-  AdminDashboardRepository({
-    AdminDashboardRemoteDataSource? remoteDataSource,
-  }) : _remoteDataSource = remoteDataSource ?? const AdminDashboardRemoteDataSource();
+  AdminDashboardRepository({AdminDashboardRemoteDataSource? remoteDataSource})
+    : _remoteDataSource =
+          remoteDataSource ?? const AdminDashboardRemoteDataSource();
 
   final AdminDashboardRemoteDataSource _remoteDataSource;
 

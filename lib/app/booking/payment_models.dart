@@ -30,22 +30,28 @@ class Payment {
   factory Payment.fromJson(Map<String, dynamic> json) {
     return Payment(
       id: json['id']?.toString() ?? '',
-      bookingRequestsId: json['booking_requests_id']?.toString() ??
+      bookingRequestsId:
+          json['booking_requests_id']?.toString() ??
           json['bookingRequestsId']?.toString() ??
           '',
-      payerId: json['payer_id']?.toString() ?? json['payerId']?.toString() ?? '',
+      payerId:
+          json['payer_id']?.toString() ?? json['payerId']?.toString() ?? '',
       method: json['method']?.toString() ?? '',
       status: json['status']?.toString() ?? '',
       amount: _parseDouble(json['amount']) ?? 0,
       paidAt: _parseDateTime(json['paid_at'] ?? json['paidAt']),
-      createdAt: _parseDateTime(json['created_at'] ?? json['createdAt']) ??
+      createdAt:
+          _parseDateTime(json['created_at'] ?? json['createdAt']) ??
           DateTime.fromMillisecondsSinceEpoch(0),
-      updatedAt: _parseDateTime(json['updated_at'] ?? json['updatedAt']) ??
+      updatedAt:
+          _parseDateTime(json['updated_at'] ?? json['updatedAt']) ??
           DateTime.fromMillisecondsSinceEpoch(0),
-      transactionReference: json['transaction_reference']?.toString() ??
+      transactionReference:
+          json['transaction_reference']?.toString() ??
           json['transactionReference']?.toString() ??
           '',
-      paymentScheduleId: json['payment_schedule_id']?.toString() ??
+      paymentScheduleId:
+          json['payment_schedule_id']?.toString() ??
           json['paymentScheduleId']?.toString(),
       monthNumber: (json['month_number'] as num?)?.toInt(),
     );
@@ -88,4 +94,3 @@ class Payment {
     return null;
   }
 }
-

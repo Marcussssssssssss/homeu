@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:homeu/app/auth/homeu_auth_service.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
 import 'package:homeu/app/favorites/homeu_favorites_controller.dart';
+import 'package:homeu/app/profile/profile_models.dart';
 import 'package:homeu/core/theme/homeu_app_theme.dart';
 import 'package:homeu/pages/home/booking_screen.dart';
 import 'package:homeu/pages/home/chat_screen.dart';
@@ -34,7 +37,9 @@ class _HomeUPropertyDetailsScreenState
     super.initState();
     _ownerProfileFuture = AppSupabase.client
         .from('profiles')
-        .select('full_name, profile_image_url')
+        .select(
+          'full_name, profile_image_url, risk_status, account_status, risk_reason',
+        )
         .eq('id', widget.property.ownerId)
         .maybeSingle();
   }
@@ -64,6 +69,168 @@ class _HomeUPropertyDetailsScreenState
       return Icons.outdoor_grill_rounded;
     }
     return Icons.check_circle_outline_rounded;
+  }
+
+  String _normalizedAvailabilityStatus(PropertyItem property) {
+    final status = property.status.trim();
+    if (status.isEmpty) {
+      return 'Active';
+    }
+    return '${status[0].toUpperCase()}${status.substring(1).toLowerCase()}';
+  }
+
+  bool _isBookNowAvailable(PropertyItem property) {
+    final normalized = property.status.trim().toLowerCase();
+    return normalized.isEmpty || normalized == 'active';
+  }
+
+  bool _isViewingAvailable(PropertyItem property) {
+    final normalized = property.status.trim().toLowerCase();
+    return normalized != 'occupied';
+  }
+
+  HomeURiskStatus _resolvedOwnerRiskStatus(Map<String, dynamic>? data) {
+    if (data != null && data['risk_status'] != null) {
+      return HomeUProfileData.mapRiskStatus(data['risk_status']?.toString());
+    }
+    return widget.property.ownerRiskStatus;
+  }
+
+  HomeUAccountStatus _resolvedOwnerAccountStatus(Map<String, dynamic>? data) {
+    if (data != null && data['account_status'] != null) {
+      return HomeUProfileData.mapAccountStatus(
+        data['account_status']?.toString(),
+      );
+    }
+    return widget.property.ownerAccountStatus;
+  }
+
+  Widget _buildOwnerModerationBanner({
+    required HomeURiskStatus riskStatus,
+    required HomeUAccountStatus accountStatus,
+  }) {
+    final isDark = context.isDarkMode;
+    final isRestricted =
+        accountStatus == HomeUAccountStatus.suspended ||
+        accountStatus == HomeUAccountStatus.removed;
+    final isHighRisk = riskStatus == HomeURiskStatus.highRisk;
+    final isSuspicious = riskStatus == HomeURiskStatus.suspicious;
+
+    if (!isRestricted && !isHighRisk && !isSuspicious) {
+      return const SizedBox.shrink();
+    }
+
+    final backgroundColor = isRestricted
+        ? (isDark
+              ? Colors.white.withValues(alpha: 0.05)
+              : context.homeuMutedText.withValues(alpha: 0.08))
+        : (isHighRisk
+              ? (isDark
+                    ? Colors.red.withValues(alpha: 0.12)
+                    : const Color(0xFFFEF2F2))
+              : (isDark
+                    ? Colors.orange.withValues(alpha: 0.12)
+                    : const Color(0xFFFFF7ED)));
+    final borderColor = isRestricted
+        ? (isDark
+              ? Colors.white.withValues(alpha: 0.12)
+              : context.homeuMutedText.withValues(alpha: 0.2))
+        : (isHighRisk
+              ? (isDark
+                    ? Colors.red.withValues(alpha: 0.45)
+                    : const Color(0xFFF87171))
+              : (isDark
+                    ? Colors.orange.withValues(alpha: 0.45)
+                    : const Color(0xFFF59E0B)));
+    final iconColor = isRestricted
+        ? context.homeuMutedText
+        : (isHighRisk ? const Color(0xFFDC2626) : const Color(0xFFD97706));
+    final message = isRestricted
+        ? 'This listing is currently unavailable due to admin review.'
+        : 'This owner has been flagged by HomeU admin. Please proceed carefully.';
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: borderColor),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            isRestricted ? Icons.block_rounded : Icons.warning_amber_rounded,
+            color: iconColor,
+            size: 22,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              message,
+              style: TextStyle(
+                color: context.homeuPrimaryText,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                height: 1.35,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLocationMapPreview(PropertyItem property) {
+    if (!property.hasCoordinates) {
+      return const SizedBox.shrink();
+    }
+
+    final latitude = property.latitude!;
+    final longitude = property.longitude!;
+
+    return Container(
+      margin: const EdgeInsets.only(top: 12),
+      height: 160,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: context.homeuSoftBorder),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(14),
+        child: FlutterMap(
+          options: MapOptions(
+            initialCenter: LatLng(latitude, longitude),
+            initialZoom: 15,
+            interactionOptions: const InteractionOptions(
+              flags: InteractiveFlag.none,
+            ),
+          ),
+          children: [
+            TileLayer(
+              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+              userAgentPackageName: 'com.example.homeu',
+            ),
+            MarkerLayer(
+              markers: [
+                Marker(
+                  point: LatLng(latitude, longitude),
+                  width: 44,
+                  height: 44,
+                  alignment: Alignment.topCenter,
+                  child: const Icon(
+                    Icons.location_on_rounded,
+                    color: Color(0xFFC53030),
+                    size: 40,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   static final RegExp _uuidPattern = RegExp(
@@ -369,6 +536,11 @@ class _HomeUPropertyDetailsScreenState
     final property = widget.property;
     final currentUserId = AppSupabase.auth.currentUser?.id;
     final isOwner = currentUserId == property.ownerId;
+    final availabilityStatus = _normalizedAvailabilityStatus(property);
+    final ownerRestricted = property.isOwnerRestricted;
+    final canBookNow = _isBookNowAvailable(property) && !ownerRestricted;
+    final canScheduleViewing =
+        _isViewingAvailable(property) && !ownerRestricted;
 
     debugPrint('[DEBUG] Details Page Build for ID: ${property.id}');
     debugPrint('[DEBUG] Total Images Received: ${property.imageUrls.length}');
@@ -438,14 +610,17 @@ class _HomeUPropertyDetailsScreenState
                         height: 46,
                         child: OutlinedButton(
                           key: const Key('schedule_viewing_button'),
-                          onPressed: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute<void>(
-                                builder: (_) =>
-                                    HomeUViewingScreen(property: property),
-                              ),
-                            );
-                          },
+                          onPressed: canScheduleViewing
+                              ? () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute<void>(
+                                      builder: (_) => HomeUViewingScreen(
+                                        property: property,
+                                      ),
+                                    ),
+                                  );
+                                }
+                              : null,
                           style: OutlinedButton.styleFrom(
                             side: const BorderSide(color: Color(0xFF1E3A8A)),
                             shape: RoundedRectangleBorder(
@@ -467,14 +642,17 @@ class _HomeUPropertyDetailsScreenState
                         height: 52,
                         child: ElevatedButton(
                           key: const Key('book_now_button'),
-                          onPressed: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute<void>(
-                                builder: (_) =>
-                                    HomeUBookingScreen(property: property),
-                              ),
-                            );
-                          },
+                          onPressed: canBookNow
+                              ? () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute<void>(
+                                      builder: (_) => HomeUBookingScreen(
+                                        property: property,
+                                      ),
+                                    ),
+                                  );
+                                }
+                              : null,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF1E3A8A),
                             foregroundColor: Colors.white,
@@ -489,6 +667,20 @@ class _HomeUPropertyDetailsScreenState
                           child: const Text('Book Now'),
                         ),
                       ),
+                      if (!canBookNow) ...[
+                        const SizedBox(height: 8),
+                        Text(
+                          ownerRestricted
+                              ? 'This listing is currently unavailable due to admin review.'
+                              : 'This property is currently not available for booking.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: context.homeuMutedText,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -544,6 +736,13 @@ class _HomeUPropertyDetailsScreenState
                       fontWeight: FontWeight.w700,
                     ),
                   ),
+                  if (property.hasOwnerFlag) ...[
+                    const SizedBox(height: 12),
+                    _buildOwnerModerationBanner(
+                      riskStatus: property.ownerRiskStatus,
+                      accountStatus: property.ownerAccountStatus,
+                    ),
+                  ],
                   const SizedBox(height: 18),
                   Text(
                     'Location',
@@ -568,62 +767,71 @@ class _HomeUPropertyDetailsScreenState
                         ),
                       ],
                     ),
-                    child: Row(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Container(
-                          width: 78,
-                          height: 64,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            gradient: const LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [Color(0xFFE7F0FF), Color(0xFFDDF4EA)],
+                        Row(
+                          children: [
+                            Container(
+                              width: 78,
+                              height: 64,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                                gradient: const LinearGradient(
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                  colors: [
+                                    Color(0xFFE7F0FF),
+                                    Color(0xFFDDF4EA),
+                                  ],
+                                ),
+                              ),
+                              child: const Icon(
+                                Icons.location_city_rounded,
+                                color: Color(0xFF1E3A8A),
+                              ),
                             ),
-                          ),
-                          child: const Icon(
-                            Icons.location_city_rounded,
-                            color: Color(0xFF1E3A8A),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                property.location,
-                                style: TextStyle(
-                                  color: context.homeuPrimaryText,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w700,
-                                ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    property.displayAddress,
+                                    style: TextStyle(
+                                      color: context.homeuPrimaryText,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Nearby: ${property.nearbyLandmarks}',
+                                    style: TextStyle(
+                                      color: context.homeuMutedText,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Nearby: ${property.nearbyLandmarks}',
-                                style: TextStyle(
-                                  color: context.homeuMutedText,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
+                        _buildLocationMapPreview(property),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 18),
-                  Text(
-                    'Description',
-                    style: TextStyle(
-                      color: context.homeuPrimaryText,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
+                   const SizedBox(height: 18),
+                   Text(
+                     'Description',
+                     style: TextStyle(
+                       color: context.homeuPrimaryText,
+                       fontSize: 16,
+                       fontWeight: FontWeight.w700,
+                     ),
+                   ),
+                   const SizedBox(height: 8),
                   Text(
                     property.description,
                     style: TextStyle(
@@ -693,6 +901,10 @@ class _HomeUPropertyDetailsScreenState
                         }
 
                         final data = snapshot.data;
+                        final ownerRiskStatus =
+                            _resolvedOwnerRiskStatus(data);
+                        final ownerAccountStatus =
+                            _resolvedOwnerAccountStatus(data);
                         final String ownerName =
                             (data?['full_name'] as String?)?.isNotEmpty == true
                             ? data!['full_name'] as String
@@ -779,6 +991,41 @@ class _HomeUPropertyDetailsScreenState
                                           fontWeight: FontWeight.w500,
                                         ),
                                       ),
+                                      if (ownerRiskStatus !=
+                                              HomeURiskStatus.normal ||
+                                          ownerAccountStatus !=
+                                              HomeUAccountStatus.active) ...[
+                                        const SizedBox(height: 6),
+                                        Wrap(
+                                          spacing: 6,
+                                          runSpacing: 6,
+                                          children: [
+                                            if (ownerRiskStatus ==
+                                                    HomeURiskStatus.suspicious ||
+                                                ownerRiskStatus ==
+                                                    HomeURiskStatus.highRisk)
+                                              _ModerationTag(
+                                                label: ownerRiskStatus ==
+                                                        HomeURiskStatus.highRisk
+                                                    ? 'High Risk'
+                                                    : 'Suspicious Owner',
+                                                color: ownerRiskStatus ==
+                                                        HomeURiskStatus.highRisk
+                                                    ? const Color(0xFFDC2626)
+                                                    : const Color(0xFFF59E0B),
+                                              ),
+                                            if (ownerAccountStatus !=
+                                                HomeUAccountStatus.active)
+                                              _ModerationTag(
+                                                label: ownerAccountStatus ==
+                                                        HomeUAccountStatus.suspended
+                                                    ? 'Suspended'
+                                                    : 'Removed',
+                                                color: const Color(0xFF6B7280),
+                                              ),
+                                          ],
+                                        ),
+                                      ],
                                     ],
                                   ),
                                 ),
@@ -793,12 +1040,86 @@ class _HomeUPropertyDetailsScreenState
                       },
                     ),
                   ],
+                  const SizedBox(height: 18),
+                  Text(
+                    'Availability',
+                    style: TextStyle(
+                      color: context.homeuPrimaryText,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: context.homeuCard,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: context.homeuAccent.withValues(alpha: 0.14),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Text(
+                          'Availability:',
+                          style: TextStyle(
+                            color: context.homeuMutedText,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            availabilityStatus,
+                            style: TextStyle(
+                              color: context.homeuPrimaryText,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
           ),
         );
       },
+    );
+  }
+}
+
+class _ModerationTag extends StatelessWidget {
+  const _ModerationTag({required this.label, required this.color});
+
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: color,
+          fontSize: 10.5,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
     );
   }
 }

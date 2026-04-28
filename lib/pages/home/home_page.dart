@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:homeu/app/auth/homeu_auth_service.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/profile/profile_controller.dart';
@@ -30,8 +31,9 @@ class HomeUHomePage extends StatefulWidget {
 }
 
 class _HomeUHomePageState extends State<HomeUHomePage> {
-  static const double _filterMinPrice = 300;
-  static const double _filterMaxPrice = 5000;
+  static const double _filterMinPrice = 0;
+  static const double _filterMaxPrice = 10000;
+  static const double _nearbyRadiusKm = 10;
 
   late final HomeUProfileController _profileController;
   final HomeUFavoritesController _favoritesController =
@@ -46,10 +48,11 @@ class _HomeUHomePageState extends State<HomeUHomePage> {
   String _selectedPropertyType = 'Any';
   String _selectedRoomType = 'Any';
   String _selectedFurnishing = 'Any';
-  double _minimumRating = 0;
   double? _minimumPrice;
   double? _maximumPrice;
   _SortOption _selectedSortOption = _SortOption.newest;
+  Position? _currentPosition;
+  bool _nearbyOnly = false;
 
   @override
   void initState() {
@@ -70,17 +73,19 @@ class _HomeUHomePageState extends State<HomeUHomePage> {
         (!AppSupabase.isInitialized && widget.seedProperties.isNotEmpty)
         ? Future<List<PropertyItem>>.value(widget.seedProperties)
         : _propertyRemoteDataSource.fetchPublishedProperties();
-    _propertiesFuture.then((items) {
-      if (!mounted) {
-        return;
-      }
-      final resolved = items.isEmpty ? widget.seedProperties : items;
-      setState(() {
-        _hydrateFilterOptions(resolved);
-      });
-    }).catchError((_) {
-      // Keep fallback options when remote loading fails.
-    });
+    _propertiesFuture
+        .then((items) {
+          if (!mounted) {
+            return;
+          }
+          final resolved = items.isEmpty ? widget.seedProperties : items;
+          setState(() {
+            _hydrateFilterOptions(resolved);
+          });
+        })
+        .catchError((_) {
+          // Keep fallback options when remote loading fails.
+        });
   }
 
   void _hydrateFilterOptions(List<PropertyItem> items) {
@@ -100,12 +105,13 @@ class _HomeUHomePageState extends State<HomeUHomePage> {
   }
 
   List<String> _buildOptions(Iterable<String> values) {
-    final options = values
-        .map((value) => value.trim())
-        .where((value) => value.isNotEmpty && value.toLowerCase() != 'any')
-        .toSet()
-        .toList(growable: false)
-      ..sort();
+    final options =
+        values
+            .map((value) => value.trim())
+            .where((value) => value.isNotEmpty && value.toLowerCase() != 'any')
+            .toSet()
+            .toList(growable: false)
+          ..sort();
 
     return <String>['Any', ...options];
   }
@@ -131,55 +137,73 @@ class _HomeUHomePageState extends State<HomeUHomePage> {
   }
 
   List<PropertyItem> _applyListingFilters(List<PropertyItem> source) {
-    final filtered = source.where((property) {
-      final normalizedType = property.propertyType.trim().toLowerCase();
-      final matchesType =
-          _selectedPropertyType == 'Any' ||
-          normalizedType == _selectedPropertyType.toLowerCase();
-      if (!matchesType) {
-        return false;
-      }
+    final filtered = source
+        .where((property) {
+          if (property.isOwnerRestricted) {
+            return false;
+          }
 
-      final query = _searchQuery.trim().toLowerCase();
-      if (query.isNotEmpty) {
-        final haystack =
-            '${property.name} ${property.description} ${property.location}'
-                .toLowerCase();
-        if (!haystack.contains(query)) {
-          return false;
-        }
-      }
+          final normalizedType = property.propertyType.trim().toLowerCase();
+          final matchesType =
+              _selectedPropertyType == 'Any' ||
+              normalizedType == _selectedPropertyType.toLowerCase();
+          if (!matchesType) {
+            return false;
+          }
 
-      final matchesRoomType =
-          _selectedRoomType == 'Any' ||
-          property.roomType.trim().toLowerCase() ==
-              _selectedRoomType.toLowerCase();
-      if (!matchesRoomType) {
-        return false;
-      }
+          final query = _searchQuery.trim().toLowerCase();
+          if (query.isNotEmpty) {
+            final haystack =
+                '${property.name} ${property.description} ${property.location}'
+                    .toLowerCase();
+            if (!haystack.contains(query)) {
+              return false;
+            }
+          }
 
-      final matchesFurnishing =
-          _selectedFurnishing == 'Any' ||
-          property.furnishing.trim().toLowerCase() ==
-              _selectedFurnishing.toLowerCase();
-      if (!matchesFurnishing) {
-        return false;
-      }
+          final matchesRoomType =
+              _selectedRoomType == 'Any' ||
+              property.roomType.trim().toLowerCase() ==
+                  _selectedRoomType.toLowerCase();
+          if (!matchesRoomType) {
+            return false;
+          }
 
-      final price = property.pricePerMonthValue;
-      if (_minimumPrice != null && price < _minimumPrice!) {
-        return false;
-      }
-      if (_maximumPrice != null && price > _maximumPrice!) {
-        return false;
-      }
+          final matchesFurnishing =
+              _selectedFurnishing == 'Any' ||
+              property.furnishing.trim().toLowerCase() ==
+                  _selectedFurnishing.toLowerCase();
+          if (!matchesFurnishing) {
+            return false;
+          }
 
-      if (property.rating < _minimumRating) {
-        return false;
-      }
+          final price = property.pricePerMonthValue;
+          if (_minimumPrice != null && price < _minimumPrice!) {
+            return false;
+          }
+          if (_maximumPrice != null && price > _maximumPrice!) {
+            return false;
+          }
 
-      return true;
-    }).toList(growable: false);
+          if (_nearbyOnly) {
+            final distanceKm = _distanceFromCurrentLocationKm(property);
+            if (distanceKm == null || distanceKm > _nearbyRadiusKm) {
+              return false;
+            }
+          }
+
+          return true;
+        })
+        .toList(growable: false);
+
+    if (_nearbyOnly && _currentPosition != null) {
+      filtered.sort((a, b) {
+        final aDistance = _distanceFromCurrentLocationKm(a) ?? double.infinity;
+        final bDistance = _distanceFromCurrentLocationKm(b) ?? double.infinity;
+        return aDistance.compareTo(bDistance);
+      });
+      return filtered;
+    }
 
     filtered.sort((a, b) {
       switch (_selectedSortOption) {
@@ -206,6 +230,111 @@ class _HomeUHomePageState extends State<HomeUHomePage> {
     return filtered;
   }
 
+  double? _distanceFromCurrentLocationKm(PropertyItem property) {
+    final position = _currentPosition;
+    if (position == null ||
+        property.latitude == null ||
+        property.longitude == null) {
+      return null;
+    }
+
+    final meters = Geolocator.distanceBetween(
+      position.latitude,
+      position.longitude,
+      property.latitude!,
+      property.longitude!,
+    );
+    return meters / 1000;
+  }
+
+  String? _distanceText(PropertyItem property) {
+    final distanceKm = _distanceFromCurrentLocationKm(property);
+    if (distanceKm == null) {
+      return null;
+    }
+    return '${distanceKm.toStringAsFixed(distanceKm >= 10 ? 0 : 1)} km away';
+  }
+
+  Future<bool> _ensureLocationAccess() async {
+    final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      if (!mounted) return false;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Location services are disabled. Please enable them to use Nearby.',
+          ),
+        ),
+      );
+      return false;
+    }
+
+    var permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+    }
+
+    if (permission == LocationPermission.denied) {
+      if (!mounted) return false;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Location permission is required to show nearby properties.',
+          ),
+        ),
+      );
+      return false;
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      if (!mounted) return false;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Location permission is permanently denied. Please enable it in settings.',
+          ),
+        ),
+      );
+      return false;
+    }
+
+    return true;
+  }
+
+  Future<void> _toggleNearbyFilter() async {
+    if (_nearbyOnly) {
+      setState(() {
+        _nearbyOnly = false;
+        _currentPosition = null;
+      });
+      return;
+    }
+
+    if (!await _ensureLocationAccess()) {
+      return;
+    }
+
+    try {
+      final position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+        ),
+      );
+      if (!mounted) return;
+      setState(() {
+        _currentPosition = position;
+        _nearbyOnly = true;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Unable to determine your current location.'),
+        ),
+      );
+    }
+  }
+
   Future<void> _openFilterSheet() async {
     const lowerBound = _filterMinPrice;
     const maxBound = _filterMaxPrice;
@@ -216,7 +345,6 @@ class _HomeUHomePageState extends State<HomeUHomePage> {
     var selectedFurnishing = _furnishingOptions.contains(_selectedFurnishing)
         ? _selectedFurnishing
         : 'Any';
-    var minimumRating = _minimumRating;
     var range = RangeValues(
       (_minimumPrice ?? lowerBound).clamp(lowerBound, maxBound),
       (_maximumPrice ?? maxBound).clamp(lowerBound, maxBound),
@@ -312,28 +440,14 @@ class _HomeUHomePageState extends State<HomeUHomePage> {
                         },
                       ),
                       const SizedBox(height: 14),
-                      Text('Minimum Rating: ${minimumRating.toStringAsFixed(1)}'),
-                      Slider(
-                        value: minimumRating,
-                        min: 0,
-                        max: 5,
-                        divisions: 10,
-                        label: minimumRating.toStringAsFixed(1),
-                        onChanged: (value) {
-                          setSheetState(() {
-                            minimumRating = value;
-                          });
-                        },
-                      ),
-                      const SizedBox(height: 8),
                       Row(
                         children: [
                           Expanded(
                             child: OutlinedButton(
                               onPressed: () {
-                                Navigator.of(sheetContext).pop(
-                                  const _FilterSheetResult.reset(),
-                                );
+                                Navigator.of(
+                                  sheetContext,
+                                ).pop(const _FilterSheetResult.reset());
                               },
                               child: const Text('Reset'),
                             ),
@@ -348,7 +462,6 @@ class _HomeUHomePageState extends State<HomeUHomePage> {
                                     maximumPrice: range.end,
                                     roomType: selectedRoomType,
                                     furnishing: selectedFurnishing,
-                                    minimumRating: minimumRating,
                                   ),
                                 );
                               },
@@ -377,7 +490,6 @@ class _HomeUHomePageState extends State<HomeUHomePage> {
         _maximumPrice = null;
         _selectedRoomType = 'Any';
         _selectedFurnishing = 'Any';
-        _minimumRating = 0;
       });
       return;
     }
@@ -387,7 +499,6 @@ class _HomeUHomePageState extends State<HomeUHomePage> {
       _maximumPrice = result.maximumPrice;
       _selectedRoomType = result.roomType;
       _selectedFurnishing = result.furnishing;
-      _minimumRating = result.minimumRating;
     });
   }
 
@@ -502,7 +613,10 @@ class _HomeUHomePageState extends State<HomeUHomePage> {
                           label: Text('$count'),
                           backgroundColor: Colors.white,
                           textColor: context.homeuAccent,
-                          child: const Icon(Icons.compare_arrows_rounded, size: 20),
+                          child: const Icon(
+                            Icons.compare_arrows_rounded,
+                            size: 20,
+                          ),
                         ),
                       ),
                     ),
@@ -603,6 +717,19 @@ class _HomeUHomePageState extends State<HomeUHomePage> {
                             icon: const Icon(Icons.swap_vert_rounded),
                             tooltip: 'Sort properties',
                           ),
+                          IconButton(
+                            key: const Key('listing_nearby_button'),
+                            onPressed: _toggleNearbyFilter,
+                            icon: Icon(
+                              _nearbyOnly
+                                  ? Icons.near_me_rounded
+                                  : Icons.near_me_outlined,
+                            ),
+                            color: _nearbyOnly ? context.homeuAccent : null,
+                            tooltip: _nearbyOnly
+                                ? 'Nearby filter on'
+                                : 'Show nearby properties',
+                          ),
                         ],
                       ),
                       const SizedBox(height: 10),
@@ -640,7 +767,8 @@ class _HomeUHomePageState extends State<HomeUHomePage> {
                       FutureBuilder<List<PropertyItem>>(
                         future: _propertiesFuture,
                         builder: (context, snapshot) {
-                          if (snapshot.hasError && widget.seedProperties.isEmpty) {
+                          if (snapshot.hasError &&
+                              widget.seedProperties.isEmpty) {
                             return Padding(
                               padding: const EdgeInsets.symmetric(vertical: 20),
                               child: Text(
@@ -679,9 +807,11 @@ class _HomeUHomePageState extends State<HomeUHomePage> {
                                 .map(
                                   (property) => _PropertyCard(
                                     property: property,
-                                    isFavorited: _favoritesController.isFavorited(
-                                      property.id,
-                                    ),
+                                    distanceText: _nearbyOnly
+                                        ? _distanceText(property)
+                                        : null,
+                                    isFavorited: _favoritesController
+                                        .isFavorited(property.id),
                                     onToggleFavorite: () {
                                       _favoritesController.toggle(property);
                                     },
@@ -719,7 +849,6 @@ class _FilterSheetResult {
     required this.maximumPrice,
     required this.roomType,
     required this.furnishing,
-    required this.minimumRating,
   }) : isReset = false;
 
   const _FilterSheetResult.reset()
@@ -727,14 +856,12 @@ class _FilterSheetResult {
       maximumPrice = null,
       roomType = 'Any',
       furnishing = 'Any',
-      minimumRating = 0,
       isReset = true;
 
   final double? minimumPrice;
   final double? maximumPrice;
   final String roomType;
   final String furnishing;
-  final double minimumRating;
   final bool isReset;
 }
 
@@ -781,12 +908,14 @@ class _CategoryChip extends StatelessWidget {
 class _PropertyCard extends StatelessWidget {
   const _PropertyCard({
     required this.property,
+    required this.distanceText,
     required this.onTap,
     required this.isFavorited,
     required this.onToggleFavorite,
   });
 
   final PropertyItem property;
+  final String? distanceText;
   final VoidCallback onTap;
   final bool isFavorited;
   final VoidCallback onToggleFavorite;
@@ -855,30 +984,40 @@ class _PropertyCard extends StatelessWidget {
                       return GestureDetector(
                         onTap: canAdd
                             ? () {
-                              final controller = PropertyComparisonController.instance;
-                              controller.toggleProperty(property);
-                              final nowSelected = controller.isSelected(property.id);
-                              
-                              ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(nowSelected 
-                                    ? 'Added ${property.name} to comparison' 
-                                    : 'Removed ${property.name} from comparison'),
-                                  duration: const Duration(seconds: 2),
-                                  action: nowSelected ? SnackBarAction(
-                                    label: 'COMPARE',
-                                    onPressed: () {
-                                      Navigator.of(context).push(
-                                        MaterialPageRoute<void>(
-                                          builder: (_) => const PropertyComparisonScreen(),
-                                        ),
-                                      );
-                                    },
-                                  ) : null,
-                                ),
-                              );
-                            }
+                                final controller =
+                                    PropertyComparisonController.instance;
+                                controller.toggleProperty(property);
+                                final nowSelected = controller.isSelected(
+                                  property.id,
+                                );
+
+                                ScaffoldMessenger.of(
+                                  context,
+                                ).hideCurrentSnackBar();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      nowSelected
+                                          ? 'Added ${property.name} to comparison'
+                                          : 'Removed ${property.name} from comparison',
+                                    ),
+                                    duration: const Duration(seconds: 2),
+                                    action: nowSelected
+                                        ? SnackBarAction(
+                                            label: 'COMPARE',
+                                            onPressed: () {
+                                              Navigator.of(context).push(
+                                                MaterialPageRoute<void>(
+                                                  builder: (_) =>
+                                                      const PropertyComparisonScreen(),
+                                                ),
+                                              );
+                                            },
+                                          )
+                                        : null,
+                                  ),
+                                );
+                              }
                             : null,
                         child: CircleAvatar(
                           radius: 16,
@@ -915,6 +1054,14 @@ class _PropertyCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 5),
+                  if (property.isOwnerSuspicious || property.isOwnerHighRisk)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: _OwnerRiskBadge(property: property),
+                      ),
+                    ),
                   Row(
                     children: [
                       Icon(
@@ -947,27 +1094,66 @@ class _PropertyCard extends StatelessWidget {
                         ),
                       ),
                       const Spacer(),
-                      const Icon(
-                        Icons.star_rounded,
-                        size: 17,
-                        color: Color(0xFFF59E0B),
-                      ),
-                      const SizedBox(width: 3),
-                      Text(
-                        property.rating.toStringAsFixed(1),
-                        style: TextStyle(
-                          color: context.homeuPrimaryText,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
                     ],
                   ),
+                  if (distanceText != null) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      distanceText!,
+                      style: TextStyle(
+                        color: context.homeuMutedText,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+
+class _OwnerRiskBadge extends StatelessWidget {
+  const _OwnerRiskBadge({required this.property});
+
+  final PropertyItem property;
+
+  @override
+  Widget build(BuildContext context) {
+    final isHighRisk = property.isOwnerHighRisk;
+    final color = isHighRisk ? const Color(0xFFDC2626) : const Color(0xFFF59E0B);
+    final label = property.ownerRiskBadgeLabel;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            isHighRisk ? Icons.warning_rounded : Icons.info_outline_rounded,
+            size: 14,
+            color: color,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
       ),
     );
   }
