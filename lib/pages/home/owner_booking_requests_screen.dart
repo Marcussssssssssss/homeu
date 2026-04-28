@@ -8,7 +8,6 @@ import '../../app/property/booking_request/booking_requests_controller.dart';
 import '../../app/property/viewing_request/viewing_requests_controller.dart';
 import 'owner_analytics_screen.dart';
 import 'owner_booking_request_details_screen.dart';
-import 'owner_dashboard_screen.dart';
 import 'owner_my_properties_screen.dart';
 
 class HomeUOwnerBookingRequestsScreen extends StatefulWidget {
