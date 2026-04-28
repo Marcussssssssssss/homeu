@@ -54,11 +54,15 @@ class HomeUAppTheme {
         labelStyle: TextStyle(color: colorScheme.onSurfaceVariant),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: colorScheme.outline.withValues(alpha: 0.35)),
+          borderSide: BorderSide(
+            color: colorScheme.outline.withValues(alpha: 0.35),
+          ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: BorderSide(color: colorScheme.outline.withValues(alpha: 0.35)),
+          borderSide: BorderSide(
+            color: colorScheme.outline.withValues(alpha: 0.35),
+          ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
@@ -67,13 +71,17 @@ class HomeUAppTheme {
       ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: isDark ? const Color(0xFF111A2B) : Colors.white,
-        indicatorColor: colorScheme.primary.withValues(alpha: isDark ? 0.35 : 0.18),
+        indicatorColor: colorScheme.primary.withValues(
+          alpha: isDark ? 0.35 : 0.18,
+        ),
         labelTextStyle: WidgetStateProperty.resolveWith<TextStyle>((states) {
           final isSelected = states.contains(WidgetState.selected);
           return TextStyle(
             color: isSelected
                 ? (isDark ? const Color(0xFFEAF0FF) : colorScheme.primary)
-                : (isDark ? const Color(0xFFB0BED5) : colorScheme.onSurfaceVariant),
+                : (isDark
+                      ? const Color(0xFFB0BED5)
+                      : colorScheme.onSurfaceVariant),
             fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
           );
         }),
@@ -82,7 +90,9 @@ class HomeUAppTheme {
           return IconThemeData(
             color: isSelected
                 ? (isDark ? const Color(0xFFEAF0FF) : colorScheme.primary)
-                : (isDark ? const Color(0xFFB0BED5) : colorScheme.onSurfaceVariant),
+                : (isDark
+                      ? const Color(0xFFB0BED5)
+                      : colorScheme.onSurfaceVariant),
           );
         }),
       ),
@@ -95,7 +105,9 @@ class HomeUAppTheme {
       ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
-        backgroundColor: isDark ? const Color(0xFF1B2433) : const Color(0xFF1F314F),
+        backgroundColor: isDark
+            ? const Color(0xFF1B2433)
+            : const Color(0xFF1F314F),
         contentTextStyle: const TextStyle(color: Colors.white),
       ),
       textTheme: ThemeData(brightness: colorScheme.brightness).textTheme.apply(
@@ -113,14 +125,19 @@ extension HomeUThemeContext on BuildContext {
   bool get isDarkMode => Theme.of(this).brightness == Brightness.dark;
 
   Color get homeuCard => isDarkMode ? const Color(0xFF172336) : Colors.white;
-  Color get homeuRaisedCard => isDarkMode ? const Color(0xFF1E2D44) : const Color(0xFFF8FAFF);
-  Color get homeuPrimaryText => isDarkMode ? const Color(0xFFEAF0FF) : colors.onSurface;
-  Color get homeuSecondaryText =>
-      isDarkMode ? const Color(0xFFBDC9DE) : colors.onSurface.withValues(alpha: 0.82);
-  Color get homeuMutedText =>
-      isDarkMode ? const Color(0xFFA3B0C6) : colors.onSurfaceVariant.withValues(alpha: 0.95);
-  Color get homeuHelperText =>
-      isDarkMode ? const Color(0xFF95A4BD) : colors.onSurfaceVariant.withValues(alpha: 0.88);
+  Color get homeuRaisedCard =>
+      isDarkMode ? const Color(0xFF1E2D44) : const Color(0xFFF8FAFF);
+  Color get homeuPrimaryText =>
+      isDarkMode ? const Color(0xFFEAF0FF) : colors.onSurface;
+  Color get homeuSecondaryText => isDarkMode
+      ? const Color(0xFFBDC9DE)
+      : colors.onSurface.withValues(alpha: 0.82);
+  Color get homeuMutedText => isDarkMode
+      ? const Color(0xFFA3B0C6)
+      : colors.onSurfaceVariant.withValues(alpha: 0.95);
+  Color get homeuHelperText => isDarkMode
+      ? const Color(0xFF95A4BD)
+      : colors.onSurfaceVariant.withValues(alpha: 0.88);
   Color get homeuAccent => colors.primary;
   Color get homeuPrice => HomeUAppTheme.brandSecondary;
   Color get homeuSoftBorder => isDarkMode
@@ -137,4 +154,3 @@ extension HomeUThemeContext on BuildContext {
       : colors.primary.withValues(alpha: 0.14);
   Color get homeuSuccess => colors.secondary;
 }
-

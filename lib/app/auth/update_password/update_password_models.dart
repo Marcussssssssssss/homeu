@@ -1,8 +1,4 @@
-enum UpdatePasswordSubmissionStatus {
-  success,
-  validationFailure,
-  failure,
-}
+enum UpdatePasswordSubmissionStatus { success, validationFailure, failure }
 
 class UpdatePasswordPayload {
   const UpdatePasswordPayload({
@@ -31,4 +27,3 @@ class UpdatePasswordSubmissionResult {
   bool get isValidationFailure =>
       status == UpdatePasswordSubmissionStatus.validationFailure;
 }
-

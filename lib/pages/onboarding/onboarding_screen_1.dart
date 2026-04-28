@@ -252,14 +252,16 @@ class _BrowseListingIllustration extends StatelessWidget {
                     children: [
                       _ListingCard(
                         title: context.l10n.onboardingExampleListing1Title,
-                        subtitle: context.l10n.onboardingExampleListing1Subtitle,
+                        subtitle:
+                            context.l10n.onboardingExampleListing1Subtitle,
                         price: context.l10n.onboardingExampleListing1Price,
                         accent: const Color(0xFF1E3A8A),
                       ),
                       const SizedBox(height: 12),
                       _ListingCard(
                         title: context.l10n.onboardingExampleListing2Title,
-                        subtitle: context.l10n.onboardingExampleListing2Subtitle,
+                        subtitle:
+                            context.l10n.onboardingExampleListing2Subtitle,
                         price: context.l10n.onboardingExampleListing2Price,
                         accent: const Color(0xFF10B981),
                       ),

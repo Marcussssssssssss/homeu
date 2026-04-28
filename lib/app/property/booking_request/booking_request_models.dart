@@ -44,7 +44,10 @@ class BookingRequestModel {
     if (parsedStartDate != null && json['move_out_date'] != null) {
       final moveOutDate = DateTime.tryParse(json['move_out_date'].toString());
       if (moveOutDate != null) {
-        calculatedDuration = (moveOutDate.year - parsedStartDate.year) * 12 + moveOutDate.month - parsedStartDate.month;
+        calculatedDuration =
+            (moveOutDate.year - parsedStartDate.year) * 12 +
+            moveOutDate.month -
+            parsedStartDate.month;
       }
     }
 
@@ -61,7 +64,10 @@ class BookingRequestModel {
       monthlyPrice: monthlyPrice,
       tenantName: tenant['full_name']?.toString() ?? 'Unknown Tenant',
       tenantProfileUrl: tenant['profile_image_url'],
-      tenantPhone: tenant['phone']?.toString() ?? tenant['phone_number']?.toString() ?? 'No Phone',
+      tenantPhone:
+          tenant['phone']?.toString() ??
+          tenant['phone_number']?.toString() ??
+          'No Phone',
       tenantEmail: tenant['email']?.toString() ?? 'No Email',
       startDate: parsedStartDate,
       durationMonths: parsedDurationMonths > 0 ? parsedDurationMonths : 1,

@@ -83,7 +83,7 @@ class _EmptyComparisonState extends StatelessWidget {
             width: 80,
             height: 80,
             decoration: BoxDecoration(
-              color: context.homeuAccent.withOpacity(0.1),
+              color: context.homeuAccent.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Icon(
@@ -105,10 +105,7 @@ class _EmptyComparisonState extends StatelessWidget {
           Text(
             'Go back and select 2 properties\nto start comparing',
             textAlign: TextAlign.center,
-            style: TextStyle(
-              color: context.homeuSecondaryText,
-              fontSize: 14,
-            ),
+            style: TextStyle(color: context.homeuSecondaryText, fontSize: 14),
           ),
           const SizedBox(height: 24),
           OutlinedButton.icon(
@@ -184,16 +181,13 @@ class _PriceComparisonWidget extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: context.homeuAccent.withOpacity(0.1),
+        color: context.homeuAccent.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: context.homeuAccent.withOpacity(0.3)),
+        border: Border.all(color: context.homeuAccent.withValues(alpha: 0.3)),
       ),
       child: Row(
         children: [
-          Icon(
-            Icons.trending_down_rounded,
-            color: context.homeuAccent,
-          ),
+          Icon(Icons.trending_down_rounded, color: context.homeuAccent),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -266,9 +260,12 @@ class _PropertyComparisonCard extends StatelessWidget {
                 top: 8,
                 right: 8,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.5),
+                    color: Colors.black.withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
@@ -286,22 +283,19 @@ class _PropertyComparisonCard extends StatelessWidget {
                 left: 8,
                 child: GestureDetector(
                   onTap: () {
-                    PropertyComparisonController.instance
-                        .removeProperty(property.id);
+                    PropertyComparisonController.instance.removeProperty(
+                      property.id,
+                    );
                   },
                   child: Container(
                     width: 28,
                     height: 28,
                     decoration: BoxDecoration(
-                      color: Colors.red.withOpacity(0.9),
+                      color: Colors.red.withValues(alpha: 0.9),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: const Center(
-                      child: Icon(
-                        Icons.close,
-                        size: 16,
-                        color: Colors.white,
-                      ),
+                      child: Icon(Icons.close, size: 16, color: Colors.white),
                     ),
                   ),
                 ),
@@ -332,25 +326,6 @@ class _PropertyComparisonCard extends StatelessWidget {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    Icon(
-                      Icons.star_rounded,
-                      size: 14,
-                      color: const Color(0xFFF59E0B),
-                    ),
-                    const SizedBox(width: 2),
-                    Text(
-                      property.rating.toStringAsFixed(1),
-                      style: TextStyle(
-                        color: context.homeuPrimaryText,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
               ],
             ),
           ),
@@ -365,16 +340,19 @@ class _DetailedComparisonRows extends StatelessWidget {
 
   final List<PropertyItem> properties;
 
-  @override
-  Widget build(BuildContext context) {
-    final rows = [
-      ('Location', properties.map((p) => p.location).toList()),
-      ('Type', properties.map((p) => p.propertyType).toList()),
-      ('Rooms', properties.map((p) => p.roomType).toList()),
-      ('Furnishing', properties.map((p) => p.furnishing).toList()),
-      ('Owner', properties.map((p) => p.ownerName).toList()),
-      ('Nearby', properties.map((p) => p.nearbyLandmarks).toList()),
-    ];
+   @override
+   Widget build(BuildContext context) {
+     final rows = [
+       (
+         'Address',
+         properties.map((p) => _fullAddressForComparison(p)).toList(),
+       ),
+       ('Type', properties.map((p) => p.propertyType).toList()),
+       ('Rooms', properties.map((p) => p.roomType).toList()),
+       ('Furnishing', properties.map((p) => p.furnishing).toList()),
+       ('Owner', properties.map((p) => p.ownerName).toList()),
+       ('Availability', properties.map((p) => p.status).toList()),
+     ];
 
     return Column(
       children: rows
@@ -384,10 +362,19 @@ class _DetailedComparisonRows extends StatelessWidget {
             (entry) => _ComparisonRow(
               label: entry.value.$1,
               values: entry.value.$2,
+              truncateValues: entry.value.$1 != 'Address',
             ),
           )
           .toList(),
     );
+  }
+
+  String _fullAddressForComparison(PropertyItem property) {
+    final fullAddress = property.address.trim();
+    if (fullAddress.isNotEmpty) {
+      return fullAddress;
+    }
+    return property.location.trim();
   }
 }
 
@@ -395,10 +382,12 @@ class _ComparisonRow extends StatelessWidget {
   const _ComparisonRow({
     required this.label,
     required this.values,
+    this.truncateValues = true,
   });
 
   final String label;
   final List<String> values;
+  final bool truncateValues;
 
   @override
   Widget build(BuildContext context) {
@@ -428,8 +417,10 @@ class _ComparisonRow extends StatelessWidget {
                   (value) => Expanded(
                     child: Text(
                       value,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+                      maxLines: truncateValues ? 2 : null,
+                      overflow: truncateValues
+                          ? TextOverflow.ellipsis
+                          : TextOverflow.visible,
                       style: TextStyle(
                         color: context.homeuPrimaryText,
                         fontSize: 13,

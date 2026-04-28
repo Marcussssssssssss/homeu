@@ -6,7 +6,9 @@ class OwnerAnalyticsRemoteDataSource {
   Future<OwnerAnalyticsData> fetchAnalytics(String ownerId) async {
     final dynamic propertiesResponse = await AppSupabase.client
         .from('properties')
-        .select('id, property_type, status, monthly_price, booking_requests(status, move_in_date, move_out_date, total_amount, created_at)')
+        .select(
+          'id, property_type, status, monthly_price, booking_requests(status, move_in_date, move_out_date, total_amount, created_at)',
+        )
         .eq('owner_id', ownerId)
         .neq('status', 'Archived');
 
@@ -16,7 +18,9 @@ class OwnerAnalyticsRemoteDataSource {
 
     final dynamic bookingsResponse = await AppSupabase.client
         .from('booking_requests')
-        .select('id, status, total_amount, payment_status, created_at, payments(amount, status, paid_at, created_at)')
+        .select(
+          'id, status, total_amount, payment_status, created_at, payments(amount, status, paid_at, created_at)',
+        )
         .eq('owner_id', ownerId);
 
     final List<Map<String, dynamic>> bookings = bookingsResponse is List
@@ -50,7 +54,8 @@ class OwnerAnalyticsRemoteDataSource {
 
     String occupancyRateStr = '0%';
     if (activeListings > 0) {
-      occupancyRateStr = '${((occupiedCount / activeListings) * 100).toStringAsFixed(0)}%';
+      occupancyRateStr =
+          '${((occupiedCount / activeListings) * 100).toStringAsFixed(0)}%';
     }
 
     final now = DateTime.now();
@@ -68,13 +73,19 @@ class OwnerAnalyticsRemoteDataSource {
 
       for (final payment in relatedPayments) {
         if (payment is Map<String, dynamic>) {
-          final paymentStatus = payment['status']?.toString().toLowerCase() ?? '';
+          final paymentStatus =
+              payment['status']?.toString().toLowerCase() ?? '';
 
-          if (paymentStatus == 'paid' || paymentStatus == 'success' || paymentStatus == 'completed') {
+          if (paymentStatus == 'paid' ||
+              paymentStatus == 'success' ||
+              paymentStatus == 'completed') {
             final amount = (payment['amount'] as num?)?.toDouble() ?? 0.0;
             totalNetEarnings += amount;
 
-            final dateString = payment['paid_at']?.toString() ?? payment['created_at']?.toString() ?? b['created_at']?.toString();
+            final dateString =
+                payment['paid_at']?.toString() ??
+                payment['created_at']?.toString() ??
+                b['created_at']?.toString();
             if (dateString != null) {
               final date = DateTime.tryParse(dateString);
               if (date != null && earningsMap.containsKey(date.month)) {
@@ -102,23 +113,58 @@ class OwnerAnalyticsRemoteDataSource {
     int condoCount = 0, apartmentCount = 0, roomCount = 0, landedCount = 0;
     for (final p in properties) {
       final type = p['property_type']?.toString().toLowerCase() ?? '';
-      if (type.contains('condo')) condoCount++;
-      else if (type.contains('apartment')) apartmentCount++;
-      else if (type.contains('room')) roomCount++;
-      else if (type.contains('landed')) landedCount++;
-      else condoCount++;
+      if (type.contains('condo'))
+        condoCount++;
+      else if (type.contains('apartment'))
+        apartmentCount++;
+      else if (type.contains('room'))
+        roomCount++;
+      else if (type.contains('landed'))
+        landedCount++;
+      else
+        condoCount++;
     }
 
     int totalTypes = condoCount + apartmentCount + roomCount + landedCount;
     List<RentalTypeData> rentalDistribution = [];
 
     if (totalTypes > 0) {
-      if (condoCount > 0) rentalDistribution.add(RentalTypeData(OwnerRentalType.condo, ((condoCount / totalTypes) * 100).round(), const Color(0xFF1E3A8A)));
-      if (apartmentCount > 0) rentalDistribution.add(RentalTypeData(OwnerRentalType.apartment, ((apartmentCount / totalTypes) * 100).round(), const Color(0xFF10B981)));
-      if (roomCount > 0) rentalDistribution.add(RentalTypeData(OwnerRentalType.room, ((roomCount / totalTypes) * 100).round(), const Color(0xFFF59E0B)));
-      if (landedCount > 0) rentalDistribution.add(RentalTypeData(OwnerRentalType.landed, ((landedCount / totalTypes) * 100).round(), const Color(0xFF7C3AED)));
+      if (condoCount > 0)
+        rentalDistribution.add(
+          RentalTypeData(
+            OwnerRentalType.condo,
+            ((condoCount / totalTypes) * 100).round(),
+            const Color(0xFF1E3A8A),
+          ),
+        );
+      if (apartmentCount > 0)
+        rentalDistribution.add(
+          RentalTypeData(
+            OwnerRentalType.apartment,
+            ((apartmentCount / totalTypes) * 100).round(),
+            const Color(0xFF10B981),
+          ),
+        );
+      if (roomCount > 0)
+        rentalDistribution.add(
+          RentalTypeData(
+            OwnerRentalType.room,
+            ((roomCount / totalTypes) * 100).round(),
+            const Color(0xFFF59E0B),
+          ),
+        );
+      if (landedCount > 0)
+        rentalDistribution.add(
+          RentalTypeData(
+            OwnerRentalType.landed,
+            ((landedCount / totalTypes) * 100).round(),
+            const Color(0xFF7C3AED),
+          ),
+        );
     } else {
-      rentalDistribution.add(RentalTypeData(OwnerRentalType.condo, 100, const Color(0xFF1E3A8A)));
+      rentalDistribution.add(
+        RentalTypeData(OwnerRentalType.condo, 100, const Color(0xFF1E3A8A)),
+      );
     }
 
     double projectedRevenue = 0;
@@ -204,17 +250,22 @@ class OwnerAnalyticsRemoteDataSource {
 
       final status = b['status']?.toString().trim().toLowerCase() ?? '';
 
-      if (status != 'approved' && status != 'occupied' && status != 'completed') {
+      if (status != 'approved' &&
+          status != 'occupied' &&
+          status != 'completed') {
         continue;
       }
 
-      DateTime? start = _parseDate(b['move_in_date']) ?? _parseDate(b['created_at']);
+      DateTime? start =
+          _parseDate(b['move_in_date']) ?? _parseDate(b['created_at']);
       if (start == null) continue;
 
       DateTime? end = _parseDate(b['move_out_date']);
       if (end == null) {
         final totalAmount = _parseNum(b['total_amount']) ?? 0;
-        final estimatedMonths = monthlyPrice > 0 ? (totalAmount / monthlyPrice).round() : 1;
+        final estimatedMonths = monthlyPrice > 0
+            ? (totalAmount / monthlyPrice).round()
+            : 1;
         final durationMonths = estimatedMonths > 0 ? estimatedMonths : 1;
         end = DateTime(start.year, start.month + durationMonths, start.day);
       }

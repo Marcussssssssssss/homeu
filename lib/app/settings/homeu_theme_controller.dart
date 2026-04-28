@@ -64,13 +64,13 @@ class HomeUThemeController extends ChangeNotifier {
     try {
       final latest = await _repository.fetchLatestPreferences();
       if (latest == null) return;
-      
+
       final latestMode = _repository.readThemeMode(latest, fallback: 'light');
       final parsedMode = _fromRaw(latestMode);
       if (_themeMode == parsedMode) {
         return;
       }
-      
+
       _themeMode = parsedMode;
       // Sync global local setting to match Supabase
       await _localDataSource.saveGlobalSetting('theme_mode', latestMode);

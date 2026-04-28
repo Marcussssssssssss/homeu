@@ -70,17 +70,17 @@ class _PropertyImageGalleryState extends State<PropertyImageGallery> {
             child: finalUrls.isEmpty
                 ? _buildPlaceholder()
                 : (hasMultiple
-                    ? PageView.builder(
-                        controller: _pageController,
-                        onPageChanged: (index) {
-                          setState(() => _currentIndex = index);
-                        },
-                        itemCount: finalUrls.length,
-                        itemBuilder: (context, index) {
-                          return _buildImage(finalUrls[index]);
-                        },
-                      )
-                    : _buildImage(finalUrls.first)),
+                      ? PageView.builder(
+                          controller: _pageController,
+                          onPageChanged: (index) {
+                            setState(() => _currentIndex = index);
+                          },
+                          itemCount: finalUrls.length,
+                          itemBuilder: (context, index) {
+                            return _buildImage(finalUrls[index]);
+                          },
+                        )
+                      : _buildImage(finalUrls.first)),
           ),
           if (hasMultiple)
             Positioned(
@@ -98,7 +98,7 @@ class _PropertyImageGalleryState extends State<PropertyImageGallery> {
                     decoration: BoxDecoration(
                       color: _currentIndex == index
                           ? Colors.white
-                          : Colors.white.withOpacity(0.5),
+                          : Colors.white.withValues(alpha: 0.5),
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
@@ -112,9 +112,7 @@ class _PropertyImageGalleryState extends State<PropertyImageGallery> {
 
   Widget _buildImage(String url) {
     return ClipRRect(
-      borderRadius: const BorderRadius.vertical(
-        top: Radius.circular(16),
-      ),
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
       child: Image.network(
         url,
         fit: BoxFit.cover,
@@ -136,15 +134,13 @@ class _PropertyImageGalleryState extends State<PropertyImageGallery> {
   Widget _buildPlaceholder({bool isLoading = false}) {
     return Container(
       decoration: BoxDecoration(
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(16),
-        ),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Colors.blueGrey.withOpacity(0.1),
-            Colors.blueGrey.withOpacity(0.05),
+            Colors.blueGrey.withValues(alpha: 0.1),
+            Colors.blueGrey.withValues(alpha: 0.05),
           ],
         ),
       ),

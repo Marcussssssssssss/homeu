@@ -1,9 +1,6 @@
 import 'package:homeu/app/auth/homeu_session.dart';
 
-enum LoginSubmissionStatus {
-  success,
-  failure,
-}
+enum LoginSubmissionStatus { success, failure }
 
 class LoginPayload {
   const LoginPayload({required this.email, required this.password});

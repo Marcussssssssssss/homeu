@@ -26,20 +26,23 @@ class AddPropertyRemoteDataSource {
     required String status,
     required DateTime? publishAt,
   }) async {
-    await AppSupabase.client.from('properties').update({
-      'title': title,
-      'description': description,
-      'location_area': locationArea,
-      'latitude': latitude,
-      'longitude': longitude,
-      'monthly_price': monthlyPrice,
-      'room_type': rentalType,
-      'property_type': propertyType,
-      'furnishing': furnishing,
-      'facilities': facilities,
-      'status': status,
-      'publish_at': publishAt?.toIso8601String(),
-    }).eq('id', propertyId);
+    await AppSupabase.client
+        .from('properties')
+        .update({
+          'title': title,
+          'description': description,
+          'location_area': locationArea,
+          'latitude': latitude,
+          'longitude': longitude,
+          'monthly_price': monthlyPrice,
+          'room_type': rentalType,
+          'property_type': propertyType,
+          'furnishing': furnishing,
+          'facilities': facilities,
+          'status': status,
+          'publish_at': publishAt?.toIso8601String(),
+        })
+        .eq('id', propertyId);
   }
 
   Future<String?> createProperty({
@@ -64,20 +67,20 @@ class AddPropertyRemoteDataSource {
     final dynamic row = await AppSupabase.client
         .from('properties')
         .insert({
-      'owner_id': userId,
-      'title': title,
-      'description': description,
-      'location_area': locationArea,
-      'latitude': latitude,
-      'longitude': longitude,
-      'monthly_price': monthlyPrice,
-      'room_type': rentalType,
-      'property_type': propertyType,
-      'furnishing': furnishing,
-      'facilities': facilities,
-      'status': status,
-      'publish_at': publishAt?.toIso8601String(),
-    })
+          'owner_id': userId,
+          'title': title,
+          'description': description,
+          'location_area': locationArea,
+          'latitude': latitude,
+          'longitude': longitude,
+          'monthly_price': monthlyPrice,
+          'room_type': rentalType,
+          'property_type': propertyType,
+          'furnishing': furnishing,
+          'facilities': facilities,
+          'status': status,
+          'publish_at': publishAt?.toIso8601String(),
+        })
         .select('id')
         .maybeSingle();
 

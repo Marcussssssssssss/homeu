@@ -6,4 +6,3 @@ class EnvKeys {
   static const String supabasePasswordResetRedirectUrl =
       'SUPABASE_PASSWORD_RESET_REDIRECT_URL';
 }
-

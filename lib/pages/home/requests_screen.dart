@@ -11,7 +11,8 @@ class HomeURequestsScreen extends StatefulWidget {
   State<HomeURequestsScreen> createState() => _HomeURequestsScreenState();
 }
 
-class _HomeURequestsScreenState extends State<HomeURequestsScreen> with SingleTickerProviderStateMixin {
+class _HomeURequestsScreenState extends State<HomeURequestsScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
@@ -52,8 +53,14 @@ class _HomeURequestsScreenState extends State<HomeURequestsScreen> with SingleTi
           unselectedLabelColor: const Color(0xFF64748B),
           indicatorColor: const Color(0xFF1E3A8A),
           indicatorWeight: 3,
-          labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-          unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
+          labelStyle: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 16,
+          ),
+          unselectedLabelStyle: const TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 16,
+          ),
           tabs: const [
             Tab(text: 'Bookings'),
             Tab(text: 'Viewings'),
@@ -62,10 +69,7 @@ class _HomeURequestsScreenState extends State<HomeURequestsScreen> with SingleTi
       ),
       body: TabBarView(
         controller: _tabController,
-        children: const [
-          _BookingsTab(),
-          _ViewingsTab(),
-        ],
+        children: const [_BookingsTab(), _ViewingsTab()],
       ),
     );
   }

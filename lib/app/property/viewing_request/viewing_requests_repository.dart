@@ -6,8 +6,9 @@ class ViewingRequestsRepository {
   ViewingRequestsRepository({
     HomeUAuthService? authService,
     ViewingRequestsRemoteDataSource? remoteDataSource,
-  })  : _authService = authService ?? HomeUAuthService.instance,
-        _remoteDataSource = remoteDataSource ?? const ViewingRequestsRemoteDataSource();
+  }) : _authService = authService ?? HomeUAuthService.instance,
+       _remoteDataSource =
+           remoteDataSource ?? const ViewingRequestsRemoteDataSource();
 
   final HomeUAuthService _authService;
   final ViewingRequestsRemoteDataSource _remoteDataSource;

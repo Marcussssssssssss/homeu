@@ -47,9 +47,11 @@ class ChatRemoteDataSource {
 
     // Fetch other user's profile to populate other_user_name and other_user_photo_url
     final myUserId = AppSupabase.auth.currentUser?.id;
-    final otherUserId = row['tenant_id'] == myUserId ? row['owner_id'] : row['tenant_id'];
+    final otherUserId = row['tenant_id'] == myUserId
+        ? row['owner_id']
+        : row['tenant_id'];
     final profile = await _fetchProfile(otherUserId.toString());
-    
+
     final Map<String, dynamic> json = Map<String, dynamic>.from(row);
     if (profile != null) {
       json['other_user_name'] = profile['full_name'];
@@ -59,7 +61,9 @@ class ChatRemoteDataSource {
     return Conversation.fromJson(json);
   }
 
-  Future<List<Conversation>> listMyConversations({required String myUserId}) async {
+  Future<List<Conversation>> listMyConversations({
+    required String myUserId,
+  }) async {
     if (!AppSupabase.isInitialized) {
       return const <Conversation>[];
     }
@@ -80,19 +84,24 @@ class ChatRemoteDataSource {
     var convs = rows.whereType<Map<String, dynamic>>().toList();
     if (convs.isEmpty) return [];
 
-    // Consolidation Logic: Since we might have legacy property-based conversations, 
+    // Consolidation Logic: Since we might have legacy property-based conversations,
     // or to strictly enforce one thread per owner in the UI.
     final Map<String, Map<String, dynamic>> consolidated = {};
     for (final c in convs) {
-      final otherUserId = c['tenant_id'] == myUserId ? c['owner_id'] : c['tenant_id'];
+      final otherUserId = c['tenant_id'] == myUserId
+          ? c['owner_id']
+          : c['tenant_id'];
       final key = otherUserId.toString();
       if (!consolidated.containsKey(key)) {
         consolidated[key] = c;
       } else {
         // Keep the one with the more recent message
-        final existingDate = _parseDateTime(consolidated[key]!['last_message_at']);
+        final existingDate = _parseDateTime(
+          consolidated[key]!['last_message_at'],
+        );
         final currentDate = _parseDateTime(c['last_message_at']);
-        if (currentDate != null && (existingDate == null || currentDate.isAfter(existingDate))) {
+        if (currentDate != null &&
+            (existingDate == null || currentDate.isAfter(existingDate))) {
           consolidated[key] = c;
         }
       }
@@ -100,8 +109,12 @@ class ChatRemoteDataSource {
     convs = consolidated.values.toList();
     // Re-sort after consolidation
     convs.sort((a, b) {
-      final da = _parseDateTime(a['last_message_at']) ?? DateTime.fromMillisecondsSinceEpoch(0);
-      final db = _parseDateTime(b['last_message_at']) ?? DateTime.fromMillisecondsSinceEpoch(0);
+      final da =
+          _parseDateTime(a['last_message_at']) ??
+          DateTime.fromMillisecondsSinceEpoch(0);
+      final db =
+          _parseDateTime(b['last_message_at']) ??
+          DateTime.fromMillisecondsSinceEpoch(0);
       return db.compareTo(da);
     });
 
@@ -120,7 +133,7 @@ class ChatRemoteDataSource {
           .from('profiles')
           .select('id, full_name, profile_image_url')
           .inFilter('id', userIds.toList());
-      
+
       if (profiles is List) {
         for (final p in profiles) {
           if (p is Map<String, dynamic>) {
@@ -131,15 +144,17 @@ class ChatRemoteDataSource {
     }
 
     return convs.map((row) {
-      final otherUserId = row['tenant_id'] == myUserId ? row['owner_id'] : row['tenant_id'];
+      final otherUserId = row['tenant_id'] == myUserId
+          ? row['owner_id']
+          : row['tenant_id'];
       final profile = profileMap[otherUserId.toString()];
-      
+
       final Map<String, dynamic> json = Map<String, dynamic>.from(row);
       if (profile != null) {
         json['other_user_name'] = profile['full_name'];
         json['other_user_photo_url'] = profile['profile_image_url'];
       }
-      
+
       return Conversation.fromJson(json);
     }).toList();
   }
@@ -195,7 +210,8 @@ class ChatRemoteDataSource {
     }
 
     final trimmedMessage = messageText?.trim();
-    if ((trimmedMessage == null || trimmedMessage.isEmpty) && attachmentUrl == null) {
+    if ((trimmedMessage == null || trimmedMessage.isEmpty) &&
+        attachmentUrl == null) {
       return null;
     }
 

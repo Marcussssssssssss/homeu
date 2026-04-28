@@ -8,12 +8,14 @@ import 'package:homeu/pages/home/admin_dashboard_screen.dart';
 import 'package:homeu/pages/home/admin_owner_moderation_screen.dart';
 import 'package:homeu/pages/home/conversation_list_screen.dart';
 import 'package:homeu/pages/home/profile_screen.dart';
+
 class HomeUAdminShellScreen extends StatefulWidget {
   const HomeUAdminShellScreen({super.key, this.initialIndex = 0});
   final int initialIndex;
   @override
   State<HomeUAdminShellScreen> createState() => _HomeUAdminShellScreenState();
 }
+
 class _HomeUAdminShellScreenState extends State<HomeUAdminShellScreen> {
   late int _currentIndex;
   @override
@@ -21,11 +23,13 @@ class _HomeUAdminShellScreenState extends State<HomeUAdminShellScreen> {
     super.initState();
     _currentIndex = widget.initialIndex.clamp(0, 4);
   }
+
   void _switchTab(int index) {
     setState(() {
       _currentIndex = index;
     });
   }
+
   @override
   Widget build(BuildContext context) {
     if (!HomeUSession.canAccess(HomeURole.admin)) {

@@ -1,9 +1,6 @@
 import 'package:homeu/app/auth/homeu_session.dart';
 
-enum RegisterSubmissionStatus {
-  success,
-  failure,
-}
+enum RegisterSubmissionStatus { success, failure }
 
 class RegisterPayload {
   const RegisterPayload({
@@ -36,4 +33,3 @@ class RegisterSubmissionResult {
 
   bool get isSuccess => status == RegisterSubmissionStatus.success;
 }
-

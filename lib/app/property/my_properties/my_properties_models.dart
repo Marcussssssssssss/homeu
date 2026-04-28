@@ -74,12 +74,15 @@ class OwnerPropertyModel {
     if (bookings is List) {
       for (final booking in bookings.whereType<Map>()) {
         final status = booking['status']?.toString().trim().toLowerCase() ?? '';
-        final shouldBlockCalendar = status == 'approved' || status == 'occupied';
+        final shouldBlockCalendar =
+            status == 'approved' || status == 'occupied';
         if (!shouldBlockCalendar) {
           continue;
         }
 
-        final start = _parseDate(booking['move_in_date']) ?? _parseDate(booking['created_at']);
+        final start =
+            _parseDate(booking['move_in_date']) ??
+            _parseDate(booking['created_at']);
         if (start == null) {
           continue;
         }
@@ -95,7 +98,11 @@ class OwnerPropertyModel {
         }
 
         if (end.isBefore(start)) {
-          final normalizedEnd = DateTime(start.year, start.month + 1, start.day);
+          final normalizedEnd = DateTime(
+            start.year,
+            start.month + 1,
+            start.day,
+          );
           periods.add({'start': start, 'end': normalizedEnd});
           continue;
         }
@@ -106,10 +113,11 @@ class OwnerPropertyModel {
 
     final today = DateTime.now();
     final todayStart = DateTime(today.year, today.month, today.day);
-    final activeOrUpcoming = periods
-        .where((p) => !p['end']!.isBefore(todayStart))
-        .toList(growable: false)
-      ..sort((a, b) => a['start']!.compareTo(b['start']!));
+    final activeOrUpcoming =
+        periods
+            .where((p) => !p['end']!.isBefore(todayStart))
+            .toList(growable: false)
+          ..sort((a, b) => a['start']!.compareTo(b['start']!));
 
     if (activeOrUpcoming.isNotEmpty) {
       hasActive = true;
@@ -123,7 +131,9 @@ class OwnerPropertyModel {
       locationArea: json['location_area']?.toString() ?? 'No Location',
       monthlyPrice: monthlyPrice,
       status: json['status']?.toString() ?? 'Draft',
-      publishAt: json['publish_at'] != null ? DateTime.tryParse(json['publish_at'].toString()) : null,
+      publishAt: json['publish_at'] != null
+          ? DateTime.tryParse(json['publish_at'].toString())
+          : null,
       coverImageUrl: coverImage?.isEmpty == true ? null : coverImage,
       hasActiveBooking: hasActive,
       moveInDate: inDate,

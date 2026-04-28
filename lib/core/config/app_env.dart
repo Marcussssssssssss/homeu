@@ -24,15 +24,18 @@ class AppEnv {
     _isLoaded = true;
   }
 
-  static String get supabaseUrl => dotenv.maybeGet(EnvKeys.supabaseUrl)?.trim() ?? '';
+  static String get supabaseUrl =>
+      dotenv.maybeGet(EnvKeys.supabaseUrl)?.trim() ?? '';
 
-  static String get supabaseAnonKey => dotenv.maybeGet(EnvKeys.supabaseAnonKey)?.trim() ?? '';
-
+  static String get supabaseAnonKey =>
+      dotenv.maybeGet(EnvKeys.supabaseAnonKey)?.trim() ?? '';
 
   static String? get passwordResetRedirectUrl {
     String value = '';
     try {
-      value = dotenv.maybeGet(EnvKeys.supabasePasswordResetRedirectUrl)?.trim() ?? '';
+      value =
+          dotenv.maybeGet(EnvKeys.supabasePasswordResetRedirectUrl)?.trim() ??
+          '';
     } catch (_) {
       return null;
     }
@@ -48,7 +51,9 @@ class AppEnv {
 
   static bool _looksLikeUrl(String value) {
     final uri = Uri.tryParse(value);
-    return uri != null && (uri.scheme == 'https' || uri.scheme == 'http') && uri.host.isNotEmpty;
+    return uri != null &&
+        (uri.scheme == 'https' || uri.scheme == 'http') &&
+        uri.host.isNotEmpty;
   }
 
   static bool _looksLikeRealAnonKey(String value) {
@@ -64,4 +69,3 @@ class AppEnv {
     return !placeholders.contains(value);
   }
 }
-

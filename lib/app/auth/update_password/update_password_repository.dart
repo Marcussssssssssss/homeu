@@ -39,7 +39,9 @@ class UpdatePasswordRepository {
 
   final UpdatePasswordAuthDataSource _dataSource;
 
-  Future<UpdatePasswordSubmissionResult> submit(UpdatePasswordPayload payload) async {
+  Future<UpdatePasswordSubmissionResult> submit(
+    UpdatePasswordPayload payload,
+  ) async {
     final currentPassword = payload.currentPassword?.trim() ?? '';
     final newPassword = payload.newPassword.trim();
     final confirmPassword = payload.confirmNewPassword.trim();
@@ -129,7 +131,9 @@ class UpdatePasswordRepository {
     final message = error.message.trim();
     final lower = message.toLowerCase();
 
-    if (lower.contains('session') || lower.contains('token') || lower.contains('expired')) {
+    if (lower.contains('session') ||
+        lower.contains('token') ||
+        lower.contains('expired')) {
       return errorSessionExpired;
     }
 
@@ -150,4 +154,3 @@ class UpdatePasswordRepository {
     return errorGeneric;
   }
 }
-

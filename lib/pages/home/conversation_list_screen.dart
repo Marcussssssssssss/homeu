@@ -11,11 +11,14 @@ class HomeUConversationListScreen extends StatefulWidget {
   const HomeUConversationListScreen({super.key});
 
   @override
-  State<HomeUConversationListScreen> createState() => _HomeUConversationListScreenState();
+  State<HomeUConversationListScreen> createState() =>
+      _HomeUConversationListScreenState();
 }
 
-class _HomeUConversationListScreenState extends State<HomeUConversationListScreen> {
-  final ChatRemoteDataSource _chatRemoteDataSource = const ChatRemoteDataSource();
+class _HomeUConversationListScreenState
+    extends State<HomeUConversationListScreen> {
+  final ChatRemoteDataSource _chatRemoteDataSource =
+      const ChatRemoteDataSource();
   final TextEditingController _searchController = TextEditingController();
 
   bool _isLoading = true;
@@ -93,8 +96,8 @@ class _HomeUConversationListScreenState extends State<HomeUConversationListScree
                       child: _loadError != null
                           ? _buildErrorView()
                           : _filteredConversations.isEmpty
-                              ? _buildEmptyView()
-                              : _buildConversationList(),
+                          ? _buildEmptyView()
+                          : _buildConversationList(),
                     ),
             ),
           ],
@@ -126,8 +129,15 @@ class _HomeUConversationListScreenState extends State<HomeUConversationListScree
                 controller: _searchController,
                 decoration: InputDecoration(
                   hintText: context.l10n.chatSearchHint,
-                  hintStyle: TextStyle(color: context.homeuMutedText, fontSize: 14),
-                  prefixIcon: Icon(Icons.search, color: context.homeuMutedText, size: 20),
+                  hintStyle: TextStyle(
+                    color: context.homeuMutedText,
+                    fontSize: 14,
+                  ),
+                  prefixIcon: Icon(
+                    Icons.search,
+                    color: context.homeuMutedText,
+                    size: 20,
+                  ),
                   border: InputBorder.none,
                   enabledBorder: InputBorder.none,
                   focusedBorder: InputBorder.none,
@@ -239,7 +249,9 @@ class _HomeUConversationListScreenState extends State<HomeUConversationListScree
           fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
         ),
       ),
-      trailing: isSelected ? Icon(Icons.check, color: context.homeuAccent, size: 20) : null,
+      trailing: isSelected
+          ? Icon(Icons.check, color: context.homeuAccent, size: 20)
+          : null,
       onTap: onTap,
     );
   }
@@ -252,9 +264,11 @@ class _HomeUConversationListScreenState extends State<HomeUConversationListScree
       itemBuilder: (context, index) {
         final conversation = _filteredConversations[index];
         final myUserId = AppSupabase.auth.currentUser?.id;
-        final otherUserId = myUserId == conversation.tenantId ? conversation.ownerId : conversation.tenantId;
+        final otherUserId = myUserId == conversation.tenantId
+            ? conversation.ownerId
+            : conversation.tenantId;
         final isOnline = _onlineUserIds.contains(otherUserId);
-        
+
         return _ConversationListItem(
           conversation: conversation,
           isOnline: isOnline,
@@ -280,7 +294,11 @@ class _HomeUConversationListScreenState extends State<HomeUConversationListScree
         Center(
           child: Column(
             children: [
-              Icon(Icons.chat_bubble_outline, size: 64, color: context.homeuMutedText.withValues(alpha: 0.5)),
+              Icon(
+                Icons.chat_bubble_outline,
+                size: 64,
+                color: context.homeuMutedText.withValues(alpha: 0.5),
+              ),
               const SizedBox(height: 16),
               Text(
                 'No conversations yet.',
@@ -305,7 +323,11 @@ class _HomeUConversationListScreenState extends State<HomeUConversationListScree
           padding: const EdgeInsets.all(32),
           child: Column(
             children: [
-              const Icon(Icons.error_outline, size: 48, color: Colors.redAccent),
+              const Icon(
+                Icons.error_outline,
+                size: 48,
+                color: Colors.redAccent,
+              ),
               const SizedBox(height: 16),
               Text(
                 _loadError!,
@@ -346,7 +368,9 @@ class _HomeUConversationListScreenState extends State<HomeUConversationListScree
     }
 
     try {
-      final rows = await _chatRemoteDataSource.listMyConversations(myUserId: userId);
+      final rows = await _chatRemoteDataSource.listMyConversations(
+        myUserId: userId,
+      );
       if (mounted) {
         setState(() {
           _conversations = rows;
@@ -369,33 +393,35 @@ class _HomeUConversationListScreenState extends State<HomeUConversationListScree
   void _setupPresence(String userId) {
     _presenceChannel = AppSupabase.client.channel('chat_presence');
 
-    _presenceChannel!.onPresenceSync((payload) {
-      final states = _presenceChannel!.presenceState();
-      final onlineUsers = <String>{};
-      
-      for (final state in states) {
-        for (final presence in state.presences) {
-          final presenceUserId = presence.payload['user_id']?.toString();
-          if (presenceUserId != null) {
-            onlineUsers.add(presenceUserId);
-          }
-        }
-      }
+    _presenceChannel!
+        .onPresenceSync((payload) {
+          final states = _presenceChannel!.presenceState();
+          final onlineUsers = <String>{};
 
-      if (mounted) {
-        setState(() {
-          _onlineUserIds.clear();
-          _onlineUserIds.addAll(onlineUsers);
+          for (final state in states) {
+            for (final presence in state.presences) {
+              final presenceUserId = presence.payload['user_id']?.toString();
+              if (presenceUserId != null) {
+                onlineUsers.add(presenceUserId);
+              }
+            }
+          }
+
+          if (mounted) {
+            setState(() {
+              _onlineUserIds.clear();
+              _onlineUserIds.addAll(onlineUsers);
+            });
+          }
+        })
+        .subscribe((status, error) async {
+          if (status == RealtimeSubscribeStatus.subscribed) {
+            await _presenceChannel!.track({
+              'user_id': userId,
+              'online_at': DateTime.now().toIso8601String(),
+            });
+          }
         });
-      }
-    }).subscribe((status, error) async {
-      if (status == RealtimeSubscribeStatus.subscribed) {
-        await _presenceChannel!.track({
-          'user_id': userId,
-          'online_at': DateTime.now().toIso8601String(),
-        });
-      }
-    });
   }
 }
 

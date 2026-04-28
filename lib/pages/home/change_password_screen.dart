@@ -6,10 +6,7 @@ import 'package:homeu/core/localization/homeu_l10n.dart';
 import 'package:homeu/core/theme/homeu_app_theme.dart';
 
 class HomeUChangePasswordScreen extends StatefulWidget {
-  const HomeUChangePasswordScreen({
-    super.key,
-    this.controller,
-  });
+  const HomeUChangePasswordScreen({super.key, this.controller});
 
   final UpdatePasswordController? controller;
 
@@ -40,7 +37,7 @@ class _HomeUChangePasswordScreenState extends State<HomeUChangePasswordScreen> {
     final currentPassword = _currentPasswordController.text.trim();
     final newPassword = _newPasswordController.text.trim();
     final confirmPassword = _confirmPasswordController.text.trim();
-    
+
     if (currentPassword.isEmpty) {
       return false;
     }
@@ -303,7 +300,8 @@ class _HomeUChangePasswordScreenState extends State<HomeUChangePasswordScreen> {
                               controller: _currentPasswordController,
                               validator: (value) {
                                 if (value == null || value.trim().isEmpty) {
-                                  return t.updatePasswordValidationCurrentRequired;
+                                  return t
+                                      .updatePasswordValidationCurrentRequired;
                                 }
                                 return null;
                               },
@@ -345,9 +343,11 @@ class _HomeUChangePasswordScreenState extends State<HomeUChangePasswordScreen> {
                               controller: _confirmPasswordController,
                               validator: (value) {
                                 if (value == null || value.trim().isEmpty) {
-                                  return t.updatePasswordValidationConfirmRequired;
+                                  return t
+                                      .updatePasswordValidationConfirmRequired;
                                 }
-                                if (value.trim() != _newPasswordController.text.trim()) {
+                                if (value.trim() !=
+                                    _newPasswordController.text.trim()) {
                                   return t.updatePasswordValidationMismatch;
                                 }
                                 return null;
@@ -374,8 +374,8 @@ class _HomeUChangePasswordScreenState extends State<HomeUChangePasswordScreen> {
                             color: _isErrorMessage
                                 ? const Color(0xFFFFF2F2)
                                 : (context.isDarkMode
-                                    ? const Color(0xFF11211D)
-                                    : const Color(0xFFF0FBF5)),
+                                      ? const Color(0xFF11211D)
+                                      : const Color(0xFFF0FBF5)),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
                               color: _isErrorMessage

@@ -20,20 +20,21 @@ class PropertyImageRemoteDataSource {
       throw const AuthException('No authenticated user found.');
     }
 
-    final ext = p.extension(file.path).isEmpty ? '.jpg' : p.extension(file.path);
+    final ext = p.extension(file.path).isEmpty
+        ? '.jpg'
+        : p.extension(file.path);
     final objectPath =
         'properties/$propertyId/$userId/${DateTime.now().millisecondsSinceEpoch}_$sortOrder$ext';
 
     final contentType = lookupMimeType(file.path) ?? 'image/jpeg';
 
-    await AppSupabase.client.storage.from(_bucket).upload(
-      objectPath,
-      file,
-      fileOptions: FileOptions(
-        upsert: true,
-        contentType: contentType,
-      ),
-    );
+    await AppSupabase.client.storage
+        .from(_bucket)
+        .upload(
+          objectPath,
+          file,
+          fileOptions: FileOptions(upsert: true, contentType: contentType),
+        );
 
     return AppSupabase.client.storage.from(_bucket).getPublicUrl(objectPath);
   }

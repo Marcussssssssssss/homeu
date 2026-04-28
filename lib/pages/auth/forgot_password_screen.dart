@@ -82,9 +82,7 @@ class _HomeUForgotPasswordPageState extends State<HomeUForgotPasswordPage> {
     });
 
     if (!result.isSuccess) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(_resolveForgotPasswordMessage(result.message))),
       );
       return;
