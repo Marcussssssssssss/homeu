@@ -3,15 +3,13 @@ import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
 import 'package:homeu/core/theme/homeu_app_theme.dart';
 import 'package:homeu/core/supabase/app_supabase.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
 
 class HomeUAdminAuditLogsScreen extends StatefulWidget {
   const HomeUAdminAuditLogsScreen({super.key});
 
   @override
-  State<HomeUAdminAuditLogsScreen> createState() =>
-      _HomeUAdminAuditLogsScreenState();
+  State<HomeUAdminAuditLogsScreen> createState() => _HomeUAdminAuditLogsScreenState();
 }
 
 class _HomeUAdminAuditLogsScreenState extends State<HomeUAdminAuditLogsScreen> {
@@ -25,22 +23,19 @@ class _HomeUAdminAuditLogsScreenState extends State<HomeUAdminAuditLogsScreen> {
   DateTimeRange? _dateRange;
 
   // Predefined filter options
-  final List<String> _tables = [
-    'profiles',
-    'properties',
-    'bookings',
-    'reports',
-    'audit_logs',
-  ];
+  final List<String> _tables = ['profiles', 'properties', 'bookings', 'property_reports', 'reports', 'audit_logs'];
   final List<String> _actions = [
     'admin_created',
     'admin_updated',
     'admin_removed',
-    'owner_flag',
-    'owner_mark_risk',
-    'owner_suspend',
-    'owner_restore',
-    'owner_remove',
+    'report_contact_owner',
+    'report_contact_tenant',
+    'report_risk_low',
+    'report_risk_medium',
+    'report_risk_high',
+    'report_risk_invalid',
+    'report_reviewed',
+    'report_dismissed',
     'property_approved',
     'property_rejected',
     'profile_update',
@@ -71,10 +66,7 @@ class _HomeUAdminAuditLogsScreenState extends State<HomeUAdminAuditLogsScreen> {
       }
       if (_dateRange != null) {
         query = query.gte('created_at', _dateRange!.start.toIso8601String());
-        query = query.lte(
-          'created_at',
-          _dateRange!.end.add(const Duration(days: 1)).toIso8601String(),
-        );
+        query = query.lte('created_at', _dateRange!.end.add(const Duration(days: 1)).toIso8601String());
       }
 
       // 2. Apply Sorting and Execute
@@ -93,9 +85,9 @@ class _HomeUAdminAuditLogsScreenState extends State<HomeUAdminAuditLogsScreen> {
           _logs = [];
           _isLoading = false;
         });
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Failed to load logs: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load logs: $e')),
+        );
       }
     }
   }
@@ -172,16 +164,15 @@ class _HomeUAdminAuditLogsScreenState extends State<HomeUAdminAuditLogsScreen> {
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : RefreshIndicator(
-                    onRefresh: _fetchLogs,
-                    child: _logs.isEmpty
-                        ? _buildEmptyState(context)
-                        : ListView.builder(
-                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-                            itemCount: _logs.length,
-                            itemBuilder: (context, index) =>
-                                _AuditLogCard(log: _logs[index]),
-                          ),
-                  ),
+              onRefresh: _fetchLogs,
+              child: _logs.isEmpty
+                  ? _buildEmptyState(context)
+                  : ListView.builder(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+                itemCount: _logs.length,
+                itemBuilder: (context, index) => _AuditLogCard(log: _logs[index]),
+              ),
+            ),
           ),
         ],
       ),
@@ -205,9 +196,7 @@ class _HomeUAdminAuditLogsScreenState extends State<HomeUAdminAuditLogsScreen> {
             decoration: InputDecoration(
               hintText: 'Search descriptions...',
               prefixIcon: const Icon(Icons.search_rounded),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               contentPadding: EdgeInsets.zero,
               filled: true,
               fillColor: context.homeuCard,
@@ -259,11 +248,7 @@ class _HomeUAdminAuditLogsScreenState extends State<HomeUAdminAuditLogsScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.history_toggle_off_rounded,
-            size: 64,
-            color: context.homeuMutedText,
-          ),
+          Icon(Icons.history_toggle_off_rounded, size: 64, color: context.homeuMutedText),
           const SizedBox(height: 16),
           Text(
             'No audit logs found matching your criteria.',
@@ -271,10 +256,7 @@ class _HomeUAdminAuditLogsScreenState extends State<HomeUAdminAuditLogsScreen> {
             style: TextStyle(color: context.homeuMutedText, fontSize: 15),
           ),
           const SizedBox(height: 8),
-          TextButton(
-            onPressed: _resetFilters,
-            child: const Text('Clear all filters'),
-          ),
+          TextButton(onPressed: _resetFilters, child: const Text('Clear all filters')),
         ],
       ),
     );
@@ -287,22 +269,13 @@ class _FilterChip extends StatelessWidget {
   final VoidCallback onTap;
   final IconData icon;
 
-  const _FilterChip({
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-    required this.icon,
-  });
+  const _FilterChip({required this.label, required this.isSelected, required this.onTap, required this.icon});
 
   @override
   Widget build(BuildContext context) {
     return ActionChip(
       onPressed: onTap,
-      avatar: Icon(
-        icon,
-        size: 14,
-        color: isSelected ? Colors.white : context.homeuAccent,
-      ),
+      avatar: Icon(icon, size: 14, color: isSelected ? Colors.white : context.homeuAccent),
       label: Text(label),
       backgroundColor: isSelected ? context.homeuAccent : context.homeuCard,
       labelStyle: TextStyle(
@@ -310,9 +283,7 @@ class _FilterChip extends StatelessWidget {
         fontSize: 12,
         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
       ),
-      side: BorderSide(
-        color: isSelected ? Colors.transparent : context.homeuSoftBorder,
-      ),
+      side: BorderSide(color: isSelected ? Colors.transparent : context.homeuSoftBorder),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
     );
   }
@@ -324,12 +295,7 @@ class _DropdownFilter extends StatelessWidget {
   final List<String> items;
   final Function(String?) onChanged;
 
-  const _DropdownFilter({
-    required this.hint,
-    required this.value,
-    required this.items,
-    required this.onChanged,
-  });
+  const _DropdownFilter({required this.hint, required this.value, required this.items, required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -337,33 +303,21 @@ class _DropdownFilter extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12),
       height: 32,
       decoration: BoxDecoration(
-        color: value != null
-            ? context.homeuAccent.withValues(alpha: 0.1)
-            : context.homeuCard,
+        color: value != null ? context.homeuAccent.withValues(alpha: 0.1) : context.homeuCard,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: value != null ? context.homeuAccent : context.homeuSoftBorder,
-        ),
+        border: Border.all(color: value != null ? context.homeuAccent : context.homeuSoftBorder),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: value,
-          hint: Text(
-            hint,
-            style: TextStyle(fontSize: 12, color: context.homeuSecondaryText),
-          ),
-          style: TextStyle(
-            fontSize: 12,
-            color: context.homeuPrimaryText,
-            fontWeight: FontWeight.w600,
-          ),
-          icon: Icon(
-            Icons.keyboard_arrow_down_rounded,
-            size: 16,
-            color: context.homeuMutedText,
-          ),
+          hint: Text(hint, style: TextStyle(fontSize: 12, color: context.homeuSecondaryText)),
+          style: TextStyle(fontSize: 12, color: context.homeuPrimaryText, fontWeight: FontWeight.w600),
+          icon: Icon(Icons.keyboard_arrow_down_rounded, size: 16, color: context.homeuMutedText),
           items: items.map((String item) {
-            return DropdownMenuItem<String>(value: item, child: Text(item));
+            return DropdownMenuItem<String>(
+              value: item,
+              child: Text(item),
+            );
           }).toList(),
           onChanged: onChanged,
         ),
@@ -388,8 +342,7 @@ class _AuditLogCard extends StatelessWidget {
     }
 
     final action = log['action']?.toString() ?? 'unknown_action';
-    final description =
-        log['description']?.toString() ?? 'No details available';
+    final description = log['description']?.toString() ?? 'No details available';
     final actorEmail = log['actor_email']?.toString() ?? 'System / Anonymous';
     final actorRole = log['actor_role']?.toString() ?? 'unknown';
     final targetTable = log['target_table']?.toString() ?? 'N/A';
@@ -412,21 +365,8 @@ class _AuditLogCard extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    Text(
-                      formattedTime,
-                      style: TextStyle(
-                        color: context.homeuPrimaryText,
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      formattedDate,
-                      style: TextStyle(
-                        color: context.homeuMutedText,
-                        fontSize: 11,
-                      ),
-                    ),
+                    Text(formattedTime, style: TextStyle(color: context.homeuPrimaryText, fontSize: 13, fontWeight: FontWeight.bold)),
+                    Text(formattedDate, style: TextStyle(color: context.homeuMutedText, fontSize: 11)),
                   ],
                 ),
               ],
@@ -434,12 +374,7 @@ class _AuditLogCard extends StatelessWidget {
             const SizedBox(height: 14),
             Text(
               description,
-              style: TextStyle(
-                color: context.homeuPrimaryText,
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                height: 1.3,
-              ),
+              style: TextStyle(color: context.homeuPrimaryText, fontSize: 15, fontWeight: FontWeight.w600, height: 1.3),
             ),
             const SizedBox(height: 16),
             Container(
@@ -451,15 +386,8 @@ class _AuditLogCard extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  _DetailRow(
-                    label: 'Actor',
-                    value: actorEmail,
-                    subValue: actorRole.toUpperCase(),
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 6),
-                    child: Divider(height: 1),
-                  ),
+                  _DetailRow(label: 'Actor', value: actorEmail, subValue: actorRole.toUpperCase()),
+                  const Padding(padding: EdgeInsets.symmetric(vertical: 6), child: Divider(height: 1)),
                   _DetailRow(label: 'Target Table', value: targetTable),
                   const SizedBox(height: 8),
                   _DetailRow(label: 'Target ID', value: targetId, isCode: true),
@@ -482,16 +410,17 @@ class _ActionBadge extends StatelessWidget {
     Color color = Colors.blueGrey;
     final a = action.toLowerCase();
 
-    if (a.contains('create') || a.contains('add') || a.contains('restore'))
+    if (a.contains('create') || a.contains('add') || a.contains('restore')) {
       color = Colors.green;
-    else if (a.contains('update') || a.contains('edit'))
+    } else if (a.contains('contact') || a.contains('chat')) {
+      color = Colors.indigo;
+    } else if (a.contains('update') || a.contains('edit') || a.contains('review')) {
       color = Colors.blue;
-    else if (a.contains('suspend') ||
-        a.contains('deactivate') ||
-        a.contains('remove'))
+    } else if (a.contains('suspend') || a.contains('deactivate') || a.contains('remove')) {
       color = Colors.red;
-    else if (a.contains('flag') || a.contains('risk') || a.contains('reject'))
+    } else if (a.contains('flag') || a.contains('risk') || a.contains('reject') || a.contains('dismiss')) {
       color = Colors.orange;
+    }
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -502,12 +431,7 @@ class _ActionBadge extends StatelessWidget {
       ),
       child: Text(
         action.replaceAll('_', ' ').toUpperCase(),
-        style: TextStyle(
-          color: color,
-          fontSize: 10,
-          fontWeight: FontWeight.w800,
-          letterSpacing: 0.5,
-        ),
+        style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.5),
       ),
     );
   }
@@ -519,12 +443,7 @@ class _DetailRow extends StatelessWidget {
   final String? subValue;
   final bool isCode;
 
-  const _DetailRow({
-    required this.label,
-    required this.value,
-    this.subValue,
-    this.isCode = false,
-  });
+  const _DetailRow({required this.label, required this.value, this.subValue, this.isCode = false});
 
   @override
   Widget build(BuildContext context) {
@@ -533,14 +452,7 @@ class _DetailRow extends StatelessWidget {
       children: [
         SizedBox(
           width: 80,
-          child: Text(
-            label,
-            style: TextStyle(
-              color: context.homeuMutedText,
-              fontSize: 11,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+          child: Text(label, style: TextStyle(color: context.homeuMutedText, fontSize: 11, fontWeight: FontWeight.bold)),
         ),
         Expanded(
           child: Column(
@@ -556,14 +468,7 @@ class _DetailRow extends StatelessWidget {
                 ),
               ),
               if (subValue != null)
-                Text(
-                  subValue!,
-                  style: TextStyle(
-                    color: context.homeuAccent,
-                    fontSize: 9,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
+                Text(subValue!, style: TextStyle(color: context.homeuAccent, fontSize: 9, fontWeight: FontWeight.w900)),
             ],
           ),
         ),

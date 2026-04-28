@@ -2,34 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
 import 'package:homeu/app/chat/chat_remote_datasource.dart';
-import 'package:homeu/app/profile/profile_models.dart';
 import 'package:homeu/core/supabase/app_supabase.dart';
 import 'package:homeu/core/theme/homeu_app_theme.dart';
 import 'package:homeu/pages/home/chat_screen.dart';
 import 'package:intl/intl.dart';
-
 class HomeUAdminReportsModerationScreen extends StatefulWidget {
   const HomeUAdminReportsModerationScreen({super.key});
   @override
   State<HomeUAdminReportsModerationScreen> createState() =>
       _HomeUAdminReportsModerationScreenState();
 }
-
 class _HomeUAdminReportsModerationScreenState
     extends State<HomeUAdminReportsModerationScreen> {
-  final ChatRemoteDataSource _chatRemoteDataSource =
-      const ChatRemoteDataSource();
+  final ChatRemoteDataSource _chatRemoteDataSource = const ChatRemoteDataSource();
   static const List<Map<String, String>> _statusFilters = <Map<String, String>>[
     {'key': 'all', 'label': 'All'},
     {'key': 'pending', 'label': 'Pending'},
     {'key': 'reviewed', 'label': 'Reviewed'},
     {'key': 'dismissed', 'label': 'Dismissed'},
-  ];
-  static const List<Map<String, String>> _ownerFilters = <Map<String, String>>[
-    {'key': 'suspicious_owners', 'label': 'Suspicious Owners'},
-    {'key': 'high_risk_owners', 'label': 'High Risk Owners'},
-    {'key': 'suspended_owners', 'label': 'Suspended Owners'},
-    {'key': 'removed_owners', 'label': 'Removed Owners'},
   ];
   bool _isLoading = true;
   String _selectedFilterKey = 'all';
@@ -40,7 +30,6 @@ class _HomeUAdminReportsModerationScreenState
     super.initState();
     _loadReports();
   }
-
   Future<void> _loadReports() async {
     if (!mounted) {
       return;
@@ -51,7 +40,7 @@ class _HomeUAdminReportsModerationScreenState
           .from('property_reports')
           .select(
             'report_id, property_id, owner_id, tenant_id, reason, description, '
-            'status, created_at, reviewed_by, reviewed_at',
+            'status, created_at',
           )
           .order('created_at', ascending: false);
       final rows = (rawRows is List ? rawRows : const <dynamic>[])
@@ -68,19 +57,13 @@ class _HomeUAdminReportsModerationScreenState
         if (tenantId.isNotEmpty) tenantIds.add(tenantId);
         if (propertyId.isNotEmpty) propertyIds.add(propertyId);
       }
-      final profileIds = <String>{
-        ...ownerIds,
-        ...tenantIds,
-      }.toList(growable: false);
+      final profileIds = <String>{...ownerIds, ...tenantIds}.toList(growable: false);
       final propertyIdList = propertyIds.toList(growable: false);
-      Map<String, Map<String, dynamic>> profilesById =
-          const <String, Map<String, dynamic>>{};
+      Map<String, Map<String, dynamic>> profilesById = const <String, Map<String, dynamic>>{};
       if (profileIds.isNotEmpty) {
         final dynamic profileRows = await AppSupabase.client
             .from('profiles')
-            .select(
-              'id, full_name, email, risk_status, account_status, risk_reason',
-            )
+            .select('id, full_name, email')
             .inFilter('id', profileIds);
         if (profileRows is List) {
           profilesById = {
@@ -98,8 +81,7 @@ class _HomeUAdminReportsModerationScreenState
         if (propertyRows is List) {
           propertyTitles = {
             for (final row in propertyRows.whereType<Map<String, dynamic>>())
-              row['id']?.toString() ?? '':
-                  row['title']?.toString() ?? 'Unknown listing',
+              row['id']?.toString() ?? '': row['title']?.toString() ?? 'Unknown listing',
           };
         }
       }
@@ -109,44 +91,30 @@ class _HomeUAdminReportsModerationScreenState
         if (ownerId.isEmpty) continue;
         ownerReportCount[ownerId] = (ownerReportCount[ownerId] ?? 0) + 1;
       }
-      final mappedReports = rows
-          .map((row) {
-            final ownerId = row['owner_id']?.toString() ?? '';
-            final tenantId = row['tenant_id']?.toString() ?? '';
-            final propertyId = row['property_id']?.toString() ?? '';
-            final ownerProfile =
-                profilesById[ownerId] ?? const <String, dynamic>{};
-            final tenantProfile =
-                profilesById[tenantId] ?? const <String, dynamic>{};
-            return _ReportRecord(
-              reportId: row['report_id']?.toString() ?? 'Unknown',
-              propertyId: propertyId,
-              ownerId: ownerId,
-              tenantId: tenantId,
-              propertyTitle:
-                  propertyTitles[propertyId] ??
-                  'Property #${propertyId.isNotEmpty ? propertyId : 'N/A'}',
-              ownerName:
-                  ownerProfile['full_name']?.toString() ?? 'Unknown owner',
-              ownerEmail: ownerProfile['email']?.toString() ?? '-',
-              tenantName:
-                  tenantProfile['full_name']?.toString() ?? 'Unknown reporter',
-              tenantEmail: tenantProfile['email']?.toString() ?? '-',
-              reason: row['reason']?.toString() ?? '-',
-              description: row['description']?.toString() ?? '',
-              status: _normalizeReportStatus(row['status']?.toString()),
-              createdAt: _parseDate(row['created_at']) ?? DateTime.now(),
-              ownerRiskStatus: _toRiskStatus(
-                ownerProfile['risk_status']?.toString(),
-              ),
-              ownerAccountStatus: _toAccountStatus(
-                ownerProfile['account_status']?.toString(),
-              ),
-              ownerRiskReason: ownerProfile['risk_reason']?.toString(),
-              previousReportCount: ownerReportCount[ownerId] ?? 0,
-            );
-          })
-          .toList(growable: false);
+      final mappedReports = rows.map((row) {
+        final ownerId = row['owner_id']?.toString() ?? '';
+        final tenantId = row['tenant_id']?.toString() ?? '';
+        final propertyId = row['property_id']?.toString() ?? '';
+        final ownerProfile = profilesById[ownerId] ?? const <String, dynamic>{};
+        final tenantProfile = profilesById[tenantId] ?? const <String, dynamic>{};
+        return _ReportRecord(
+          reportId: row['report_id']?.toString() ?? 'Unknown',
+          propertyId: propertyId,
+          ownerId: ownerId,
+          tenantId: tenantId,
+          propertyTitle:
+              propertyTitles[propertyId] ?? 'Property #${propertyId.isNotEmpty ? propertyId : 'N/A'}',
+          ownerName: ownerProfile['full_name']?.toString() ?? 'Unknown owner',
+          ownerEmail: ownerProfile['email']?.toString() ?? '-',
+          tenantName: tenantProfile['full_name']?.toString() ?? 'Unknown reporter',
+          tenantEmail: tenantProfile['email']?.toString() ?? '-',
+          reason: row['reason']?.toString() ?? '-',
+          description: row['description']?.toString() ?? '',
+          status: _normalizeReportStatus(row['status']?.toString()),
+          createdAt: _parseDate(row['created_at']) ?? DateTime.now(),
+          previousReportCount: ownerReportCount[ownerId] ?? 0,
+        );
+      }).toList(growable: false);
       if (!mounted) {
         return;
       }
@@ -162,69 +130,50 @@ class _HomeUAdminReportsModerationScreenState
         _reports = const <_ReportRecord>[];
         _isLoading = false;
       });
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Failed to load reports: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to load reports: $e')),
+      );
     }
   }
-
   List<_ReportRecord> get _filteredReports {
-    final filtered = _reports
-        .where((report) {
-          if (!_matchesSelectedFilter(report)) return false;
-          if (_searchQuery.trim().isEmpty) return true;
-          final q = _searchQuery.trim().toLowerCase();
-          return report.propertyTitle.toLowerCase().contains(q) ||
-              report.ownerName.toLowerCase().contains(q) ||
-              report.ownerEmail.toLowerCase().contains(q) ||
-              report.tenantName.toLowerCase().contains(q) ||
-              report.reason.toLowerCase().contains(q) ||
-              report.shortReportId.toLowerCase().contains(q) ||
-              report.reportId.toLowerCase().contains(q);
-        })
-        .toList(growable: false);
+    final filtered = _reports.where((report) {
+      if (!_matchesSelectedFilter(report)) return false;
+      if (_searchQuery.trim().isEmpty) return true;
+      final q = _searchQuery.trim().toLowerCase();
+      return report.propertyTitle.toLowerCase().contains(q) ||
+          report.ownerName.toLowerCase().contains(q) ||
+          report.ownerEmail.toLowerCase().contains(q) ||
+          report.tenantName.toLowerCase().contains(q) ||
+          report.reason.toLowerCase().contains(q) ||
+          report.shortReportId.toLowerCase().contains(q) ||
+          report.reportId.toLowerCase().contains(q);
+    }).toList(growable: false);
     filtered.sort((a, b) {
-      final byStatus = _statusPriority(
-        a.status,
-      ).compareTo(_statusPriority(b.status));
+      final byStatus = _statusPriority(a.status).compareTo(_statusPriority(b.status));
       if (byStatus != 0) return byStatus;
       return b.createdAt.compareTo(a.createdAt);
     });
     return filtered;
   }
-
   bool _matchesSelectedFilter(_ReportRecord report) {
     switch (_selectedFilterKey) {
       case 'pending':
       case 'reviewed':
       case 'dismissed':
         return report.status == _selectedFilterKey;
-      case 'suspicious_owners':
-        return report.ownerRiskStatus == HomeURiskStatus.suspicious;
-      case 'high_risk_owners':
-        return report.ownerRiskStatus == HomeURiskStatus.highRisk;
-      case 'suspended_owners':
-        return report.ownerAccountStatus == HomeUAccountStatus.suspended;
-      case 'removed_owners':
-        return report.ownerAccountStatus == HomeUAccountStatus.removed;
       case 'all':
       default:
         return true;
     }
   }
-
   String _filterLabelForKey(String key) {
-    for (final filter in <Map<String, String>>[
-      ..._statusFilters,
-      ..._ownerFilters,
-    ]) {
+    for (final filter in _statusFilters) {
       if (filter['key'] == key) {
         return filter['label'] ?? 'All';
       }
     }
     return 'All';
   }
-
   Future<void> _showFilterBottomSheet() async {
     String tempFilterKey = _selectedFilterKey;
     await showModalBottomSheet<void>(
@@ -245,10 +194,7 @@ class _HomeUAdminReportsModerationScreenState
               padding: EdgeInsets.fromLTRB(16, 16, 16, 12 + bottomInset),
               child: StatefulBuilder(
                 builder: (context, setSheetState) {
-                  Widget buildSection({
-                    required String title,
-                    required List<Map<String, String>> filters,
-                  }) {
+                  Widget buildSection({required String title, required List<Map<String, String>> filters}) {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -274,26 +220,18 @@ class _HomeUAdminReportsModerationScreenState
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(
                                 color: isSelected
-                                    ? context.homeuAccent.withValues(
-                                        alpha: 0.35,
-                                      )
+                                    ? context.homeuAccent.withValues(alpha: 0.35)
                                     : context.homeuSoftBorder,
                               ),
                             ),
                             child: ListTile(
                               dense: true,
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                              ),
+                              contentPadding: const EdgeInsets.symmetric(horizontal: 10),
                               title: Text(label),
                               trailing: isSelected
-                                  ? Icon(
-                                      Icons.check_circle_rounded,
-                                      color: context.homeuAccent,
-                                    )
+                                  ? Icon(Icons.check_circle_rounded, color: context.homeuAccent)
                                   : null,
-                              onTap: () =>
-                                  setSheetState(() => tempFilterKey = key),
+                              onTap: () => setSheetState(() => tempFilterKey = key),
                             ),
                           );
                         }),
@@ -319,15 +257,7 @@ class _HomeUAdminReportsModerationScreenState
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              buildSection(
-                                title: 'Report Status',
-                                filters: _statusFilters,
-                              ),
-                              const SizedBox(height: 10),
-                              buildSection(
-                                title: 'Owner Status / Risk',
-                                filters: _ownerFilters,
-                              ),
+                              buildSection(title: 'Report Status', filters: _statusFilters),
                               const SizedBox(height: 16),
                             ],
                           ),
@@ -348,9 +278,7 @@ class _HomeUAdminReportsModerationScreenState
                           Expanded(
                             child: ElevatedButton(
                               onPressed: () {
-                                setState(
-                                  () => _selectedFilterKey = tempFilterKey,
-                                );
+                                setState(() => _selectedFilterKey = tempFilterKey);
                                 Navigator.of(sheetContext).pop();
                               },
                               child: const Text('Apply Filter'),
@@ -368,61 +296,27 @@ class _HomeUAdminReportsModerationScreenState
       },
     );
   }
-
   Future<void> _openReportDetails(_ReportRecord report) async {
     final result = await Navigator.of(context).push<String?>(
       MaterialPageRoute<String?>(
         builder: (_) => _ReportDetailsScreen(
           report: report,
-          riskLabel: _riskLabel(report.ownerRiskStatus),
-          accountLabel: _accountLabel(report.ownerAccountStatus),
           onContactOwner: () => _contactOwner(report),
-          onFlagSuspicious: () => _moderateOwner(
-            report,
-            action: 'owner_flag_suspicious',
-            actionLabel: 'Flag Owner as Suspicious',
-            nextRisk: HomeURiskStatus.suspicious,
-            nextStatus: null,
-          ),
-          onMarkHighRisk: () => _moderateOwner(
-            report,
-            action: 'owner_mark_high_risk',
-            actionLabel: 'Mark Owner as High Risk',
-            nextRisk: HomeURiskStatus.highRisk,
-            nextStatus: null,
-          ),
-          onSuspendOwner: () => _moderateOwner(
-            report,
-            action: 'owner_suspend',
-            actionLabel: 'Suspend Owner',
-            nextRisk: null,
-            nextStatus: HomeUAccountStatus.suspended,
-          ),
-          onRemoveOwner: () => _moderateOwner(
-            report,
-            action: 'owner_mark_removed',
-            actionLabel: 'Mark Owner as Removed',
-            nextRisk: null,
-            nextStatus: HomeUAccountStatus.removed,
-          ),
-          onRestoreOwner: () => _moderateOwner(
-            report,
-            action: 'owner_restore',
-            actionLabel: 'Restore Owner',
-            nextRisk: HomeURiskStatus.normal,
-            nextStatus: HomeUAccountStatus.active,
-          ),
-          onDismissReport: () => _updateReportStatus(
+          onContactTenant: () => _contactTenant(report),
+          onRecordRiskLevel: (riskLevel) => _recordRiskLevel(report, riskLevel: riskLevel),
+          onDismissReport: (riskLevel) => _updateReportStatus(
             report,
             nextStatus: 'dismissed',
             action: 'report_dismissed',
             actionLabel: 'Dismiss Report',
+            riskLevel: riskLevel,
           ),
-          onMarkReviewed: () => _updateReportStatus(
+          onMarkReviewed: (riskLevel) => _updateReportStatus(
             report,
             nextStatus: 'reviewed',
             action: 'report_reviewed',
             actionLabel: 'Mark as Reviewed',
+            riskLevel: riskLevel,
           ),
         ),
       ),
@@ -433,17 +327,16 @@ class _HomeUAdminReportsModerationScreenState
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result)));
     await _loadReports();
   }
-
   Future<String?> _contactOwner(_ReportRecord report) async {
+    final navigator = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
     final adminId = AppSupabase.auth.currentUser?.id;
     if (adminId == null) {
       return null;
     }
     if (report.propertyId.isEmpty || report.ownerId.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Missing owner or property context for chat.'),
-        ),
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Missing owner or property context for chat.')),
       );
       return null;
     }
@@ -456,10 +349,19 @@ class _HomeUAdminReportsModerationScreenState
       if (!mounted || conversation == null) {
         return null;
       }
-      Navigator.of(context).push(
+      await _insertAudit(
+        action: 'report_contact_owner',
+        report: report,
+        reason: 'Opened owner chat for report follow-up.',
+        metadata: {
+          'report_id': report.reportId,
+          'property_id': report.propertyId,
+          'owner_id': report.ownerId,
+        },
+      );
+      navigator.push(
         MaterialPageRoute<void>(
-          builder: (_) =>
-              HomeUChatScreen.fromConversation(conversation: conversation),
+          builder: (_) => HomeUChatScreen.fromConversation(conversation: conversation),
         ),
       );
       return null;
@@ -467,66 +369,91 @@ class _HomeUAdminReportsModerationScreenState
       if (!mounted) {
         return null;
       }
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Unable to open chat: $e')));
+      messenger.showSnackBar(
+        SnackBar(content: Text('Unable to open chat: $e')),
+      );
       return null;
     }
   }
 
-  Future<String?> _moderateOwner(
+  Future<String?> _contactTenant(_ReportRecord report) async {
+    final navigator = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final adminId = AppSupabase.auth.currentUser?.id;
+    if (adminId == null) {
+      return null;
+    }
+    if (report.propertyId.isEmpty || report.tenantId.isEmpty) {
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Missing tenant or property context for chat.')),
+      );
+      return null;
+    }
+    try {
+      final conversation = await _chatRemoteDataSource.getOrCreateConversation(
+        propertyId: report.propertyId,
+        tenantId: report.tenantId,
+        ownerId: adminId,
+      );
+      if (!mounted || conversation == null) {
+        return null;
+      }
+      await _insertAudit(
+        action: 'report_contact_tenant',
+        report: report,
+        reason: 'Opened tenant chat for report follow-up.',
+        metadata: {
+          'report_id': report.reportId,
+          'property_id': report.propertyId,
+          'tenant_id': report.tenantId,
+        },
+      );
+      navigator.push(
+        MaterialPageRoute<void>(
+          builder: (_) => HomeUChatScreen.fromConversation(conversation: conversation),
+        ),
+      );
+      return null;
+    } catch (e) {
+      if (!mounted) {
+        return null;
+      }
+      messenger.showSnackBar(
+        SnackBar(content: Text('Unable to open chat: $e')),
+      );
+      return null;
+    }
+  }
+
+  Future<String?> _recordRiskLevel(
     _ReportRecord report, {
-    required String action,
-    required String actionLabel,
-    required HomeURiskStatus? nextRisk,
-    required HomeUAccountStatus? nextStatus,
+    required String riskLevel,
   }) async {
-    final reason = await _askReasonAndConfirm(actionLabel);
+    final reason = await _askReasonAndConfirm('Record Risk Level');
     if (reason == null) {
       return null;
     }
-    final now = DateTime.now().toUtc().toIso8601String();
-    final admin = AppSupabase.auth.currentUser;
-    final profileUpdate = <String, dynamic>{
-      'risk_reason': reason,
-      'moderated_by': admin?.id,
-      'moderated_at': now,
-      if (nextRisk != null) 'risk_status': _riskToDb(nextRisk),
-      if (nextStatus != null) 'account_status': _accountToDb(nextStatus),
-    };
     try {
-      await AppSupabase.client
-          .from('profiles')
-          .update(profileUpdate)
-          .eq('id', report.ownerId);
-      await AppSupabase.client
-          .from('property_reports')
-          .update({
-            'status': 'action_taken',
-            'reviewed_by': admin?.id,
-            'reviewed_at': now,
-          })
-          .eq('report_id', report.reportId);
       await _insertAudit(
-        action: action,
+        action: 'report_risk_${riskLevel.toLowerCase()}',
         report: report,
         reason: reason,
         metadata: {
           'report_id': report.reportId,
           'property_id': report.propertyId,
           'owner_id': report.ownerId,
-          'next_risk_status': nextRisk?.name,
-          'next_account_status': nextStatus?.name,
+          'tenant_id': report.tenantId,
+          'risk_level': riskLevel.toLowerCase(),
         },
       );
-      return '$actionLabel completed.';
+      return 'Risk level recorded.';
     } catch (e) {
       if (!mounted) {
         return null;
       }
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Moderation update failed: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Risk evaluation failed: $e')),
+      );
       return null;
     }
   }
@@ -536,6 +463,7 @@ class _HomeUAdminReportsModerationScreenState
     required String nextStatus,
     required String action,
     required String actionLabel,
+    required String riskLevel,
   }) async {
     final reason = await _askReasonAndConfirm(actionLabel);
     if (reason == null) {
@@ -544,16 +472,6 @@ class _HomeUAdminReportsModerationScreenState
     final admin = AppSupabase.auth.currentUser;
     final now = DateTime.now().toUtc().toIso8601String();
     try {
-      if (report.ownerId.isNotEmpty) {
-        await AppSupabase.client
-            .from('profiles')
-            .update({
-              'risk_reason': reason,
-              'moderated_by': admin?.id,
-              'moderated_at': now,
-            })
-            .eq('id', report.ownerId);
-      }
       await AppSupabase.client
           .from('property_reports')
           .update({
@@ -571,6 +489,7 @@ class _HomeUAdminReportsModerationScreenState
           'property_id': report.propertyId,
           'owner_id': report.ownerId,
           'status': nextStatus,
+          'risk_level': riskLevel.toLowerCase(),
         },
       );
       return '$actionLabel completed.';
@@ -578,13 +497,12 @@ class _HomeUAdminReportsModerationScreenState
       if (!mounted) {
         return null;
       }
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Report update failed: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Report update failed: $e')),
+      );
       return null;
     }
   }
-
   Future<void> _insertAudit({
     required String action,
     required _ReportRecord report,
@@ -604,7 +522,6 @@ class _HomeUAdminReportsModerationScreenState
       'created_at': DateTime.now().toUtc().toIso8601String(),
     });
   }
-
   Future<String?> _askReasonAndConfirm(String actionLabel) async {
     final reason = await showDialog<String>(
       context: context,
@@ -612,7 +529,6 @@ class _HomeUAdminReportsModerationScreenState
     );
     return reason;
   }
-
   @override
   Widget build(BuildContext context) {
     if (!HomeUSession.canAccess(HomeURole.admin)) {
@@ -622,7 +538,7 @@ class _HomeUAdminReportsModerationScreenState
     return Scaffold(
       backgroundColor: context.colors.surface,
       appBar: AppBar(
-        title: const Text('Reports & Moderation'),
+        title: const Text('Reports Review'),
         backgroundColor: context.colors.surface,
         actions: [
           IconButton(
@@ -650,19 +566,14 @@ class _HomeUAdminReportsModerationScreenState
                           fillColor: context.homeuCard,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(
-                              color: context.homeuSoftBorder,
-                            ),
+                            borderSide: BorderSide(color: context.homeuSoftBorder),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(
-                              color: context.homeuSoftBorder,
-                            ),
+                            borderSide: BorderSide(color: context.homeuSoftBorder),
                           ),
                         ),
-                        onChanged: (value) =>
-                            setState(() => _searchQuery = value),
+                        onChanged: (value) => setState(() => _searchQuery = value),
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -676,10 +587,7 @@ class _HomeUAdminReportsModerationScreenState
                       ),
                       child: IconButton(
                         tooltip: 'Filter reports',
-                        icon: Icon(
-                          Icons.filter_list_rounded,
-                          color: context.homeuAccent,
-                        ),
+                        icon: Icon(Icons.filter_list_rounded, color: context.homeuAccent),
                         onPressed: _showFilterBottomSheet,
                       ),
                     ),
@@ -699,12 +607,8 @@ class _HomeUAdminReportsModerationScreenState
                     const SizedBox(width: 8),
                     Chip(
                       label: Text(_filterLabelForKey(_selectedFilterKey)),
-                      backgroundColor: context.homeuAccent.withValues(
-                        alpha: 0.12,
-                      ),
-                      side: BorderSide(
-                        color: context.homeuAccent.withValues(alpha: 0.25),
-                      ),
+                      backgroundColor: context.homeuAccent.withValues(alpha: 0.12),
+                      side: BorderSide(color: context.homeuAccent.withValues(alpha: 0.25)),
                       labelStyle: TextStyle(
                         color: context.homeuPrimaryText,
                         fontSize: 12,
@@ -734,9 +638,7 @@ class _HomeUAdminReportsModerationScreenState
                               Center(
                                 child: Text(
                                   'No reports match the current filters.',
-                                  style: TextStyle(
-                                    color: context.homeuMutedText,
-                                  ),
+                                  style: TextStyle(color: context.homeuMutedText),
                                 ),
                               ),
                             ],
@@ -758,97 +660,32 @@ class _HomeUAdminReportsModerationScreenState
       ),
     );
   }
-
-  String _riskToDb(HomeURiskStatus value) {
-    switch (value) {
-      case HomeURiskStatus.normal:
-        return 'normal';
-      case HomeURiskStatus.suspicious:
-        return 'suspicious';
-      case HomeURiskStatus.highRisk:
-        return 'high_risk';
-    }
-  }
-
-  String _accountToDb(HomeUAccountStatus value) {
-    switch (value) {
-      case HomeUAccountStatus.active:
-        return 'active';
-      case HomeUAccountStatus.suspended:
-        return 'suspended';
-      case HomeUAccountStatus.removed:
-        return 'removed';
-    }
-  }
-
-  HomeURiskStatus _toRiskStatus(String? value) {
-    final normalized = (value ?? '').trim().toLowerCase().replaceAll('-', '_');
-    if (normalized == 'high_risk' || normalized == 'highrisk') {
-      return HomeURiskStatus.highRisk;
-    }
-    if (normalized == 'suspicious') {
-      return HomeURiskStatus.suspicious;
-    }
-    return HomeURiskStatus.normal;
-  }
-
-  HomeUAccountStatus _toAccountStatus(String? value) {
-    final normalized = (value ?? '').trim().toLowerCase();
-    if (normalized == 'suspended') return HomeUAccountStatus.suspended;
-    if (normalized == 'removed') return HomeUAccountStatus.removed;
-    return HomeUAccountStatus.active;
-  }
-
   String _normalizeReportStatus(String? status) {
     final normalized = (status ?? 'pending').trim().toLowerCase();
-    const allowed = {'pending', 'reviewed', 'dismissed', 'action_taken'};
+    if (normalized == 'action_taken') {
+      return 'reviewed';
+    }
+    const allowed = {'pending', 'reviewed', 'dismissed'};
     return allowed.contains(normalized) ? normalized : 'pending';
   }
-
   int _statusPriority(String status) {
     switch (status) {
       case 'pending':
         return 0;
       case 'reviewed':
         return 1;
-      case 'action_taken':
-        return 2;
       case 'dismissed':
-        return 3;
+        return 2;
       default:
-        return 4;
+        return 3;
     }
   }
-
-  String _riskLabel(HomeURiskStatus status) {
-    switch (status) {
-      case HomeURiskStatus.normal:
-        return 'Normal';
-      case HomeURiskStatus.suspicious:
-        return 'Suspicious';
-      case HomeURiskStatus.highRisk:
-        return 'High Risk';
-    }
-  }
-
-  String _accountLabel(HomeUAccountStatus status) {
-    switch (status) {
-      case HomeUAccountStatus.active:
-        return 'Active';
-      case HomeUAccountStatus.suspended:
-        return 'Suspended';
-      case HomeUAccountStatus.removed:
-        return 'Removed';
-    }
-  }
-
   DateTime? _parseDate(dynamic value) {
     if (value is DateTime) return value;
     if (value is String) return DateTime.tryParse(value);
     return null;
   }
 }
-
 class _ReportRecord {
   const _ReportRecord({
     required this.reportId,
@@ -864,11 +701,9 @@ class _ReportRecord {
     required this.description,
     required this.status,
     required this.createdAt,
-    required this.ownerRiskStatus,
-    required this.ownerAccountStatus,
-    required this.ownerRiskReason,
     required this.previousReportCount,
   });
+
   final String reportId;
   final String propertyId;
   final String ownerId;
@@ -882,9 +717,6 @@ class _ReportRecord {
   final String description;
   final String status;
   final DateTime createdAt;
-  final HomeURiskStatus ownerRiskStatus;
-  final HomeUAccountStatus ownerAccountStatus;
-  final String? ownerRiskReason;
   final int previousReportCount;
 
   String get shortReportId {
@@ -899,29 +731,19 @@ class _ReportRecord {
 class _ReportDetailsScreen extends StatefulWidget {
   const _ReportDetailsScreen({
     required this.report,
-    required this.riskLabel,
-    required this.accountLabel,
     required this.onContactOwner,
-    required this.onFlagSuspicious,
-    required this.onMarkHighRisk,
-    required this.onSuspendOwner,
-    required this.onRemoveOwner,
-    required this.onRestoreOwner,
+    required this.onContactTenant,
+    required this.onRecordRiskLevel,
     required this.onDismissReport,
     required this.onMarkReviewed,
   });
 
   final _ReportRecord report;
-  final String riskLabel;
-  final String accountLabel;
   final Future<String?> Function() onContactOwner;
-  final Future<String?> Function() onFlagSuspicious;
-  final Future<String?> Function() onMarkHighRisk;
-  final Future<String?> Function() onSuspendOwner;
-  final Future<String?> Function() onRemoveOwner;
-  final Future<String?> Function() onRestoreOwner;
-  final Future<String?> Function() onDismissReport;
-  final Future<String?> Function() onMarkReviewed;
+  final Future<String?> Function() onContactTenant;
+  final Future<String?> Function(String riskLevel) onRecordRiskLevel;
+  final Future<String?> Function(String riskLevel) onDismissReport;
+  final Future<String?> Function(String riskLevel) onMarkReviewed;
 
   @override
   State<_ReportDetailsScreen> createState() => _ReportDetailsScreenState();
@@ -929,6 +751,9 @@ class _ReportDetailsScreen extends StatefulWidget {
 
 class _ReportDetailsScreenState extends State<_ReportDetailsScreen> {
   bool _hasReviewedComplaint = false;
+  String _selectedRiskLevel = 'low';
+
+  static const List<String> _riskLevels = <String>['low', 'medium', 'high', 'invalid'];
 
   Future<void> _runAction(Future<String?> Function() action) async {
     final result = await action();
@@ -941,9 +766,7 @@ class _ReportDetailsScreenState extends State<_ReportDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     final report = widget.report;
-    final dateText = DateFormat(
-      'MMM d, yyyy HH:mm',
-    ).format(report.createdAt.toLocal());
+    final dateText = DateFormat('MMM d, yyyy HH:mm').format(report.createdAt.toLocal());
 
     return Scaffold(
       backgroundColor: context.colors.surface,
@@ -973,17 +796,7 @@ class _ReportDetailsScreenState extends State<_ReportDetailsScreen> {
               rows: [
                 _InfoRowData(label: 'Name', value: report.ownerName),
                 _InfoRowData(label: 'Email', value: report.ownerEmail),
-                _InfoRowData(label: 'Risk', value: widget.riskLabel),
-                _InfoRowData(label: 'Account', value: widget.accountLabel),
-                _InfoRowData(
-                  label: 'Total reports',
-                  value: report.previousReportCount.toString(),
-                ),
-                if ((report.ownerRiskReason ?? '').trim().isNotEmpty)
-                  _InfoRowData(
-                    label: 'Latest risk note',
-                    value: report.ownerRiskReason!.trim(),
-                  ),
+                _InfoRowData(label: 'Total reports', value: report.previousReportCount.toString()),
               ],
             ),
             const SizedBox(height: 10),
@@ -1001,12 +814,54 @@ class _ReportDetailsScreenState extends State<_ReportDetailsScreen> {
                 _InfoRowData(label: 'Reason', value: report.reason),
                 _InfoRowData(
                   label: 'Description',
-                  value: report.description.trim().isEmpty
-                      ? '-'
-                      : report.description.trim(),
+                  value: report.description.trim().isEmpty ? '-' : report.description.trim(),
                 ),
                 _InfoRowData(label: 'Status', value: report.status),
               ],
+            ),
+            const SizedBox(height: 10),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: context.homeuCard,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: context.homeuSoftBorder),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Risk evaluation',
+                    style: TextStyle(
+                      color: context.homeuPrimaryText,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Internal review only. This does not change listing visibility or account status.',
+                    style: TextStyle(color: context.homeuMutedText, fontSize: 12.5),
+                  ),
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: _riskLevels.map((level) {
+                      final selected = _selectedRiskLevel == level;
+                      return ChoiceChip(
+                        label: Text(level.toUpperCase()),
+                        selected: selected,
+                        onSelected: (value) {
+                          if (!value) return;
+                          setState(() => _selectedRiskLevel = level);
+                        },
+                      );
+                    }).toList(growable: false),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 12),
             Container(
@@ -1023,7 +878,7 @@ class _ReportDetailsScreenState extends State<_ReportDetailsScreen> {
                 contentPadding: EdgeInsets.zero,
                 title: const Text('I have reviewed this complaint.'),
                 subtitle: Text(
-                  'Moderation actions unlock after this confirmation.',
+                  'Risk evaluation and status updates unlock after this confirmation.',
                   style: TextStyle(color: context.homeuMutedText, fontSize: 12),
                 ),
                 controlAffinity: ListTileControlAffinity.leading,
@@ -1056,11 +911,8 @@ class _ReportDetailsScreenState extends State<_ReportDetailsScreen> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Review the complaint before taking any moderation action.',
-                    style: TextStyle(
-                      color: context.homeuMutedText,
-                      fontSize: 12.5,
-                    ),
+                    'Use chat for follow-up, then record the internal risk level or update the report status.',
+                    style: TextStyle(color: context.homeuMutedText, fontSize: 12.5),
                   ),
                   const SizedBox(height: 12),
                   Wrap(
@@ -1074,53 +926,37 @@ class _ReportDetailsScreenState extends State<_ReportDetailsScreen> {
                         onTap: () => _runAction(widget.onContactOwner),
                       ),
                       _ActionChip(
-                        label: 'Flag Suspicious',
+                        label: 'Contact Tenant',
+                        icon: Icons.forum_outlined,
+                        color: Colors.indigo,
+                        onTap: () => _runAction(widget.onContactTenant),
+                      ),
+                      _ActionChip(
+                        label: 'Record Risk',
                         icon: Icons.flag_outlined,
                         color: Colors.orange,
                         enabled: _hasReviewedComplaint,
-                        onTap: () => _runAction(widget.onFlagSuspicious),
-                      ),
-                      _ActionChip(
-                        label: 'Mark High Risk',
-                        icon: Icons.priority_high_rounded,
-                        color: Colors.deepOrange,
-                        enabled: _hasReviewedComplaint,
-                        onTap: () => _runAction(widget.onMarkHighRisk),
-                      ),
-                      _ActionChip(
-                        label: 'Suspend Owner',
-                        icon: Icons.block_rounded,
-                        color: Colors.red,
-                        enabled: _hasReviewedComplaint,
-                        onTap: () => _runAction(widget.onSuspendOwner),
-                      ),
-                      _ActionChip(
-                        label: 'Mark Owner Removed',
-                        icon: Icons.person_remove_alt_1_rounded,
-                        color: Colors.red,
-                        enabled: _hasReviewedComplaint,
-                        onTap: () => _runAction(widget.onRemoveOwner),
-                      ),
-                      _ActionChip(
-                        label: 'Restore Owner',
-                        icon: Icons.restore_rounded,
-                        color: Colors.green,
-                        enabled: _hasReviewedComplaint,
-                        onTap: () => _runAction(widget.onRestoreOwner),
-                      ),
-                      _ActionChip(
-                        label: 'Dismiss Report',
-                        icon: Icons.close_rounded,
-                        color: Colors.blueGrey,
-                        enabled: _hasReviewedComplaint,
-                        onTap: () => _runAction(widget.onDismissReport),
+                        onTap: () => _runAction(
+                          () => widget.onRecordRiskLevel(_selectedRiskLevel),
+                        ),
                       ),
                       _ActionChip(
                         label: 'Mark Reviewed',
                         icon: Icons.fact_check_outlined,
                         color: Colors.blue,
                         enabled: _hasReviewedComplaint,
-                        onTap: () => _runAction(widget.onMarkReviewed),
+                        onTap: () => _runAction(
+                          () => widget.onMarkReviewed(_selectedRiskLevel),
+                        ),
+                      ),
+                      _ActionChip(
+                        label: 'Dismiss Report',
+                        icon: Icons.close_rounded,
+                        color: Colors.blueGrey,
+                        enabled: _hasReviewedComplaint,
+                        onTap: () => _runAction(
+                          () => widget.onDismissReport(_selectedRiskLevel),
+                        ),
                       ),
                     ],
                   ),
@@ -1140,9 +976,7 @@ class _ReportCard extends StatelessWidget {
   final VoidCallback onTap;
   @override
   Widget build(BuildContext context) {
-    final createdLabel = DateFormat(
-      'MMM d, yyyy HH:mm',
-    ).format(report.createdAt.toLocal());
+    final createdLabel = DateFormat('MMM d, yyyy HH:mm').format(report.createdAt.toLocal());
     return Card(
       margin: const EdgeInsets.only(top: 10),
       color: context.homeuCard,
@@ -1179,50 +1013,18 @@ class _ReportCard extends StatelessWidget {
                 report.propertyTitle,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: context.homeuPrimaryText,
-                  fontWeight: FontWeight.w700,
-                ),
+                style: TextStyle(color: context.homeuPrimaryText, fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 4),
-              Text(
-                'Owner: ${report.ownerName} (${report.ownerEmail})',
-                style: TextStyle(
-                  color: context.homeuSecondaryText,
-                  fontSize: 12.5,
-                ),
-              ),
+              Text('Owner: ${report.ownerName} (${report.ownerEmail})', style: TextStyle(color: context.homeuSecondaryText, fontSize: 12.5)),
               const SizedBox(height: 2),
-              Text(
-                'Reporter: ${report.tenantName} (${report.tenantEmail})',
-                style: TextStyle(
-                  color: context.homeuSecondaryText,
-                  fontSize: 12.5,
-                ),
-              ),
+              Text('Reporter: ${report.tenantName} (${report.tenantEmail})', style: TextStyle(color: context.homeuSecondaryText, fontSize: 12.5)),
               const SizedBox(height: 6),
-              Text(
-                'Reason: ${report.reason}',
-                style: TextStyle(
-                  color: context.homeuPrimaryText,
-                  fontSize: 13.3,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+              Text('Reason: ${report.reason}', style: TextStyle(color: context.homeuPrimaryText, fontSize: 13.3, fontWeight: FontWeight.w600)),
               const SizedBox(height: 8),
               Row(
                 children: [
-                  _RiskStatusBadge(risk: report.ownerRiskStatus),
-                  const SizedBox(width: 8),
-                  _AccountStatusBadge(status: report.ownerAccountStatus),
-                  const Spacer(),
-                  Text(
-                    createdLabel,
-                    style: TextStyle(
-                      color: context.homeuMutedText,
-                      fontSize: 11.5,
-                    ),
-                  ),
+                  Text(createdLabel, style: TextStyle(color: context.homeuMutedText, fontSize: 11.5)),
                 ],
               ),
             ],
@@ -1232,7 +1034,6 @@ class _ReportCard extends StatelessWidget {
     );
   }
 }
-
 class _StatusBadge extends StatelessWidget {
   const _StatusBadge({required this.status});
   final String status;
@@ -1242,7 +1043,6 @@ class _StatusBadge extends StatelessWidget {
     if (status == 'pending') color = Colors.orange;
     if (status == 'reviewed') color = Colors.blue;
     if (status == 'dismissed') color = Colors.blueGrey;
-    if (status == 'action_taken') color = Colors.green;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
@@ -1251,82 +1051,11 @@ class _StatusBadge extends StatelessWidget {
       ),
       child: Text(
         status.replaceAll('_', ' ').toUpperCase(),
-        style: TextStyle(
-          color: color,
-          fontSize: 10.5,
-          fontWeight: FontWeight.w800,
-        ),
+        style: TextStyle(color: color, fontSize: 10.5, fontWeight: FontWeight.w800),
       ),
     );
   }
 }
-
-class _RiskStatusBadge extends StatelessWidget {
-  const _RiskStatusBadge({required this.risk});
-  final HomeURiskStatus risk;
-  @override
-  Widget build(BuildContext context) {
-    Color color = Colors.green;
-    String label = 'NORMAL';
-    if (risk == HomeURiskStatus.suspicious) {
-      color = Colors.orange;
-      label = 'SUSPICIOUS';
-    }
-    if (risk == HomeURiskStatus.highRisk) {
-      color = Colors.red;
-      label = 'HIGH RISK';
-    }
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: color,
-          fontSize: 10,
-          fontWeight: FontWeight.w700,
-        ),
-      ),
-    );
-  }
-}
-
-class _AccountStatusBadge extends StatelessWidget {
-  const _AccountStatusBadge({required this.status});
-  final HomeUAccountStatus status;
-  @override
-  Widget build(BuildContext context) {
-    Color color = Colors.blue;
-    String label = 'ACTIVE';
-    if (status == HomeUAccountStatus.suspended) {
-      color = Colors.red;
-      label = 'SUSPENDED';
-    }
-    if (status == HomeUAccountStatus.removed) {
-      color = Colors.grey;
-      label = 'REMOVED';
-    }
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: color,
-          fontSize: 10,
-          fontWeight: FontWeight.w700,
-        ),
-      ),
-    );
-  }
-}
-
 class _InfoCard extends StatelessWidget {
   const _InfoCard({required this.title, required this.rows});
   final String title;
@@ -1344,13 +1073,7 @@ class _InfoCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: TextStyle(
-              color: context.homeuPrimaryText,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
+          Text(title, style: TextStyle(color: context.homeuPrimaryText, fontWeight: FontWeight.w700)),
           const SizedBox(height: 10),
           for (int i = 0; i < rows.length; i++) ...[
             _InfoRow(row: rows[i]),
@@ -1361,13 +1084,11 @@ class _InfoCard extends StatelessWidget {
     );
   }
 }
-
 class _InfoRowData {
   const _InfoRowData({required this.label, required this.value});
   final String label;
   final String value;
 }
-
 class _InfoRow extends StatelessWidget {
   const _InfoRow({required this.row});
   final _InfoRowData row;
@@ -1380,28 +1101,19 @@ class _InfoRow extends StatelessWidget {
           width: 110,
           child: Text(
             row.label,
-            style: TextStyle(
-              color: context.homeuMutedText,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
+            style: TextStyle(color: context.homeuMutedText, fontSize: 12, fontWeight: FontWeight.w600),
           ),
         ),
         Expanded(
           child: Text(
             row.value,
-            style: TextStyle(
-              color: context.homeuPrimaryText,
-              fontSize: 12.5,
-              fontWeight: FontWeight.w600,
-            ),
+            style: TextStyle(color: context.homeuPrimaryText, fontSize: 12.5, fontWeight: FontWeight.w600),
           ),
         ),
       ],
     );
   }
 }
-
 class _ActionChip extends StatelessWidget {
   const _ActionChip({
     required this.label,
@@ -1526,3 +1238,4 @@ class _ModerationReasonConfirmDialogState
     );
   }
 }
+

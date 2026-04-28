@@ -7,6 +7,7 @@ import 'package:homeu/app/viewing/viewing_local_datasource.dart';
 import 'package:homeu/app/viewing/viewing_models.dart';
 import 'package:homeu/app/viewing/viewing_remote_datasource.dart';
 import 'package:homeu/core/supabase/app_supabase.dart';
+import 'package:homeu/core/utils/date_time_utils.dart';
 import 'package:homeu/pages/home/property_item.dart';
 import 'package:uuid/uuid.dart';
 
@@ -20,9 +21,8 @@ class HomeUViewingScreen extends StatefulWidget {
 }
 
 class _HomeUViewingScreenState extends State<HomeUViewingScreen> {
-  final ViewingRemoteDataSource _viewingRemoteDataSource =
-      const ViewingRemoteDataSource();
-
+  final ViewingRemoteDataSource _viewingRemoteDataSource = const ViewingRemoteDataSource();
+  
   bool _isLoading = true;
   bool _isSubmitting = false;
   List<Map<String, dynamic>> _availableSlots = [];
@@ -36,6 +36,9 @@ class _HomeUViewingScreenState extends State<HomeUViewingScreen> {
 
   Future<void> _fetchAvailableSlots() async {
     setState(() => _isLoading = true);
+    final now = DateTime.now().toMalaysiaTime();
+    final nowWall = DateTime.utc(now.year, now.month, now.day, now.hour, now.minute);
+
     try {
       // 1. Fetch available slots from owner_availabilities
       final slotsResponse = await AppSupabase.client
@@ -43,11 +46,9 @@ class _HomeUViewingScreenState extends State<HomeUViewingScreen> {
           .select()
           .eq('property_id', widget.property.id)
           .eq('status', 'Available')
-          .gte('start_time', DateTime.now().toUtc().toIso8601String());
+          .gte('start_time', nowWall.toIso8601String());
 
-      final List<Map<String, dynamic>> slots = List<Map<String, dynamic>>.from(
-        slotsResponse,
-      );
+      final List<Map<String, dynamic>> slots = List<Map<String, dynamic>>.from(slotsResponse);
 
       // 2. Cross-reference with existing approved viewings for buffer enforcement
       final approvedViewingsResponse = await AppSupabase.client
@@ -55,14 +56,14 @@ class _HomeUViewingScreenState extends State<HomeUViewingScreen> {
           .select('scheduled_at')
           .eq('property_id', widget.property.id)
           .eq('status', 'Approved');
-
+      
       final List<DateTime> approvedTimes = (approvedViewingsResponse as List)
-          .map((v) => DateTime.parse(v['scheduled_at'] as String).toLocal())
+          .map((v) => (v['scheduled_at'] as String).parseAsWallTime())
           .toList();
 
       // 3. Filter slots: Remove those within 30-min buffer of an approved viewing
       final filteredSlots = slots.where((slot) {
-        final slotTime = DateTime.parse(slot['start_time'] as String).toLocal();
+        final slotTime = (slot['start_time'] as String).parseAsWallTime();
         for (final approvedTime in approvedTimes) {
           final difference = slotTime.difference(approvedTime).inMinutes.abs();
           if (difference < 30) return false;
@@ -89,20 +90,17 @@ class _HomeUViewingScreenState extends State<HomeUViewingScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title: const Text(
-          'Schedule Viewing',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
+        title: const Text('Schedule Viewing', style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.white,
         elevation: 0,
         foregroundColor: const Color(0xFF0F172A),
       ),
       bottomNavigationBar: _buildBottomBar(),
-      body: _isLoading
+      body: _isLoading 
           ? const Center(child: CircularProgressIndicator())
-          : _availableSlots.isEmpty
-          ? _buildNoSlotsState()
-          : _buildSlotList(),
+          : _availableSlots.isEmpty 
+              ? _buildNoSlotsState()
+              : _buildSlotList(),
     );
   }
 
@@ -116,11 +114,7 @@ class _HomeUViewingScreenState extends State<HomeUViewingScreen> {
           const SizedBox(height: 24),
           const Text(
             'Select an Available Slot',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF1E293B),
-            ),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
           ),
           const SizedBox(height: 8),
           const Text(
@@ -134,9 +128,7 @@ class _HomeUViewingScreenState extends State<HomeUViewingScreen> {
             itemCount: _availableSlots.length,
             itemBuilder: (context, index) {
               final slot = _availableSlots[index];
-              final startTime = DateTime.parse(
-                slot['start_time'] as String,
-              ).toLocal();
+              final startTime = (slot['start_time'] as String).parseAsWallTime();
               final isSelected = _selectedSlot == slot;
 
               return Padding(
@@ -147,14 +139,10 @@ class _HomeUViewingScreenState extends State<HomeUViewingScreen> {
                   child: Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: isSelected
-                          ? const Color(0xFFEFF6FF)
-                          : Colors.white,
+                      color: isSelected ? const Color(0xFFEFF6FF) : Colors.white,
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: isSelected
-                            ? const Color(0xFF3B82F6)
-                            : const Color(0xFFE2E8F0),
+                        color: isSelected ? const Color(0xFF3B82F6) : const Color(0xFFE2E8F0),
                         width: isSelected ? 2 : 1,
                       ),
                     ),
@@ -163,17 +151,13 @@ class _HomeUViewingScreenState extends State<HomeUViewingScreen> {
                         Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: isSelected
-                                ? const Color(0xFF3B82F6)
-                                : const Color(0xFFF1F5F9),
+                            color: isSelected ? const Color(0xFF3B82F6) : const Color(0xFFF1F5F9),
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
                             Icons.calendar_today_rounded,
                             size: 18,
-                            color: isSelected
-                                ? Colors.white
-                                : const Color(0xFF64748B),
+                            color: isSelected ? Colors.white : const Color(0xFF64748B),
                           ),
                         ),
                         const SizedBox(width: 16),
@@ -182,26 +166,17 @@ class _HomeUViewingScreenState extends State<HomeUViewingScreen> {
                           children: [
                             Text(
                               DateFormat('EEEE, MMM d').format(startTime),
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15,
-                              ),
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                             ),
                             Text(
-                              DateFormat('hh:mm a').format(startTime),
-                              style: const TextStyle(
-                                color: Color(0xFF64748B),
-                                fontSize: 13,
-                              ),
+                              DateFormat('h:mm a').format(startTime),
+                              style: const TextStyle(color: Color(0xFF64748B), fontSize: 13),
                             ),
                           ],
                         ),
                         const Spacer(),
                         if (isSelected)
-                          const Icon(
-                            Icons.check_circle,
-                            color: Color(0xFF3B82F6),
-                          ),
+                          const Icon(Icons.check_circle, color: Color(0xFF3B82F6)),
                       ],
                     ),
                   ),
@@ -226,35 +201,17 @@ class _HomeUViewingScreenState extends State<HomeUViewingScreen> {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: widget.property.imageUrls.isNotEmpty
-                ? Image.network(
-                    widget.property.imageUrls[0],
-                    width: 60,
-                    height: 60,
-                    fit: BoxFit.cover,
-                  )
-                : Container(
-                    width: 60,
-                    height: 60,
-                    color: const Color(0xFFF1F5F9),
-                  ),
+            child: widget.property.imageUrls.isNotEmpty 
+              ? Image.network(widget.property.imageUrls[0], width: 60, height: 60, fit: BoxFit.cover)
+              : Container(width: 60, height: 60, color: const Color(0xFFF1F5F9)),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  widget.property.name,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  widget.property.location,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFF64748B),
-                  ),
-                ),
+                Text(widget.property.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text(widget.property.location, style: const TextStyle(fontSize: 12, color: Color(0xFF64748B))),
               ],
             ),
           ),
@@ -270,11 +227,7 @@ class _HomeUViewingScreenState extends State<HomeUViewingScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.event_busy_rounded,
-              size: 64,
-              color: Color(0xFFCBD5E1),
-            ),
+            const Icon(Icons.event_busy_rounded, size: 64, color: Color(0xFFCBD5E1)),
             const SizedBox(height: 16),
             const Text(
               'No Available Slots',
@@ -287,10 +240,7 @@ class _HomeUViewingScreenState extends State<HomeUViewingScreen> {
               style: TextStyle(color: Color(0xFF64748B)),
             ),
             const SizedBox(height: 24),
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Go Back'),
-            ),
+            TextButton(onPressed: () => Navigator.pop(context), child: const Text('Go Back')),
           ],
         ),
       ),
@@ -304,26 +254,16 @@ class _HomeUViewingScreenState extends State<HomeUViewingScreen> {
         child: SizedBox(
           height: 52,
           child: ElevatedButton(
-            onPressed: (_isSubmitting || _selectedSlot == null)
-                ? null
-                : _confirmViewing,
+            onPressed: (_isSubmitting || _selectedSlot == null) ? null : _confirmViewing,
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF1E3A8A),
               foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               disabledBackgroundColor: const Color(0xFFE2E8F0),
             ),
             child: _isSubmitting
-                ? const CircularProgressIndicator(
-                    color: Colors.white,
-                    strokeWidth: 2,
-                  )
-                : const Text(
-                    'Confirm Request',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
+                ? const CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
+                : const Text('Confirm Request', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
           ),
         ),
       ),
@@ -332,7 +272,7 @@ class _HomeUViewingScreenState extends State<HomeUViewingScreen> {
 
   Future<void> _confirmViewing() async {
     if (_selectedSlot == null) return;
-
+    
     setState(() => _isSubmitting = true);
     try {
       final tenantId = AppSupabase.auth.currentUser?.id;
@@ -356,9 +296,7 @@ class _HomeUViewingScreenState extends State<HomeUViewingScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: const Text(
-                'You have already scheduled a viewing for this time slot. Please check your Requests.',
-              ),
+              content: const Text('You have already scheduled a viewing for this time slot. Please check your Requests.'),
               backgroundColor: context.homeuAccent,
             ),
           );
@@ -381,16 +319,11 @@ class _HomeUViewingScreenState extends State<HomeUViewingScreen> {
 
       await _viewingRemoteDataSource.createViewingRequest(request);
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Request Sent!')));
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Request Sent!')));
         Navigator.pop(context, true);
       }
     } catch (e) {
-      if (mounted)
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
     }

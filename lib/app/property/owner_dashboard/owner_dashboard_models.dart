@@ -1,5 +1,6 @@
 class DashboardData {
   DashboardData({
+    required this.ownerName,
     required this.totalEarnings,
     required this.activeListings,
     required this.pendingRequests,
@@ -10,6 +11,7 @@ class DashboardData {
     required this.recentViewingRequests,
   });
 
+  final String ownerName;
   final double totalEarnings;
   final int activeListings;
   final int pendingRequests;
