@@ -28,9 +28,10 @@ class _HomeUOwnerViewingAvailabilityScreenState extends State<HomeUOwnerViewingA
   }
 
   bool _isDayUnavailable(DateTime day) {
-    final d = DateTime(day.year, day.month, day.day);
+    // Use UTC to treat year/month/day as fixed wall time, avoiding timezone shifts.
+    final d = DateTime.utc(day.year, day.month, day.day);
     final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
+    final today = DateTime.utc(now.year, now.month, now.day);
 
     // 1. Block past dates
     if (d.isBefore(today)) return true;
@@ -38,8 +39,8 @@ class _HomeUOwnerViewingAvailabilityScreenState extends State<HomeUOwnerViewingA
     for (final period in widget.property.bookedPeriods) {
       final startRaw = period['start']!;
       final endRaw = period['end']!;
-      final s = DateTime(startRaw.year, startRaw.month, startRaw.day);
-      final e = DateTime(endRaw.year, endRaw.month, endRaw.day);
+      final s = DateTime.utc(startRaw.year, startRaw.month, startRaw.day);
+      final e = DateTime.utc(endRaw.year, endRaw.month, endRaw.day);
 
       if (d.isAtSameMomentAs(s) || d.isAtSameMomentAs(e) || (d.isAfter(s) && d.isBefore(e))) {
         return true;
@@ -49,8 +50,9 @@ class _HomeUOwnerViewingAvailabilityScreenState extends State<HomeUOwnerViewingA
     for (final slot in _slots) {
       final status = slot['status'];
       if (status == 'Booked' || status == 'Approved') {
-        final slotDate = DateTime.parse(slot['start_time']).toLocal();
-        final sd = DateTime(slotDate.year, slotDate.month, slotDate.day);
+        // Parse without .toLocal() to keep the selected wall time.
+        final slotDate = DateTime.parse(slot['start_time']);
+        final sd = DateTime.utc(slotDate.year, slotDate.month, slotDate.day);
         if (d.isAtSameMomentAs(sd)) {
           return true;
         }
@@ -82,21 +84,23 @@ class _HomeUOwnerViewingAvailabilityScreenState extends State<HomeUOwnerViewingA
       final List<String> slotsToDelete = [];
 
       final now = DateTime.now();
+      final nowWall = DateTime.utc(now.year, now.month, now.day, now.hour, now.minute);
 
       for (final slot in fetchedSlots) {
-        final startTime = DateTime.parse(slot['start_time']).toLocal();
+        // Parse without .toLocal() to maintain fixed wall time.
+        final startTime = DateTime.parse(slot['start_time']);
         final status = slot['status'];
 
         if (status == 'Available') {
-          bool isExpired = startTime.isBefore(now);
+          bool isExpired = startTime.isBefore(nowWall);
 
           bool isOccupied = false;
           for (final period in widget.property.bookedPeriods) {
             final startRaw = period['start']!;
             final endRaw = period['end']!;
-            final s = DateTime(startRaw.year, startRaw.month, startRaw.day);
-            final e = DateTime(endRaw.year, endRaw.month, endRaw.day);
-            final d = DateTime(startTime.year, startTime.month, startTime.day);
+            final s = DateTime.utc(startRaw.year, startRaw.month, startRaw.day);
+            final e = DateTime.utc(endRaw.year, endRaw.month, endRaw.day);
+            final d = DateTime.utc(startTime.year, startTime.month, startTime.day);
 
             if (d.isAtSameMomentAs(s) || d.isAtSameMomentAs(e) || (d.isAfter(s) && d.isBefore(e))) {
               isOccupied = true;
@@ -133,11 +137,12 @@ class _HomeUOwnerViewingAvailabilityScreenState extends State<HomeUOwnerViewingA
   }
 
   Future<void> _addSlot() async {
-    final startDateTime = DateTime(
+    // Use DateTime.utc to store the selected numbers as a fixed wall time in the DB.
+    final startDateTime = DateTime.utc(
       _selectedDate.year, _selectedDate.month, _selectedDate.day,
       _startTime.hour, _startTime.minute,
     );
-    final endDateTime = DateTime(
+    final endDateTime = DateTime.utc(
       _selectedDate.year, _selectedDate.month, _selectedDate.day,
       _endTime.hour, _endTime.minute,
     );
@@ -146,15 +151,17 @@ class _HomeUOwnerViewingAvailabilityScreenState extends State<HomeUOwnerViewingA
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('End time must be after start time.')));
       return;
     }
-    if (startDateTime.isBefore(DateTime.now())) {
+    final now = DateTime.now();
+    final nowWall = DateTime.utc(now.year, now.month, now.day, now.hour, now.minute);
+    if (startDateTime.isBefore(nowWall)) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Cannot schedule in the past.')));
       return;
     }
 
     bool hasOverlap = false;
     for (final slot in _slots) {
-      final existingStart = DateTime.parse(slot['start_time']).toLocal();
-      final existingEnd = DateTime.parse(slot['end_time']).toLocal();
+      final existingStart = DateTime.parse(slot['start_time']);
+      final existingEnd = DateTime.parse(slot['end_time']);
 
       if (startDateTime.isBefore(existingEnd) && endDateTime.isAfter(existingStart)) {
         hasOverlap = true;
@@ -215,7 +222,8 @@ class _HomeUOwnerViewingAvailabilityScreenState extends State<HomeUOwnerViewingA
     return '$hour:$minute $period';
   }
   String _formatDateTimeString(String isoString) {
-    final date = DateTime.parse(isoString).toLocal();
+    // Parse the ISO string and use it directly without .toLocal() to avoid timezone shifts.
+    final date = DateTime.parse(isoString);
     final time = TimeOfDay.fromDateTime(date);
     return '${_formatDate(date)} at ${_formatTime(time)}';
   }

@@ -20,13 +20,9 @@ enum _SortOption { priceLowToHigh, priceHighToLow, newest }
 class HomeUHomePage extends StatefulWidget {
   const HomeUHomePage({
     super.key,
-    this.showNotificationBadge = true,
-    this.showQrScanFab = true,
     this.seedProperties = const <PropertyItem>[],
   });
 
-  final bool showNotificationBadge;
-  final bool showQrScanFab;
   final List<PropertyItem> seedProperties;
 
   @override
@@ -513,15 +509,6 @@ class _HomeUHomePageState extends State<HomeUHomePage> {
                   );
                 },
               ),
-              if (widget.showQrScanFab)
-                FloatingActionButton.extended(
-                  heroTag: 'qr_fab',
-                  onPressed: () {},
-                  backgroundColor: context.homeuAccent,
-                  foregroundColor: Colors.white,
-                  icon: const Icon(Icons.qr_code_scanner_rounded),
-                  label: Text(t.homeScanQr),
-                ),
             ],
           ),
           body: SafeArea(
@@ -540,37 +527,13 @@ class _HomeUHomePageState extends State<HomeUHomePage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              greetingText,
-                              style: TextStyle(
-                                color: context.homeuPrimaryText,
-                                fontSize: 28,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                          Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              IconButton(
-                                onPressed: () {},
-                                icon: Icon(
-                                  Icons.notifications_none_rounded,
-                                  color: context.homeuAccent,
-                                ),
-                              ),
-                              if (widget.showNotificationBadge)
-                                const Positioned(
-                                  right: 8,
-                                  top: 9,
-                                  child: _NotificationDot(),
-                                ),
-                            ],
-                          ),
-                        ],
+                      Text(
+                        greetingText,
+                        style: TextStyle(
+                          color: context.homeuPrimaryText,
+                          fontSize: 28,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -773,23 +736,6 @@ class _FilterSheetResult {
   final String furnishing;
   final double minimumRating;
   final bool isReset;
-}
-
-class _NotificationDot extends StatelessWidget {
-  const _NotificationDot();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 10,
-      height: 10,
-      decoration: BoxDecoration(
-        color: context.homeuSuccess,
-        shape: BoxShape.circle,
-        border: Border.all(color: context.homeuCard, width: 1.4),
-      ),
-    );
-  }
 }
 
 class _CategoryChip extends StatelessWidget {
