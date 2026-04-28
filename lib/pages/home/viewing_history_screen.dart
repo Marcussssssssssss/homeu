@@ -500,7 +500,9 @@ class _ViewingHistoryCard extends StatelessWidget {
     final isRented = property.status.toLowerCase() == 'rented';
     final showRentedKillSwitch = isRented && (viewing.status.toLowerCase() == 'pending' || viewing.status.toLowerCase() == 'approved');
 
-    final bool showCancelButton = statusEnum == HomeUViewingFilterStatus.pending;
+    final bool isFuture = viewing.scheduledAt.isAfter(DateTime.now());
+    final bool showCancelButton = (statusEnum == HomeUViewingFilterStatus.pending) || 
+                                 (statusEnum == HomeUViewingFilterStatus.approved && isFuture);
 
     Widget cardContent = Row(
       crossAxisAlignment: CrossAxisAlignment.start,
