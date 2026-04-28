@@ -8,6 +8,7 @@ import 'package:homeu/pages/home/owner_bottom_navigation_bar.dart';
 import 'package:homeu/pages/home/conversation_list_screen.dart';
 import 'package:homeu/pages/home/profile_screen.dart';
 
+import '../../app/property/booking_request/booking_request_models.dart';
 import '../../app/property/booking_request/booking_requests_controller.dart';
 import '../../app/property/my_properties/my_properties_models.dart';
 import '../../app/property/owner_dashboard/owner_dashboard_controller.dart';
@@ -282,15 +283,32 @@ class _HomeUOwnerDashboardScreenState extends State<HomeUOwnerDashboardScreen> {
                         propertyName: req['propertyName'],
                         status: req['status'],
                         onTap: () {
-                          if (widget.onNavigateToTab != null) {
-                            widget.onNavigateToTab!(2);
-                          } else {
-                            Navigator.of(context).push(
-                              MaterialPageRoute<void>(
-                                builder: (_) => const HomeUOwnerBookingRequestsScreen(initialTabIndex: 0),
+                          final requestModel = BookingRequestModel(
+                            id: req['id']?.toString() ?? '',
+                            propertyId: req['propertyId']?.toString() ?? '',
+                            ownerId: req['ownerId']?.toString() ?? '',
+                            tenantId: req['tenantId']?.toString() ?? '',
+                            propertyTitle: req['propertyName']?.toString() ?? 'Unknown Property',
+                            monthlyPrice: req['monthlyPrice'] as num? ?? 0,
+                            tenantName: req['tenantName']?.toString() ?? 'Unknown Tenant',
+                            tenantProfileUrl: req['profile_image_url'] as String?,
+                            tenantPhone: req['tenantPhone']?.toString() ?? '',
+                            tenantEmail: req['tenantEmail']?.toString() ?? '',
+                            startDate: req['startDate'] as DateTime?,
+                            durationMonths: req['durationMonths'] as int? ?? 1,
+                            status: req['status']?.toString() ?? 'Pending',
+                          );
+
+                          final bookingController = BookingRequestsController();
+
+                          Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) => HomeUOwnerBookingRequestDetailsScreen(
+                                request: requestModel,
+                                controller: bookingController,
                               ),
-                            ).then((_) => _controller.loadDashboard());
-                          }
+                            ),
+                          ).then((_) => _controller.loadDashboard());
                         },
                       )),
 
