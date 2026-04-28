@@ -562,18 +562,22 @@ class _ViewingHistoryCard extends StatelessWidget {
               top: 0,
               right: 0,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                constraints: const BoxConstraints(maxWidth: 80),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: showRentedKillSwitch ? const Color(0xFFEF4444) : _getStatusColor(statusEnum),
+                  color: showRentedKillSwitch ? const Color(0xFF94A3B8) : _getStatusColor(statusEnum),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Text(
-                  (showRentedKillSwitch ? 'Property Rented' : status).toUpperCase(),
-                  style: const TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white,
-                    letterSpacing: 0.5,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    (showRentedKillSwitch ? 'Cancelled' : status).toUpperCase(),
+                    style: const TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                      letterSpacing: 0.5,
+                    ),
                   ),
                 ),
               ),
@@ -632,17 +636,6 @@ class _ViewingHistoryCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Star rating
-        Row(
-          children: List.generate(5, (index) {
-            return Icon(
-              Icons.star,
-              size: 14,
-              color: index < property.rating.floor() ? const Color(0xFFF59E0B) : const Color(0xFFE2E8F0),
-            );
-          }),
-        ),
-        const SizedBox(height: 6),
         // Title
         Padding(
           padding: const EdgeInsets.only(right: 60),
