@@ -566,7 +566,14 @@ class _HomeUOwnerBookingRequestsScreenState extends State<HomeUOwnerBookingReque
                           final isPending = request.status == 'Pending';
                           final isApproved = request.status == 'Approved';
 
-                          final isPastViewingTime = DateTime.now().isAfter(request.scheduledAt);
+                          final exactWallTime = DateTime(
+                            request.scheduledAt.year,
+                            request.scheduledAt.month,
+                            request.scheduledAt.day,
+                            request.scheduledAt.hour,
+                            request.scheduledAt.minute,
+                          );
+                          final isPastViewingTime = DateTime.now().isAfter(exactWallTime);
 
                           final timeStr =
                               "${request.scheduledAt.hour % 12 == 0 ? 12 : request.scheduledAt.hour % 12}:${request.scheduledAt.minute.toString().padLeft(2, '0')} ${request.scheduledAt.hour >= 12 ? 'PM' : 'AM'}";

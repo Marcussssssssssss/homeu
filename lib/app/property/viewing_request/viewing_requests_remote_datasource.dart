@@ -66,5 +66,25 @@ class ViewingRequestsRemoteDataSource {
         .update({'status': newStatus})
         .eq('id', viewingId);
 
+    if (newStatus == 'Approved') {
+      final dynamic approvedRequest = await AppSupabase.client
+          .from('viewing_requests')
+          .select('property_id, scheduled_at')
+          .eq('id', viewingId)
+          .maybeSingle();
+
+      if (approvedRequest != null) {
+        final propertyId = approvedRequest['property_id'];
+        final scheduledAt = approvedRequest['scheduled_at'];
+
+        await AppSupabase.client
+            .from('viewing_requests')
+            .update({'status': 'Rejected'})
+            .eq('property_id', propertyId)
+            .eq('scheduled_at', scheduledAt)
+            .eq('status', 'Pending')
+            .neq('id', viewingId);
+      }
+    }
   }
 }
