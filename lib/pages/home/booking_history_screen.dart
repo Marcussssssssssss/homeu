@@ -152,9 +152,13 @@ class _HomeUBookingHistoryScreenState extends State<HomeUBookingHistoryScreen> {
                         onPaymentScheduleTap: () {
                           _navigateToDetails(context, booking);
                         },
-                        onReceiptTap: (booking.status == HomeUBookingStatus.approved || booking.status == HomeUBookingStatus.completed) 
+                        onReceiptTap: (booking.status == HomeUBookingStatus.pending ||
+                                       booking.status == HomeUBookingStatus.approved ||
+                                       booking.status == HomeUBookingStatus.completed ||
+                                       (booking.status == HomeUBookingStatus.rejected && (booking.paymentStatus == 'Paid' || booking.paymentStatus == 'Fully Paid')))
                             ? () => _showReceipt(context, booking) 
                             : null,
+                        paymentStatus: booking.paymentStatus,
                       ),
                     ),
                   ],
@@ -212,6 +216,7 @@ class _HomeUBookingHistoryScreenState extends State<HomeUBookingHistoryScreen> {
         context: context,
         payment: payment,
         property: booking.property,
+        isRefund: booking.status == HomeUBookingStatus.rejected,
       );
     } catch (e) {
       if (!mounted) return;
@@ -317,6 +322,7 @@ class _HomeUBookingHistoryScreenState extends State<HomeUBookingHistoryScreen> {
       checkInDate: checkIn,
       checkOutDate: checkOut,
       status: _mapStatus(booking.status),
+      paymentStatus: booking.paymentStatus,
     );
   }
 
@@ -366,6 +372,7 @@ class _BookingHistoryItem {
     required this.checkInDate,
     required this.checkOutDate,
     required this.status,
+    required this.paymentStatus,
   });
 
   final String id;
@@ -376,4 +383,5 @@ class _BookingHistoryItem {
   final DateTime checkInDate;
   final DateTime checkOutDate;
   final HomeUBookingStatus status;
+  final String paymentStatus;
 }
