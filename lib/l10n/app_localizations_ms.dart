@@ -779,4 +779,45 @@ class AppLocalizationsMs extends AppLocalizations {
 
   @override
   String get chatAttachDocument => 'Dokumen';
+
+  @override
+  String get receiptTitle => 'Resit Pembayaran';
+
+  @override
+  String get receiptSuccess => 'Pembayaran Berjaya';
+
+  @override
+  String get receiptTransactionId => 'ID Transaksi';
+
+  @override
+  String get receiptProperty => 'Hartanah';
+
+  @override
+  String get receiptLocation => 'Lokasi';
+
+  @override
+  String get receiptPaymentDate => 'Tarikh Pembayaran';
+
+  @override
+  String get receiptPaymentMethod => 'Kaedah Pembayaran';
+
+  @override
+  String get receiptInstallment => 'Ansuran';
+
+  @override
+  String receiptMonth(Object number) {
+    return 'Bulan $number';
+  }
+
+  @override
+  String get receiptTotalAmount => 'Jumlah Keseluruhan';
+
+  @override
+  String get receiptDownload => 'Muat Turun';
+
+  @override
+  String get receiptShare => 'Kongsi';
+
+  @override
+  String get receiptFooter => 'Terima kasih kerana menggunakan HomeU!';
 }

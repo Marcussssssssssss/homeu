@@ -16,6 +16,7 @@ class BookingHistoryCard extends StatelessWidget {
     this.propertyStatus,
     this.onTap,
     this.onPaymentScheduleTap,
+    this.onReceiptTap,
   });
 
   final String hotelName;
@@ -30,6 +31,7 @@ class BookingHistoryCard extends StatelessWidget {
   final String? propertyStatus;
   final VoidCallback? onTap;
   final VoidCallback? onPaymentScheduleTap;
+  final VoidCallback? onReceiptTap;
 
   @override
   Widget build(BuildContext context) {
@@ -223,39 +225,72 @@ class BookingHistoryCard extends StatelessWidget {
             ),
           ],
         ),
-        if (onPaymentScheduleTap != null && !isPast && (status.toLowerCase() == 'approved' || status.toLowerCase() == 'paid'))
+        // Action Buttons Row (Payment Schedule & Receipt)
+        if ((onPaymentScheduleTap != null && !isPast && (status.toLowerCase() == 'approved' || status.toLowerCase() == 'paid')) || onReceiptTap != null)
           Padding(
             padding: const EdgeInsets.only(top: 8),
-            child: GestureDetector(
-              onTap: onPaymentScheduleTap,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
-                  color: purpleAccent.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: purpleAccent.withOpacity(0.2)),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.receipt_long_outlined, size: 14, color: purpleAccent),
-                    const SizedBox(width: 6),
-                    Flexible(
-                      child: Text(
-                        'VIEW PAYMENT SCHEDULE',
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w800,
-                          color: purpleAccent,
-                          letterSpacing: 0.5,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                if (onPaymentScheduleTap != null && !isPast && (status.toLowerCase() == 'approved' || status.toLowerCase() == 'paid'))
+                  GestureDetector(
+                    onTap: onPaymentScheduleTap,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: purpleAccent.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: purpleAccent.withOpacity(0.2)),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.receipt_long_outlined, size: 14, color: purpleAccent),
+                          const SizedBox(width: 6),
+                          const Text(
+                            'VIEW PAYMENT SCHEDULE',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFF6366F1),
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
-              ),
+                  ),
+                if (onReceiptTap != null)
+                  GestureDetector(
+                    onTap: onReceiptTap,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF10B981).withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: const Color(0xFF10B981).withOpacity(0.2)),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.receipt_outlined, size: 14, color: Color(0xFF10B981)),
+                          const SizedBox(width: 6),
+                          Text(
+                            'RECEIPT',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFF10B981),
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
         const SizedBox(height: 16),

@@ -255,5 +255,23 @@
   "chatAttachmentTitle": "Hantar Lampiran",
   "chatAttachImage": "Imej",
   "chatAttachCamera": "Kamera",
-  "chatAttachDocument": "Dokumen"
+  "chatAttachDocument": "Dokumen",
+  "receiptTitle": "Resit Pembayaran",
+  "receiptSuccess": "Pembayaran Berjaya",
+  "receiptTransactionId": "ID Transaksi",
+  "receiptProperty": "Hartanah",
+  "receiptLocation": "Lokasi",
+  "receiptPaymentDate": "Tarikh Pembayaran",
+  "receiptPaymentMethod": "Kaedah Pembayaran",
+  "receiptInstallment": "Ansuran",
+  "receiptMonth": "Bulan {number}",
+  "@receiptMonth": {
+    "placeholders": {
+      "number": {}
+    }
+  },
+  "receiptTotalAmount": "Jumlah Keseluruhan",
+  "receiptDownload": "Muat Turun",
+  "receiptShare": "Kongsi",
+  "receiptFooter": "Terima kasih kerana menggunakan HomeU!"
 }

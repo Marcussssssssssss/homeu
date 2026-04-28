@@ -12,6 +12,8 @@ import 'package:homeu/core/supabase/app_supabase.dart';
 import 'package:homeu/pages/home/property_item.dart';
 import 'package:homeu/pages/home/home_tenant_shell_screen.dart';
 
+import 'package:homeu/pages/home/dialogs/booking_receipt_dialog.dart';
+
 enum HomeUPaymentMethod { card, banking, ewallet }
 
 class HomeUPaymentScreen extends StatefulWidget {
@@ -872,12 +874,16 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
 
       if (isSuccessful) {
         if (widget.isInstallment) {
-          // If it's an installment, wait a moment to show success message then pop
-          await Future.delayed(const Duration(seconds: 1));
+          if (!mounted) return;
+          
+          await _showSuccessWithReceipt(payment!);
+          
           if (!mounted) return;
           Navigator.of(context).pop(true);
         } else {
-          await Future.delayed(const Duration(seconds: 2));
+          if (!mounted) return;
+          await _showSuccessWithReceipt(payment!);
+          
           if (!mounted) return;
           // Navigate to Home Dashboard (Tenant Shell) and clear stack for initial booking fee
           Navigator.of(context).pushAndRemoveUntil(
@@ -915,6 +921,72 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
           _isSubmittingPayment = false;
         });
       }
+    }
+  }
+
+  Future<void> _showSuccessWithReceipt(Payment payment) async {
+    final bool? viewReceipt = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        backgroundColor: context.homeuCard,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.check_circle_rounded, color: Color(0xFF10B981), size: 64),
+            const SizedBox(height: 16),
+            Text(
+              'Payment Successful!',
+              style: TextStyle(
+                color: context.homeuPrimaryText,
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Your payment of RM ${_formatCurrency(payment.amount)} has been processed.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: context.homeuSecondaryText),
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context, true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: context.homeuAccent,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+                child: const Text('View Receipt'),
+              ),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text(
+                  'Dismiss',
+                  style: TextStyle(color: context.homeuMutedText),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (viewReceipt == true) {
+      if (!mounted) return;
+      await BookingReceiptDialog.show(
+        context: context,
+        payment: payment,
+        property: widget.property,
+      );
     }
   }
 
