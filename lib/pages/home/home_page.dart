@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:homeu/app/auth/homeu_auth_service.dart';
@@ -68,6 +70,7 @@ class _HomeUHomePageState extends State<HomeUHomePage> {
       ),
     );
     _profileController.loadProfile();
+    unawaited(_favoritesController.loadForCurrentTenant());
     _hydrateFilterOptions(widget.seedProperties);
     _propertiesFuture =
         (!AppSupabase.isInitialized && widget.seedProperties.isNotEmpty)
@@ -813,7 +816,9 @@ class _HomeUHomePageState extends State<HomeUHomePage> {
                                     isFavorited: _favoritesController
                                         .isFavorited(property.id),
                                     onToggleFavorite: () {
-                                      _favoritesController.toggle(property);
+                                      return _favoritesController.toggle(
+                                        property,
+                                      );
                                     },
                                     onTap: () {
                                       Navigator.of(context).push(
@@ -918,7 +923,7 @@ class _PropertyCard extends StatelessWidget {
   final String? distanceText;
   final VoidCallback onTap;
   final bool isFavorited;
-  final VoidCallback onToggleFavorite;
+  final Future<HomeUFavouriteActionResult> Function() onToggleFavorite;
 
   @override
   Widget build(BuildContext context) {
@@ -953,22 +958,97 @@ class _PropertyCard extends StatelessWidget {
                 Positioned(
                   right: 10,
                   top: 10,
-                  child: CircleAvatar(
-                    radius: 16,
-                    backgroundColor: context.homeuCard,
-                    child: IconButton(
-                      key: Key('favorite_toggle_${property.id}'),
-                      padding: EdgeInsets.zero,
-                      onPressed: onToggleFavorite,
-                      icon: Icon(
-                        isFavorited
-                            ? Icons.favorite_rounded
-                            : Icons.favorite_border_rounded,
-                        size: 18,
-                        color: property.accentColor,
-                      ),
-                    ),
-                  ),
+                  child: HomeUSession.loggedInRole != null &&
+                          HomeUSession.loggedInRole != HomeURole.tenant
+                      ? const SizedBox.shrink()
+                      : ListenableBuilder(
+                          listenable: HomeUFavoritesController.instance,
+                          builder: (context, _) {
+                            final favoritesController =
+                                HomeUFavoritesController.instance;
+                            final favorited =
+                                favoritesController.isFavorited(property.id) ||
+                                isFavorited;
+                            final isBusy = favoritesController.isBusy(
+                              property.id,
+                            );
+                            return CircleAvatar(
+                              radius: 16,
+                              backgroundColor: context.homeuCard,
+                              child: IconButton(
+                                key: Key('favorite_toggle_${property.id}'),
+                                padding: EdgeInsets.zero,
+                                onPressed: isBusy
+                                    ? null
+                                    : () async {
+                                        final result = await onToggleFavorite();
+                                        if (!context.mounted) return;
+                                        switch (result) {
+                                          case HomeUFavouriteActionResult
+                                              .added:
+                                          case HomeUFavouriteActionResult
+                                              .removed:
+                                          case HomeUFavouriteActionResult.busy:
+                                            break;
+                                          case HomeUFavouriteActionResult
+                                              .requiresLogin:
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                  'Please login to save favourites.',
+                                                ),
+                                              ),
+                                            );
+                                            break;
+                                          case HomeUFavouriteActionResult
+                                              .requiresTenant:
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                  'Favourites are only available for tenants.',
+                                                ),
+                                              ),
+                                            );
+                                            break;
+                                          case HomeUFavouriteActionResult
+                                              .policyBlocked:
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                  'Favourites are blocked by Supabase RLS. Run favourites_rls.sql in Supabase.',
+                                                ),
+                                              ),
+                                            );
+                                            break;
+                                          case HomeUFavouriteActionResult
+                                              .failed:
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                  'Unable to update favourite. Please try again.',
+                                                ),
+                                              ),
+                                            );
+                                            break;
+                                        }
+                                      },
+                                icon: Icon(
+                                  favorited
+                                      ? Icons.favorite_rounded
+                                      : Icons.favorite_border_rounded,
+                                  size: 18,
+                                  color: favorited
+                                      ? Colors.red
+                                      : context.homeuMutedText,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
                 ),
                 Positioned(
                   left: 10,

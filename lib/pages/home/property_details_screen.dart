@@ -13,6 +13,7 @@ import 'package:homeu/pages/home/chat_screen.dart';
 import 'package:homeu/pages/home/property_item.dart';
 import 'package:homeu/pages/home/property_image_gallery.dart';
 import 'package:homeu/pages/home/viewing_screen.dart';
+import 'dart:async';
 
 import 'package:homeu/core/supabase/app_supabase.dart';
 
@@ -35,6 +36,7 @@ class _HomeUPropertyDetailsScreenState
   @override
   void initState() {
     super.initState();
+    unawaited(_favoritesController.loadForCurrentTenant());
     _ownerProfileFuture = AppSupabase.client
         .from('profiles')
         .select(
@@ -713,18 +715,80 @@ class _HomeUPropertyDetailsScreenState
                           ),
                         ),
                       ),
-                      IconButton(
-                        key: const Key('details_favorite_toggle'),
-                        onPressed: () {
-                          _favoritesController.toggle(property);
-                        },
-                        icon: Icon(
-                          isFavorited
-                              ? Icons.favorite_rounded
-                              : Icons.favorite_border_rounded,
-                          color: context.homeuAccent,
-                        ),
-                      ),
+                        HomeUSession.loggedInRole != null &&
+                                HomeUSession.loggedInRole != HomeURole.tenant
+                            ? const SizedBox.shrink()
+                            : IconButton(
+                                key: const Key('details_favorite_toggle'),
+                                onPressed: _favoritesController.isBusy(
+                                        property.id)
+                                    ? null
+                                    : () async {
+                                        final result = await _favoritesController
+                                            .toggle(property);
+                                        if (!context.mounted) return;
+                                        switch (result) {
+                                          case HomeUFavouriteActionResult
+                                              .added:
+                                          case HomeUFavouriteActionResult
+                                              .removed:
+                                          case HomeUFavouriteActionResult.busy:
+                                            break;
+                                          case HomeUFavouriteActionResult
+                                              .requiresLogin:
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                  'Please login to save favourites.',
+                                                ),
+                                              ),
+                                            );
+                                            break;
+                                          case HomeUFavouriteActionResult
+                                              .requiresTenant:
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                  'Favourites are only available for tenants.',
+                                                ),
+                                              ),
+                                            );
+                                            break;
+                                          case HomeUFavouriteActionResult
+                                              .policyBlocked:
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                  'Favourites are blocked by Supabase RLS. Run favourites_rls.sql in Supabase.',
+                                                ),
+                                              ),
+                                            );
+                                            break;
+                                          case HomeUFavouriteActionResult
+                                              .failed:
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                  'Unable to update favourite. Please try again.',
+                                                ),
+                                              ),
+                                            );
+                                            break;
+                                        }
+                                      },
+                                icon: Icon(
+                                  isFavorited
+                                      ? Icons.favorite_rounded
+                                      : Icons.favorite_border_rounded,
+                                  color: isFavorited
+                                      ? Colors.red
+                                      : context.homeuMutedText,
+                                ),
+                              ),
                     ],
                   ),
                   const SizedBox(height: 6),
