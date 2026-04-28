@@ -490,7 +490,7 @@ class _ViewingHistoryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     const purpleAccent = Color(0xFF6366F1);
     const grayBorder = Color(0xFFF1F5F9);
-    final isPast = viewing.status.toLowerCase() == 'completed' || 
+    final isPast = viewing.status.toLowerCase() == 'completed' ||
                    viewing.status.toLowerCase() == 'cancelled' ||
                    viewing.status.toLowerCase() == 'rejected' ||
                    viewing.status.toLowerCase() == 'slot taken' ||
@@ -643,7 +643,7 @@ class _ViewingHistoryCard extends StatelessWidget {
         const SizedBox(height: 6),
         // Title
         Padding(
-          padding: const EdgeInsets.only(right: 60), 
+          padding: const EdgeInsets.only(right: 60),
           child: Text(
             property.name,
             style: const TextStyle(
