@@ -267,16 +267,46 @@ class _HomeUViewingScreenState extends State<HomeUViewingScreen> {
   }
 
   Future<void> _confirmViewing() async {
+    if (_selectedSlot == null) return;
+    
     setState(() => _isSubmitting = true);
     try {
       final tenantId = AppSupabase.auth.currentUser?.id;
-      final startTime = DateTime.parse(_selectedSlot!['start_time'] as String);
+      if (tenantId == null) return;
 
+      final startTimeStr = _selectedSlot!['start_time'] as String;
+      final startTime = DateTime.parse(startTimeStr);
+
+      // 1. Check for existing similar request
+      final existingResponse = await AppSupabase.client
+          .from('viewing_requests')
+          .select('id')
+          .eq('property_id', widget.property.id)
+          .eq('tenant_id', tenantId)
+          .eq('scheduled_at', startTime.toUtc().toIso8601String())
+          .not('status', 'in', '("Cancelled","Rejected")');
+
+      final List existing = existingResponse as List;
+
+      if (existing.isNotEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('You have already scheduled a viewing for this time slot. Please check your Requests.'),
+              backgroundColor: context.homeuAccent,
+            ),
+          );
+        }
+        setState(() => _isSubmitting = false);
+        return;
+      }
+
+      // 2. Proceed with insert if no duplicate found
       final request = ViewingRequest(
         id: const Uuid().v4(),
         propertyId: widget.property.id,
         ownerId: widget.property.ownerId,
-        tenantId: tenantId!,
+        tenantId: tenantId,
         scheduledAt: startTime,
         status: 'Pending',
         createdAt: DateTime.now().toUtc(),

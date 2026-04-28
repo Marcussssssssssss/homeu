@@ -9,6 +9,7 @@ import 'package:homeu/core/localization/homeu_l10n.dart';
 import 'package:homeu/core/theme/homeu_app_theme.dart';
 import 'package:homeu/pages/home/home_tenant_shell_screen.dart';
 import 'package:homeu/pages/home/home_owner_shell_screen.dart';
+import 'package:homeu/pages/home/home_admin_shell_screen.dart';
 import 'package:homeu/pages/auth/register_screen.dart';
 
 import 'forgot_password_screen.dart';
@@ -71,10 +72,20 @@ class _HomeULoginScreenState extends State<HomeULoginScreen> {
   }
 
   void _navigateToHome(HomeURole role) {
+    debugPrint('HomeULoginScreen: [DEBUG] Navigating for role: $role');
     HomeUSession.register(role);
-    final Widget destination = role == HomeURole.owner
-        ? const HomeUOwnerShellScreen()
-        : const HomeUTenantShellScreen();
+    
+    Widget destination;
+    if (role == HomeURole.admin) {
+      debugPrint('HomeULoginScreen: [DEBUG] Destination: Admin Dashboard');
+      destination = const HomeUAdminShellScreen();
+    } else if (role == HomeURole.owner) {
+      debugPrint('HomeULoginScreen: [DEBUG] Destination: Owner Shell');
+      destination = const HomeUOwnerShellScreen();
+    } else {
+      debugPrint('HomeULoginScreen: [DEBUG] Destination: Tenant Shell');
+      destination = const HomeUTenantShellScreen();
+    }
 
     Navigator.of(
       context,
@@ -91,6 +102,7 @@ class _HomeULoginScreenState extends State<HomeULoginScreen> {
     if (success && mounted) {
       if (HomeUAuthService.instance.hasActiveSession) {
         final role = await HomeUAuthService.instance.fetchCurrentUserRole();
+        debugPrint('HomeULoginScreen: [DEBUG] Biometric fetch role: $role');
         if (role != null) {
           // Unlock the app locally
           await BiometricAuthService.instance.setAppLocked(false);
@@ -147,6 +159,8 @@ class _HomeULoginScreenState extends State<HomeULoginScreen> {
       );
       return;
     }
+
+    debugPrint('HomeULoginScreen: [DEBUG] Login successful. ID: ${HomeUAuthService.instance.currentUserId}, Role: ${result.role}');
 
     // Success normal login: ensure app is not locked locally
     await BiometricAuthService.instance.setAppLocked(false);

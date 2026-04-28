@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+import 'package:homeu/app/booking/payment_remote_datasource.dart';
 import 'package:homeu/core/supabase/app_supabase.dart';
 import 'booking_request_models.dart';
 
@@ -12,6 +14,8 @@ class BookingRequestsRemoteDataSource {
           property_id,
           tenant_id,
           status, 
+          move_in_date,     
+          move_out_date,  
           created_at,
           total_amount,
           properties!inner (title, monthly_price, owner_id)
@@ -70,7 +74,7 @@ class BookingRequestsRemoteDataSource {
         .from('booking_requests')
         .update({'status': newStatus})
         .eq('id', bookingId)
-        .select('id, property_id, created_at, total_amount, properties!inner(monthly_price)');
+        .select('id, property_id, move_in_date, move_out_date, created_at, total_amount, properties!inner(monthly_price)');
 
     if (response.isEmpty) {
       throw Exception('Failed to update booking. You may not have permission.');
@@ -80,14 +84,14 @@ class BookingRequestsRemoteDataSource {
       final approvedData = response.first;
       final propertyId = approvedData['property_id'];
 
-      final startA = _parseDateTime(approvedData['created_at']);
+      final startA = _parseDateTime(approvedData['move_in_date']) ?? _parseDateTime(approvedData['created_at']);
       final durationA = _resolveDurationMonths(approvedData);
 
       if (propertyId != null && startA != null) {
         final endA = DateTime(startA.year, startA.month + durationA, startA.day);
         final pendingResponses = await AppSupabase.client
             .from('booking_requests')
-            .select('id, created_at, total_amount, properties!inner(monthly_price)')
+            .select('id, move_in_date, move_out_date, created_at, total_amount, properties!inner(monthly_price)')
             .eq('property_id', propertyId)
             .neq('id', bookingId)
             .inFilter('status', ['Pending', 'Pending Decision']);
@@ -96,7 +100,7 @@ class BookingRequestsRemoteDataSource {
         final idsToCancel = <String>[];
 
         for (final pending in pendingList.whereType<Map<String, dynamic>>()) {
-          final startB = _parseDateTime(pending['created_at']);
+          final startB = _parseDateTime(pending['move_in_date']) ?? _parseDateTime(pending['created_at']);
           if (startB == null) {
             continue;
           }
@@ -133,9 +137,12 @@ class BookingRequestsRemoteDataSource {
   }
 
   int _resolveDurationMonths(Map<String, dynamic> row) {
-    final rawDuration = row['duration_months'];
-    if (rawDuration is num && rawDuration > 0) {
-      return rawDuration.toInt();
+    final moveIn = _parseDateTime(row['move_in_date']);
+    final moveOut = _parseDateTime(row['move_out_date']);
+
+    if (moveIn != null && moveOut != null) {
+      final months = (moveOut.year - moveIn.year) * 12 + moveOut.month - moveIn.month;
+      if (months > 0) return months;
     }
 
     final totalAmount = _parseNum(row['total_amount']);

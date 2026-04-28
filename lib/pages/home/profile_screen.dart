@@ -80,16 +80,21 @@ class _HomeUProfileScreenState extends State<HomeUProfileScreen> {
     if (value) {
       final canAuth = await BiometricAuthService.instance.canAuthenticate();
       if (!canAuth) {
-        _showProfileFeedback('Biometric authentication is not available or not set up on this device.');
+        _showProfileFeedback(
+          'Biometric authentication is not available or not set up on this device.',
+        );
         return;
       }
 
-      final authenticated = await BiometricAuthService.instance.authenticateWithBiometrics(
-        localizedReason: 'Please authenticate to enable biometric login',
-      );
+      final authenticated = await BiometricAuthService.instance
+          .authenticateWithBiometrics(
+            localizedReason: 'Please authenticate to enable biometric login',
+          );
 
       if (authenticated) {
-        final success = await _profileController.updateBiometricPreference(true);
+        final success = await _profileController.updateBiometricPreference(
+          true,
+        );
         if (success) {
           await BiometricAuthService.instance.enableForUser(
             userId: _profileController.profile.userId,
@@ -146,7 +151,9 @@ class _HomeUProfileScreenState extends State<HomeUProfileScreen> {
     if (updated) {
       _showProfileFeedback(context.l10n.profileUpdatedSuccess);
     } else if (_profileController.errorMessage != null) {
-      _showProfileFeedback(_resolveProfileMessage(_profileController.errorMessage!));
+      _showProfileFeedback(
+        _resolveProfileMessage(_profileController.errorMessage!),
+      );
     }
   }
 
@@ -184,30 +191,36 @@ class _HomeUProfileScreenState extends State<HomeUProfileScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 ListTile(
-                  leading: const CircleAvatar(
-                    backgroundColor: Color(0x1F1E3A8A),
-                    child: Icon(
-                      Icons.photo_library_outlined,
-                      color: Colors.white,
-                    ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2,
+                  ),
+                  minLeadingWidth: 44,
+                  leading: const _AvatarPickerLeadingIcon(
+                    icon: Icons.photo_library_outlined,
                   ),
                   title: Text(context.l10n.profilePhotoChooseGallery),
                   subtitle: Text(
                     context.l10n.profilePhotoChooseGallerySubtitle,
+                    style: TextStyle(color: context.homeuSecondaryText),
                   ),
                   onTap: () =>
                       Navigator.of(sheetContext).pop(_AvatarAction.gallery),
                 ),
                 ListTile(
-                  leading: const CircleAvatar(
-                    backgroundColor: Color(0x1F1E3A8A),
-                    child: Icon(
-                      Icons.photo_camera_outlined,
-                      color: Colors.white,
-                    ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2,
+                  ),
+                  minLeadingWidth: 44,
+                  leading: const _AvatarPickerLeadingIcon(
+                    icon: Icons.photo_camera_outlined,
                   ),
                   title: Text(context.l10n.profilePhotoTakeCamera),
-                  subtitle: Text(context.l10n.profilePhotoTakeCameraSubtitle),
+                  subtitle: Text(
+                    context.l10n.profilePhotoTakeCameraSubtitle,
+                    style: TextStyle(color: context.homeuSecondaryText),
+                  ),
                   onTap: () =>
                       Navigator.of(sheetContext).pop(_AvatarAction.camera),
                 ),
@@ -244,8 +257,8 @@ class _HomeUProfileScreenState extends State<HomeUProfileScreen> {
       }
 
       final previousLocalAvatarPath = _localAvatarPath;
-      final previousRemoteAvatarUrl =
-          _profileController.profile.profileImageUrl?.trim();
+      final previousRemoteAvatarUrl = _profileController.profile.profileImageUrl
+          ?.trim();
 
       setState(() {
         _localAvatarPath = pickedFile.path;
@@ -259,7 +272,8 @@ class _HomeUProfileScreenState extends State<HomeUProfileScreen> {
       }
 
       if (uploaded) {
-        if (previousRemoteAvatarUrl != null && previousRemoteAvatarUrl.isNotEmpty) {
+        if (previousRemoteAvatarUrl != null &&
+            previousRemoteAvatarUrl.isNotEmpty) {
           await NetworkImage(previousRemoteAvatarUrl).evict();
         }
 
@@ -308,6 +322,30 @@ class _HomeUProfileScreenState extends State<HomeUProfileScreen> {
         return t.themeDark;
       default:
         return t.themeLight;
+    }
+  }
+
+  String _accountStatusLabel(BuildContext context, HomeUAccountStatus status) {
+    final t = context.l10n;
+    switch (status) {
+      case HomeUAccountStatus.suspended:
+        return t.profileAccountStatusSuspended;
+      case HomeUAccountStatus.removed:
+        return t.profileAccountStatusRemoved;
+      case HomeUAccountStatus.active:
+        return t.profileAccountStatusActive;
+    }
+  }
+
+  String _riskStatusLabel(BuildContext context, HomeURiskStatus status) {
+    final t = context.l10n;
+    switch (status) {
+      case HomeURiskStatus.suspicious:
+        return t.profileRiskStatusSuspicious;
+      case HomeURiskStatus.highRisk:
+        return t.profileRiskStatusHigh;
+      case HomeURiskStatus.normal:
+        return t.profileRiskStatusNormal;
     }
   }
 
@@ -400,7 +438,9 @@ class _HomeUProfileScreenState extends State<HomeUProfileScreen> {
       HomeULanguageController.instance.setLocalLanguage(selectedCode);
       _showProfileFeedback(context.l10n.profileLanguageSaved);
     } else if (_profileController.errorMessage != null) {
-      _showProfileFeedback(_resolveProfileMessage(_profileController.errorMessage!));
+      _showProfileFeedback(
+        _resolveProfileMessage(_profileController.errorMessage!),
+      );
     }
   }
 
@@ -435,9 +475,7 @@ class _HomeUProfileScreenState extends State<HomeUProfileScreen> {
           ),
           content: Text(
             'Are you sure you want to log out of your HomeU account?',
-            style: TextStyle(
-              color: context.homeuSecondaryText,
-            ),
+            style: TextStyle(color: context.homeuSecondaryText),
           ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
@@ -492,9 +530,7 @@ class _HomeUProfileScreenState extends State<HomeUProfileScreen> {
     }
 
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute<void>(
-        builder: (_) => const HomeULoginScreen(),
-      ),
+      MaterialPageRoute<void>(builder: (_) => const HomeULoginScreen()),
       (route) => false,
     );
   }
@@ -505,13 +541,23 @@ class _HomeUProfileScreenState extends State<HomeUProfileScreen> {
       return HomeURoleBlockedScreen(requiredRole: widget.role);
     }
     return AnimatedBuilder(
-      animation: Listenable.merge([_profileController, HomeUThemeController.instance]),
+      animation: Listenable.merge([
+        _profileController,
+        HomeUThemeController.instance,
+      ]),
       builder: (context, _) {
         final t = context.l10n;
         final profile = _profileController.profile;
-        final roleLabel = profile.role == HomeURole.owner
-            ? t.profileRoleOwner
-            : t.profileRoleTenant;
+        final roleLabel = switch (profile.role) {
+          HomeURole.owner => t.profileRoleOwner,
+          HomeURole.admin => t.profileRoleAdmin,
+          HomeURole.tenant => t.profileRoleTenant,
+        };
+        final accountStatusLabel = _accountStatusLabel(
+          context,
+          profile.accountStatus,
+        );
+        final riskStatusLabel = _riskStatusLabel(context, profile.riskStatus);
         final selectedLanguageLabel = _languageLabel(
           context,
           _profileController.selectedLanguageCode,
@@ -527,9 +573,7 @@ class _HomeUProfileScreenState extends State<HomeUProfileScreen> {
             : null;
         final ImageProvider<Object>? avatarImage = _localAvatarPath != null
             ? FileImage(File(_localAvatarPath!))
-            : (hasNetworkAvatar
-                  ? NetworkImage(avatarUrl!)
-                  : null);
+            : (hasNetworkAvatar ? NetworkImage(avatarUrl!) : null);
         return Scaffold(
           backgroundColor: context.colors.surface,
           appBar: AppBar(
@@ -575,6 +619,40 @@ class _HomeUProfileScreenState extends State<HomeUProfileScreen> {
                         email: profile.email,
                         phone: profile.phoneNumber,
                         roleLabel: roleLabel,
+                        accountStatusLabel: accountStatusLabel,
+                        riskStatusLabel: riskStatusLabel,
+                      ),
+                      SizedBox(height: sectionGap),
+                      SizedBox(
+                        height: 48,
+                        child: OutlinedButton(
+                          key: const Key('edit_profile_button'),
+                          onPressed: _profileController.isSaving
+                              ? null
+                              : () {
+                                  _openEditProfileSheet(profile);
+                                },
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: context.homeuAccent,
+                            side: BorderSide(color: context.homeuSoftBorder),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            textStyle: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          child: _profileController.isSaving
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : Text(t.profileEditButton),
+                        ),
                       ),
                       if (_profileController.errorMessage != null) ...[
                         SizedBox(height: sectionGap),
@@ -586,7 +664,9 @@ class _HomeUProfileScreenState extends State<HomeUProfileScreen> {
                             border: Border.all(color: const Color(0xFFFFD2D2)),
                           ),
                           child: Text(
-                            _resolveProfileMessage(_profileController.errorMessage!),
+                            _resolveProfileMessage(
+                              _profileController.errorMessage!,
+                            ),
                             style: const TextStyle(
                               color: Color(0xFFB42318),
                               fontSize: 12.8,
@@ -621,7 +701,8 @@ class _HomeUProfileScreenState extends State<HomeUProfileScreen> {
                                 onTap: () {
                                   Navigator.of(context).push(
                                     MaterialPageRoute<void>(
-                                      builder: (_) => const HomeUFavoritesScreen(),
+                                      builder: (_) =>
+                                          const HomeUFavoritesScreen(),
                                     ),
                                   );
                                 },
@@ -661,9 +742,14 @@ class _HomeUProfileScreenState extends State<HomeUProfileScreen> {
                                 title: 'Biometric Login',
                                 subtitle: 'Unlock HomeU with biometrics',
                                 trailing: Switch(
-                                  value: _profileController.isBiometricLoginEnabled,
-                                  onChanged: (_profileController.isSaving || _profileController.isLoading) ? null : _toggleBiometric,
-                                  activeColor: context.homeuAccent,
+                                  value: _profileController
+                                      .isBiometricLoginEnabled,
+                                  onChanged:
+                                      (_profileController.isSaving ||
+                                          _profileController.isLoading)
+                                      ? null
+                                      : _toggleBiometric,
+                                  activeThumbColor: context.homeuAccent,
                                 ),
                               ),
                             ],
@@ -688,48 +774,6 @@ class _HomeUProfileScreenState extends State<HomeUProfileScreen> {
                             Divider(
                               height: 1,
                               color: context.homeuSectionDivider,
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(
-                                14,
-                                12,
-                                14,
-                                12,
-                              ),
-                              child: SizedBox(
-                                height: 48,
-                                width: double.infinity,
-                                child: OutlinedButton(
-                                  key: const Key('edit_profile_button'),
-                                  onPressed: _profileController.isSaving
-                                      ? null
-                                      : () {
-                                          _openEditProfileSheet(profile);
-                                        },
-                                  style: OutlinedButton.styleFrom(
-                                    foregroundColor: context.homeuAccent,
-                                    side: BorderSide(
-                                      color: context.homeuSoftBorder,
-                                    ),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(14),
-                                    ),
-                                    textStyle: const TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                  child: _profileController.isSaving
-                                      ? const SizedBox(
-                                          width: 18,
-                                          height: 18,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                          ),
-                                        )
-                                      : Text(t.profileEditButton),
-                                ),
-                              ),
                             ),
                           ],
                         ),
@@ -904,12 +948,16 @@ class _ProfileDetailsCard extends StatelessWidget {
     required this.email,
     required this.phone,
     required this.roleLabel,
+    required this.accountStatusLabel,
+    required this.riskStatusLabel,
   });
 
   final String name;
   final String email;
   final String phone;
   final String roleLabel;
+  final String accountStatusLabel;
+  final String riskStatusLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -960,6 +1008,18 @@ class _ProfileDetailsCard extends StatelessWidget {
             icon: Icons.badge_outlined,
             label: context.l10n.profileFieldRole,
             value: roleLabel,
+          ),
+          const SizedBox(height: 12),
+          _ProfileDetailItem(
+            icon: Icons.verified_user_outlined,
+            label: context.l10n.profileFieldAccountStatus,
+            value: accountStatusLabel,
+          ),
+          const SizedBox(height: 12),
+          _ProfileDetailItem(
+            icon: Icons.gpp_maybe_outlined,
+            label: context.l10n.profileFieldRiskStatus,
+            value: riskStatusLabel,
           ),
         ],
       ),
@@ -1096,6 +1156,33 @@ class _ProfileActionTile extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _AvatarPickerLeadingIcon extends StatelessWidget {
+  const _AvatarPickerLeadingIcon({required this.icon});
+
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final borderColor = context.homeuAccent.withValues(
+      alpha: context.isDarkMode ? 0.35 : 0.2,
+    );
+    final bgColor = context.isDarkMode
+        ? context.homeuAccent.withValues(alpha: 0.22)
+        : const Color(0xFFE8EEFF);
+
+    return Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: borderColor),
+      ),
+      child: Icon(icon, color: context.homeuAccent, size: 22),
     );
   }
 }

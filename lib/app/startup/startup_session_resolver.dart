@@ -7,6 +7,7 @@ enum HomeUStartupDestination {
   authFlow,
   tenantFlow,
   ownerFlow,
+  adminFlow
 }
 
 class HomeUStartupSessionResolver {
@@ -98,6 +99,9 @@ class HomeUStartupSessionResolver {
     }
     if (role == HomeURole.tenant) {
       return HomeUStartupDestination.tenantFlow;
+    }
+    if (role == HomeURole.admin) {
+      return HomeUStartupDestination.adminFlow;
     }
     return HomeUStartupDestination.authFlow;
   }
