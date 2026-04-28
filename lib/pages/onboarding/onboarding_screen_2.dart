@@ -242,7 +242,9 @@ class _OwnerListingIllustration extends StatelessWidget {
           ),
           Center(
             child: Padding(
-              padding: const EdgeInsets.only(top: 48), // Added top padding to prevent overlap
+              padding: const EdgeInsets.only(
+                top: 48,
+              ), // Added top padding to prevent overlap
               child: FittedBox(
                 fit: BoxFit.scaleDown,
                 child: SizedBox(

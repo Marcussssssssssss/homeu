@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:homeu/core/supabase/app_supabase.dart';
+import 'package:homeu/app/property/property_storage_image_datasource.dart';
+import 'package:homeu/app/profile/profile_models.dart';
 import 'package:homeu/pages/home/property_item.dart';
 
 class PropertyRemoteDataSource {
   const PropertyRemoteDataSource();
+
+  static const PropertyStorageImageDataSource _storageImageDataSource =
+      PropertyStorageImageDataSource();
 
   Future<List<PropertyItem>> fetchPublishedProperties() async {
     if (!AppSupabase.isInitialized) {
@@ -12,9 +17,7 @@ class PropertyRemoteDataSource {
 
     final dynamic rows = await AppSupabase.client
         .from('properties')
-        .select(
-      'id, owner_id, title, description, location_area, monthly_price, property_type, room_type, furnishing, nearby_landmarks, created_at, status, facilities',
-    )
+        .select('*')
         .eq('status', 'Active');
 
     if (rows is! List) {
@@ -22,25 +25,22 @@ class PropertyRemoteDataSource {
     }
 
     final propertyRows = rows.whereType<Map<String, dynamic>>().toList();
-    final propertyIds = propertyRows
-        .map((row) => row['id']?.toString() ?? '')
-        .where((id) => id.isNotEmpty)
-        .toList();
 
     final ownerProfiles = await _fetchOwnerProfiles(
       propertyRows.map((row) => row['owner_id']?.toString() ?? ''),
     );
 
-    final imageMap = await _fetchPropertyImages(propertyIds);
+    final imageMap = await _fetchPropertyImages(propertyRows);
 
     return propertyRows.map((row) {
       final propertyId = row['id']?.toString() ?? '';
-      return _mapRowToPropertyItem(
+      final property = _mapRowToPropertyItem(
         row,
         ownerProfiles,
         imageMap[propertyId] ?? const <String>[],
       );
-    }).toList();
+      return property;
+    }).where((property) => !property.isOwnerRestricted).toList();
   }
 
   Future<Map<String, PropertyItem>> fetchPropertiesByIds(
@@ -62,9 +62,7 @@ class PropertyRemoteDataSource {
 
     final dynamic rows = await AppSupabase.client
         .from('properties')
-        .select(
-      'id, owner_id, title, description, location_area, monthly_price, property_type, room_type, furnishing, nearby_landmarks, created_at, status, facilities',
-    )
+        .select('*')
         .inFilter('id', ids);
 
     if (rows is! List) {
@@ -76,7 +74,7 @@ class PropertyRemoteDataSource {
       propertyRows.map((row) => row['owner_id']?.toString() ?? ''),
     );
 
-    final imageMap = await _fetchPropertyImages(ids);
+    final imageMap = await _fetchPropertyImages(propertyRows);
 
     final mapped = <String, PropertyItem>{};
     for (final row in propertyRows) {
@@ -95,73 +93,39 @@ class PropertyRemoteDataSource {
   }
 
   Future<Map<String, List<String>>> _fetchPropertyImages(
-    Iterable<String> propertyIds,
+    List<Map<String, dynamic>> propertyRows,
   ) async {
-    final ids = propertyIds
-        .map((id) => id.trim())
-        .where((id) => id.isNotEmpty)
-        .toSet()
-        .toList();
-
-    if (ids.isEmpty) return {};
-
-    try {
-      final dynamic rows = await AppSupabase.client
-          .from('property_image')
-          .select('property_id, public_url, sort_order')
-          .inFilter('property_id', ids);
-
-      if (rows is! List) return {};
-
-      final Map<String, List<Map<String, dynamic>>> groupedRaw = {};
-      for (final row in rows.whereType<Map<String, dynamic>>()) {
-        final pid = row['property_id']?.toString() ?? '';
-        if (pid.isEmpty) continue;
-        groupedRaw.putIfAbsent(pid, () => []);
-        groupedRaw[pid]!.add(row);
-      }
-
-      final Map<String, List<String>> result = {};
-
-      int extractIndex(String url) {
-        final reg = RegExp(r'_(\d+)\.\w+$');
-        final match = reg.firstMatch(url);
-        if (match != null) return int.parse(match.group(1)!);
-        return 999999;
-      }
-
-      groupedRaw.forEach((propertyId, images) {
-        // Sort by sort_order ASC, then by filename numeric suffix
-        images.sort((a, b) {
-          final int sA = (a['sort_order'] as num?)?.toInt() ?? 999999;
-          final int sB = (b['sort_order'] as num?)?.toInt() ?? 999999;
-          if (sA != sB) return sA.compareTo(sB);
-
-          final String uA = a['public_url']?.toString() ?? '';
-          final String uB = b['public_url']?.toString() ?? '';
-          return extractIndex(uA).compareTo(extractIndex(uB));
-        });
-
-        result[propertyId] = images
-            .map((img) => img['public_url']?.toString() ?? '')
-            .where((url) => url.isNotEmpty)
-            .toList();
-
-        debugPrint('[DEBUG] Property Image Mapping:');
-        debugPrint('  - Properties ID: $propertyId');
-        debugPrint('  - Image Table Property_ID Match: $propertyId');
-        debugPrint('  - Total Images Attached: ${result[propertyId]!.length}');
-        if (result[propertyId]!.isNotEmpty) {
-          debugPrint('  - First Image (_0 expected): ${result[propertyId]!.first}');
-          debugPrint('  - Full Ordered List: ${result[propertyId]}');
-        }
-      });
-
-      return result;
-    } catch (e) {
-      debugPrint('Error fetching images: $e');
-      return {};
+    if (propertyRows.isEmpty) {
+      return const <String, List<String>>{};
     }
+
+    final mapped = await Future.wait(
+      propertyRows.map((row) async {
+        final propertyId = row['id']?.toString().trim() ?? '';
+        final ownerId = row['owner_id']?.toString().trim() ?? '';
+        if (propertyId.isEmpty) {
+          return null;
+        }
+
+        final urls = await _storageImageDataSource.fetchPropertyImageUrls(
+          propertyId: propertyId,
+          ownerId: ownerId,
+        );
+
+        if (urls.isEmpty) {
+          return null;
+        }
+
+        return MapEntry(propertyId, urls);
+      }),
+    );
+
+    final result = <String, List<String>>{};
+    for (final entry in mapped.whereType<MapEntry<String, List<String>>>()) {
+      result[entry.key] = entry.value;
+    }
+
+    return result;
   }
 
   Future<Map<String, _OwnerProfile>> _fetchOwnerProfiles(
@@ -180,7 +144,8 @@ class PropertyRemoteDataSource {
     try {
       final dynamic rows = await AppSupabase.client
           .from('profiles')
-          .select('id, full_name, role, avatar_url')
+          .select('*')
+          .eq('role', 'owner')
           .inFilter('id', ids);
 
       if (rows is! List) {
@@ -195,8 +160,13 @@ class PropertyRemoteDataSource {
         }
         mapped[id] = _OwnerProfile(
           fullName: row['full_name']?.toString().trim() ?? '',
+          name: row['name']?.toString().trim() ?? '',
+          username: row['username']?.toString().trim() ?? '',
           role: row['role']?.toString().trim() ?? '',
           avatarUrl: row['avatar_url']?.toString().trim(),
+          riskStatus: _parseRiskStatus(row['risk_status']?.toString()),
+          accountStatus: _parseAccountStatus(row['account_status']?.toString()),
+          riskReason: row['risk_reason']?.toString(),
         );
       }
       return mapped;
@@ -219,11 +189,15 @@ class PropertyRemoteDataSource {
     final ownerId = row['owner_id']?.toString() ?? '';
     final ownerProfile = ownerProfiles[ownerId];
 
-    final ownerName = ownerProfile?.fullName.isNotEmpty == true
-        ? ownerProfile!.fullName
-        : 'Property Owner';
+    final ownerName = _resolveOwnerDisplayName(ownerProfile);
 
     final ownerRole = _formatOwnerRole(ownerProfile?.role ?? 'owner');
+
+    final rawAddress = row['address']?.toString().trim() ?? '';
+    final rawLocationArea = row['location_area']?.toString().trim() ?? '';
+    final address = rawAddress.isNotEmpty ? rawAddress : rawLocationArea;
+    final latitude = _parseDouble(row['latitude']);
+    final longitude = _parseDouble(row['longitude']);
 
     final rawFacilities = row['facilities'];
     List<String> facilities = [];
@@ -237,12 +211,23 @@ class PropertyRemoteDataSource {
           .toList();
     }
 
+    final nearbyLandmarks = row['nearby_landmarks'];
+    final nearbyLandmarksText = nearbyLandmarks is List
+        ? nearbyLandmarks
+              .map((e) => e.toString())
+              .where((e) => e.trim().isNotEmpty)
+              .join(', ')
+        : nearbyLandmarks?.toString().trim() ?? '';
+
     return PropertyItem(
       id: row['id']?.toString() ?? '',
       ownerId: ownerId,
       name: row['title']?.toString() ?? '',
       description: row['description']?.toString() ?? '',
-      location: row['location_area']?.toString() ?? '',
+      location: rawLocationArea,
+      address: address,
+      latitude: latitude,
+      longitude: longitude,
       pricePerMonth: priceText,
       rating: 4.5,
       accentColor: const Color(0xFF1E3A8A),
@@ -251,13 +236,18 @@ class PropertyRemoteDataSource {
       propertyType: row['property_type']?.toString() ?? 'Any',
       roomType: row['room_type']?.toString() ?? 'Any',
       furnishing: row['furnishing']?.toString() ?? 'Any',
-      nearbyLandmarks:
-          row['nearby_landmarks'] ?? 'Nearby landmarks not available.',
+      nearbyLandmarks: nearbyLandmarksText.isNotEmpty
+          ? nearbyLandmarksText
+          : 'Nearby landmarks not available.',
       createdAt: createdAt,
       status: row['status']?.toString() ?? 'Active',
       facilities: facilities,
       imageUrls: imageUrls,
       ownerPhotoUrl: ownerProfile?.avatarUrl,
+      ownerRiskStatus: ownerProfile?.riskStatus ?? HomeURiskStatus.normal,
+      ownerAccountStatus:
+          ownerProfile?.accountStatus ?? HomeUAccountStatus.active,
+      ownerRiskReason: ownerProfile?.riskReason,
       photoColors: const [
         Color(0xFF5D7FBF),
         Color(0xFF4A68A8),
@@ -279,16 +269,77 @@ class PropertyRemoteDataSource {
     }
     return '${normalized[0].toUpperCase()}${normalized.substring(1)}';
   }
+
+  double? _parseDouble(dynamic value) {
+    if (value is num) {
+      return value.toDouble();
+    }
+    if (value is String) {
+      return double.tryParse(value);
+    }
+    return null;
+  }
+
+  HomeURiskStatus _parseRiskStatus(String? value) {
+    final normalized = (value ?? '').trim().toLowerCase().replaceAll('-', '_');
+    if (normalized == 'high_risk' || normalized == 'highrisk') {
+      return HomeURiskStatus.highRisk;
+    }
+    if (normalized == 'suspicious') {
+      return HomeURiskStatus.suspicious;
+    }
+    return HomeURiskStatus.normal;
+  }
+
+  HomeUAccountStatus _parseAccountStatus(String? value) {
+    final normalized = (value ?? '').trim().toLowerCase();
+    if (normalized == 'suspended') return HomeUAccountStatus.suspended;
+    if (normalized == 'removed') return HomeUAccountStatus.removed;
+    return HomeUAccountStatus.active;
+  }
+
+  String _resolveOwnerDisplayName(_OwnerProfile? profile) {
+    if (profile == null || profile.role.trim().toLowerCase() != 'owner') {
+      return 'Unknown Owner';
+    }
+
+    final fullName = profile.fullName.trim();
+    if (fullName.isNotEmpty) {
+      return fullName;
+    }
+
+    final fallbackName = profile.name.trim();
+    if (fallbackName.isNotEmpty) {
+      return fallbackName;
+    }
+
+    final username = profile.username.trim();
+    if (username.isNotEmpty) {
+      return username;
+    }
+
+    return 'Unknown Owner';
+  }
 }
 
 class _OwnerProfile {
   const _OwnerProfile({
     required this.fullName,
+    required this.name,
+    required this.username,
     required this.role,
     this.avatarUrl,
+    this.riskStatus = HomeURiskStatus.normal,
+    this.accountStatus = HomeUAccountStatus.active,
+    this.riskReason,
   });
 
   final String fullName;
+  final String name;
+  final String username;
   final String role;
   final String? avatarUrl;
+  final HomeURiskStatus riskStatus;
+  final HomeUAccountStatus accountStatus;
+  final String? riskReason;
 }

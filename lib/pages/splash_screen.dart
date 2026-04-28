@@ -65,7 +65,9 @@ class _HomeUSplashScreenState extends State<HomeUSplashScreen> {
                           borderRadius: BorderRadius.circular(28),
                           boxShadow: [
                             BoxShadow(
-                              color: context.colors.primary.withValues(alpha: 0.18),
+                              color: context.colors.primary.withValues(
+                                alpha: 0.18,
+                              ),
                               blurRadius: 22,
                               offset: Offset(0, 10),
                             ),
@@ -202,11 +204,7 @@ class _HouseIllustration extends StatelessWidget {
               ),
             ),
           ),
-          Icon(
-            Icons.house_rounded,
-            size: 88,
-            color: context.homeuAccent,
-          ),
+          Icon(Icons.house_rounded, size: 88, color: context.homeuAccent),
           Positioned(
             right: 28,
             top: 28,

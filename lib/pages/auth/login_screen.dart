@@ -74,7 +74,7 @@ class _HomeULoginScreenState extends State<HomeULoginScreen> {
   void _navigateToHome(HomeURole role) {
     debugPrint('HomeULoginScreen: [DEBUG] Navigating for role: $role');
     HomeUSession.register(role);
-    
+
     Widget destination;
     if (role == HomeURole.admin) {
       debugPrint('HomeULoginScreen: [DEBUG] Destination: Admin Dashboard');
@@ -95,9 +95,10 @@ class _HomeULoginScreenState extends State<HomeULoginScreen> {
   Future<void> _handleBiometricLogin() async {
     if (_isLoading) return;
 
-    final success = await BiometricAuthService.instance.authenticateWithBiometrics(
-      localizedReason: 'Authenticate to access HomeU',
-    );
+    final success = await BiometricAuthService.instance
+        .authenticateWithBiometrics(
+          localizedReason: 'Authenticate to access HomeU',
+        );
 
     if (success && mounted) {
       if (HomeUAuthService.instance.hasActiveSession) {
@@ -110,17 +111,23 @@ class _HomeULoginScreenState extends State<HomeULoginScreen> {
           return;
         }
       }
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Session expired. Please login with email and password.')),
+        const SnackBar(
+          content: Text(
+            'Session expired. Please login with email and password.',
+          ),
+        ),
       );
       setState(() {
         _isBiometricAvailable = false;
         _rememberedUser = null;
       });
     } else if (!success && mounted) {
-       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Biometric authentication failed or cancelled.')),
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Biometric authentication failed or cancelled.'),
+        ),
       );
     }
   }
@@ -160,7 +167,9 @@ class _HomeULoginScreenState extends State<HomeULoginScreen> {
       return;
     }
 
-    debugPrint('HomeULoginScreen: [DEBUG] Login successful. ID: ${HomeUAuthService.instance.currentUserId}, Role: ${result.role}');
+    debugPrint(
+      'HomeULoginScreen: [DEBUG] Login successful. ID: ${HomeUAuthService.instance.currentUserId}, Role: ${result.role}',
+    );
 
     // Success normal login: ensure app is not locked locally
     await BiometricAuthService.instance.setAppLocked(false);
@@ -247,7 +256,10 @@ class _HomeULoginScreenState extends State<HomeULoginScreen> {
                           ),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(16),
-                            child: Image.asset('HomeU.png', fit: BoxFit.contain),
+                            child: Image.asset(
+                              'HomeU.png',
+                              fit: BoxFit.contain,
+                            ),
                           ),
                         ),
                       ),
@@ -282,9 +294,13 @@ class _HomeULoginScreenState extends State<HomeULoginScreen> {
                         const SizedBox(height: 24),
                         Row(
                           children: [
-                            Expanded(child: Divider(color: context.homeuSoftBorder)),
+                            Expanded(
+                              child: Divider(color: context.homeuSoftBorder),
+                            ),
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                              ),
                               child: Text(
                                 'OR',
                                 style: TextStyle(
@@ -294,7 +310,9 @@ class _HomeULoginScreenState extends State<HomeULoginScreen> {
                                 ),
                               ),
                             ),
-                            Expanded(child: Divider(color: context.homeuSoftBorder)),
+                            Expanded(
+                              child: Divider(color: context.homeuSoftBorder),
+                            ),
                           ],
                         ),
                         const SizedBox(height: 24),

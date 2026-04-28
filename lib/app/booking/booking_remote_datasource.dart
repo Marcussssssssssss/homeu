@@ -73,18 +73,27 @@ class BookingRemoteDataSource {
     return BookingRequest.fromJson(row);
   }
 
-  Future<void> updatePaymentStatus({required String bookingId, required String paymentStatus}) async {
+  Future<void> updatePaymentStatus({
+    required String bookingId,
+    required String paymentStatus,
+  }) async {
     if (!AppSupabase.isInitialized) {
       return;
     }
 
     await AppSupabase.client
         .from('booking_requests')
-        .update({'payment_status': paymentStatus, 'updated_at': DateTime.now().toUtc().toIso8601String()})
+        .update({
+          'payment_status': paymentStatus,
+          'updated_at': DateTime.now().toUtc().toIso8601String(),
+        })
         .eq('id', bookingId);
   }
 
-  Future<void> cancelBookingIfPending({required String bookingId, required String tenantId}) async {
+  Future<void> cancelBookingIfPending({
+    required String bookingId,
+    required String tenantId,
+  }) async {
     if (!AppSupabase.isInitialized) {
       return;
     }
@@ -104,7 +113,10 @@ class BookingRemoteDataSource {
 
     await AppSupabase.client
         .from('booking_requests')
-        .update({'status': 'Cancelled', 'updated_at': DateTime.now().toUtc().toIso8601String()})
+        .update({
+          'status': 'Cancelled',
+          'updated_at': DateTime.now().toUtc().toIso8601String(),
+        })
         .eq('id', bookingId);
   }
 
@@ -129,7 +141,11 @@ class BookingRemoteDataSource {
         .toList();
   }
 
-  Future<void> updatePaymentScheduleStatus(String scheduleId, String status, {String? paymentId}) async {
+  Future<void> updatePaymentScheduleStatus(
+    String scheduleId,
+    String status, {
+    String? paymentId,
+  }) async {
     if (!AppSupabase.isInitialized) {
       return;
     }
@@ -159,7 +175,9 @@ class BookingRemoteDataSource {
         .from('booking_requests')
         .select('*')
         .eq('property_id', propertyId)
-        .or('status.eq.Approved,status.eq.Paid,payment_status.eq.Paid,payment_status.eq.Fully Paid');
+        .or(
+          'status.eq.Approved,status.eq.Paid,payment_status.eq.Paid,payment_status.eq.Fully Paid',
+        );
 
     if (rows is! List) {
       return const [];
@@ -171,4 +189,3 @@ class BookingRemoteDataSource {
         .toList();
   }
 }
-

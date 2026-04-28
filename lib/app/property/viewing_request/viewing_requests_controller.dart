@@ -4,7 +4,7 @@ import 'viewing_requests_repository.dart';
 
 class ViewingRequestsController extends ChangeNotifier {
   ViewingRequestsController({ViewingRequestsRepository? repository})
-      : _repository = repository ?? ViewingRequestsRepository();
+    : _repository = repository ?? ViewingRequestsRepository();
 
   final ViewingRequestsRepository _repository;
 
@@ -13,7 +13,14 @@ class ViewingRequestsController extends ChangeNotifier {
   String? errorMessage;
 
   String selectedFilter = 'All';
-  final List<String> availableFilters = ['All', 'Pending', 'Approved', 'Rejected', 'Completed', 'Cancelled'];
+  final List<String> availableFilters = [
+    'All',
+    'Pending',
+    'Approved',
+    'Rejected',
+    'Completed',
+    'Cancelled',
+  ];
 
   List<ViewingRequestModel> get filteredRequests {
     if (selectedFilter == 'All') return requests;

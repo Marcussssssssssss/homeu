@@ -30,7 +30,7 @@ class HomeUSession {
       // Allow local previews/tests when no auth context is set.
       return true;
     }
-    // Admin has access to everything or just their own dashboard? 
+    // Admin has access to everything or just their own dashboard?
     // Usually admin has their own dashboard.
     return _loggedInRole == requiredRole;
   }

@@ -11,4 +11,3 @@ class ForgotPasswordController {
     return _repository.submit(payload);
   }
 }
-

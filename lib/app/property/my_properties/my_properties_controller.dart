@@ -5,7 +5,7 @@ import 'my_properties_repository.dart';
 
 class MyPropertiesController extends ChangeNotifier {
   MyPropertiesController({MyPropertiesRepository? repository})
-      : _repository = repository ?? MyPropertiesRepository();
+    : _repository = repository ?? MyPropertiesRepository();
 
   final MyPropertiesRepository _repository;
 
@@ -21,7 +21,7 @@ class MyPropertiesController extends ChangeNotifier {
     'Booked',
     'Occupied',
     'Expiring Soon',
-    'Draft'
+    'Draft',
   ];
 
   List<OwnerPropertyModel> get filteredProperties {
@@ -73,7 +73,9 @@ class MyPropertiesController extends ChangeNotifier {
       debugPrint('Error archiving property: $e');
       final errorText = e.toString();
 
-      if (errorText.contains(MyPropertiesRemoteDataSource.archiveBlockedApprovedBookingError)) {
+      if (errorText.contains(
+        MyPropertiesRemoteDataSource.archiveBlockedApprovedBookingError,
+      )) {
         return MyPropertiesRemoteDataSource.archiveBlockedApprovedBookingError;
       }
 

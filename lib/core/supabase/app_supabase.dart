@@ -11,7 +11,9 @@ class AppSupabase {
 
   static SupabaseClient get client {
     if (!_isInitialized) {
-      throw StateError('AppSupabase is not initialized. Call AppSupabase.initialize() first.');
+      throw StateError(
+        'AppSupabase is not initialized. Call AppSupabase.initialize() first.',
+      );
     }
     return Supabase.instance.client;
   }
@@ -31,8 +33,10 @@ class AppSupabase {
       return;
     }
 
-    await Supabase.initialize(url: AppEnv.supabaseUrl, anonKey: AppEnv.supabaseAnonKey);
+    await Supabase.initialize(
+      url: AppEnv.supabaseUrl,
+      anonKey: AppEnv.supabaseAnonKey,
+    );
     _isInitialized = true;
   }
 }
-

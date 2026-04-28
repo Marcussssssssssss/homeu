@@ -26,48 +26,50 @@ class ViewingRemoteDataSource {
         .eq('tenant_id', tenantId)
         .order('created_at')
         .asyncMap((rows) async {
-      final list = rows.map(ViewingRequest.fromJson).toList();
+          final list = rows.map(ViewingRequest.fromJson).toList();
 
-      // Auto-cancellation logic for expired Pending viewings
-      final now = DateTime.now();
-      final List<String> expiredIds = [];
+          // Auto-cancellation logic for expired Pending viewings
+          final now = DateTime.now();
+          final List<String> expiredIds = [];
 
-      for (int i = 0; i < list.length; i++) {
-        final v = list[i];
-        if (v.status == 'Pending' && v.scheduledAt.isBefore(now)) {
-          expiredIds.add(v.id);
-          // Update local object immediately
-          list[i] = ViewingRequest(
-            id: v.id,
-            propertyId: v.propertyId,
-            ownerId: v.ownerId,
-            tenantId: v.tenantId,
-            scheduledAt: v.scheduledAt,
-            status: 'Cancelled',
-            createdAt: v.createdAt,
-            updatedAt: now,
-          );
-        }
-      }
+          for (int i = 0; i < list.length; i++) {
+            final v = list[i];
+            if (v.status == 'Pending' && v.scheduledAt.isBefore(now)) {
+              expiredIds.add(v.id);
+              // Update local object immediately
+              list[i] = ViewingRequest(
+                id: v.id,
+                propertyId: v.propertyId,
+                ownerId: v.ownerId,
+                tenantId: v.tenantId,
+                scheduledAt: v.scheduledAt,
+                status: 'Cancelled',
+                createdAt: v.createdAt,
+                updatedAt: now,
+              );
+            }
+          }
 
-      if (expiredIds.isNotEmpty) {
-        unawaited(AppSupabase.client
-            .from('viewing_requests')
-            .update({
-              'status': 'Cancelled',
-              'updated_at': now.toUtc().toIso8601String(),
-            })
-            .inFilter('id', expiredIds));
-      }
+          if (expiredIds.isNotEmpty) {
+            unawaited(
+              AppSupabase.client
+                  .from('viewing_requests')
+                  .update({
+                    'status': 'Cancelled',
+                    'updated_at': now.toUtc().toIso8601String(),
+                  })
+                  .inFilter('id', expiredIds),
+            );
+          }
 
-      // Save to local SQLite cache
-      await localDataSource.saveViewingRequests(list);
+          // Save to local SQLite cache
+          await localDataSource.saveViewingRequests(list);
 
-      // Sort: Most recent first
-      list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+          // Sort: Most recent first
+          list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
-      return list;
-    });
+          return list;
+        });
   }
 
   Future<ViewingRequest?> createViewingRequest(ViewingRequest request) async {
@@ -132,13 +134,15 @@ class ViewingRemoteDataSource {
 
     if (expiredIds.isNotEmpty) {
       // Trigger background update to Supabase
-      unawaited(AppSupabase.client
-          .from('viewing_requests')
-          .update({
-            'status': 'Cancelled',
-            'updated_at': now.toUtc().toIso8601String(),
-          })
-          .inFilter('id', expiredIds));
+      unawaited(
+        AppSupabase.client
+            .from('viewing_requests')
+            .update({
+              'status': 'Cancelled',
+              'updated_at': now.toUtc().toIso8601String(),
+            })
+            .inFilter('id', expiredIds),
+      );
     }
 
     return list;
@@ -166,7 +170,10 @@ class ViewingRemoteDataSource {
         .eq('tenant_id', tenantId);
   }
 
-  Future<void> cancelViewing({required String viewingId, required String tenantId}) async {
+  Future<void> cancelViewing({
+    required String viewingId,
+    required String tenantId,
+  }) async {
     if (!AppSupabase.isInitialized) {
       return;
     }
@@ -204,4 +211,3 @@ class ViewingRemoteDataSource {
     return rows.isNotEmpty;
   }
 }
-

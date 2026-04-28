@@ -24,8 +24,11 @@ class PaymentSchedule {
   factory PaymentSchedule.fromJson(Map<String, dynamic> json) {
     return PaymentSchedule(
       id: json['id']?.toString() ?? '',
-      bookingId: json['booking_id']?.toString() ?? json['bookingId']?.toString() ?? '',
-      monthNumber: json['month_number'] is int ? json['month_number'] : int.tryParse(json['month_number']?.toString() ?? '0') ?? 0,
+      bookingId:
+          json['booking_id']?.toString() ?? json['bookingId']?.toString() ?? '',
+      monthNumber: json['month_number'] is int
+          ? json['month_number']
+          : int.tryParse(json['month_number']?.toString() ?? '0') ?? 0,
       amount: (json['amount'] as num?)?.toDouble() ?? 0.0,
       dueDate: _parseDate(json['due_date']),
       status: json['status']?.toString() ?? 'Pending',

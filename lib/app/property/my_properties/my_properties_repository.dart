@@ -6,8 +6,9 @@ class MyPropertiesRepository {
   MyPropertiesRepository({
     HomeUAuthService? authService,
     MyPropertiesRemoteDataSource? remoteDataSource,
-  })  : _authService = authService ?? HomeUAuthService.instance,
-        _remoteDataSource = remoteDataSource ?? const MyPropertiesRemoteDataSource();
+  }) : _authService = authService ?? HomeUAuthService.instance,
+       _remoteDataSource =
+           remoteDataSource ?? const MyPropertiesRemoteDataSource();
 
   final HomeUAuthService _authService;
   final MyPropertiesRemoteDataSource _remoteDataSource;

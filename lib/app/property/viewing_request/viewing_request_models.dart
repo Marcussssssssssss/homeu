@@ -28,9 +28,14 @@ class ViewingRequestModel {
       propertyTitle: property['title']?.toString() ?? 'Unknown Property',
       tenantName: tenant['full_name']?.toString() ?? 'Unknown Tenant',
       tenantProfileUrl: tenant['profile_image_url'],
-      tenantPhone: tenant['phone_number']?.toString() ?? tenant['phone']?.toString() ?? 'No Phone',
+      tenantPhone:
+          tenant['phone_number']?.toString() ??
+          tenant['phone']?.toString() ??
+          'No Phone',
       tenantEmail: tenant['email']?.toString() ?? 'No Email',
-      scheduledAt: DateTime.tryParse(json['scheduled_at']?.toString() ?? '') ?? DateTime.now(),
+      scheduledAt:
+          DateTime.tryParse(json['scheduled_at']?.toString() ?? '') ??
+          DateTime.now(),
       status: json['status']?.toString() ?? 'Pending',
     );
   }

@@ -11,4 +11,3 @@ class UpdatePasswordController {
     return _repository.submit(payload);
   }
 }
-

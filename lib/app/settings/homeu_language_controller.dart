@@ -76,4 +76,3 @@ class HomeULanguageController extends ChangeNotifier {
     return 'en';
   }
 }
-

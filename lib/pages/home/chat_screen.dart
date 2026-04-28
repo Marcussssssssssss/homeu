@@ -74,7 +74,9 @@ class _HomeUChatScreenState extends State<HomeUChatScreen> {
   }
 
   void _setupConnectivityListener() {
-    _connectivitySubscription = Connectivity().onConnectivityChanged.listen((results) {
+    _connectivitySubscription = Connectivity().onConnectivityChanged.listen((
+      results,
+    ) {
       if (results.any((result) => result != ConnectivityResult.none)) {
         _syncPendingMessages();
       }
@@ -90,7 +92,9 @@ class _HomeUChatScreenState extends State<HomeUChatScreen> {
         String? finalUrl = message.attachmentUrl;
 
         // If it's a pending file upload
-        if (message.syncStatus == 'pending_upload' && finalUrl != null && !finalUrl.startsWith('http')) {
+        if (message.syncStatus == 'pending_upload' &&
+            finalUrl != null &&
+            !finalUrl.startsWith('http')) {
           final file = io.File(finalUrl);
           if (await file.exists()) {
             final fileName = p.basename(finalUrl);
@@ -116,7 +120,7 @@ class _HomeUChatScreenState extends State<HomeUChatScreen> {
         if (sent != null) {
           // IMPORTANT: Mark as synced locally
           await _chatLocalDataSource.markAsSynced(message.id);
-          
+
           // Refresh list if we are in this conversation
           if (_conversation?.id == message.conversationId) {
             _loadMessages();
@@ -259,10 +263,7 @@ class _HomeUChatScreenState extends State<HomeUChatScreen> {
               itemBuilder: (context, index) {
                 final message = _messages[index];
                 final isMine = message.senderId == _currentUserId;
-                return _MessageBubble(
-                  message: message,
-                  isMine: isMine,
-                );
+                return _MessageBubble(message: message, isMine: isMine);
               },
             ),
     );
@@ -319,7 +320,9 @@ class _HomeUChatScreenState extends State<HomeUChatScreen> {
           const SizedBox(width: 12),
           Container(
             decoration: BoxDecoration(
-              color: _canSend ? context.homeuAccent : context.homeuMutedText.withValues(alpha: 0.3),
+              color: _canSend
+                  ? context.homeuAccent
+                  : context.homeuMutedText.withValues(alpha: 0.3),
               shape: BoxShape.circle,
             ),
             child: IconButton(
@@ -441,11 +444,11 @@ class _HomeUChatScreenState extends State<HomeUChatScreen> {
     if (!await chatDir.exists()) {
       await chatDir.create(recursive: true);
     }
-    
+
     final extension = p.extension(name);
     final fileName = '${DateTime.now().millisecondsSinceEpoch}$extension';
     final localPath = p.join(chatDir.path, fileName);
-    
+
     await io.File(path).copy(localPath);
     return localPath;
   }
@@ -507,7 +510,7 @@ class _HomeUChatScreenState extends State<HomeUChatScreen> {
       );
 
       if (sent != null) {
-        // Local sync handled via remote datasource normally, 
+        // Local sync handled via remote datasource normally,
         // but since we are sending it now, we should ensure local is updated if we used a temp id
         // In this online path, we usually don't have a tempId yet unless we are retrying.
       }
@@ -586,7 +589,7 @@ class _HomeUChatScreenState extends State<HomeUChatScreen> {
 
       _currentUserId = userId;
       _conversation = conversation;
-      
+
       if (conversation != null) {
         _setupPresence(userId, conversation);
         _setupMessagesSubscription(conversation.id);
@@ -631,65 +634,73 @@ class _HomeUChatScreenState extends State<HomeUChatScreen> {
   }
 
   void _setupPresence(String userId, Conversation conversation) {
-    final otherUserId = userId == conversation.tenantId ? conversation.ownerId : conversation.tenantId;
+    final otherUserId = userId == conversation.tenantId
+        ? conversation.ownerId
+        : conversation.tenantId;
 
     _presenceChannel = AppSupabase.client.channel('chat_presence');
 
-    _presenceChannel!.onPresenceSync((payload) {
-      final states = _presenceChannel!.presenceState();
-      final onlineUsers = <String>{};
-      
-      for (final state in states) {
-        for (final presence in state.presences) {
-          final presenceUserId = presence.payload['user_id']?.toString();
-          if (presenceUserId != null) {
-            onlineUsers.add(presenceUserId);
-          }
-        }
-      }
+    _presenceChannel!
+        .onPresenceSync((payload) {
+          final states = _presenceChannel!.presenceState();
+          final onlineUsers = <String>{};
 
-      if (mounted) {
-        setState(() {
-          _isOtherUserOnline = onlineUsers.contains(otherUserId);
+          for (final state in states) {
+            for (final presence in state.presences) {
+              final presenceUserId = presence.payload['user_id']?.toString();
+              if (presenceUserId != null) {
+                onlineUsers.add(presenceUserId);
+              }
+            }
+          }
+
+          if (mounted) {
+            setState(() {
+              _isOtherUserOnline = onlineUsers.contains(otherUserId);
+            });
+          }
+        })
+        .subscribe((status, error) async {
+          if (status == RealtimeSubscribeStatus.subscribed) {
+            await _presenceChannel!.track({
+              'user_id': userId,
+              'online_at': DateTime.now().toIso8601String(),
+            });
+          }
         });
-      }
-    }).subscribe((status, error) async {
-      if (status == RealtimeSubscribeStatus.subscribed) {
-        await _presenceChannel!.track({
-          'user_id': userId,
-          'online_at': DateTime.now().toIso8601String(),
-        });
-      }
-    });
   }
 
   void _setupMessagesSubscription(String conversationId) {
-    _messagesChannel = AppSupabase.client.channel('public:chat_messages:$conversationId');
+    _messagesChannel = AppSupabase.client.channel(
+      'public:chat_messages:$conversationId',
+    );
 
-    _messagesChannel!.onPostgresChanges(
-      event: PostgresChangeEvent.insert,
-      schema: 'public',
-      table: 'chat_messages',
-      filter: PostgresChangeFilter(
-        type: PostgresChangeFilterType.eq,
-        column: 'conversation_id',
-        value: conversationId,
-      ),
-      callback: (payload) {
-        if (payload.newRecord.isNotEmpty) {
-          final newMessage = ChatMessage.fromJson(payload.newRecord);
-          if (mounted) {
-            setState(() {
-              // Add to the beginning of the list because reverse: true
-              // and we check if it already exists to avoid duplicates
-              if (!_messages.any((m) => m.id == newMessage.id)) {
-                _messages = [newMessage, ..._messages];
+    _messagesChannel!
+        .onPostgresChanges(
+          event: PostgresChangeEvent.insert,
+          schema: 'public',
+          table: 'chat_messages',
+          filter: PostgresChangeFilter(
+            type: PostgresChangeFilterType.eq,
+            column: 'conversation_id',
+            value: conversationId,
+          ),
+          callback: (payload) {
+            if (payload.newRecord.isNotEmpty) {
+              final newMessage = ChatMessage.fromJson(payload.newRecord);
+              if (mounted) {
+                setState(() {
+                  // Add to the beginning of the list because reverse: true
+                  // and we check if it already exists to avoid duplicates
+                  if (!_messages.any((m) => m.id == newMessage.id)) {
+                    _messages = [newMessage, ..._messages];
+                  }
+                });
               }
-            });
-          }
-        }
-      },
-    ).subscribe();
+            }
+          },
+        )
+        .subscribe();
   }
 
   Future<void> _loadMessages() async {
@@ -699,8 +710,12 @@ class _HomeUChatScreenState extends State<HomeUChatScreen> {
     }
 
     try {
-      final remoteMessages = await _chatRemoteDataSource.fetchMessages(conversationId);
-      final pendingMessages = await _chatLocalDataSource.getPendingMessages(conversationId);
+      final remoteMessages = await _chatRemoteDataSource.fetchMessages(
+        conversationId,
+      );
+      final pendingMessages = await _chatLocalDataSource.getPendingMessages(
+        conversationId,
+      );
 
       if (!mounted) {
         return;
@@ -774,7 +789,9 @@ class _HomeUChatScreenState extends State<HomeUChatScreen> {
         _loadMessages(); // Refresh to get the real message from Supabase
       }
     } catch (e) {
-      debugPrint('Failed to send message immediately, will retry when online: $e');
+      debugPrint(
+        'Failed to send message immediately, will retry when online: $e',
+      );
     }
   }
 
@@ -817,10 +834,7 @@ class _HomeUChatScreenState extends State<HomeUChatScreen> {
 }
 
 class _MessageBubble extends StatelessWidget {
-  const _MessageBubble({
-    required this.message,
-    required this.isMine,
-  });
+  const _MessageBubble({required this.message, required this.isMine});
 
   final ChatMessage message;
   final bool isMine;
@@ -830,24 +844,33 @@ class _MessageBubble extends StatelessWidget {
     // Check if the content is a Supabase Storage URL
     final attachmentUrl = message.attachmentUrl;
     final hasAttachment = attachmentUrl != null && attachmentUrl.isNotEmpty;
-    
+
     final isLocalFile = hasAttachment && !attachmentUrl.startsWith('http');
-    
+
     // Also check if text itself looks like a Supabase URL (fallback)
-    final looksLikeUrl = message.messageText.contains('supabase.co/storage/v1/object/public/');
-    final imageUrl = hasAttachment ? attachmentUrl : (looksLikeUrl ? message.messageText : null);
+    final looksLikeUrl = message.messageText.contains(
+      'supabase.co/storage/v1/object/public/',
+    );
+    final imageUrl = hasAttachment
+        ? attachmentUrl
+        : (looksLikeUrl ? message.messageText : null);
     final isImage = imageUrl != null && _isImageUrl(imageUrl);
-    
-    final hasText = message.messageText.isNotEmpty && 
-                    !looksLikeUrl && 
-                    !_isFileName(message.messageText);
+
+    final hasText =
+        message.messageText.isNotEmpty &&
+        !looksLikeUrl &&
+        !_isFileName(message.messageText);
 
     return Align(
       alignment: isMine ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
-        padding: EdgeInsets.all(isImage ? 0 : 12), // Set to 0 if image to allow ClipRRect to fill
-        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
+        padding: EdgeInsets.all(
+          isImage ? 0 : 12,
+        ), // Set to 0 if image to allow ClipRRect to fill
+        constraints: BoxConstraints(
+          maxWidth: MediaQuery.of(context).size.width * 0.75,
+        ),
         decoration: BoxDecoration(
           color: isMine ? context.homeuAccent : context.homeuRaisedCard,
           borderRadius: BorderRadius.only(
@@ -873,7 +896,9 @@ class _MessageBubble extends StatelessWidget {
             bottomRight: Radius.circular(isMine ? 4 : 16),
           ),
           child: Column(
-            crossAxisAlignment: isMine ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+            crossAxisAlignment: isMine
+                ? CrossAxisAlignment.end
+                : CrossAxisAlignment.start,
             children: [
               if (isImage)
                 GestureDetector(
@@ -889,36 +914,47 @@ class _MessageBubble extends StatelessWidget {
                     child: Stack(
                       alignment: Alignment.bottomRight,
                       children: [
-                        isLocalFile 
-                          ? Image.file(
-                              io.File(imageUrl),
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) => Container(
-                                width: 200,
-                                height: 100,
-                                color: Colors.grey[300],
-                                child: const Icon(Icons.broken_image, color: Colors.grey),
+                        isLocalFile
+                            ? Image.file(
+                                io.File(imageUrl),
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    Container(
+                                      width: 200,
+                                      height: 100,
+                                      color: Colors.grey[300],
+                                      child: const Icon(
+                                        Icons.broken_image,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                              )
+                            : Image.network(
+                                imageUrl,
+                                fit: BoxFit.cover,
+                                loadingBuilder:
+                                    (context, child, loadingProgress) {
+                                      if (loadingProgress == null) return child;
+                                      return Container(
+                                        width: 200,
+                                        height: 200,
+                                        color: Colors.grey[200],
+                                        child: const Center(
+                                          child: CircularProgressIndicator(),
+                                        ),
+                                      );
+                                    },
+                                errorBuilder: (context, error, stackTrace) =>
+                                    Container(
+                                      width: 200,
+                                      height: 100,
+                                      color: Colors.grey[300],
+                                      child: const Icon(
+                                        Icons.broken_image,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
                               ),
-                            )
-                          : Image.network(
-                              imageUrl,
-                              fit: BoxFit.cover,
-                              loadingBuilder: (context, child, loadingProgress) {
-                                if (loadingProgress == null) return child;
-                                return Container(
-                                  width: 200,
-                                  height: 200,
-                                  color: Colors.grey[200],
-                                  child: const Center(child: CircularProgressIndicator()),
-                                );
-                              },
-                              errorBuilder: (context, error, stackTrace) => Container(
-                                width: 200,
-                                height: 100,
-                                color: Colors.grey[300],
-                                child: const Icon(Icons.broken_image, color: Colors.grey),
-                              ),
-                            ),
                         if (isMine && message.syncStatus.startsWith('pending'))
                           Positioned(
                             bottom: 8,
@@ -952,7 +988,9 @@ class _MessageBubble extends StatelessWidget {
                         child: Text(
                           message.messageText,
                           style: TextStyle(
-                            color: isMine ? Colors.white : context.homeuPrimaryText,
+                            color: isMine
+                                ? Colors.white
+                                : context.homeuPrimaryText,
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
                           ),
@@ -962,8 +1000,8 @@ class _MessageBubble extends StatelessWidget {
                         const SizedBox(width: 4),
                         Icon(
                           message.syncStatus.startsWith('pending')
-                            ? Icons.access_time 
-                            : Icons.done_all,
+                              ? Icons.access_time
+                              : Icons.done_all,
                           size: 14,
                           color: Colors.white70,
                         ),
@@ -980,19 +1018,19 @@ class _MessageBubble extends StatelessWidget {
 
   bool _isFileName(String text) {
     final lowerText = text.toLowerCase();
-    return lowerText.endsWith('.jpg') || 
-           lowerText.endsWith('.jpeg') || 
-           lowerText.endsWith('.png') || 
-           lowerText.endsWith('.webp') ||
-           lowerText.endsWith('.gif');
+    return lowerText.endsWith('.jpg') ||
+        lowerText.endsWith('.jpeg') ||
+        lowerText.endsWith('.png') ||
+        lowerText.endsWith('.webp') ||
+        lowerText.endsWith('.gif');
   }
 
   bool _isImageUrl(String url) {
     final lowerUrl = url.toLowerCase();
-    return lowerUrl.contains('.jpg') || 
-           lowerUrl.contains('.jpeg') || 
-           lowerUrl.contains('.png') || 
-           lowerUrl.contains('.gif') ||
-           lowerUrl.contains('.webp');
+    return lowerUrl.contains('.jpg') ||
+        lowerUrl.contains('.jpeg') ||
+        lowerUrl.contains('.png') ||
+        lowerUrl.contains('.gif') ||
+        lowerUrl.contains('.webp');
   }
 }

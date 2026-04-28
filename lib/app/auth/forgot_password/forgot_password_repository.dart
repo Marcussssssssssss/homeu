@@ -19,7 +19,9 @@ class ForgotPasswordRepository {
 
   final ForgotPasswordAuthDataSource _dataSource;
 
-  Future<ForgotPasswordSubmissionResult> submit(ForgotPasswordPayload payload) async {
+  Future<ForgotPasswordSubmissionResult> submit(
+    ForgotPasswordPayload payload,
+  ) async {
     if (!AppSupabase.isInitialized) {
       return const ForgotPasswordSubmissionResult(
         status: ForgotPasswordSubmissionStatus.success,
@@ -69,5 +71,3 @@ class ForgotPasswordRepository {
     return errorGeneric;
   }
 }
-
-
