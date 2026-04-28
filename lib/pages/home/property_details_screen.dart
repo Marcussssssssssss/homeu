@@ -107,83 +107,6 @@ class _HomeUPropertyDetailsScreenState
     return widget.property.ownerAccountStatus;
   }
 
-  Widget _buildOwnerModerationBanner({
-    required HomeURiskStatus riskStatus,
-    required HomeUAccountStatus accountStatus,
-  }) {
-    final isDark = context.isDarkMode;
-    final isRestricted =
-        accountStatus == HomeUAccountStatus.suspended ||
-        accountStatus == HomeUAccountStatus.removed;
-    final isHighRisk = riskStatus == HomeURiskStatus.highRisk;
-    final isSuspicious = riskStatus == HomeURiskStatus.suspicious;
-
-    if (!isRestricted && !isHighRisk && !isSuspicious) {
-      return const SizedBox.shrink();
-    }
-
-    final backgroundColor = isRestricted
-        ? (isDark
-              ? Colors.white.withValues(alpha: 0.05)
-              : context.homeuMutedText.withValues(alpha: 0.08))
-        : (isHighRisk
-              ? (isDark
-                    ? Colors.red.withValues(alpha: 0.12)
-                    : const Color(0xFFFEF2F2))
-              : (isDark
-                    ? Colors.orange.withValues(alpha: 0.12)
-                    : const Color(0xFFFFF7ED)));
-    final borderColor = isRestricted
-        ? (isDark
-              ? Colors.white.withValues(alpha: 0.12)
-              : context.homeuMutedText.withValues(alpha: 0.2))
-        : (isHighRisk
-              ? (isDark
-                    ? Colors.red.withValues(alpha: 0.45)
-                    : const Color(0xFFF87171))
-              : (isDark
-                    ? Colors.orange.withValues(alpha: 0.45)
-                    : const Color(0xFFF59E0B)));
-    final iconColor = isRestricted
-        ? context.homeuMutedText
-        : (isHighRisk ? const Color(0xFFDC2626) : const Color(0xFFD97706));
-    final message = isRestricted
-        ? 'This listing is currently unavailable due to admin review.'
-        : 'This owner has been flagged by HomeU admin. Please proceed carefully.';
-
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: borderColor),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(
-            isRestricted ? Icons.block_rounded : Icons.warning_amber_rounded,
-            color: iconColor,
-            size: 22,
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              message,
-              style: TextStyle(
-                color: context.homeuPrimaryText,
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                height: 1.35,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildLocationMapPreview(PropertyItem property) {
     if (!property.hasCoordinates) {
       return const SizedBox.shrink();
@@ -792,21 +715,25 @@ class _HomeUPropertyDetailsScreenState
                     ],
                   ),
                   const SizedBox(height: 6),
-                  Text(
-                    property.pricePerMonth,
-                    style: TextStyle(
-                      color: context.homeuPrice,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                    ),
+                  Row(
+                    children: [
+                      Text(
+                        property.pricePerMonth,
+                        style: TextStyle(
+                          color: context.homeuPrice,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      if (property.hasHighRiskReport)
+                        _ModerationTag(
+                          label: 'High Risk Report',
+                          color: const Color(0xFFDC2626),
+                          icon: Icons.warning_rounded,
+                        ),
+                    ],
                   ),
-                  if (property.hasOwnerFlag) ...[
-                    const SizedBox(height: 12),
-                    _buildOwnerModerationBanner(
-                      riskStatus: property.ownerRiskStatus,
-                      accountStatus: property.ownerAccountStatus,
-                    ),
-                  ],
                   const SizedBox(height: 18),
                   Text(
                     'Location',
@@ -1162,10 +1089,15 @@ class _HomeUPropertyDetailsScreenState
 }
 
 class _ModerationTag extends StatelessWidget {
-  const _ModerationTag({required this.label, required this.color});
+  const _ModerationTag({
+    required this.label,
+    required this.color,
+    this.icon,
+  });
 
   final String label;
   final Color color;
+  final IconData? icon;
 
   @override
   Widget build(BuildContext context) {
@@ -1176,13 +1108,22 @@ class _ModerationTag extends StatelessWidget {
         borderRadius: BorderRadius.circular(999),
         border: Border.all(color: color.withValues(alpha: 0.25)),
       ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: color,
-          fontSize: 10.5,
-          fontWeight: FontWeight.w700,
-        ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (icon != null) ...[
+            Icon(icon, size: 12, color: color),
+            const SizedBox(width: 4),
+          ],
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontSize: 10.5,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -6,49 +6,57 @@ import 'package:homeu/core/supabase/app_supabase.dart';
 import 'package:homeu/core/theme/homeu_app_theme.dart';
 import 'package:homeu/pages/home/chat_screen.dart';
 import 'package:intl/intl.dart';
+
 class HomeUAdminReportsModerationScreen extends StatefulWidget {
   const HomeUAdminReportsModerationScreen({super.key});
+
   @override
   State<HomeUAdminReportsModerationScreen> createState() =>
       _HomeUAdminReportsModerationScreenState();
 }
+
 class _HomeUAdminReportsModerationScreenState
     extends State<HomeUAdminReportsModerationScreen> {
   final ChatRemoteDataSource _chatRemoteDataSource = const ChatRemoteDataSource();
+
   static const List<Map<String, String>> _statusFilters = <Map<String, String>>[
     {'key': 'all', 'label': 'All'},
     {'key': 'pending', 'label': 'Pending'},
     {'key': 'reviewed', 'label': 'Reviewed'},
     {'key': 'dismissed', 'label': 'Dismissed'},
   ];
+
   bool _isLoading = true;
   String _selectedFilterKey = 'all';
   String _searchQuery = '';
   List<_ReportRecord> _reports = const <_ReportRecord>[];
+
   @override
   void initState() {
     super.initState();
     _loadReports();
   }
+
   Future<void> _loadReports() async {
-    if (!mounted) {
-      return;
-    }
+    if (!mounted) return;
     setState(() => _isLoading = true);
     try {
       final dynamic rawRows = await AppSupabase.client
           .from('property_reports')
           .select(
             'report_id, property_id, owner_id, tenant_id, reason, description, '
-            'status, created_at',
+            'status, created_at, risk_level',
           )
           .order('created_at', ascending: false);
+
       final rows = (rawRows is List ? rawRows : const <dynamic>[])
           .whereType<Map<String, dynamic>>()
           .toList(growable: false);
+
       final ownerIds = <String>{};
       final tenantIds = <String>{};
       final propertyIds = <String>{};
+
       for (final row in rows) {
         final ownerId = row['owner_id']?.toString() ?? '';
         final tenantId = row['tenant_id']?.toString() ?? '';
@@ -57,9 +65,11 @@ class _HomeUAdminReportsModerationScreenState
         if (tenantId.isNotEmpty) tenantIds.add(tenantId);
         if (propertyId.isNotEmpty) propertyIds.add(propertyId);
       }
+
       final profileIds = <String>{...ownerIds, ...tenantIds}.toList(growable: false);
       final propertyIdList = propertyIds.toList(growable: false);
-      Map<String, Map<String, dynamic>> profilesById = const <String, Map<String, dynamic>>{};
+
+      Map<String, Map<String, dynamic>> profilesById = {};
       if (profileIds.isNotEmpty) {
         final dynamic profileRows = await AppSupabase.client
             .from('profiles')
@@ -72,7 +82,8 @@ class _HomeUAdminReportsModerationScreenState
           };
         }
       }
-      Map<String, String> propertyTitles = const <String, String>{};
+
+      Map<String, String> propertyTitles = {};
       if (propertyIdList.isNotEmpty) {
         final dynamic propertyRows = await AppSupabase.client
             .from('properties')
@@ -85,18 +96,20 @@ class _HomeUAdminReportsModerationScreenState
           };
         }
       }
+
       final ownerReportCount = <String, int>{};
       for (final row in rows) {
         final ownerId = row['owner_id']?.toString() ?? '';
         if (ownerId.isEmpty) continue;
         ownerReportCount[ownerId] = (ownerReportCount[ownerId] ?? 0) + 1;
       }
+
       final mappedReports = rows.map((row) {
         final ownerId = row['owner_id']?.toString() ?? '';
         final tenantId = row['tenant_id']?.toString() ?? '';
         final propertyId = row['property_id']?.toString() ?? '';
-        final ownerProfile = profilesById[ownerId] ?? const <String, dynamic>{};
-        final tenantProfile = profilesById[tenantId] ?? const <String, dynamic>{};
+        final ownerProfile = profilesById[ownerId] ?? {};
+        final tenantProfile = profilesById[tenantId] ?? {};
         return _ReportRecord(
           reportId: row['report_id']?.toString() ?? 'Unknown',
           propertyId: propertyId,
@@ -111,21 +124,19 @@ class _HomeUAdminReportsModerationScreenState
           reason: row['reason']?.toString() ?? '-',
           description: row['description']?.toString() ?? '',
           status: _normalizeReportStatus(row['status']?.toString()),
+          riskLevel: row['risk_level']?.toString()?.toLowerCase() ?? 'low',
           createdAt: _parseDate(row['created_at']) ?? DateTime.now(),
           previousReportCount: ownerReportCount[ownerId] ?? 0,
         );
       }).toList(growable: false);
-      if (!mounted) {
-        return;
-      }
+
+      if (!mounted) return;
       setState(() {
         _reports = mappedReports;
         _isLoading = false;
       });
     } catch (e) {
-      if (!mounted) {
-        return;
-      }
+      if (!mounted) return;
       setState(() {
         _reports = const <_ReportRecord>[];
         _isLoading = false;
@@ -135,6 +146,7 @@ class _HomeUAdminReportsModerationScreenState
       );
     }
   }
+
   List<_ReportRecord> get _filteredReports {
     final filtered = _reports.where((report) {
       if (!_matchesSelectedFilter(report)) return false;
@@ -155,6 +167,7 @@ class _HomeUAdminReportsModerationScreenState
     });
     return filtered;
   }
+
   bool _matchesSelectedFilter(_ReportRecord report) {
     switch (_selectedFilterKey) {
       case 'pending':
@@ -166,6 +179,7 @@ class _HomeUAdminReportsModerationScreenState
         return true;
     }
   }
+
   String _filterLabelForKey(String key) {
     for (final filter in _statusFilters) {
       if (filter['key'] == key) {
@@ -174,6 +188,7 @@ class _HomeUAdminReportsModerationScreenState
     }
     return 'All';
   }
+
   Future<void> _showFilterBottomSheet() async {
     String tempFilterKey = _selectedFilterKey;
     await showModalBottomSheet<void>(
@@ -296,6 +311,7 @@ class _HomeUAdminReportsModerationScreenState
       },
     );
   }
+
   Future<void> _openReportDetails(_ReportRecord report) async {
     final result = await Navigator.of(context).push<String?>(
       MaterialPageRoute<String?>(
@@ -321,34 +337,32 @@ class _HomeUAdminReportsModerationScreenState
         ),
       ),
     );
-    if (!mounted || result == null) {
-      return;
-    }
+    if (!mounted || result == null) return;
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result)));
     await _loadReports();
   }
+
   Future<String?> _contactOwner(_ReportRecord report) async {
     final navigator = Navigator.of(context);
     final messenger = ScaffoldMessenger.of(context);
     final adminId = AppSupabase.auth.currentUser?.id;
-    if (adminId == null) {
-      return null;
-    }
+    if (adminId == null) return null;
+
     if (report.propertyId.isEmpty || report.ownerId.isEmpty) {
       messenger.showSnackBar(
         const SnackBar(content: Text('Missing owner or property context for chat.')),
       );
       return null;
     }
+
     try {
       final conversation = await _chatRemoteDataSource.getOrCreateConversation(
         propertyId: report.propertyId,
         tenantId: adminId,
         ownerId: report.ownerId,
       );
-      if (!mounted || conversation == null) {
-        return null;
-      }
+      if (!mounted || conversation == null) return null;
+
       await _insertAudit(
         action: 'report_contact_owner',
         report: report,
@@ -366,9 +380,7 @@ class _HomeUAdminReportsModerationScreenState
       );
       return null;
     } catch (e) {
-      if (!mounted) {
-        return null;
-      }
+      if (!mounted) return null;
       messenger.showSnackBar(
         SnackBar(content: Text('Unable to open chat: $e')),
       );
@@ -380,24 +392,23 @@ class _HomeUAdminReportsModerationScreenState
     final navigator = Navigator.of(context);
     final messenger = ScaffoldMessenger.of(context);
     final adminId = AppSupabase.auth.currentUser?.id;
-    if (adminId == null) {
-      return null;
-    }
+    if (adminId == null) return null;
+
     if (report.propertyId.isEmpty || report.tenantId.isEmpty) {
       messenger.showSnackBar(
         const SnackBar(content: Text('Missing tenant or property context for chat.')),
       );
       return null;
     }
+
     try {
       final conversation = await _chatRemoteDataSource.getOrCreateConversation(
         propertyId: report.propertyId,
         tenantId: report.tenantId,
         ownerId: adminId,
       );
-      if (!mounted || conversation == null) {
-        return null;
-      }
+      if (!mounted || conversation == null) return null;
+
       await _insertAudit(
         action: 'report_contact_tenant',
         report: report,
@@ -415,9 +426,7 @@ class _HomeUAdminReportsModerationScreenState
       );
       return null;
     } catch (e) {
-      if (!mounted) {
-        return null;
-      }
+      if (!mounted) return null;
       messenger.showSnackBar(
         SnackBar(content: Text('Unable to open chat: $e')),
       );
@@ -430,10 +439,14 @@ class _HomeUAdminReportsModerationScreenState
     required String riskLevel,
   }) async {
     final reason = await _askReasonAndConfirm('Record Risk Level');
-    if (reason == null) {
-      return null;
-    }
+    if (reason == null) return null;
+
     try {
+      await AppSupabase.client
+          .from('property_reports')
+          .update({'risk_level': riskLevel.toLowerCase()})
+          .eq('report_id', report.reportId);
+
       await _insertAudit(
         action: 'report_risk_${riskLevel.toLowerCase()}',
         report: report,
@@ -448,9 +461,7 @@ class _HomeUAdminReportsModerationScreenState
       );
       return 'Risk level recorded.';
     } catch (e) {
-      if (!mounted) {
-        return null;
-      }
+      if (!mounted) return null;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Risk evaluation failed: $e')),
       );
@@ -466,9 +477,8 @@ class _HomeUAdminReportsModerationScreenState
     required String riskLevel,
   }) async {
     final reason = await _askReasonAndConfirm(actionLabel);
-    if (reason == null) {
-      return null;
-    }
+    if (reason == null) return null;
+
     final admin = AppSupabase.auth.currentUser;
     final now = DateTime.now().toUtc().toIso8601String();
     try {
@@ -478,8 +488,10 @@ class _HomeUAdminReportsModerationScreenState
             'status': nextStatus,
             'reviewed_by': admin?.id,
             'reviewed_at': now,
+            'risk_level': riskLevel.toLowerCase(),
           })
           .eq('report_id', report.reportId);
+
       await _insertAudit(
         action: action,
         report: report,
@@ -494,15 +506,14 @@ class _HomeUAdminReportsModerationScreenState
       );
       return '$actionLabel completed.';
     } catch (e) {
-      if (!mounted) {
-        return null;
-      }
+      if (!mounted) return null;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Report update failed: $e')),
       );
       return null;
     }
   }
+
   Future<void> _insertAudit({
     required String action,
     required _ReportRecord report,
@@ -522,6 +533,7 @@ class _HomeUAdminReportsModerationScreenState
       'created_at': DateTime.now().toUtc().toIso8601String(),
     });
   }
+
   Future<String?> _askReasonAndConfirm(String actionLabel) async {
     final reason = await showDialog<String>(
       context: context,
@@ -529,6 +541,7 @@ class _HomeUAdminReportsModerationScreenState
     );
     return reason;
   }
+
   @override
   Widget build(BuildContext context) {
     if (!HomeUSession.canAccess(HomeURole.admin)) {
@@ -660,32 +673,30 @@ class _HomeUAdminReportsModerationScreenState
       ),
     );
   }
+
   String _normalizeReportStatus(String? status) {
     final normalized = (status ?? 'pending').trim().toLowerCase();
-    if (normalized == 'action_taken') {
-      return 'reviewed';
-    }
+    if (normalized == 'action_taken') return 'reviewed';
     const allowed = {'pending', 'reviewed', 'dismissed'};
     return allowed.contains(normalized) ? normalized : 'pending';
   }
+
   int _statusPriority(String status) {
     switch (status) {
-      case 'pending':
-        return 0;
-      case 'reviewed':
-        return 1;
-      case 'dismissed':
-        return 2;
-      default:
-        return 3;
+      case 'pending': return 0;
+      case 'reviewed': return 1;
+      case 'dismissed': return 2;
+      default: return 3;
     }
   }
+
   DateTime? _parseDate(dynamic value) {
     if (value is DateTime) return value;
     if (value is String) return DateTime.tryParse(value);
     return null;
   }
 }
+
 class _ReportRecord {
   const _ReportRecord({
     required this.reportId,
@@ -700,6 +711,7 @@ class _ReportRecord {
     required this.reason,
     required this.description,
     required this.status,
+    required this.riskLevel,
     required this.createdAt,
     required this.previousReportCount,
   });
@@ -716,14 +728,13 @@ class _ReportRecord {
   final String reason;
   final String description;
   final String status;
+  final String riskLevel;
   final DateTime createdAt;
   final int previousReportCount;
 
   String get shortReportId {
     final trimmed = reportId.trim();
-    if (trimmed.isEmpty || trimmed == 'Unknown') {
-      return 'Unknown';
-    }
+    if (trimmed.isEmpty || trimmed == 'Unknown') return 'Unknown';
     return trimmed.length <= 8 ? trimmed : trimmed.substring(0, 8);
   }
 }
@@ -751,15 +762,22 @@ class _ReportDetailsScreen extends StatefulWidget {
 
 class _ReportDetailsScreenState extends State<_ReportDetailsScreen> {
   bool _hasReviewedComplaint = false;
-  String _selectedRiskLevel = 'low';
+  late String _selectedRiskLevel;
 
   static const List<String> _riskLevels = <String>['low', 'medium', 'high', 'invalid'];
 
+  @override
+  void initState() {
+    super.initState();
+    _selectedRiskLevel = widget.report.riskLevel;
+    if (!_riskLevels.contains(_selectedRiskLevel)) {
+      _selectedRiskLevel = 'low';
+    }
+  }
+
   Future<void> _runAction(Future<String?> Function() action) async {
     final result = await action();
-    if (!mounted || result == null) {
-      return;
-    }
+    if (!mounted || result == null) return;
     Navigator.of(context).pop(result);
   }
 
@@ -816,7 +834,7 @@ class _ReportDetailsScreenState extends State<_ReportDetailsScreen> {
                   label: 'Description',
                   value: report.description.trim().isEmpty ? '-' : report.description.trim(),
                 ),
-                _InfoRowData(label: 'Status', value: report.status),
+                _InfoRowData(label: 'Status', value: report.status.toUpperCase()),
               ],
             ),
             const SizedBox(height: 10),
@@ -883,9 +901,7 @@ class _ReportDetailsScreenState extends State<_ReportDetailsScreen> {
                 ),
                 controlAffinity: ListTileControlAffinity.leading,
                 onChanged: (value) {
-                  setState(() {
-                    _hasReviewedComplaint = value ?? false;
-                  });
+                  setState(() => _hasReviewedComplaint = value ?? false);
                 },
               ),
             ),
@@ -926,14 +942,14 @@ class _ReportDetailsScreenState extends State<_ReportDetailsScreen> {
                         onTap: () => _runAction(widget.onContactOwner),
                       ),
                       _ActionChip(
-                        label: 'Contact Tenant',
+                        label: 'Contact Reporter',
                         icon: Icons.forum_outlined,
                         color: Colors.indigo,
                         onTap: () => _runAction(widget.onContactTenant),
                       ),
                       _ActionChip(
-                        label: 'Record Risk',
-                        icon: Icons.flag_outlined,
+                        label: 'Save Risk Level',
+                        icon: Icons.save_rounded,
                         color: Colors.orange,
                         enabled: _hasReviewedComplaint,
                         onTap: () => _runAction(
@@ -974,6 +990,7 @@ class _ReportCard extends StatelessWidget {
   const _ReportCard({required this.report, required this.onTap});
   final _ReportRecord report;
   final VoidCallback onTap;
+
   @override
   Widget build(BuildContext context) {
     final createdLabel = DateFormat('MMM d, yyyy HH:mm').format(report.createdAt.toLocal());
@@ -1016,15 +1033,32 @@ class _ReportCard extends StatelessWidget {
                 style: TextStyle(color: context.homeuPrimaryText, fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 4),
-              Text('Owner: ${report.ownerName} (${report.ownerEmail})', style: TextStyle(color: context.homeuSecondaryText, fontSize: 12.5)),
+              Text('Owner: ${report.ownerName}', style: TextStyle(color: context.homeuSecondaryText, fontSize: 12.5)),
               const SizedBox(height: 2),
-              Text('Reporter: ${report.tenantName} (${report.tenantEmail})', style: TextStyle(color: context.homeuSecondaryText, fontSize: 12.5)),
+              Text('Reporter: ${report.tenantName}', style: TextStyle(color: context.homeuSecondaryText, fontSize: 12.5)),
               const SizedBox(height: 6),
               Text('Reason: ${report.reason}', style: TextStyle(color: context.homeuPrimaryText, fontSize: 13.3, fontWeight: FontWeight.w600)),
               const SizedBox(height: 8),
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(createdLabel, style: TextStyle(color: context.homeuMutedText, fontSize: 11.5)),
+                  if (report.riskLevel != 'low')
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: _getRiskColor(report.riskLevel).withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        report.riskLevel.toUpperCase(),
+                        style: TextStyle(
+                          color: _getRiskColor(report.riskLevel),
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ],
@@ -1033,10 +1067,21 @@ class _ReportCard extends StatelessWidget {
       ),
     );
   }
+
+  Color _getRiskColor(String level) {
+    switch (level) {
+      case 'high': return Colors.red;
+      case 'medium': return Colors.orange;
+      case 'invalid': return Colors.grey;
+      default: return Colors.blue;
+    }
+  }
 }
+
 class _StatusBadge extends StatelessWidget {
   const _StatusBadge({required this.status});
   final String status;
+
   @override
   Widget build(BuildContext context) {
     Color color = Colors.grey;
@@ -1056,10 +1101,12 @@ class _StatusBadge extends StatelessWidget {
     );
   }
 }
+
 class _InfoCard extends StatelessWidget {
   const _InfoCard({required this.title, required this.rows});
   final String title;
   final List<_InfoRowData> rows;
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -1084,14 +1131,17 @@ class _InfoCard extends StatelessWidget {
     );
   }
 }
+
 class _InfoRowData {
   const _InfoRowData({required this.label, required this.value});
   final String label;
   final String value;
 }
+
 class _InfoRow extends StatelessWidget {
   const _InfoRow({required this.row});
   final _InfoRowData row;
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -1114,6 +1164,7 @@ class _InfoRow extends StatelessWidget {
     );
   }
 }
+
 class _ActionChip extends StatelessWidget {
   const _ActionChip({
     required this.label,
@@ -1127,6 +1178,7 @@ class _ActionChip extends StatelessWidget {
   final Color color;
   final VoidCallback onTap;
   final bool enabled;
+
   @override
   Widget build(BuildContext context) {
     final effectiveColor = enabled ? color : context.homeuMutedText;
@@ -1149,16 +1201,13 @@ class _ActionChip extends StatelessWidget {
 
 class _ModerationReasonConfirmDialog extends StatefulWidget {
   const _ModerationReasonConfirmDialog({required this.actionLabel});
-
   final String actionLabel;
 
   @override
-  State<_ModerationReasonConfirmDialog> createState() =>
-      _ModerationReasonConfirmDialogState();
+  State<_ModerationReasonConfirmDialog> createState() => _ModerationReasonConfirmDialogState();
 }
 
-class _ModerationReasonConfirmDialogState
-    extends State<_ModerationReasonConfirmDialog> {
+class _ModerationReasonConfirmDialogState extends State<_ModerationReasonConfirmDialog> {
   final TextEditingController _reasonController = TextEditingController();
   final FocusNode _reasonFocusNode = FocusNode();
   bool _confirmChecked = false;
@@ -1172,9 +1221,7 @@ class _ModerationReasonConfirmDialogState
   }
 
   void _closeWithResult(String? result) {
-    if (!mounted || _isClosing) {
-      return;
-    }
+    if (!mounted || _isClosing) return;
     _isClosing = true;
     _reasonFocusNode.unfocus();
     Navigator.of(context).pop(result);
@@ -1197,9 +1244,7 @@ class _ModerationReasonConfirmDialogState
             focusNode: _reasonFocusNode,
             maxLines: 3,
             onChanged: (_) {
-              if (!mounted || _isClosing) {
-                return;
-              }
+              if (!mounted || _isClosing) return;
               setState(() {});
             },
             decoration: const InputDecoration(
@@ -1215,12 +1260,8 @@ class _ModerationReasonConfirmDialogState
             title: const Text('I confirm this action.'),
             controlAffinity: ListTileControlAffinity.leading,
             onChanged: (value) {
-              if (!mounted || _isClosing) {
-                return;
-              }
-              setState(() {
-                _confirmChecked = value ?? false;
-              });
+              if (!mounted || _isClosing) return;
+              setState(() => _confirmChecked = value ?? false);
             },
           ),
         ],
@@ -1238,4 +1279,3 @@ class _ModerationReasonConfirmDialogState
     );
   }
 }
-

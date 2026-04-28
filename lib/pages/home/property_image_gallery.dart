@@ -132,17 +132,13 @@ class _PropertyImageGalleryState extends State<PropertyImageGallery> {
   }
 
   Widget _buildPlaceholder({bool isLoading = false}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
         borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Colors.blueGrey.withValues(alpha: 0.1),
-            Colors.blueGrey.withValues(alpha: 0.05),
-          ],
-        ),
+        color: isDark 
+            ? Colors.white.withValues(alpha: 0.05)
+            : Colors.grey.withValues(alpha: 0.08),
       ),
       child: Center(
         child: isLoading
@@ -151,10 +147,12 @@ class _PropertyImageGalleryState extends State<PropertyImageGallery> {
                 height: 24,
                 child: CircularProgressIndicator(strokeWidth: 2),
               )
-            : const Icon(
+            : Icon(
                 Icons.apartment_rounded,
                 size: 56,
-                color: Colors.blueGrey,
+                color: isDark 
+                    ? Colors.white.withValues(alpha: 0.2) 
+                    : Colors.grey.withValues(alpha: 0.4),
               ),
       ),
     );

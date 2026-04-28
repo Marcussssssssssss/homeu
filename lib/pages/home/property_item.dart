@@ -29,6 +29,7 @@ class PropertyItem {
     this.ownerRiskStatus = HomeURiskStatus.normal,
     this.ownerAccountStatus = HomeUAccountStatus.active,
     this.ownerRiskReason,
+    this.hasHighRiskReport = false,
   });
 
   final String id;
@@ -57,13 +58,15 @@ class PropertyItem {
   final HomeURiskStatus ownerRiskStatus;
   final HomeUAccountStatus ownerAccountStatus;
   final String? ownerRiskReason;
+  final bool hasHighRiskReport;
 
   String get displayAddress =>
       address.trim().isNotEmpty ? address.trim() : location.trim();
 
   bool get hasOwnerFlag =>
       ownerRiskStatus != HomeURiskStatus.normal ||
-      ownerAccountStatus != HomeUAccountStatus.active;
+      ownerAccountStatus != HomeUAccountStatus.active ||
+      hasHighRiskReport;
 
   bool get isOwnerSuspicious => ownerRiskStatus == HomeURiskStatus.suspicious;
 
@@ -74,6 +77,7 @@ class PropertyItem {
       ownerAccountStatus == HomeUAccountStatus.removed;
 
   String get ownerRiskBadgeLabel {
+    if (hasHighRiskReport) return 'High Risk Report';
     switch (ownerRiskStatus) {
       case HomeURiskStatus.normal:
         return '';

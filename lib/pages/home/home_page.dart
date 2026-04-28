@@ -934,9 +934,9 @@ class _PropertyCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: context.homeuAccent.withValues(alpha: 0.14),
-            blurRadius: 14,
-            offset: const Offset(0, 5),
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -1053,69 +1053,77 @@ class _PropertyCard extends StatelessWidget {
                 Positioned(
                   left: 10,
                   top: 10,
-                  child: ListenableBuilder(
-                    listenable: PropertyComparisonController.instance,
-                    builder: (context, _) {
-                      final isSelected = PropertyComparisonController.instance
-                          .isSelected(property.id);
-                      final canAdd =
-                          PropertyComparisonController.instance.canAddMore ||
-                          isSelected;
-                      return GestureDetector(
-                        onTap: canAdd
-                            ? () {
-                                final controller =
-                                    PropertyComparisonController.instance;
-                                controller.toggleProperty(property);
-                                final nowSelected = controller.isSelected(
-                                  property.id,
-                                );
+                  child: Row(
+                    children: [
+                      ListenableBuilder(
+                        listenable: PropertyComparisonController.instance,
+                        builder: (context, _) {
+                          final isSelected = PropertyComparisonController.instance
+                              .isSelected(property.id);
+                          final canAdd =
+                              PropertyComparisonController.instance.canAddMore ||
+                              isSelected;
+                          return GestureDetector(
+                            onTap: canAdd
+                                ? () {
+                                    final controller =
+                                        PropertyComparisonController.instance;
+                                    controller.toggleProperty(property);
+                                    final nowSelected = controller.isSelected(
+                                      property.id,
+                                    );
 
-                                ScaffoldMessenger.of(
-                                  context,
-                                ).hideCurrentSnackBar();
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      nowSelected
-                                          ? 'Added ${property.name} to comparison'
-                                          : 'Removed ${property.name} from comparison',
-                                    ),
-                                    duration: const Duration(seconds: 2),
-                                    action: nowSelected
-                                        ? SnackBarAction(
-                                            label: 'COMPARE',
-                                            onPressed: () {
-                                              Navigator.of(context).push(
-                                                MaterialPageRoute<void>(
-                                                  builder: (_) =>
-                                                      const PropertyComparisonScreen(),
-                                                ),
-                                              );
-                                            },
-                                          )
-                                        : null,
-                                  ),
-                                );
-                              }
-                            : null,
-                        child: CircleAvatar(
-                          radius: 16,
-                          backgroundColor: isSelected
-                              ? context.homeuAccent
-                              : context.homeuCard,
-                          child: Icon(
-                            isSelected
-                                ? Icons.check_rounded
-                                : Icons.compare_arrows_rounded,
-                            size: 18,
-                            color: isSelected
-                                ? Colors.white
-                                : context.homeuAccent,
-                          ),
-                        ),
-                      );
-                    },
+                                    ScaffoldMessenger.of(
+                                      context,
+                                    ).hideCurrentSnackBar();
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                          nowSelected
+                                              ? 'Added ${property.name} to comparison'
+                                              : 'Removed ${property.name} from comparison',
+                                        ),
+                                        duration: const Duration(seconds: 2),
+                                        action: nowSelected
+                                            ? SnackBarAction(
+                                                label: 'COMPARE',
+                                                onPressed: () {
+                                                  Navigator.of(context).push(
+                                                    MaterialPageRoute<void>(
+                                                      builder: (_) =>
+                                                          const PropertyComparisonScreen(),
+                                                    ),
+                                                  );
+                                                },
+                                              )
+                                            : null,
+                                      ),
+                                    );
+                                  }
+                                : null,
+                            child: CircleAvatar(
+                              radius: 16,
+                              backgroundColor: isSelected
+                                  ? context.homeuAccent
+                                  : context.homeuCard,
+                              child: Icon(
+                                isSelected
+                                    ? Icons.check_rounded
+                                    : Icons.compare_arrows_rounded,
+                                size: 18,
+                                color: isSelected
+                                    ? Colors.white
+                                    : context.homeuAccent,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                      if (property.hasHighRiskReport) ...[
+                        const SizedBox(width: 8),
+                        const _HighRiskCompactBadge(),
+                      ],
+                    ],
                   ),
                 ),
               ],
@@ -1134,14 +1142,6 @@ class _PropertyCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 5),
-                  if (property.isOwnerSuspicious || property.isOwnerHighRisk)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: _OwnerRiskBadge(property: property),
-                      ),
-                    ),
                   Row(
                     children: [
                       Icon(
@@ -1197,40 +1197,37 @@ class _PropertyCard extends StatelessWidget {
   }
 }
 
-
-class _OwnerRiskBadge extends StatelessWidget {
-  const _OwnerRiskBadge({required this.property});
-
-  final PropertyItem property;
+class _HighRiskCompactBadge extends StatelessWidget {
+  const _HighRiskCompactBadge();
 
   @override
   Widget build(BuildContext context) {
-    final isHighRisk = property.isOwnerHighRisk;
-    final color = isHighRisk ? const Color(0xFFDC2626) : const Color(0xFFF59E0B);
-    final label = property.ownerRiskBadgeLabel;
-
+    const color = Color(0xFFDC2626);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: color.withValues(alpha: 0.25)),
+        color: const Color(0xFFFEF2F2),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: color.withValues(alpha: 0.15)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
-      child: Row(
+      child: const Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            isHighRisk ? Icons.warning_rounded : Icons.info_outline_rounded,
-            size: 14,
-            color: color,
-          ),
-          const SizedBox(width: 4),
+          Icon(Icons.warning_rounded, size: 12, color: color),
+          SizedBox(width: 4),
           Text(
-            label,
+            'High Risk',
             style: TextStyle(
               color: color,
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
+              fontSize: 10,
+              fontWeight: FontWeight.w800,
             ),
           ),
         ],
