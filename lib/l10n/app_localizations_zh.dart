@@ -723,4 +723,45 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get chatAttachDocument => '文档';
+
+  @override
+  String get receiptTitle => '付款收据';
+
+  @override
+  String get receiptSuccess => '付款成功';
+
+  @override
+  String get receiptTransactionId => '交易 ID';
+
+  @override
+  String get receiptProperty => '房源';
+
+  @override
+  String get receiptLocation => '位置';
+
+  @override
+  String get receiptPaymentDate => '付款日期';
+
+  @override
+  String get receiptPaymentMethod => '付款方式';
+
+  @override
+  String get receiptInstallment => '分期';
+
+  @override
+  String receiptMonth(Object number) {
+    return '第 $number 个月';
+  }
+
+  @override
+  String get receiptTotalAmount => '总金额';
+
+  @override
+  String get receiptDownload => '下载';
+
+  @override
+  String get receiptShare => '分享';
+
+  @override
+  String get receiptFooter => '感谢您使用 HomeU！';
 }

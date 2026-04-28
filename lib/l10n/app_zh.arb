@@ -255,5 +255,23 @@
   "chatAttachmentTitle": "发送附件",
   "chatAttachImage": "图片",
   "chatAttachCamera": "拍照",
-  "chatAttachDocument": "文档"
+  "chatAttachDocument": "文档",
+  "receiptTitle": "付款收据",
+  "receiptSuccess": "付款成功",
+  "receiptTransactionId": "交易 ID",
+  "receiptProperty": "房源",
+  "receiptLocation": "位置",
+  "receiptPaymentDate": "付款日期",
+  "receiptPaymentMethod": "付款方式",
+  "receiptInstallment": "分期",
+  "receiptMonth": "第 {number} 个月",
+  "@receiptMonth": {
+    "placeholders": {
+      "number": {}
+    }
+  },
+  "receiptTotalAmount": "总金额",
+  "receiptDownload": "下载",
+  "receiptShare": "分享",
+  "receiptFooter": "感谢您使用 HomeU！"
 }

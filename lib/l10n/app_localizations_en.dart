@@ -776,4 +776,45 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get chatAttachDocument => 'Document';
+
+  @override
+  String get receiptTitle => 'Payment Receipt';
+
+  @override
+  String get receiptSuccess => 'Payment Successful';
+
+  @override
+  String get receiptTransactionId => 'Transaction ID';
+
+  @override
+  String get receiptProperty => 'Property';
+
+  @override
+  String get receiptLocation => 'Location';
+
+  @override
+  String get receiptPaymentDate => 'Payment Date';
+
+  @override
+  String get receiptPaymentMethod => 'Payment Method';
+
+  @override
+  String get receiptInstallment => 'Installment';
+
+  @override
+  String receiptMonth(Object number) {
+    return 'Month $number';
+  }
+
+  @override
+  String get receiptTotalAmount => 'Total Amount';
+
+  @override
+  String get receiptDownload => 'Download';
+
+  @override
+  String get receiptShare => 'Share';
+
+  @override
+  String get receiptFooter => 'Thank you for using HomeU!';
 }
