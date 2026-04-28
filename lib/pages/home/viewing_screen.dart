@@ -7,6 +7,7 @@ import 'package:homeu/app/viewing/viewing_local_datasource.dart';
 import 'package:homeu/app/viewing/viewing_models.dart';
 import 'package:homeu/app/viewing/viewing_remote_datasource.dart';
 import 'package:homeu/core/supabase/app_supabase.dart';
+import 'package:homeu/core/utils/date_time_utils.dart';
 import 'package:homeu/pages/home/property_item.dart';
 import 'package:uuid/uuid.dart';
 
@@ -35,6 +36,9 @@ class _HomeUViewingScreenState extends State<HomeUViewingScreen> {
 
   Future<void> _fetchAvailableSlots() async {
     setState(() => _isLoading = true);
+    final now = DateTime.now().toMalaysiaTime();
+    final nowWall = DateTime.utc(now.year, now.month, now.day, now.hour, now.minute);
+
     try {
       // 1. Fetch available slots from owner_availabilities
       final slotsResponse = await AppSupabase.client
@@ -42,7 +46,7 @@ class _HomeUViewingScreenState extends State<HomeUViewingScreen> {
           .select()
           .eq('property_id', widget.property.id)
           .eq('status', 'Available')
-          .gte('start_time', DateTime.now().toUtc().toIso8601String());
+          .gte('start_time', nowWall.toIso8601String());
 
       final List<Map<String, dynamic>> slots = List<Map<String, dynamic>>.from(slotsResponse);
 
@@ -54,12 +58,12 @@ class _HomeUViewingScreenState extends State<HomeUViewingScreen> {
           .eq('status', 'Approved');
       
       final List<DateTime> approvedTimes = (approvedViewingsResponse as List)
-          .map((v) => DateTime.parse(v['scheduled_at'] as String).toLocal())
+          .map((v) => (v['scheduled_at'] as String).parseAsWallTime())
           .toList();
 
       // 3. Filter slots: Remove those within 30-min buffer of an approved viewing
       final filteredSlots = slots.where((slot) {
-        final slotTime = DateTime.parse(slot['start_time'] as String).toLocal();
+        final slotTime = (slot['start_time'] as String).parseAsWallTime();
         for (final approvedTime in approvedTimes) {
           final difference = slotTime.difference(approvedTime).inMinutes.abs();
           if (difference < 30) return false;
@@ -124,7 +128,7 @@ class _HomeUViewingScreenState extends State<HomeUViewingScreen> {
             itemCount: _availableSlots.length,
             itemBuilder: (context, index) {
               final slot = _availableSlots[index];
-              final startTime = DateTime.parse(slot['start_time'] as String).toLocal();
+              final startTime = (slot['start_time'] as String).parseAsWallTime();
               final isSelected = _selectedSlot == slot;
 
               return Padding(
@@ -165,7 +169,7 @@ class _HomeUViewingScreenState extends State<HomeUViewingScreen> {
                               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                             ),
                             Text(
-                              DateFormat('hh:mm a').format(startTime),
+                              DateFormat('h:mm a').format(startTime),
                               style: const TextStyle(color: Color(0xFF64748B), fontSize: 13),
                             ),
                           ],

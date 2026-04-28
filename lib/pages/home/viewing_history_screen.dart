@@ -8,6 +8,7 @@ import 'package:homeu/app/viewing/viewing_local_datasource.dart';
 import 'package:homeu/app/viewing/viewing_models.dart';
 import 'package:homeu/app/viewing/viewing_remote_datasource.dart';
 import 'package:homeu/core/supabase/app_supabase.dart';
+import 'package:homeu/core/utils/date_time_utils.dart';
 import 'package:homeu/pages/home/property_details_screen.dart';
 import 'package:homeu/pages/home/property_item.dart';
 import 'package:homeu/pages/home/widgets/status_filter_chips.dart';
@@ -624,8 +625,9 @@ class _ViewingHistoryCard extends StatelessWidget {
   Widget _buildInfoSection(BuildContext context, Color purpleAccent, {bool showCancelButton = false}) {
     final dateFormat = DateFormat('MMM d');
     final dayFormat = DateFormat('EEEE');
-    final timeFormat = DateFormat('hh:mm a');
-    final scheduledAt = viewing.scheduledAt.toLocal();
+    final timeFormat = DateFormat('h:mm a');
+    // Treating scheduledAt as Wall Time (already UTC) to avoid double-offsetting on physical phones.
+    final scheduledAt = viewing.scheduledAt;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
