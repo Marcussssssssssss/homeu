@@ -3,7 +3,6 @@ import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
 import 'package:homeu/core/theme/homeu_app_theme.dart';
 import 'package:homeu/core/supabase/app_supabase.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
 
 class HomeUAdminAuditLogsScreen extends StatefulWidget {
@@ -24,11 +23,22 @@ class _HomeUAdminAuditLogsScreenState extends State<HomeUAdminAuditLogsScreen> {
   DateTimeRange? _dateRange;
 
   // Predefined filter options
-  final List<String> _tables = ['profiles', 'properties', 'bookings', 'reports', 'audit_logs'];
+  final List<String> _tables = ['profiles', 'properties', 'bookings', 'property_reports', 'reports', 'audit_logs'];
   final List<String> _actions = [
-    'admin_created', 'admin_updated', 'admin_removed',
-    'owner_flag', 'owner_mark_risk', 'owner_suspend', 'owner_restore', 'owner_remove',
-    'property_approved', 'property_rejected', 'profile_update'
+    'admin_created',
+    'admin_updated',
+    'admin_removed',
+    'report_contact_owner',
+    'report_contact_tenant',
+    'report_risk_low',
+    'report_risk_medium',
+    'report_risk_high',
+    'report_risk_invalid',
+    'report_reviewed',
+    'report_dismissed',
+    'property_approved',
+    'property_rejected',
+    'profile_update',
   ];
 
   @override
@@ -400,10 +410,17 @@ class _ActionBadge extends StatelessWidget {
     Color color = Colors.blueGrey;
     final a = action.toLowerCase();
 
-    if (a.contains('create') || a.contains('add') || a.contains('restore')) color = Colors.green;
-    else if (a.contains('update') || a.contains('edit')) color = Colors.blue;
-    else if (a.contains('suspend') || a.contains('deactivate') || a.contains('remove')) color = Colors.red;
-    else if (a.contains('flag') || a.contains('risk') || a.contains('reject')) color = Colors.orange;
+    if (a.contains('create') || a.contains('add') || a.contains('restore')) {
+      color = Colors.green;
+    } else if (a.contains('contact') || a.contains('chat')) {
+      color = Colors.indigo;
+    } else if (a.contains('update') || a.contains('edit') || a.contains('review')) {
+      color = Colors.blue;
+    } else if (a.contains('suspend') || a.contains('deactivate') || a.contains('remove')) {
+      color = Colors.red;
+    } else if (a.contains('flag') || a.contains('risk') || a.contains('reject') || a.contains('dismiss')) {
+      color = Colors.orange;
+    }
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),

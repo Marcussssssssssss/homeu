@@ -7,7 +7,6 @@ import 'package:homeu/app/profile/admin_dashboard_repository.dart';
 import 'package:homeu/pages/home/admin_owner_moderation_screen.dart';
 import 'package:homeu/pages/home/admin_management_screen.dart';
 import 'package:homeu/pages/home/admin_audit_logs_screen.dart';
-import 'package:homeu/pages/home/profile_screen.dart';
 
 class HomeUAdminDashboardScreen extends StatefulWidget {
   const HomeUAdminDashboardScreen({
@@ -60,19 +59,6 @@ class _HomeUAdminDashboardScreenState extends State<HomeUAdminDashboardScreen> {
         });
       }
     }
-  }
-
-  void _openAdminProfile() {
-    if (widget.onNavigateToTab != null) {
-      widget.onNavigateToTab!(4);
-      return;
-    }
-
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => const HomeUProfileScreen(role: HomeURole.admin),
-      ),
-    );
   }
 
   void _openReportsModeration() {
@@ -211,9 +197,9 @@ class _HomeUAdminDashboardScreenState extends State<HomeUAdminDashboardScreen> {
 
                 // Menu Options
                 _ManagementTile(
-                  title: 'Reports & Moderation',
+                  title: 'Reports Review',
                   subtitle:
-                      '${_stats.pendingComplaints} pending of ${_stats.totalComplaints} total complaints',
+                      '${_stats.pendingComplaints} pending of ${_stats.totalComplaints} total reports',
                   icon: Icons.gavel_rounded,
                   onTap: _openReportsModeration,
                 ),
