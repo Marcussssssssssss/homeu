@@ -5,7 +5,9 @@ class OwnerDashboardRemoteDataSource {
   Future<DashboardData> fetchDashboardData(String ownerId) async {
     final dynamic propertiesResponse = await AppSupabase.client
         .from('properties')
-        .select('id, title, location_area, monthly_price, status, property_image(public_url), booking_requests(status, move_in_date, move_out_date, total_amount, created_at)')
+        .select(
+          'id, title, location_area, monthly_price, status, property_image(public_url), booking_requests(status, move_in_date, move_out_date, total_amount, created_at)',
+        )
         .eq('owner_id', ownerId)
         .neq('status', 'Archived')
         .order('created_at', ascending: false);
@@ -16,7 +18,9 @@ class OwnerDashboardRemoteDataSource {
 
     final dynamic bookingsResponse = await AppSupabase.client
         .from('booking_requests')
-        .select('id, property_id, tenant_id, status, total_amount, payment_status, created_at, payments(amount, status)')
+        .select(
+          'id, property_id, tenant_id, status, total_amount, payment_status, created_at, payments(amount, status)',
+        )
         .eq('owner_id', ownerId)
         .order('created_at', ascending: false);
 
@@ -72,9 +76,12 @@ class OwnerDashboardRemoteDataSource {
 
       for (final payment in relatedPayments) {
         if (payment is Map<String, dynamic>) {
-          final paymentStatus = payment['status']?.toString().toLowerCase() ?? '';
+          final paymentStatus =
+              payment['status']?.toString().toLowerCase() ?? '';
 
-          if (paymentStatus == 'paid' || paymentStatus == 'success' || paymentStatus == 'completed') {
+          if (paymentStatus == 'paid' ||
+              paymentStatus == 'success' ||
+              paymentStatus == 'completed') {
             totalEarnings += (payment['amount'] as num?)?.toDouble() ?? 0.0;
           }
         }
@@ -129,11 +136,13 @@ class OwnerDashboardRemoteDataSource {
 
     for (var b in activeBookings.take(3)) {
       final prop = properties.firstWhere(
-              (p) => p['id'] == b['property_id'],
-          orElse: () => {'title': 'Unknown Property'}
+        (p) => p['id'] == b['property_id'],
+        orElse: () => {'title': 'Unknown Property'},
       );
 
-      final tenantData = tenantProfiles[b['tenant_id']] ?? {'name': 'Unknown Tenant', 'imageUrl': ''};
+      final tenantData =
+          tenantProfiles[b['tenant_id']] ??
+          {'name': 'Unknown Tenant', 'imageUrl': ''};
 
       recentRequests.add({
         'id': b['id'],
@@ -147,11 +156,13 @@ class OwnerDashboardRemoteDataSource {
     List<Map<String, dynamic>> recentViewingsList = [];
     for (var v in viewings.take(3)) {
       final prop = properties.firstWhere(
-              (p) => p['id'] == v['property_id'],
-          orElse: () => {'title': 'Unknown Property'}
+        (p) => p['id'] == v['property_id'],
+        orElse: () => {'title': 'Unknown Property'},
       );
 
-      final tenantData = tenantProfiles[v['tenant_id']] ?? {'name': 'Unknown Tenant', 'imageUrl': ''};
+      final tenantData =
+          tenantProfiles[v['tenant_id']] ??
+          {'name': 'Unknown Tenant', 'imageUrl': ''};
 
       recentViewingsList.add({
         'id': v['id'],
@@ -190,17 +201,22 @@ class OwnerDashboardRemoteDataSource {
 
       final status = b['status']?.toString().trim().toLowerCase() ?? '';
 
-      if (status != 'approved' && status != 'occupied' && status != 'completed') {
+      if (status != 'approved' &&
+          status != 'occupied' &&
+          status != 'completed') {
         continue;
       }
 
-      DateTime? start = _parseDate(b['move_in_date']) ?? _parseDate(b['created_at']);
+      DateTime? start =
+          _parseDate(b['move_in_date']) ?? _parseDate(b['created_at']);
       if (start == null) continue;
 
       DateTime? end = _parseDate(b['move_out_date']);
       if (end == null) {
         final totalAmount = _parseNum(b['total_amount']) ?? 0;
-        final estimatedMonths = monthlyPrice > 0 ? (totalAmount / monthlyPrice).round() : 1;
+        final estimatedMonths = monthlyPrice > 0
+            ? (totalAmount / monthlyPrice).round()
+            : 1;
         final durationMonths = estimatedMonths > 0 ? estimatedMonths : 1;
         end = DateTime(start.year, start.month + durationMonths, start.day);
       }

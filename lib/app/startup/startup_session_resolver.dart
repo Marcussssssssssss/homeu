@@ -3,12 +3,7 @@ import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/auth/biometric_auth_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-enum HomeUStartupDestination {
-  authFlow,
-  tenantFlow,
-  ownerFlow,
-  adminFlow
-}
+enum HomeUStartupDestination { authFlow, tenantFlow, ownerFlow, adminFlow }
 
 class HomeUStartupSessionResolver {
   HomeUStartupSessionResolver({
@@ -40,7 +35,9 @@ class HomeUStartupSessionResolver {
     return _destinationForRole(role);
   }
 
-  Future<HomeUStartupDestination> resolveFromAuthState(AuthState authState) async {
+  Future<HomeUStartupDestination> resolveFromAuthState(
+    AuthState authState,
+  ) async {
     switch (authState.event) {
       case AuthChangeEvent.signedOut:
         return HomeUStartupDestination.authFlow;

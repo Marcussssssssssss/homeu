@@ -35,7 +35,10 @@ class ChatLocalDataSource {
     );
   }
 
-  Future<int> insertMessage(ChatMessage message, {String syncStatus = 'pending'}) async {
+  Future<int> insertMessage(
+    ChatMessage message, {
+    String syncStatus = 'pending',
+  }) async {
     final db = await database;
     return await db.insert('local_messages', {
       'id': message.id,
@@ -84,10 +87,6 @@ class ChatLocalDataSource {
 
   Future<void> deleteMessage(String id) async {
     final db = await database;
-    await db.delete(
-      'local_messages',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    await db.delete('local_messages', where: 'id = ?', whereArgs: [id]);
   }
 }

@@ -4,7 +4,7 @@ import 'booking_requests_repository.dart';
 
 class BookingRequestsController extends ChangeNotifier {
   BookingRequestsController({BookingRequestsRepository? repository})
-      : _repository = repository ?? BookingRequestsRepository();
+    : _repository = repository ?? BookingRequestsRepository();
 
   final BookingRequestsRepository _repository;
 
@@ -20,14 +20,16 @@ class BookingRequestsController extends ChangeNotifier {
     'Approved',
     'Rejected',
     'Completed',
-    'Cancelled'
+    'Cancelled',
   ];
 
   List<BookingRequestModel> get filteredRequests {
     if (selectedFilter == 'All') return requests;
 
     if (selectedFilter == 'Pending') {
-      return requests.where((r) => r.status == 'Pending' || r.status == 'Pending Decision').toList();
+      return requests
+          .where((r) => r.status == 'Pending' || r.status == 'Pending Decision')
+          .toList();
     }
 
     return requests.where((r) => r.status == selectedFilter).toList();

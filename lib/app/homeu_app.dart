@@ -13,7 +13,8 @@ import 'package:homeu/core/supabase/app_supabase.dart';
 import 'package:homeu/pages/home/update_password_screen.dart';
 import 'package:homeu/l10n/app_localizations.dart';
 
-final RouteObserver<ModalRoute<void>> routeObserver = RouteObserver<ModalRoute<void>>();
+final RouteObserver<ModalRoute<void>> routeObserver =
+    RouteObserver<ModalRoute<void>>();
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 class HomeUApp extends StatefulWidget {
@@ -72,7 +73,8 @@ class _HomeUAppState extends State<HomeUApp> {
 
   Future<void> _handleAuthLink(Uri uri) async {
     // Expected reset link: homeu://auth/reset?code=...
-    final isResetLink = uri.scheme == 'homeu' &&
+    final isResetLink =
+        uri.scheme == 'homeu' &&
         uri.host == 'auth' &&
         uri.path.startsWith('/reset');
 

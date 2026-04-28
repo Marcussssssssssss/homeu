@@ -34,8 +34,13 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
     setState(() => _isSearching = true);
 
     try {
-      final url = Uri.parse('https://nominatim.openstreetmap.org/search?q=${Uri.encodeComponent(query)}&format=json&limit=1');
-      final response = await http.get(url, headers: {'User-Agent': 'HomeU_App'});
+      final url = Uri.parse(
+        'https://nominatim.openstreetmap.org/search?q=${Uri.encodeComponent(query)}&format=json&limit=1',
+      );
+      final response = await http.get(
+        url,
+        headers: {'User-Agent': 'HomeU_App'},
+      );
 
       if (response.statusCode == 200) {
         final List data = json.decode(response.body);
@@ -52,7 +57,9 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
           });
           _mapController.move(newPos, 15.0);
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Address not found')));
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(const SnackBar(content: Text('Address not found')));
         }
       }
     } catch (e) {
@@ -64,8 +71,13 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
 
   Future<void> _getAddressFromLatLng(LatLng point) async {
     try {
-      final url = Uri.parse('https://nominatim.openstreetmap.org/reverse?lat=${point.latitude}&lon=${point.longitude}&format=json');
-      final response = await http.get(url, headers: {'User-Agent': 'HomeU_App'});
+      final url = Uri.parse(
+        'https://nominatim.openstreetmap.org/reverse?lat=${point.latitude}&lon=${point.longitude}&format=json',
+      );
+      final response = await http.get(
+        url,
+        headers: {'User-Agent': 'HomeU_App'},
+      );
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         if (data['display_name'] != null) {
@@ -91,15 +103,17 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
           if (_pickedLocation != null)
             TextButton.icon(
               onPressed: () {
-                Navigator.of(context).pop({
-                  'location': _pickedLocation,
-                  'address': _pickedAddress,
-                });
+                Navigator.of(
+                  context,
+                ).pop({'location': _pickedLocation, 'address': _pickedAddress});
               },
               icon: const Icon(Icons.check, color: Color(0xFF1E3A8A)),
               label: const Text(
                 'Confirm',
-                style: TextStyle(color: Color(0xFF1E3A8A), fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: Color(0xFF1E3A8A),
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
         ],
@@ -149,21 +163,30 @@ class _MapSelectionScreenState extends State<MapSelectionScreen> {
             right: 15,
             child: Card(
               elevation: 4,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
               child: TextField(
                 controller: _searchController,
                 decoration: InputDecoration(
                   hintText: 'Search address or building...',
-                  prefixIcon: const Icon(Icons.search, color: Color(0xFF1E3A8A)),
+                  prefixIcon: const Icon(
+                    Icons.search,
+                    color: Color(0xFF1E3A8A),
+                  ),
                   suffixIcon: _isSearching
                       ? const Padding(
-                    padding: EdgeInsets.all(12.0),
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
+                          padding: EdgeInsets.all(12.0),
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
                       : IconButton(
-                    icon: const Icon(Icons.send, color: Color(0xFF1E3A8A)),
-                    onPressed: () => _searchAddress(_searchController.text),
-                  ),
+                          icon: const Icon(
+                            Icons.send,
+                            color: Color(0xFF1E3A8A),
+                          ),
+                          onPressed: () =>
+                              _searchAddress(_searchController.text),
+                        ),
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(vertical: 15),
                 ),

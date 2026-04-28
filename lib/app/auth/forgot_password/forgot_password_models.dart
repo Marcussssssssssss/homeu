@@ -1,7 +1,4 @@
-enum ForgotPasswordSubmissionStatus {
-  success,
-  failure,
-}
+enum ForgotPasswordSubmissionStatus { success, failure }
 
 class ForgotPasswordPayload {
   const ForgotPasswordPayload({required this.email, this.redirectTo});
@@ -21,4 +18,3 @@ class ForgotPasswordSubmissionResult {
 
   bool get isSuccess => status == ForgotPasswordSubmissionStatus.success;
 }
-

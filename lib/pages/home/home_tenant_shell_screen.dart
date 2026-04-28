@@ -53,4 +53,3 @@ class _HomeUTenantShellScreenState extends State<HomeUTenantShellScreen> {
     );
   }
 }
-

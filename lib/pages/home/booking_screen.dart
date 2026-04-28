@@ -21,7 +21,8 @@ class HomeUBookingScreen extends StatefulWidget {
 
 class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
   static const List<int> _durationOptions = [1, 3, 6, 12];
-  final BookingRemoteDataSource _bookingRemoteDataSource = const BookingRemoteDataSource();
+  final BookingRemoteDataSource _bookingRemoteDataSource =
+      const BookingRemoteDataSource();
   int _selectedDurationMonths = 6;
   DateTime _startDate = DateTime.now().add(const Duration(days: 3));
   bool _isSubmitting = false;
@@ -37,15 +38,23 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
   Future<void> _loadAvailability() async {
     setState(() => _isLoadingAvailability = true);
     try {
-      final bookings = await _bookingRemoteDataSource.getConflictingBookings(widget.property.id);
+      final bookings = await _bookingRemoteDataSource.getConflictingBookings(
+        widget.property.id,
+      );
       // Sort bookings by move-in date
-      bookings.sort((a, b) => (a.moveInDate ?? DateTime(0)).compareTo(b.moveInDate ?? DateTime(0)));
-      
+      bookings.sort(
+        (a, b) => (a.moveInDate ?? DateTime(0)).compareTo(
+          b.moveInDate ?? DateTime(0),
+        ),
+      );
+
       setState(() {
         _existingBookings = bookings;
         _isLoadingAvailability = false;
-        
-        final defaultStart = _normalizeDate(DateTime.now().add(const Duration(days: 3)));
+
+        final defaultStart = _normalizeDate(
+          DateTime.now().add(const Duration(days: 3)),
+        );
         // Find first available date if current start date is blocked
         if (_isDateBlocked(defaultStart)) {
           _startDate = _findFirstAvailableDate();
@@ -59,7 +68,8 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
     }
   }
 
-  DateTime _normalizeDate(DateTime date) => DateTime(date.year, date.month, date.day);
+  DateTime _normalizeDate(DateTime date) =>
+      DateTime(date.year, date.month, date.day);
 
   bool _isDateBlocked(DateTime date) {
     final d = _normalizeDate(date);
@@ -67,7 +77,7 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
       if (b.moveInDate == null || b.moveOutDate == null) continue;
       final start = _normalizeDate(b.moveInDate!);
       final end = _normalizeDate(b.moveOutDate!);
-      
+
       if (!d.isBefore(start) && !d.isAfter(end)) {
         return true;
       }
@@ -100,12 +110,12 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
   bool _hasDurationConflict(DateTime start, int months) {
     final normalizedStart = _normalizeDate(start);
     final end = _calculateMoveOutDate(normalizedStart, months);
-    
+
     for (final b in _existingBookings) {
       if (b.moveInDate == null || b.moveOutDate == null) continue;
       final bStart = _normalizeDate(b.moveInDate!);
       final bEnd = _normalizeDate(b.moveOutDate!);
-      
+
       // Overlap formula: (StartA <= EndB) and (EndA >= StartB)
       if (!normalizedStart.isAfter(bEnd) && !end.isBefore(bStart)) {
         return true;
@@ -117,12 +127,12 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
   BookingRequest? _getConflictBooking(DateTime start, int months) {
     final normalizedStart = _normalizeDate(start);
     final end = _calculateMoveOutDate(normalizedStart, months);
-    
+
     for (final b in _existingBookings) {
       if (b.moveInDate == null || b.moveOutDate == null) continue;
       final bStart = _normalizeDate(b.moveInDate!);
       final bEnd = _normalizeDate(b.moveOutDate!);
-      
+
       if (!normalizedStart.isAfter(bEnd) && !end.isBefore(bStart)) {
         return b;
       }
@@ -145,7 +155,8 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
 
   double get _monthlyPrice => _extractPrice(widget.property.pricePerMonth);
   double get _totalPrice => _monthlyPrice * _selectedDurationMonths;
-  bool get _isDurationValid => !_hasDurationConflict(_startDate, _selectedDurationMonths);
+  bool get _isDurationValid =>
+      !_hasDurationConflict(_startDate, _selectedDurationMonths);
 
   @override
   Widget build(BuildContext context) {
@@ -169,7 +180,11 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
                 padding: const EdgeInsets.only(bottom: 8.0),
                 child: Text(
                   'Conflict detected with an existing booking.',
-                  style: TextStyle(color: Colors.red, fontSize: 12, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             Text(
@@ -187,20 +202,35 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
               height: 52,
               child: ElevatedButton(
                 key: const Key('confirm_booking_button'),
-                onPressed: (_isSubmitting || !_isDurationValid || _isLoadingAvailability) ? null : _confirmBooking,
+                onPressed:
+                    (_isSubmitting ||
+                        !_isDurationValid ||
+                        _isLoadingAvailability)
+                    ? null
+                    : _confirmBooking,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: context.homeuAccent,
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  textStyle: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
                 child: _isSubmitting || _isLoadingAvailability
                     ? const SizedBox(
                         width: 18,
                         height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
                       )
-                    : Text('Pay Booking Fee (RM ${_formatCurrency(_monthlyPrice)})'),
+                    : Text(
+                        'Pay Booking Fee (RM ${_formatCurrency(_monthlyPrice)})',
+                      ),
               ),
             ),
           ],
@@ -311,7 +341,11 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
                       Expanded(
                         child: Text(
                           'Property is already booked starting from ${DateFormat('MMM dd, yyyy').format(_getConflictBooking(_startDate, _selectedDurationMonths)!.moveInDate!)}. Please choose a shorter duration or different start date.',
-                          style: TextStyle(color: Colors.red, fontSize: 13, fontWeight: FontWeight.w500),
+                          style: TextStyle(
+                            color: Colors.red,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
                     ],
@@ -341,12 +375,19 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
                     borderRadius: BorderRadius.circular(24),
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 200),
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
                       decoration: BoxDecoration(
-                        color: isSelected ? const Color(0xFF1E3A8A) : Colors.white,
+                        color: isSelected
+                            ? const Color(0xFF1E3A8A)
+                            : Colors.white,
                         borderRadius: BorderRadius.circular(24),
                         border: Border.all(
-                          color: isSelected ? const Color(0xFF1E3A8A) : Colors.grey[300]!,
+                          color: isSelected
+                              ? const Color(0xFF1E3A8A)
+                              : Colors.grey[300]!,
                           width: 1,
                         ),
                       ),
@@ -364,8 +405,12 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
                           Text(
                             '$months month${months > 1 ? 's' : ''}',
                             style: TextStyle(
-                              color: isSelected ? Colors.white : context.homeuPrimaryText,
-                              fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                              color: isSelected
+                                  ? Colors.white
+                                  : context.homeuPrimaryText,
+                              fontWeight: isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.w600,
                               fontSize: 14,
                             ),
                           ),
@@ -390,7 +435,11 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
                   padding: const EdgeInsets.only(bottom: 12.0),
                   child: Row(
                     children: [
-                      Icon(Icons.info_outline_rounded, size: 16, color: context.homeuAccent),
+                      Icon(
+                        Icons.info_outline_rounded,
+                        size: 16,
+                        color: context.homeuAccent,
+                      ),
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
@@ -410,7 +459,10 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
                 borderRadius: BorderRadius.circular(16),
                 onTap: _pickStartDate,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 14,
+                  ),
                   decoration: BoxDecoration(
                     color: context.homeuCard,
                     borderRadius: BorderRadius.circular(16),
@@ -418,7 +470,10 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.calendar_month_rounded, color: context.homeuAccent),
+                      Icon(
+                        Icons.calendar_month_rounded,
+                        color: context.homeuAccent,
+                      ),
                       const SizedBox(width: 8),
                       Text(
                         _formatDate(_startDate),
@@ -462,7 +517,10 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
                       children: [
                         Text(
                           'Monthly Price',
-                          style: TextStyle(color: context.homeuMutedText, fontSize: 13),
+                          style: TextStyle(
+                            color: context.homeuMutedText,
+                            fontSize: 13,
+                          ),
                         ),
                         const Spacer(),
                         Text(
@@ -480,7 +538,10 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
                       children: [
                         Text(
                           'Duration ($_selectedDurationMonths months)',
-                          style: TextStyle(color: context.homeuMutedText, fontSize: 13),
+                          style: TextStyle(
+                            color: context.homeuMutedText,
+                            fontSize: 13,
+                          ),
                         ),
                         const Spacer(),
                         Text(
@@ -558,7 +619,9 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
   Future<void> _confirmBooking() async {
     if (!AppSupabase.isInitialized) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Supabase is not initialized. Please try again later.')),
+        const SnackBar(
+          content: Text('Supabase is not initialized. Please try again later.'),
+        ),
       );
       return;
     }
@@ -575,22 +638,30 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
 
     try {
       // Race condition protection: Check availability one last time
-      final latestConflicts = await _bookingRemoteDataSource.getConflictingBookings(widget.property.id);
+      final latestConflicts = await _bookingRemoteDataSource
+          .getConflictingBookings(widget.property.id);
       _existingBookings = latestConflicts;
-      
+
       if (_hasDurationConflict(_startDate, _selectedDurationMonths)) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Sorry, this duration was just booked by another tenant.')),
+          const SnackBar(
+            content: Text(
+              'Sorry, this duration was just booked by another tenant.',
+            ),
+          ),
         );
         setState(() => _isSubmitting = false);
         return;
       }
 
       final now = DateTime.now().toUtc();
-      
+
       // Calculate moveOutDate based on selected duration correctly
-      final moveOutDate = _calculateMoveOutDate(_startDate, _selectedDurationMonths);
-      
+      final moveOutDate = _calculateMoveOutDate(
+        _startDate,
+        _selectedDurationMonths,
+      );
+
       final booking = BookingRequest(
         id: '',
         propertyId: widget.property.id,
@@ -605,14 +676,18 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
         moveOutDate: moveOutDate,
       );
 
-      debugPrint('Booking submit: propertyId=${widget.property.id}, ownerId=${widget.property.ownerId}, tenantId=$tenantId, duration=$_selectedDurationMonths');
+      debugPrint(
+        'Booking submit: propertyId=${widget.property.id}, ownerId=${widget.property.ownerId}, tenantId=$tenantId, duration=$_selectedDurationMonths',
+      );
 
       final created = await _bookingRemoteDataSource.createBooking(booking);
       if (!mounted) return;
 
       if (created == null || created.id.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Unable to create booking. Please try again.')),
+          const SnackBar(
+            content: Text('Unable to create booking. Please try again.'),
+          ),
         );
         return;
       }
@@ -632,9 +707,9 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
       debugPrint('Create booking failed: $e');
       debugPrint('$st');
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Create booking failed: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Create booking failed: $e')));
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
     }
@@ -675,4 +750,3 @@ class _HomeUBookingScreenState extends State<HomeUBookingScreen> {
     return '${date.day} ${months[date.month - 1]} ${date.year}';
   }
 }
-

@@ -31,9 +31,7 @@ class MyPropertiesRemoteDataSource {
   }
 
   Future<void> updatePropertyStatus(String propertyId, String newStatus) async {
-    final updateData = {
-      'status': newStatus,
-    };
+    final updateData = {'status': newStatus};
 
     if (newStatus == 'Active') {
       updateData['publish_at'] = DateTime.now().toIso8601String();
@@ -52,23 +50,24 @@ class MyPropertiesRemoteDataSource {
         .eq('property_id', propertyId);
 
     final bookingRows = bookingsResponse is List
-        ? bookingsResponse.whereType<Map<String, dynamic>>().toList(growable: false)
+        ? bookingsResponse.whereType<Map<String, dynamic>>().toList(
+            growable: false,
+          )
         : const <Map<String, dynamic>>[];
 
     final hasApprovedBooking = bookingRows.any(
-          (row) => (row['status']?.toString().trim().toLowerCase() ?? '') == 'approved',
+      (row) =>
+          (row['status']?.toString().trim().toLowerCase() ?? '') == 'approved',
     );
     if (hasApprovedBooking) {
       throw Exception(archiveBlockedApprovedBookingError);
     }
 
     final pendingIds = bookingRows
-        .where(
-          (row) {
-        final status = row['status']?.toString().trim().toLowerCase() ?? '';
-        return status == 'pending' || status == 'pending decision';
-      },
-    )
+        .where((row) {
+          final status = row['status']?.toString().trim().toLowerCase() ?? '';
+          return status == 'pending' || status == 'pending decision';
+        })
         .map((row) => row['id']?.toString())
         .whereType<String>()
         .where((id) => id.isNotEmpty)

@@ -9,9 +9,12 @@ class AddPropertyRepository {
     AddPropertyRemoteDataSource? remoteDataSource,
     PropertyImageRemoteDataSource? imageRemoteDataSource,
     HomeUAuthService? authService,
-  })  : _remoteDataSource = remoteDataSource ?? const AddPropertyRemoteDataSource(),
-        _imageRemoteDataSource = imageRemoteDataSource ?? const PropertyImageRemoteDataSource(), // NEW
-        _authService = authService ?? HomeUAuthService.instance;
+  }) : _remoteDataSource =
+           remoteDataSource ?? const AddPropertyRemoteDataSource(),
+       _imageRemoteDataSource =
+           imageRemoteDataSource ??
+           const PropertyImageRemoteDataSource(), // NEW
+       _authService = authService ?? HomeUAuthService.instance;
 
   final AddPropertyRemoteDataSource _remoteDataSource;
   final PropertyImageRemoteDataSource _imageRemoteDataSource;
@@ -21,11 +24,15 @@ class AddPropertyRepository {
     return await _remoteDataSource.fetchPropertyDetails(propertyId);
   }
 
-  Future<AddPropertySubmissionResult> submit(AddPropertyPayload payload, {String? existingPropertyId}) async {
+  Future<AddPropertySubmissionResult> submit(
+    AddPropertyPayload payload, {
+    String? existingPropertyId,
+  }) async {
     if (!AppSupabase.isInitialized) {
       return const AddPropertySubmissionResult(
         status: AddPropertySubmissionStatus.failure,
-        message: 'Backend is not initialized. Please check your Supabase configuration.',
+        message:
+            'Backend is not initialized. Please check your Supabase configuration.',
       );
     }
 
@@ -106,8 +113,11 @@ class AddPropertyRepository {
       if (payload.status == 'Draft') {
         successMessage = 'Draft saved successfully.';
       } else {
-        final isScheduled = payload.publishAt != null &&
-            payload.publishAt!.isAfter(DateTime.now().add(const Duration(minutes: 5)));
+        final isScheduled =
+            payload.publishAt != null &&
+            payload.publishAt!.isAfter(
+              DateTime.now().add(const Duration(minutes: 5)),
+            );
         if (isScheduled) {
           successMessage = 'Property successfully scheduled for publication.';
         } else {

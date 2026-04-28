@@ -18,10 +18,12 @@ class HomeUOwnerMyPropertiesScreen extends StatefulWidget {
   final bool showBottomNavigationBar;
 
   @override
-  State<HomeUOwnerMyPropertiesScreen> createState() => _HomeUOwnerMyPropertiesScreenState();
+  State<HomeUOwnerMyPropertiesScreen> createState() =>
+      _HomeUOwnerMyPropertiesScreenState();
 }
 
-class _HomeUOwnerMyPropertiesScreenState extends State<HomeUOwnerMyPropertiesScreen> {
+class _HomeUOwnerMyPropertiesScreenState
+    extends State<HomeUOwnerMyPropertiesScreen> {
   late final MyPropertiesController _controller;
   int _selectedNavIndex = 1;
 
@@ -50,33 +52,50 @@ class _HomeUOwnerMyPropertiesScreenState extends State<HomeUOwnerMyPropertiesScr
       ),
       bottomNavigationBar: widget.showBottomNavigationBar
           ? HomeUOwnerBottomNavigationBar(
-        selectedIndex: _selectedNavIndex,
-        onDestinationSelected: (index) {
-          if (index == _selectedNavIndex) return;
+              selectedIndex: _selectedNavIndex,
+              onDestinationSelected: (index) {
+                if (index == _selectedNavIndex) return;
 
-          if (index == 0) {
-            Navigator.of(context).popUntil((route) => route.isFirst);
-            return;
-          }
-          if (index == 1) return;
-          if (index == 2) {
-            Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const HomeUOwnerBookingRequestsScreen()));
-            return;
-          }
-          if (index == 3) {
-            Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const HomeUOwnerAnalyticsScreen()));
-            return;
-          }
-          if (index == 4) {
-            Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const HomeUConversationListScreen()));
-            return;
-          }
-          if (index == 5) {
-            Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const HomeUProfileScreen(role: HomeURole.owner)));
-            return;
-          }
-        },
-      )
+                if (index == 0) {
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                  return;
+                }
+                if (index == 1) return;
+                if (index == 2) {
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(
+                      builder: (_) => const HomeUOwnerBookingRequestsScreen(),
+                    ),
+                  );
+                  return;
+                }
+                if (index == 3) {
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(
+                      builder: (_) => const HomeUOwnerAnalyticsScreen(),
+                    ),
+                  );
+                  return;
+                }
+                if (index == 4) {
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(
+                      builder: (_) => const HomeUConversationListScreen(),
+                    ),
+                  );
+                  return;
+                }
+                if (index == 5) {
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          const HomeUProfileScreen(role: HomeURole.owner),
+                    ),
+                  );
+                  return;
+                }
+              },
+            )
           : null,
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: const Color(0xFF1E3A8A),
@@ -85,7 +104,9 @@ class _HomeUOwnerMyPropertiesScreenState extends State<HomeUOwnerMyPropertiesScr
         label: const Text('Add Property'),
         onPressed: () async {
           final result = await Navigator.of(context).push(
-            MaterialPageRoute(builder: (context) => const HomeUOwnerAddPropertyScreen()),
+            MaterialPageRoute(
+              builder: (context) => const HomeUOwnerAddPropertyScreen(),
+            ),
           );
           if (result == true) _controller.loadProperties();
         },
@@ -94,10 +115,13 @@ class _HomeUOwnerMyPropertiesScreenState extends State<HomeUOwnerMyPropertiesScr
         listenable: _controller,
         builder: (context, child) {
           if (_controller.isLoading && _controller.properties.isEmpty) {
-            return const Center(child: CircularProgressIndicator(color: Color(0xFF1E3A8A)));
+            return const Center(
+              child: CircularProgressIndicator(color: Color(0xFF1E3A8A)),
+            );
           }
 
-          if (_controller.errorMessage != null && _controller.properties.isEmpty) {
+          if (_controller.errorMessage != null &&
+              _controller.properties.isEmpty) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -119,9 +143,16 @@ class _HomeUOwnerMyPropertiesScreenState extends State<HomeUOwnerMyPropertiesScr
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.home_work_outlined, size: 64, color: Colors.grey.shade400),
+                  Icon(
+                    Icons.home_work_outlined,
+                    size: 64,
+                    color: Colors.grey.shade400,
+                  ),
                   const SizedBox(height: 16),
-                  const Text('You haven\'t listed any properties yet.', style: TextStyle(color: Color(0xFF50617F), fontSize: 16)),
+                  const Text(
+                    'You haven\'t listed any properties yet.',
+                    style: TextStyle(color: Color(0xFF50617F), fontSize: 16),
+                  ),
                 ],
               ),
             );
@@ -170,7 +201,9 @@ class _HomeUOwnerMyPropertiesScreenState extends State<HomeUOwnerMyPropertiesScr
                     onTap: () {
                       Navigator.of(context).push(
                         MaterialPageRoute(
-                          builder: (context) => HomeUOwnerPropertyDetailsScreen(property: property),
+                          builder: (context) => HomeUOwnerPropertyDetailsScreen(
+                            property: property,
+                          ),
                         ),
                       );
                     },
@@ -179,27 +212,57 @@ class _HomeUOwnerMyPropertiesScreenState extends State<HomeUOwnerMyPropertiesScr
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(16),
-                        boxShadow: const [BoxShadow(color: Color(0x0A1E3A8A), blurRadius: 10, offset: Offset(0, 4))],
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Color(0x0A1E3A8A),
+                            blurRadius: 10,
+                            offset: Offset(0, 4),
+                          ),
+                        ],
                       ),
                       child: Row(
                         children: [
                           Container(
                             width: 80,
                             height: 80,
-                            decoration: BoxDecoration(color: const Color(0xFFEAF2FF), borderRadius: BorderRadius.circular(12)),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFEAF2FF),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(12),
                               child: hasImage
                                   ? Image.network(
-                                imageUrl,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => const Center(child: Icon(Icons.broken_image_outlined, color: Color(0xFF90A4C4))),
-                                loadingBuilder: (context, child, progress) {
-                                  if (progress == null) return child;
-                                  return const Center(child: SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)));
-                                },
-                              )
-                                  : const Center(child: Icon(Icons.image_not_supported, color: Color(0xFF90A4C4))),
+                                      imageUrl,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) =>
+                                          const Center(
+                                            child: Icon(
+                                              Icons.broken_image_outlined,
+                                              color: Color(0xFF90A4C4),
+                                            ),
+                                          ),
+                                      loadingBuilder:
+                                          (context, child, progress) {
+                                            if (progress == null) return child;
+                                            return const Center(
+                                              child: SizedBox(
+                                                width: 18,
+                                                height: 18,
+                                                child:
+                                                    CircularProgressIndicator(
+                                                      strokeWidth: 2,
+                                                    ),
+                                              ),
+                                            );
+                                          },
+                                    )
+                                  : const Center(
+                                      child: Icon(
+                                        Icons.image_not_supported,
+                                        color: Color(0xFF90A4C4),
+                                      ),
+                                    ),
                             ),
                           ),
                           const SizedBox(width: 16),
@@ -208,77 +271,160 @@ class _HomeUOwnerMyPropertiesScreenState extends State<HomeUOwnerMyPropertiesScr
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            property.title.isEmpty ? 'Untitled Property' : property.title,
-                                            style: const TextStyle(color: Color(0xFF1F314F), fontSize: 15, fontWeight: FontWeight.w700),
+                                            property.title.isEmpty
+                                                ? 'Untitled Property'
+                                                : property.title,
+                                            style: const TextStyle(
+                                              color: Color(0xFF1F314F),
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w700,
+                                            ),
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
                                           ),
                                           const SizedBox(height: 6),
                                           Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                            decoration: BoxDecoration(color: statusBgColor, borderRadius: BorderRadius.circular(8)),
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                              vertical: 4,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: statusBgColor,
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                            ),
                                             child: Text(
                                               displayStatus,
-                                              style: TextStyle(color: statusColor, fontSize: 10, fontWeight: FontWeight.w700),
+                                              style: TextStyle(
+                                                color: statusColor,
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.w700,
+                                              ),
                                             ),
                                           ),
                                         ],
                                       ),
                                     ),
                                     PopupMenuButton<String>(
-                                      icon: const Icon(Icons.more_vert_rounded, color: Color(0xFF90A4C4)),
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                      icon: const Icon(
+                                        Icons.more_vert_rounded,
+                                        color: Color(0xFF90A4C4),
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
                                       onSelected: (value) async {
                                         if (value == 'publish') {
-                                          await _controller.publishDraft(property.id);
+                                          await _controller.publishDraft(
+                                            property.id,
+                                          );
                                           if (context.mounted) {
-                                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Property published successfully!')));
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                  'Property published successfully!',
+                                                ),
+                                              ),
+                                            );
                                           }
                                         } else if (value == 'edit') {
-                                          final result = await Navigator.of(context).push(
-                                            MaterialPageRoute(builder: (context) => HomeUOwnerAddPropertyScreen(propertyId: property.id)),
-                                          );
-                                          if (result == true) _controller.loadProperties();
+                                          final result =
+                                              await Navigator.of(context).push(
+                                                MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      HomeUOwnerAddPropertyScreen(
+                                                        propertyId: property.id,
+                                                      ),
+                                                ),
+                                              );
+                                          if (result == true)
+                                            _controller.loadProperties();
                                         } else if (value == 'delete') {
                                           final confirm = await showDialog<bool>(
                                             context: context,
                                             builder: (context) => AlertDialog(
-                                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                                              title: const Text('Delete Property?'),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(16),
+                                              ),
+                                              title: const Text(
+                                                'Delete Property?',
+                                              ),
                                               content: const Text(
                                                 'Are you sure you want to delete this listing? This action cannot be undone.',
-                                                style: TextStyle(color: Color(0xFF50617F)),
+                                                style: TextStyle(
+                                                  color: Color(0xFF50617F),
+                                                ),
                                               ),
                                               actions: [
                                                 TextButton(
-                                                  onPressed: () => Navigator.of(context).pop(false),
-                                                  child: const Text('Cancel', style: TextStyle(color: Color(0xFF667896))),
+                                                  onPressed: () => Navigator.of(
+                                                    context,
+                                                  ).pop(false),
+                                                  child: const Text(
+                                                    'Cancel',
+                                                    style: TextStyle(
+                                                      color: Color(0xFF667896),
+                                                    ),
+                                                  ),
                                                 ),
                                                 ElevatedButton(
-                                                  onPressed: () => Navigator.of(context).pop(true),
-                                                  style: ElevatedButton.styleFrom(backgroundColor: Colors.red.shade600),
-                                                  child: const Text('Delete', style: TextStyle(color: Colors.white)),
+                                                  onPressed: () => Navigator.of(
+                                                    context,
+                                                  ).pop(true),
+                                                  style:
+                                                      ElevatedButton.styleFrom(
+                                                        backgroundColor:
+                                                            Colors.red.shade600,
+                                                      ),
+                                                  child: const Text(
+                                                    'Delete',
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                    ),
+                                                  ),
                                                 ),
                                               ],
                                             ),
                                           );
 
                                           if (confirm == true) {
-                                            final errorMsg = await _controller.archiveProperty(property.id);
+                                            final errorMsg = await _controller
+                                                .archiveProperty(property.id);
                                             if (context.mounted) {
                                               if (errorMsg == null) {
-                                                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Property deleted successfully.')));
+                                                ScaffoldMessenger.of(
+                                                  context,
+                                                ).showSnackBar(
+                                                  const SnackBar(
+                                                    content: Text(
+                                                      'Property deleted successfully.',
+                                                    ),
+                                                  ),
+                                                );
                                               } else {
-                                                ScaffoldMessenger.of(context).showSnackBar(
-                                                  SnackBar(content: Text(errorMsg), backgroundColor: Colors.red.shade600, behavior: SnackBarBehavior.floating),
+                                                ScaffoldMessenger.of(
+                                                  context,
+                                                ).showSnackBar(
+                                                  SnackBar(
+                                                    content: Text(errorMsg),
+                                                    backgroundColor:
+                                                        Colors.red.shade600,
+                                                    behavior: SnackBarBehavior
+                                                        .floating,
+                                                  ),
                                                 );
                                               }
                                             }
@@ -286,10 +432,60 @@ class _HomeUOwnerMyPropertiesScreenState extends State<HomeUOwnerMyPropertiesScr
                                         }
                                       },
                                       itemBuilder: (context) => [
-                                        const PopupMenuItem(value: 'edit', child: Row(children: [Icon(Icons.edit_rounded, size: 20, color: Color(0xFF1F314F)), SizedBox(width: 10), Text('Edit Property')])),
-                                        if (isDraft) const PopupMenuItem(value: 'publish', child: Row(children: [Icon(Icons.publish_rounded, size: 20, color: Color(0xFF0F8A5F)), SizedBox(width: 10), Text('Publish Now', style: TextStyle(color: Color(0xFF0F8A5F)))])),
+                                        const PopupMenuItem(
+                                          value: 'edit',
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                Icons.edit_rounded,
+                                                size: 20,
+                                                color: Color(0xFF1F314F),
+                                              ),
+                                              SizedBox(width: 10),
+                                              Text('Edit Property'),
+                                            ],
+                                          ),
+                                        ),
+                                        if (isDraft)
+                                          const PopupMenuItem(
+                                            value: 'publish',
+                                            child: Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.publish_rounded,
+                                                  size: 20,
+                                                  color: Color(0xFF0F8A5F),
+                                                ),
+                                                SizedBox(width: 10),
+                                                Text(
+                                                  'Publish Now',
+                                                  style: TextStyle(
+                                                    color: Color(0xFF0F8A5F),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
                                         const PopupMenuDivider(),
-                                        const PopupMenuItem(value: 'delete', child: Row(children: [Icon(Icons.delete_outline_rounded, size: 20, color: Colors.red), SizedBox(width: 10), Text('Delete', style: TextStyle(color: Colors.red))])),
+                                        const PopupMenuItem(
+                                          value: 'delete',
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                Icons.delete_outline_rounded,
+                                                size: 20,
+                                                color: Colors.red,
+                                              ),
+                                              SizedBox(width: 10),
+                                              Text(
+                                                'Delete',
+                                                style: TextStyle(
+                                                  color: Colors.red,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
                                       ],
                                     ),
                                   ],
@@ -297,14 +493,21 @@ class _HomeUOwnerMyPropertiesScreenState extends State<HomeUOwnerMyPropertiesScr
                                 const SizedBox(height: 4),
                                 Text(
                                   property.locationArea,
-                                  style: const TextStyle(color: Color(0xFF667896), fontSize: 12),
+                                  style: const TextStyle(
+                                    color: Color(0xFF667896),
+                                    fontSize: 12,
+                                  ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
                                   'RM ${property.monthlyPrice}/mo',
-                                  style: const TextStyle(color: Color(0xFF1E3A8A), fontSize: 14, fontWeight: FontWeight.w800),
+                                  style: const TextStyle(
+                                    color: Color(0xFF1E3A8A),
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w800,
+                                  ),
                                 ),
                               ],
                             ),

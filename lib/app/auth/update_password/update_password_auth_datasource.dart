@@ -8,11 +8,13 @@ class UpdatePasswordAuthDataSource {
     required String email,
     required String password,
   }) {
-    return AppSupabase.auth.signInWithPassword(email: email, password: password);
+    return AppSupabase.auth.signInWithPassword(
+      email: email,
+      password: password,
+    );
   }
 
   Future<UserResponse> updatePassword(String newPassword) {
     return AppSupabase.auth.updateUser(UserAttributes(password: newPassword));
   }
 }
-

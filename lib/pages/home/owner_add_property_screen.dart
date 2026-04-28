@@ -14,17 +14,36 @@ class HomeUOwnerAddPropertyScreen extends StatefulWidget {
   final String? propertyId;
 
   @override
-  State<HomeUOwnerAddPropertyScreen> createState() => _HomeUOwnerAddPropertyScreenState();
+  State<HomeUOwnerAddPropertyScreen> createState() =>
+      _HomeUOwnerAddPropertyScreenState();
 }
 
-class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScreen> {
+class _HomeUOwnerAddPropertyScreenState
+    extends State<HomeUOwnerAddPropertyScreen> {
   static const List<String> _rentalTypes = ['Whole Unit', 'Room'];
-  static const List<String> _propertyTypes = ['Condo', 'Landed', 'Apartment', 'Studio'];
-  static const List<String> _furnishingTypes = ['Fully Furnished', 'Partially Furnished', 'Unfurnished'];
+  static const List<String> _propertyTypes = [
+    'Condo',
+    'Landed',
+    'Apartment',
+    'Studio',
+  ];
+  static const List<String> _furnishingTypes = [
+    'Fully Furnished',
+    'Partially Furnished',
+    'Unfurnished',
+  ];
   static const List<String> _allFacilities = [
-    'WiFi', 'Parking', 'Aircond', 'Lift', 'Gym',
-    'Swimming Pool', '24/7 Security', 'Balcony',
-    'Playground', 'Washing Machine', 'BBQ Pit'
+    'WiFi',
+    'Parking',
+    'Aircond',
+    'Lift',
+    'Gym',
+    'Swimming Pool',
+    '24/7 Security',
+    'Balcony',
+    'Playground',
+    'Washing Machine',
+    'BBQ Pit',
   ];
 
   final AddPropertyController _addPropertyController = AddPropertyController();
@@ -73,7 +92,9 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
   Future<void> _loadExistingData() async {
     setState(() => _isLoading = true);
 
-    final data = await _addPropertyController.getPropertyDetails(widget.propertyId!);
+    final data = await _addPropertyController.getPropertyDetails(
+      widget.propertyId!,
+    );
     if (data != null && mounted) {
       _titleController.text = data['title'] ?? '';
       _priceController.text = data['monthly_price']?.toString() ?? '';
@@ -104,7 +125,9 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
 
         if (data['property_image'] != null) {
           _existingImages.clear();
-          _existingImages.addAll(List<Map<String, dynamic>>.from(data['property_image']));
+          _existingImages.addAll(
+            List<Map<String, dynamic>>.from(data['property_image']),
+          );
         }
       });
     }
@@ -172,14 +195,24 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
     setState(() {
       if (status == 'Active') {
         _titleError = title.isEmpty ? 'Property Name is required' : null;
-        _priceError = (monthlyPrice == null || monthlyPrice <= 0) ? 'Valid monthly price is required' : null;
+        _priceError = (monthlyPrice == null || monthlyPrice <= 0)
+            ? 'Valid monthly price is required'
+            : null;
         _addressError = locationArea.isEmpty ? 'Address is required' : null;
-        _descriptionError = description.isEmpty ? 'Description is required' : null;
+        _descriptionError = description.isEmpty
+            ? 'Description is required'
+            : null;
 
-        hasError = _titleError != null || _priceError != null || _addressError != null || _descriptionError != null;
+        hasError =
+            _titleError != null ||
+            _priceError != null ||
+            _addressError != null ||
+            _descriptionError != null;
       } else {
         // If Draft, only title is strictly required
-        _titleError = title.isEmpty ? 'Property Name is required to save draft' : null;
+        _titleError = title.isEmpty
+            ? 'Property Name is required to save draft'
+            : null;
         _priceError = null;
         _addressError = null;
         _descriptionError = null;
@@ -201,13 +234,19 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
     if (status == 'Active') {
       if (_selectedImages.isEmpty && widget.propertyId == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select at least 1 image to publish.'), backgroundColor: Color(0xFFC53030)),
+          const SnackBar(
+            content: Text('Please select at least 1 image to publish.'),
+            backgroundColor: Color(0xFFC53030),
+          ),
         );
         return;
       }
       if (!_publishImmediately && _scheduledPublishDate == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select a date to schedule publication.'), backgroundColor: Color(0xFFC53030)),
+          const SnackBar(
+            content: Text('Please select a date to schedule publication.'),
+            backgroundColor: Color(0xFFC53030),
+          ),
         );
         return;
       }
@@ -218,7 +257,9 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
 
     DateTime? finalPublishAt;
     if (status == 'Active') {
-      finalPublishAt = _publishImmediately ? DateTime.now() : _scheduledPublishDate;
+      finalPublishAt = _publishImmediately
+          ? DateTime.now()
+          : _scheduledPublishDate;
     }
 
     final result = await _addPropertyController.submit(
@@ -245,9 +286,9 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
 
     setState(() => _isLoading = false);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(result.message)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(result.message)));
 
     if (result.isSuccess) {
       Navigator.of(context).pop(true);
@@ -277,7 +318,9 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
     return Scaffold(
       backgroundColor: const Color(0xFFF6F8FC),
       appBar: AppBar(
-        title: Text(widget.propertyId == null ? 'Add Property' : 'Edit Property'), // UPDATED
+        title: Text(
+          widget.propertyId == null ? 'Add Property' : 'Edit Property',
+        ), // UPDATED
         backgroundColor: const Color(0xFFF6F8FC),
         elevation: 0,
       ),
@@ -315,9 +358,12 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
                       value: _selectedRentalType,
                       keyValue: const Key('rental_type_dropdown'),
                       items: _rentalTypes,
-                      onChanged: _isLoading ? null : (value) {
-                        if (value != null) setState(() => _selectedRentalType = value);
-                      },
+                      onChanged: _isLoading
+                          ? null
+                          : (value) {
+                              if (value != null)
+                                setState(() => _selectedRentalType = value);
+                            },
                     ),
                     const SizedBox(height: 12),
                     // Property Type (Condo/Landed/etc)
@@ -326,9 +372,12 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
                       value: _selectedPropertyType,
                       keyValue: const Key('property_type_dropdown'),
                       items: _propertyTypes,
-                      onChanged: _isLoading ? null : (value) {
-                        if (value != null) setState(() => _selectedPropertyType = value);
-                      },
+                      onChanged: _isLoading
+                          ? null
+                          : (value) {
+                              if (value != null)
+                                setState(() => _selectedPropertyType = value);
+                            },
                     ),
                     const SizedBox(height: 12),
                     // Furnishing (Fully/Partially/Unfurnished)
@@ -337,9 +386,12 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
                       value: _selectedFurnishing,
                       keyValue: const Key('furnishing_dropdown'),
                       items: _furnishingTypes,
-                      onChanged: _isLoading ? null : (value) {
-                        if (value != null) setState(() => _selectedFurnishing = value);
-                      },
+                      onChanged: _isLoading
+                          ? null
+                          : (value) {
+                              if (value != null)
+                                setState(() => _selectedFurnishing = value);
+                            },
                     ),
                     const SizedBox(height: 12),
                     // Price
@@ -363,7 +415,8 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
                     const SizedBox(height: 12),
                     _LabeledTextField(
                       label: 'Description',
-                      hintText: 'Describe highlights, nearby landmarks, and house rules.',
+                      hintText:
+                          'Describe highlights, nearby landmarks, and house rules.',
                       keyValue: const Key('description_field'),
                       maxLines: 4,
                       controller: _descriptionController,
@@ -383,30 +436,32 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
                       key: const Key('facilities_checklist'),
                       spacing: 8,
                       runSpacing: 8,
-                      children: _allFacilities.map(
+                      children: _allFacilities
+                          .map(
                             (facility) => FilterChip(
-                          label: Text(facility),
-                          selected: _selectedFacilities.contains(facility),
-                          onSelected: _isLoading
-                              ? null
-                              : (selected) {
-                            setState(() {
-                              if (selected) {
-                                _selectedFacilities.add(facility);
-                              } else {
-                                _selectedFacilities.remove(facility);
-                              }
-                            });
-                          },
-                          selectedColor: const Color(0xFFEAF2FF),
-                          checkmarkColor: const Color(0xFF1E3A8A),
-                          labelStyle: const TextStyle(
-                            color: Color(0xFF1F314F),
-                            fontWeight: FontWeight.w600,
-                          ),
-                          side: const BorderSide(color: Color(0x331E3A8A)),
-                        ),
-                      ).toList(),
+                              label: Text(facility),
+                              selected: _selectedFacilities.contains(facility),
+                              onSelected: _isLoading
+                                  ? null
+                                  : (selected) {
+                                      setState(() {
+                                        if (selected) {
+                                          _selectedFacilities.add(facility);
+                                        } else {
+                                          _selectedFacilities.remove(facility);
+                                        }
+                                      });
+                                    },
+                              selectedColor: const Color(0xFFEAF2FF),
+                              checkmarkColor: const Color(0xFF1E3A8A),
+                              labelStyle: const TextStyle(
+                                color: Color(0xFF1F314F),
+                                fontWeight: FontWeight.w600,
+                              ),
+                              side: const BorderSide(color: Color(0x331E3A8A)),
+                            ),
+                          )
+                          .toList(),
                     ),
                   ),
                 ),
@@ -434,7 +489,8 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
                       crossAxisSpacing: 8,
                       mainAxisSpacing: 8,
                       children: [
-                        if ((_existingImages.length + _selectedImages.length) < _maxImages)
+                        if ((_existingImages.length + _selectedImages.length) <
+                            _maxImages)
                           GestureDetector(
                             onTap: _isLoading ? null : _pickImages,
                             child: const _UploadTile(addMode: true),
@@ -457,19 +513,27 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
                                 top: 6,
                                 right: 6,
                                 child: InkWell(
-                                  onTap: _isLoading ? null : () {
-                                    setState(() {
-                                      _deletedImageIds.add(img['id'].toString());
-                                      _existingImages.removeAt(index);
-                                    });
-                                  },
+                                  onTap: _isLoading
+                                      ? null
+                                      : () {
+                                          setState(() {
+                                            _deletedImageIds.add(
+                                              img['id'].toString(),
+                                            );
+                                            _existingImages.removeAt(index);
+                                          });
+                                        },
                                   child: Container(
                                     padding: const EdgeInsets.all(4),
                                     decoration: const BoxDecoration(
                                       color: Color(0xAA000000),
                                       shape: BoxShape.circle,
                                     ),
-                                    child: const Icon(Icons.close, color: Colors.white, size: 16),
+                                    child: const Icon(
+                                      Icons.close,
+                                      color: Colors.white,
+                                      size: 16,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -494,14 +558,20 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
                                 top: 6,
                                 right: 6,
                                 child: InkWell(
-                                  onTap: _isLoading ? null : () => _removeImageAt(index),
+                                  onTap: _isLoading
+                                      ? null
+                                      : () => _removeImageAt(index),
                                   child: Container(
                                     padding: const EdgeInsets.all(4),
                                     decoration: const BoxDecoration(
                                       color: Color(0xAA000000),
                                       shape: BoxShape.circle,
                                     ),
-                                    child: const Icon(Icons.close, color: Colors.white, size: 16),
+                                    child: const Icon(
+                                      Icons.close,
+                                      color: Colors.white,
+                                      size: 16,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -522,7 +592,12 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
                   decoration: BoxDecoration(
                     color: const Color(0xFFF4F8FF),
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: _locationError ? const Color(0xFFC53030) : const Color(0x331E3A8A), width: _locationError ? 1.5 : 1.0),
+                    border: Border.all(
+                      color: _locationError
+                          ? const Color(0xFFC53030)
+                          : const Color(0x331E3A8A),
+                      width: _locationError ? 1.5 : 1.0,
+                    ),
                   ),
                   child: Row(
                     children: [
@@ -538,9 +613,11 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
                           ),
                         ),
                         child: Icon(
-                            _selectedCoordinates == null ? Icons.map_outlined : Icons.location_pin,
-                            color: const Color(0xFF1E3A8A),
-                            size: 28
+                          _selectedCoordinates == null
+                              ? Icons.map_outlined
+                              : Icons.location_pin,
+                          color: const Color(0xFF1E3A8A),
+                          size: 28,
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -553,7 +630,9 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
                                   ? 'Pin property on map (Required)'
                                   : 'Coordinates Selected',
                               style: TextStyle(
-                                color: _locationError ? const Color(0xFFC53030) : const Color(0xFF1F314F),
+                                color: _locationError
+                                    ? const Color(0xFFC53030)
+                                    : const Color(0xFF1F314F),
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -561,32 +640,43 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
                             if (_selectedCoordinates != null)
                               Text(
                                 '${_selectedCoordinates!.latitude.toStringAsFixed(5)}, ${_selectedCoordinates!.longitude.toStringAsFixed(5)}',
-                                style: const TextStyle(color: Color(0xFF667896), fontSize: 11),
+                                style: const TextStyle(
+                                  color: Color(0xFF667896),
+                                  fontSize: 11,
+                                ),
                               ),
                           ],
                         ),
                       ),
                       TextButton(
-                        onPressed: _isLoading ? null : () async {
-                          final result = await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => MapSelectionScreen(initialLocation: _selectedCoordinates),
-                            ),
-                          );
+                        onPressed: _isLoading
+                            ? null
+                            : () async {
+                                final result = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => MapSelectionScreen(
+                                      initialLocation: _selectedCoordinates,
+                                    ),
+                                  ),
+                                );
 
-                          if (result != null && result is Map) {
-                            setState(() {
-                              _selectedCoordinates = result['location'] as LatLng;
-                              _locationError = false;
+                                if (result != null && result is Map) {
+                                  setState(() {
+                                    _selectedCoordinates =
+                                        result['location'] as LatLng;
+                                    _locationError = false;
 
-                              if (result['address'] != null) {
-                                _addressController.text = result['address'] as String;
-                              }
-                            });
-                          }
-                        },
-                        child: Text(_selectedCoordinates == null ? 'Select' : 'Edit'),
+                                    if (result['address'] != null) {
+                                      _addressController.text =
+                                          result['address'] as String;
+                                    }
+                                  });
+                                }
+                              },
+                        child: Text(
+                          _selectedCoordinates == null ? 'Select' : 'Edit',
+                        ),
                       ),
                     ],
                   ),
@@ -601,17 +691,26 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
                       contentPadding: EdgeInsets.zero,
                       title: const Text(
                         'Publish Immediately',
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF1F314F)),
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF1F314F),
+                        ),
                       ),
                       subtitle: const Text(
                         'Listing goes live as soon as it is submitted',
-                        style: TextStyle(fontSize: 12, color: Color(0xFF667896)),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF667896),
+                        ),
                       ),
                       value: _publishImmediately,
                       activeThumbColor: const Color(0xFF1E3A8A),
-                      onChanged: _isLoading ? null : (val) {
-                        setState(() => _publishImmediately = val);
-                      },
+                      onChanged: _isLoading
+                          ? null
+                          : (val) {
+                              setState(() => _publishImmediately = val);
+                            },
                     ),
                     if (!_publishImmediately) ...[
                       const Divider(color: Color(0x1F1E3A8A)),
@@ -635,12 +734,22 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
                     child: SizedBox(
                       height: 52,
                       child: OutlinedButton(
-                        onPressed: _isLoading ? null : () => _handleSubmit(status: 'Draft'),
+                        onPressed: _isLoading
+                            ? null
+                            : () => _handleSubmit(status: 'Draft'),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: const Color(0xFF1E3A8A),
-                          side: const BorderSide(color: Color(0xFF1E3A8A), width: 1.5),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                          side: const BorderSide(
+                            color: Color(0xFF1E3A8A),
+                            width: 1.5,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          textStyle: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                         child: const Text('Save Draft'),
                       ),
@@ -652,19 +761,29 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
                     child: SizedBox(
                       height: 52,
                       child: ElevatedButton(
-                        onPressed: _isLoading ? null : () => _handleSubmit(status: 'Active'),
+                        onPressed: _isLoading
+                            ? null
+                            : () => _handleSubmit(status: 'Active'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF1E3A8A),
                           foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          textStyle: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                         child: _isLoading
                             ? const SizedBox(
-                          width: 22,
-                          height: 22,
-                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                        )
+                                width: 22,
+                                height: 22,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
                             : const Text('Publish Property'),
                       ),
                     ),
@@ -677,7 +796,6 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
       ),
     );
   }
-
 
   Future<void> _pickDate({required bool isStart}) async {
     final currentValue = isStart ? _availableFrom : _availableUntil;
@@ -698,7 +816,9 @@ class _HomeUOwnerAddPropertyScreenState extends State<HomeUOwnerAddPropertyScree
           _availableUntil = _availableFrom.add(const Duration(days: 30));
         }
       } else {
-        _availableUntil = pickedDate.isBefore(_availableFrom) ? _availableFrom : pickedDate;
+        _availableUntil = pickedDate.isBefore(_availableFrom)
+            ? _availableFrom
+            : pickedDate;
       }
     });
   }
@@ -816,7 +936,10 @@ class _LabeledTextField extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFF1E3A8A), width: 1.2),
+              borderSide: const BorderSide(
+                color: Color(0xFF1E3A8A),
+                width: 1.2,
+              ),
             ),
           ),
         ),
@@ -857,7 +980,9 @@ class _LabeledDropdown extends StatelessWidget {
         DropdownButtonFormField<String>(
           key: keyValue,
           initialValue: value,
-          items: items.map((item) => DropdownMenuItem(value: item, child: Text(item))).toList(),
+          items: items
+              .map((item) => DropdownMenuItem(value: item, child: Text(item)))
+              .toList(),
           onChanged: onChanged,
           decoration: InputDecoration(
             filled: true,

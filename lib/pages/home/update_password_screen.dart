@@ -8,10 +8,7 @@ import 'package:homeu/core/theme/homeu_app_theme.dart';
 import 'package:homeu/pages/auth/login_screen.dart';
 
 class HomeUUpdatePasswordScreen extends StatefulWidget {
-  const HomeUUpdatePasswordScreen({
-    super.key,
-    this.controller,
-  });
+  const HomeUUpdatePasswordScreen({super.key, this.controller});
 
   final UpdatePasswordController? controller;
 
@@ -321,9 +318,11 @@ class _HomeUUpdatePasswordScreenState extends State<HomeUUpdatePasswordScreen> {
                               controller: _confirmPasswordController,
                               validator: (value) {
                                 if (value == null || value.trim().isEmpty) {
-                                  return t.updatePasswordValidationConfirmRequired;
+                                  return t
+                                      .updatePasswordValidationConfirmRequired;
                                 }
-                                if (value.trim() != _newPasswordController.text.trim()) {
+                                if (value.trim() !=
+                                    _newPasswordController.text.trim()) {
                                   return t.updatePasswordValidationMismatch;
                                 }
                                 return null;
@@ -350,8 +349,8 @@ class _HomeUUpdatePasswordScreenState extends State<HomeUUpdatePasswordScreen> {
                             color: _isErrorMessage
                                 ? const Color(0xFFFFF2F2)
                                 : (context.isDarkMode
-                                    ? const Color(0xFF11211D)
-                                    : const Color(0xFFF0FBF5)),
+                                      ? const Color(0xFF11211D)
+                                      : const Color(0xFFF0FBF5)),
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
                               color: _isErrorMessage

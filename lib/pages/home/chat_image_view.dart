@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:io' as io;
 
 class HomeUChatImageView extends StatelessWidget {
-  const HomeUChatImageView({
-    super.key,
-    required this.imageUrl,
-  });
+  const HomeUChatImageView({super.key, required this.imageUrl});
 
   final String imageUrl;
 
@@ -23,33 +20,39 @@ class HomeUChatImageView extends StatelessWidget {
               child: InteractiveViewer(
                 minScale: 0.5,
                 maxScale: 4.0,
-                child: isLocal 
-                  ? Image.file(
-                      io.File(imageUrl),
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) => const Center(
-                        child: Icon(Icons.broken_image, color: Colors.white, size: 48),
+                child: isLocal
+                    ? Image.file(
+                        io.File(imageUrl),
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Center(
+                              child: Icon(
+                                Icons.broken_image,
+                                color: Colors.white,
+                                size: 48,
+                              ),
+                            ),
+                      )
+                    : Image.network(
+                        imageUrl,
+                        fit: BoxFit.contain,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return const Center(
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                            ),
+                          );
+                        },
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Center(
+                              child: Icon(
+                                Icons.broken_image,
+                                color: Colors.white,
+                                size: 48,
+                              ),
+                            ),
                       ),
-                    )
-                  : Image.network(
-                      imageUrl,
-                      fit: BoxFit.contain,
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return const Center(
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                          ),
-                        );
-                      },
-                      errorBuilder: (context, error, stackTrace) => const Center(
-                        child: Icon(
-                          Icons.broken_image,
-                          color: Colors.white,
-                          size: 48,
-                        ),
-                      ),
-                    ),
               ),
             ),
           ),

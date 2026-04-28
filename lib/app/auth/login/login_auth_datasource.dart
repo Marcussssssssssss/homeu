@@ -8,12 +8,13 @@ class LoginAuthDataSource {
     required String email,
     required String password,
   }) {
-    return AppSupabase.auth.signInWithPassword(email: email, password: password);
+    return AppSupabase.auth.signInWithPassword(
+      email: email,
+      password: password,
+    );
   }
 
-  Future<AuthResponse> restoreSessionWithRefreshToken(
-    String refreshToken,
-  ) {
+  Future<AuthResponse> restoreSessionWithRefreshToken(String refreshToken) {
     return AppSupabase.auth.setSession(refreshToken);
   }
 
@@ -34,4 +35,3 @@ class LoginAuthDataSource {
     return null;
   }
 }
-

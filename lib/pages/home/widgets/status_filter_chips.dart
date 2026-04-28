@@ -33,11 +33,7 @@ class HomeUStatusFilterChips<T> extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       if (isSelected) ...[
-                        const Icon(
-                          Icons.check,
-                          color: Colors.white,
-                          size: 18,
-                        ),
+                        const Icon(Icons.check, color: Colors.white, size: 18),
                         const SizedBox(width: 6),
                       ],
                       Text(labelBuilder(status)),
@@ -53,7 +49,9 @@ class HomeUStatusFilterChips<T> extends StatelessWidget {
                     fontWeight: isSelected ? FontWeight.bold : FontWeight.w700,
                   ),
                   side: BorderSide(
-                    color: isSelected ? const Color(0xFF1E3A8A) : const Color(0xFFE2E8F0),
+                    color: isSelected
+                        ? const Color(0xFF1E3A8A)
+                        : const Color(0xFFE2E8F0),
                     width: 1.5,
                   ),
                   shape: RoundedRectangleBorder(

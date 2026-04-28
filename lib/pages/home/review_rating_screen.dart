@@ -9,7 +9,8 @@ class HomeUReviewRatingScreen extends StatefulWidget {
   final String propertyName;
 
   @override
-  State<HomeUReviewRatingScreen> createState() => _HomeUReviewRatingScreenState();
+  State<HomeUReviewRatingScreen> createState() =>
+      _HomeUReviewRatingScreenState();
 }
 
 class _HomeUReviewRatingScreenState extends State<HomeUReviewRatingScreen> {
@@ -17,13 +18,7 @@ class _HomeUReviewRatingScreenState extends State<HomeUReviewRatingScreen> {
   int _selectedStars = 0;
 
   static const double _averageRating = 4.6;
-  static const Map<int, int> _ratingCounts = {
-    5: 124,
-    4: 51,
-    3: 19,
-    2: 8,
-    1: 4,
-  };
+  static const Map<int, int> _ratingCounts = {5: 124, 4: 51, 3: 19, 2: 8, 1: 4};
 
   @override
   void dispose() {
@@ -109,7 +104,11 @@ class _HomeUReviewRatingScreenState extends State<HomeUReviewRatingScreen> {
                         ],
                       ),
                     ),
-                    const Icon(Icons.star_rounded, color: Color(0xFFF59E0B), size: 34),
+                    const Icon(
+                      Icons.star_rounded,
+                      color: Color(0xFFF59E0B),
+                      size: 34,
+                    ),
                   ],
                 ),
               ),
@@ -180,7 +179,9 @@ class _HomeUReviewRatingScreenState extends State<HomeUReviewRatingScreen> {
                             });
                           },
                           icon: Icon(
-                            isFilled ? Icons.star_rounded : Icons.star_outline_rounded,
+                            isFilled
+                                ? Icons.star_rounded
+                                : Icons.star_outline_rounded,
                             color: const Color(0xFFF59E0B),
                             size: 30,
                           ),
@@ -211,7 +212,8 @@ class _HomeUReviewRatingScreenState extends State<HomeUReviewRatingScreen> {
                   decoration: InputDecoration(
                     labelText: 'Comment',
                     alignLabelWithHint: true,
-                    hintText: 'Tell us about cleanliness, owner communication, and your overall experience.',
+                    hintText:
+                        'Tell us about cleanliness, owner communication, and your overall experience.',
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
                       borderSide: const BorderSide(color: Color(0x1F1E3A8A)),
@@ -222,7 +224,10 @@ class _HomeUReviewRatingScreenState extends State<HomeUReviewRatingScreen> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(color: Color(0xFF1E3A8A), width: 1.2),
+                      borderSide: const BorderSide(
+                        color: Color(0xFF1E3A8A),
+                        width: 1.2,
+                      ),
                     ),
                   ),
                 ),
@@ -235,15 +240,24 @@ class _HomeUReviewRatingScreenState extends State<HomeUReviewRatingScreen> {
                   key: const Key('submit_review_button'),
                   onPressed: () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Thank you. Your review has been submitted.')),
+                      const SnackBar(
+                        content: Text(
+                          'Thank you. Your review has been submitted.',
+                        ),
+                      ),
                     );
                     Navigator.of(context).pop();
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: context.homeuAccent,
                     foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    textStyle: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   child: const Text('Submit'),
                 ),
@@ -313,4 +327,3 @@ class _RatingDistributionRow extends StatelessWidget {
     );
   }
 }
-
