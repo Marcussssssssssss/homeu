@@ -80,52 +80,43 @@ class _HomeUOwnerBookingRequestsScreenState extends State<HomeUOwnerBookingReque
 
         bottomNavigationBar: widget.showBottomNavigationBar
             ? HomeUOwnerBottomNavigationBar(
-                selectedIndex: _selectedNavIndex,
-                onDestinationSelected: (index) {
-                  if (index == _selectedNavIndex) return;
-                  if (index == 0) {
-                    Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(builder: (_) => const HomeUOwnerDashboardScreen()),
-                          (route) => false,
-                    );
-                    return;
-                  }
-                  if (index == 1) {
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(
-                        builder: (_) => const HomeUOwnerMyPropertiesScreen(),
-                      ),
-                    );
-                    return;
-                  }
-                  if (index == 2) return;
-                  if (index == 3) {
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(
-                        builder: (_) => const HomeUOwnerAnalyticsScreen(),
-                      ),
-                    );
-                    return;
-                  }
-                  if (index == 4) {
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(
-                        builder: (_) => const HomeUConversationListScreen(),
-                      ),
-                    );
-                    return;
-                  }
-                  if (index == 5) {
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(
-                        builder: (_) =>
-                            const HomeUProfileScreen(role: HomeURole.owner),
-                      ),
-                    );
-                    return;
-                  }
-                },
-              )
+          selectedIndex: _selectedNavIndex,
+          onDestinationSelected: (index) {
+            if (index == _selectedNavIndex) return;
+
+            void switchTabInstantly(Widget screen) {
+              Navigator.of(context).pushReplacement(
+                PageRouteBuilder(
+                  pageBuilder: (context, animation1, animation2) => screen,
+                  transitionDuration: Duration.zero,
+                  reverseTransitionDuration: Duration.zero,
+                ),
+              );
+            }
+
+            if (index == 0) {
+              Navigator.of(context).popUntil((route) => route.isFirst);
+              return;
+            }
+            if (index == 1) {
+              switchTabInstantly(const HomeUOwnerMyPropertiesScreen());
+              return;
+            }
+            if (index == 2) return;
+            if (index == 3) {
+              switchTabInstantly(const HomeUOwnerAnalyticsScreen());
+              return;
+            }
+            if (index == 4) {
+              switchTabInstantly(const HomeUConversationListScreen());
+              return;
+            }
+            if (index == 5) {
+              switchTabInstantly(const HomeUProfileScreen(role: HomeURole.owner));
+              return;
+            }
+          },
+        )
             : null,
 
         body: TabBarView(

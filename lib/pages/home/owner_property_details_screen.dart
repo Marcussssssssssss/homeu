@@ -134,8 +134,6 @@ class _HomeUOwnerPropertyDetailsScreenState extends State<HomeUOwnerPropertyDeta
                               child: Text(
                                 p.locationArea,
                                 style: const TextStyle(color: Color(0xFF667896), fontSize: 14),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           ],
