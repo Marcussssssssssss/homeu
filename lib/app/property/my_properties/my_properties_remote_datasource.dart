@@ -27,7 +27,7 @@ class MyPropertiesRemoteDataSource {
     return response
         .whereType<Map<String, dynamic>>()
         .map(OwnerPropertyModel.fromJson)
-        .toList(growable: false);
+        .toList();
   }
 
   Future<void> updatePropertyStatus(String propertyId, String newStatus) async {
@@ -80,14 +80,9 @@ class MyPropertiesRemoteDataSource {
           .inFilter('id', pendingIds);
     }
 
-    final response = await AppSupabase.client
+    await AppSupabase.client
         .from('properties')
         .update({'status': 'Archived'})
-        .eq('id', propertyId)
-        .select();
-
-    if (response.isEmpty) {
-      throw Exception('Failed to archive property.');
-    }
+        .eq('id', propertyId);
   }
 }
