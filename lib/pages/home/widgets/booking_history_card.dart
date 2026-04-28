@@ -197,17 +197,6 @@ class BookingHistoryCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Star rating above title
-        Row(
-          children: List.generate(5, (index) {
-            return Icon(
-              Icons.star,
-              size: 14,
-              color: index < rating.floor() ? const Color(0xFFF59E0B) : const Color(0xFFE2E8F0),
-            );
-          }),
-        ),
-        const SizedBox(height: 6),
         // Title (Property Name)
         Padding(
           padding: const EdgeInsets.only(right: 70), // Leave room for status badge
