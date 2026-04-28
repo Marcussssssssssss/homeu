@@ -121,12 +121,70 @@ class OwnerAnalyticsRemoteDataSource {
       rentalDistribution.add(RentalTypeData(OwnerRentalType.condo, 100, const Color(0xFF1E3A8A)));
     }
 
+    double projectedRevenue = 0;
+    double overduePayments = 0;
+    int paidCount = 0;
+    int pendingCount = 0;
+    int overdueCount = 0;
+
+    List<Map<String, dynamic>> schedules = [];
+    final bookingIds = bookings.map((b) => b['id']?.toString() ?? '').where((id) => id.isNotEmpty).toList();
+
+    if (bookingIds.isNotEmpty) {
+      final dynamic schedulesResponse = await AppSupabase.client
+          .from('payment_schedules')
+          .select('amount, due_date, status')
+          .inFilter('booking_id', bookingIds);
+
+      if (schedulesResponse is List) {
+        schedules = schedulesResponse.whereType<Map<String, dynamic>>().toList();
+      }
+    }
+
+    final thirtyDaysFromNow = now.add(const Duration(days: 30));
+
+    for (var schedule in schedules) {
+      final status = schedule['status']?.toString().toLowerCase() ?? '';
+      final amount = (schedule['amount'] as num?)?.toDouble() ?? 0.0;
+      final dueDate = _parseDate(schedule['due_date']);
+
+      if (status == 'paid' || status == 'completed' || status == 'success') {
+        paidCount++;
+      } else {
+        if (dueDate != null && dueDate.isBefore(now)) {
+          // Overdue
+          overduePayments += amount;
+          overdueCount++;
+        } else {
+          // Pending
+          pendingCount++;
+          if (dueDate != null && dueDate.isAfter(now) && dueDate.isBefore(thirtyDaysFromNow)) {
+            projectedRevenue += amount;
+          }
+        }
+      }
+    }
+
+    List<PaymentCollectionData> paymentCollection = [];
+    final totalInvoices = paidCount + pendingCount + overdueCount;
+    if (totalInvoices > 0) {
+      if (paidCount > 0) paymentCollection.add(PaymentCollectionData('Paid', ((paidCount / totalInvoices) * 100).round(), const Color(0xFF10B981)));
+      if (pendingCount > 0) paymentCollection.add(PaymentCollectionData('Pending', ((pendingCount / totalInvoices) * 100).round(), const Color(0xFFF59E0B)));
+      if (overdueCount > 0) paymentCollection.add(PaymentCollectionData('Overdue', ((overdueCount / totalInvoices) * 100).round(), const Color(0xFFEF4444)));
+    } else {
+      paymentCollection.add(PaymentCollectionData('No Data', 100, Colors.grey.shade300));
+    }
+
+
     return OwnerAnalyticsData(
       netEarnings: totalNetEarnings,
       occupancyRate: occupancyRateStr,
       totalRequests: totalRequests,
       monthlyEarnings: monthlyEarnings,
       rentalDistribution: rentalDistribution,
+      projectedRevenue: projectedRevenue,
+      overduePayments: overduePayments,
+      paymentCollection: paymentCollection,
     );
   }
 
