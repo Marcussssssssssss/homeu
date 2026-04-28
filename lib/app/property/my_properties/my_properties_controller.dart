@@ -79,7 +79,7 @@ class MyPropertiesController extends ChangeNotifier {
         return MyPropertiesRemoteDataSource.archiveBlockedApprovedBookingError;
       }
 
-      return 'Failed to delete property. Please try again.';
+      return 'Supabase Error: $errorText';
     }
   }
 }
