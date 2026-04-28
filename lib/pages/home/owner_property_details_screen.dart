@@ -123,10 +123,21 @@ class _HomeUOwnerPropertyDetailsScreenState extends State<HomeUOwnerPropertyDeta
                         ),
                         const SizedBox(height: 8),
                         Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Icon(Icons.location_on_rounded, size: 16, color: Color(0xFF667896)),
+                            const Padding(
+                              padding: EdgeInsets.only(top: 2.0),
+                              child: Icon(Icons.location_on_rounded, size: 16, color: Color(0xFF667896)),
+                            ),
                             const SizedBox(width: 4),
-                            Text(p.locationArea, style: const TextStyle(color: Color(0xFF667896), fontSize: 14)),
+                            Expanded(
+                              child: Text(
+                                p.locationArea,
+                                style: const TextStyle(color: Color(0xFF667896), fontSize: 14),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
                           ],
                         ),
                         const SizedBox(height: 12),

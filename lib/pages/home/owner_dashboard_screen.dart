@@ -278,6 +278,7 @@ class _HomeUOwnerDashboardScreenState extends State<HomeUOwnerDashboardScreen> {
                       ...data.recentRequests.map((req) => _RequestCard(
                         requestKey: Key('req_${req['id']}'),
                         tenantName: req['tenantName'],
+                        tenantProfileUrl: req['profile_image_url'],
                         propertyName: req['propertyName'],
                         status: req['status'],
                         onTap: () {
@@ -323,6 +324,7 @@ class _HomeUOwnerDashboardScreenState extends State<HomeUOwnerDashboardScreen> {
                       ...data.recentViewingRequests.map((req) => _ViewingRequestCard(
                         requestKey: Key('view_${req['id']}'),
                         tenantName: req['tenantName'],
+                        tenantProfileUrl: req['profile_image_url'],
                         propertyName: req['propertyName'],
                         status: req['status'],
                         onTap: () {
@@ -482,6 +484,7 @@ class _RequestCard extends StatelessWidget {
   const _RequestCard({
     required this.requestKey,
     required this.tenantName,
+    this.tenantProfileUrl,
     required this.propertyName,
     required this.status,
     required this.onTap,
@@ -489,6 +492,7 @@ class _RequestCard extends StatelessWidget {
 
   final Key requestKey;
   final String tenantName;
+  final String? tenantProfileUrl;
   final String propertyName;
   final String status;
   final VoidCallback onTap;
@@ -531,10 +535,15 @@ class _RequestCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                const CircleAvatar(
+                CircleAvatar(
                   radius: 18,
-                  backgroundColor: Color(0x1F1E3A8A),
-                  child: Icon(Icons.person_rounded, color: Color(0xFF1E3A8A), size: 20),
+                  backgroundColor: const Color(0xFFEAF2FF),
+                  backgroundImage: (tenantProfileUrl != null && tenantProfileUrl!.isNotEmpty)
+                      ? NetworkImage(tenantProfileUrl!)
+                      : null,
+                  child: (tenantProfileUrl == null || tenantProfileUrl!.isEmpty)
+                      ? const Icon(Icons.person_rounded, color: Color(0xFF1E3A8A), size: 20)
+                      : null,
                 ),
                 const SizedBox(width: 10),
                 Expanded(
@@ -584,11 +593,11 @@ class _RequestCard extends StatelessWidget {
   }
 }
 
-// --- NEW VIEWING REQUEST CARD ---
 class _ViewingRequestCard extends StatelessWidget {
   const _ViewingRequestCard({
     required this.requestKey,
     required this.tenantName,
+    this.tenantProfileUrl,
     required this.propertyName,
     required this.status,
     required this.onTap,
@@ -596,6 +605,7 @@ class _ViewingRequestCard extends StatelessWidget {
 
   final Key requestKey;
   final String tenantName;
+  final String? tenantProfileUrl;
   final String propertyName;
   final String status;
   final VoidCallback onTap;
@@ -638,10 +648,15 @@ class _ViewingRequestCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                const CircleAvatar(
+                CircleAvatar(
                   radius: 18,
-                  backgroundColor: Color(0x1F1E3A8A),
-                  child: Icon(Icons.person_rounded, color: Color(0xFF1E3A8A), size: 20),
+                  backgroundColor: const Color(0xFFEAF2FF),
+                  backgroundImage: (tenantProfileUrl != null && tenantProfileUrl!.isNotEmpty)
+                      ? NetworkImage(tenantProfileUrl!)
+                      : null,
+                  child: (tenantProfileUrl == null || tenantProfileUrl!.isEmpty)
+                      ? const Icon(Icons.person_rounded, color: Color(0xFF1E3A8A), size: 20)
+                      : null,
                 ),
                 const SizedBox(width: 10),
                 Expanded(
