@@ -89,18 +89,22 @@ class BookingHistoryCard extends StatelessWidget {
               top: 0,
               right: 0,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                constraints: const BoxConstraints(maxWidth: 80),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: showRentedKillSwitch ? const Color(0xFF94A3B8) : _getStatusColor(status),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Text(
-                  (showRentedKillSwitch ? 'Cancelled' : status).toUpperCase(),
-                  style: const TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.white,
-                    letterSpacing: 0.5,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    (showRentedKillSwitch ? 'Cancelled' : status).toUpperCase(),
+                    style: const TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
+                      letterSpacing: 0.5,
+                    ),
                   ),
                 ),
               ),
@@ -185,16 +189,19 @@ class BookingHistoryCard extends StatelessWidget {
         ),
         const SizedBox(height: 6),
         // Title (Property Name)
-        Text(
-          hotelName,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF0F172A),
-            height: 1.2,
+        Padding(
+          padding: const EdgeInsets.only(right: 70), // Leave room for status badge
+          child: Text(
+            hotelName,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF0F172A),
+              height: 1.2,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: 8),
         // Location with purple pin
@@ -205,9 +212,9 @@ class BookingHistoryCard extends StatelessWidget {
             Expanded(
               child: Text(
                 locationAddress,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 13,
-                  color: const Color(0xFF64748B),
+                  color: Color(0xFF64748B),
                   fontWeight: FontWeight.w500,
                 ),
                 maxLines: 1,
@@ -233,13 +240,17 @@ class BookingHistoryCard extends StatelessWidget {
                   children: [
                     Icon(Icons.receipt_long_outlined, size: 14, color: purpleAccent),
                     const SizedBox(width: 6),
-                    Text(
-                      'VIEW PAYMENT SCHEDULE',
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w800,
-                        color: purpleAccent,
-                        letterSpacing: 0.5,
+                    Flexible(
+                      child: Text(
+                        'VIEW PAYMENT SCHEDULE',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800,
+                          color: purpleAccent,
+                          letterSpacing: 0.5,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
@@ -252,10 +263,16 @@ class BookingHistoryCard extends StatelessWidget {
         Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            _buildDateColumn('Move-in', checkInDate, dateFormat, dayFormat, purpleAccent),
-            const SizedBox(width: 8),
-            _buildDateColumn('Move-out', checkOutDate, dateFormat, dayFormat, purpleAccent),
-            const Expanded(child: SizedBox.shrink()),
+            Expanded(
+              child: Row(
+                children: [
+                  Expanded(child: _buildDateColumn('Move-in', checkInDate, dateFormat, dayFormat, purpleAccent)),
+                  const SizedBox(width: 4),
+                  Expanded(child: _buildDateColumn('Move-out', checkOutDate, dateFormat, dayFormat, purpleAccent)),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
             // Pricing (Booking Fee)
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -265,14 +282,14 @@ class BookingHistoryCard extends StatelessWidget {
                   style: TextStyle(fontSize: 10, color: Color(0xFF64748B), fontWeight: FontWeight.w500),
                 ),
                 ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 100),
+                  constraints: const BoxConstraints(maxWidth: 90),
                   child: FittedBox(
                     alignment: Alignment.centerRight,
                     fit: BoxFit.scaleDown,
                     child: Text(
                       'RM ${totalPrice.toStringAsFixed(0)}',
                       style: const TextStyle(
-                        fontSize: 22,
+                        fontSize: 20,
                         fontWeight: FontWeight.bold,
                         color: Color(0xFF0F172A),
                       ),
