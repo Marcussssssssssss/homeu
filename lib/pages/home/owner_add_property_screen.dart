@@ -66,8 +66,6 @@ class _HomeUOwnerAddPropertyScreenState
   String _selectedRentalType = 'Whole Unit';
   String _selectedPropertyType = 'Condo';
   String _selectedFurnishing = 'Partially Furnished';
-  DateTime _availableFrom = DateTime.now().add(const Duration(days: 7));
-  DateTime _availableUntil = DateTime.now().add(const Duration(days: 180));
 
   bool _publishImmediately = true;
   DateTime? _scheduledPublishDate;
@@ -795,32 +793,6 @@ class _HomeUOwnerAddPropertyScreenState
         ),
       ),
     );
-  }
-
-  Future<void> _pickDate({required bool isStart}) async {
-    final currentValue = isStart ? _availableFrom : _availableUntil;
-
-    final pickedDate = await showDatePicker(
-      context: context,
-      initialDate: currentValue,
-      firstDate: DateTime.now().subtract(const Duration(days: 1)),
-      lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
-    );
-
-    if (pickedDate == null) return;
-
-    setState(() {
-      if (isStart) {
-        _availableFrom = pickedDate;
-        if (_availableUntil.isBefore(_availableFrom)) {
-          _availableUntil = _availableFrom.add(const Duration(days: 30));
-        }
-      } else {
-        _availableUntil = pickedDate.isBefore(_availableFrom)
-            ? _availableFrom
-            : pickedDate;
-      }
-    });
   }
 
   String _formatDate(DateTime date) {

@@ -997,7 +997,6 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
           await _showSuccessWithReceipt(payment!);
 
           if (!mounted) return;
-          // Navigate to Home Dashboard (Tenant Shell) and clear stack for initial booking fee
           Navigator.of(context).pushAndRemoveUntil(
             MaterialPageRoute<void>(builder: (_) => HomeUTenantShellScreen()),
             (route) => false,
