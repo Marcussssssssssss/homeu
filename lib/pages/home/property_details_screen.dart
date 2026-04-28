@@ -370,12 +370,6 @@ class _HomeUPropertyDetailsScreenState
     final currentUserId = AppSupabase.auth.currentUser?.id;
     final isOwner = currentUserId == property.ownerId;
 
-    debugPrint('[DEBUG] Details Page Build for ID: ${property.id}');
-    debugPrint('[DEBUG] Total Images Received: ${property.imageUrls.length}');
-    if (property.imageUrls.isNotEmpty) {
-      debugPrint('[DEBUG] First Image URL: ${property.imageUrls.first}');
-    }
-
     return AnimatedBuilder(
       animation: _favoritesController,
       builder: (context, _) {
@@ -708,87 +702,130 @@ class _HomeUPropertyDetailsScreenState
                         final bool hasAvatar =
                             avatarUrl != null && avatarUrl.isNotEmpty;
 
-                        return InkWell(
-                          onTap: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute<void>(
-                                builder: (_) =>
-                                    HomeUChatScreen.start(property: property),
-                              ),
-                            );
-                          },
-                          borderRadius: BorderRadius.circular(16),
-                          child: Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: context.homeuCard,
+                        return Column(
+                          children: [
+                            InkWell(
+                              onTap: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute<void>(
+                                    builder: (_) =>
+                                        HomeUChatScreen.start(property: property),
+                                  ),
+                                );
+                              },
                               borderRadius: BorderRadius.circular(16),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: context.homeuAccent.withValues(
-                                    alpha: 0.14,
-                                  ),
-                                  blurRadius: 12,
-                                  offset: const Offset(0, 4),
+                              child: Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: context.homeuCard,
+                                  borderRadius: BorderRadius.circular(16),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: context.homeuAccent.withValues(
+                                        alpha: 0.14,
+                                      ),
+                                      blurRadius: 12,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                            child: Row(
-                              children: [
-                                CircleAvatar(
-                                  radius: 22,
-                                  backgroundColor: context.homeuAccent
-                                      .withValues(alpha: 0.12),
-                                  backgroundImage: hasAvatar
-                                      ? NetworkImage(avatarUrl)
-                                      : null,
-                                  child: !hasAvatar
-                                      ? Text(
-                                          ownerName.isNotEmpty
-                                              ? ownerName
-                                                    .substring(0, 1)
-                                                    .toUpperCase()
-                                              : 'P',
-                                          style: TextStyle(
-                                            color: context.homeuAccent,
-                                            fontWeight: FontWeight.bold,
+                                child: Row(
+                                  children: [
+                                    CircleAvatar(
+                                      radius: 22,
+                                      backgroundColor: context.homeuAccent
+                                          .withValues(alpha: 0.12),
+                                      backgroundImage: hasAvatar
+                                          ? NetworkImage(avatarUrl)
+                                          : null,
+                                      child: !hasAvatar
+                                          ? Text(
+                                              ownerName.isNotEmpty
+                                                  ? ownerName
+                                                        .substring(0, 1)
+                                                        .toUpperCase()
+                                                  : 'P',
+                                              style: TextStyle(
+                                                color: context.homeuAccent,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            )
+                                          : null,
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            ownerName,
+                                            style: TextStyle(
+                                              color: context.homeuPrimaryText,
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.w700,
+                                            ),
                                           ),
-                                        )
-                                      : null,
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        ownerName,
-                                        style: TextStyle(
-                                          color: context.homeuPrimaryText,
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w700,
-                                        ),
+                                          const SizedBox(height: 3),
+                                          Text(
+                                            property.ownerRole,
+                                            style: TextStyle(
+                                              color: context.homeuMutedText,
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                      const SizedBox(height: 3),
-                                      Text(
-                                        property.ownerRole,
-                                        style: TextStyle(
-                                          color: context.homeuMutedText,
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                                    ),
+                                    Icon(
+                                      Icons.chat_bubble_outline_rounded,
+                                      color: context.homeuAccent,
+                                    ),
+                                  ],
                                 ),
-                                Icon(
-                                  Icons.chat_bubble_outline_rounded,
-                                  color: context.homeuAccent,
-                                ),
-                              ],
+                              ),
                             ),
-                          ),
+                            if (property.hasHighRiskReport) ...[
+                              const SizedBox(height: 12),
+                              Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: Colors.red.withOpacity(0.08),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(color: Colors.red.withOpacity(0.3)),
+                                ),
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.warning_amber_rounded, color: Colors.red, size: 20),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          const Text(
+                                            'High Risk Report',
+                                            style: TextStyle(
+                                              color: Colors.red,
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          Text(
+                                            'This owner/property has received a high-risk report. Please proceed carefully.',
+                                            style: TextStyle(
+                                              color: context.homeuPrimaryText.withOpacity(0.8),
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ],
                         );
                       },
                     ),

@@ -821,6 +821,33 @@ class _PropertyCard extends StatelessWidget {
                   onTap: onTap,
                   limit: 3,
                 ),
+                if (property.hasHighRiskReport)
+                  Positioned(
+                    left: 10,
+                    top: 10,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.warning_rounded, color: Colors.white, size: 12),
+                          SizedBox(width: 4),
+                          Text(
+                            'HIGH RISK',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 Positioned(
                   right: 10,
                   top: 10,
@@ -842,8 +869,8 @@ class _PropertyCard extends StatelessWidget {
                   ),
                 ),
                 Positioned(
-                  left: 10,
-                  top: 10,
+                  left: property.hasHighRiskReport ? 10 : 10,
+                  top: property.hasHighRiskReport ? 42 : 10,
                   child: ListenableBuilder(
                     listenable: PropertyComparisonController.instance,
                     builder: (context, _) {

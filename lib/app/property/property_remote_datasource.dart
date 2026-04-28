@@ -32,6 +32,7 @@ class PropertyRemoteDataSource {
     );
 
     final imageMap = await _fetchPropertyImages(propertyIds);
+    final highRiskMap = await _fetchHighRiskStatus(propertyIds);
 
     return propertyRows.map((row) {
       final propertyId = row['id']?.toString() ?? '';
@@ -39,6 +40,7 @@ class PropertyRemoteDataSource {
         row,
         ownerProfiles,
         imageMap[propertyId] ?? const <String>[],
+        highRiskMap[propertyId] ?? false,
       );
     }).toList();
   }
@@ -77,6 +79,7 @@ class PropertyRemoteDataSource {
     );
 
     final imageMap = await _fetchPropertyImages(ids);
+    final highRiskMap = await _fetchHighRiskStatus(ids);
 
     final mapped = <String, PropertyItem>{};
     for (final row in propertyRows) {
@@ -85,6 +88,7 @@ class PropertyRemoteDataSource {
         row,
         ownerProfiles,
         imageMap[propertyId] ?? const <String>[],
+        highRiskMap[propertyId] ?? false,
       );
       if (property.id.isNotEmpty) {
         mapped[property.id] = property;
@@ -92,6 +96,30 @@ class PropertyRemoteDataSource {
     }
 
     return mapped;
+  }
+
+  Future<Map<String, bool>> _fetchHighRiskStatus(List<String> propertyIds) async {
+    if (propertyIds.isEmpty) return {};
+    try {
+      final dynamic rows = await AppSupabase.client
+          .from('property_reports')
+          .select('property_id')
+          .eq('risk_level', 'high')
+          .neq('status', 'dismissed')
+          .inFilter('property_id', propertyIds);
+      
+      if (rows is! List) return {};
+      
+      final Map<String, bool> result = {};
+      for (final row in rows.whereType<Map<String, dynamic>>()) {
+        final pid = row['property_id']?.toString() ?? '';
+        if (pid.isNotEmpty) result[pid] = true;
+      }
+      return result;
+    } catch (e) {
+      debugPrint('Error fetching high risk status: $e');
+      return {};
+    }
   }
 
   Future<Map<String, List<String>>> _fetchPropertyImages(
@@ -131,7 +159,6 @@ class PropertyRemoteDataSource {
       }
 
       groupedRaw.forEach((propertyId, images) {
-        // Sort by sort_order ASC, then by filename numeric suffix
         images.sort((a, b) {
           final int sA = (a['sort_order'] as num?)?.toInt() ?? 999999;
           final int sB = (b['sort_order'] as num?)?.toInt() ?? 999999;
@@ -146,15 +173,6 @@ class PropertyRemoteDataSource {
             .map((img) => img['public_url']?.toString() ?? '')
             .where((url) => url.isNotEmpty)
             .toList();
-
-        debugPrint('[DEBUG] Property Image Mapping:');
-        debugPrint('  - Properties ID: $propertyId');
-        debugPrint('  - Image Table Property_ID Match: $propertyId');
-        debugPrint('  - Total Images Attached: ${result[propertyId]!.length}');
-        if (result[propertyId]!.isNotEmpty) {
-          debugPrint('  - First Image (_0 expected): ${result[propertyId]!.first}');
-          debugPrint('  - Full Ordered List: ${result[propertyId]}');
-        }
       });
 
       return result;
@@ -209,6 +227,7 @@ class PropertyRemoteDataSource {
     Map<String, dynamic> row,
     Map<String, _OwnerProfile> ownerProfiles,
     List<String> imageUrls,
+    bool hasHighRiskReport,
   ) {
     final monthlyPrice = row['monthly_price'];
     final priceText = monthlyPrice == null
@@ -258,6 +277,7 @@ class PropertyRemoteDataSource {
       facilities: facilities,
       imageUrls: imageUrls,
       ownerPhotoUrl: ownerProfile?.avatarUrl,
+      hasHighRiskReport: hasHighRiskReport,
       photoColors: const [
         Color(0xFF5D7FBF),
         Color(0xFF4A68A8),
