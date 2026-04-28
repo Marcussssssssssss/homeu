@@ -110,6 +110,30 @@ class PaymentRemoteDataSource {
     return Payment.fromJson(row);
   }
 
+  Future<Payment?> getPaymentByMonthAndBooking({
+    required String bookingId,
+    required int monthNumber,
+  }) async {
+    if (!AppSupabase.isInitialized) {
+      return null;
+    }
+
+    final dynamic row = await AppSupabase.client
+        .from('payments')
+        .select('*')
+        .eq('booking_requests_id', bookingId)
+        .eq('month_number', monthNumber)
+        .order('created_at', ascending: false)
+        .limit(1)
+        .maybeSingle();
+
+    if (row is! Map<String, dynamic>) {
+      return null;
+    }
+
+    return Payment.fromJson(row);
+  }
+
   Future<Payment?> getPaymentByScheduleId(String scheduleId) async {
     if (!AppSupabase.isInitialized) {
       return null;

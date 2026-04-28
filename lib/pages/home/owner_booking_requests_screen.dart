@@ -8,7 +8,6 @@ import '../../app/property/booking_request/booking_requests_controller.dart';
 import '../../app/property/viewing_request/viewing_requests_controller.dart';
 import 'owner_analytics_screen.dart';
 import 'owner_booking_request_details_screen.dart';
-import 'owner_dashboard_screen.dart';
 import 'owner_my_properties_screen.dart';
 
 class HomeUOwnerBookingRequestsScreen extends StatefulWidget {
@@ -26,8 +25,7 @@ class HomeUOwnerBookingRequestsScreen extends StatefulWidget {
       _HomeUOwnerBookingRequestsScreenState();
 }
 
-class _HomeUOwnerBookingRequestsScreenState
-    extends State<HomeUOwnerBookingRequestsScreen> {
+class _HomeUOwnerBookingRequestsScreenState extends State<HomeUOwnerBookingRequestsScreen> {
   late final BookingRequestsController _bookingController;
   late final ViewingRequestsController _viewingController;
 
@@ -81,54 +79,43 @@ class _HomeUOwnerBookingRequestsScreenState
 
         bottomNavigationBar: widget.showBottomNavigationBar
             ? HomeUOwnerBottomNavigationBar(
-                selectedIndex: _selectedNavIndex,
-                onDestinationSelected: (index) {
-                  if (index == _selectedNavIndex) return;
-                  if (index == 0) {
-                    Navigator.of(context).pushAndRemoveUntil(
-                      MaterialPageRoute(
-                        builder: (_) => const HomeUOwnerDashboardScreen(),
-                      ),
-                      (route) => false,
-                    );
-                    return;
-                  }
-                  if (index == 1) {
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(
-                        builder: (_) => const HomeUOwnerMyPropertiesScreen(),
-                      ),
-                    );
-                    return;
-                  }
-                  if (index == 2) return;
-                  if (index == 3) {
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(
-                        builder: (_) => const HomeUOwnerAnalyticsScreen(),
-                      ),
-                    );
-                    return;
-                  }
-                  if (index == 4) {
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(
-                        builder: (_) => const HomeUConversationListScreen(),
-                      ),
-                    );
-                    return;
-                  }
-                  if (index == 5) {
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(
-                        builder: (_) =>
-                            const HomeUProfileScreen(role: HomeURole.owner),
-                      ),
-                    );
-                    return;
-                  }
-                },
-              )
+          selectedIndex: _selectedNavIndex,
+          onDestinationSelected: (index) {
+            if (index == _selectedNavIndex) return;
+
+            void switchTabInstantly(Widget screen) {
+              Navigator.of(context).pushReplacement(
+                PageRouteBuilder(
+                  pageBuilder: (context, animation1, animation2) => screen,
+                  transitionDuration: Duration.zero,
+                  reverseTransitionDuration: Duration.zero,
+                ),
+              );
+            }
+
+            if (index == 0) {
+              Navigator.of(context).popUntil((route) => route.isFirst);
+              return;
+            }
+            if (index == 1) {
+              switchTabInstantly(const HomeUOwnerMyPropertiesScreen());
+              return;
+            }
+            if (index == 2) return;
+            if (index == 3) {
+              switchTabInstantly(const HomeUOwnerAnalyticsScreen());
+              return;
+            }
+            if (index == 4) {
+              switchTabInstantly(const HomeUConversationListScreen());
+              return;
+            }
+            if (index == 5) {
+              switchTabInstantly(const HomeUProfileScreen(role: HomeURole.owner));
+              return;
+            }
+          },
+        )
             : null,
 
         body: TabBarView(
@@ -313,28 +300,16 @@ class _HomeUOwnerBookingRequestsScreenState
                                     children: [
                                       CircleAvatar(
                                         radius: 18,
-                                        backgroundColor: const Color(
-                                          0xFFEAF2FF,
-                                        ),
-                                        backgroundImage:
-                                            (request.tenantProfileUrl != null &&
-                                                request
-                                                    .tenantProfileUrl!
-                                                    .isNotEmpty)
-                                            ? NetworkImage(
-                                                request.tenantProfileUrl!,
-                                              )
+                                        backgroundColor: const Color(0xFFEAF2FF),
+                                        backgroundImage: (request.tenantProfileUrl != null && request.tenantProfileUrl!.isNotEmpty)
+                                            ? NetworkImage(request.tenantProfileUrl!)
                                             : null,
-                                        child:
-                                            (request.tenantProfileUrl == null ||
-                                                request
-                                                    .tenantProfileUrl!
-                                                    .isEmpty)
+                                        child: (request.tenantProfileUrl == null || request.tenantProfileUrl!.isEmpty)
                                             ? const Icon(
-                                                Icons.person_rounded,
-                                                color: Color(0xFF1E3A8A),
-                                                size: 20,
-                                              )
+                                          Icons.person_rounded,
+                                          color: Color(0xFF1E3A8A),
+                                          size: 20,
+                                        )
                                             : null,
                                       ),
                                       const SizedBox(width: 10),
@@ -591,9 +566,14 @@ class _HomeUOwnerBookingRequestsScreenState
                           final isPending = request.status == 'Pending';
                           final isApproved = request.status == 'Approved';
 
-                          final isPastViewingTime = DateTime.now().isAfter(
-                            request.scheduledAt,
+                          final exactWallTime = DateTime(
+                            request.scheduledAt.year,
+                            request.scheduledAt.month,
+                            request.scheduledAt.day,
+                            request.scheduledAt.hour,
+                            request.scheduledAt.minute,
                           );
+                          final isPastViewingTime = DateTime.now().isAfter(exactWallTime);
 
                           final timeStr =
                               "${request.scheduledAt.hour % 12 == 0 ? 12 : request.scheduledAt.hour % 12}:${request.scheduledAt.minute.toString().padLeft(2, '0')} ${request.scheduledAt.hour >= 12 ? 'PM' : 'AM'}";
@@ -619,23 +599,15 @@ class _HomeUOwnerBookingRequestsScreenState
                                     CircleAvatar(
                                       radius: 18,
                                       backgroundColor: const Color(0xFFEAF2FF),
-                                      backgroundImage:
-                                          (request.tenantProfileUrl != null &&
-                                              request
-                                                  .tenantProfileUrl!
-                                                  .isNotEmpty)
-                                          ? NetworkImage(
-                                              request.tenantProfileUrl!,
-                                            )
+                                      backgroundImage: (request.tenantProfileUrl != null && request.tenantProfileUrl!.isNotEmpty)
+                                          ? NetworkImage(request.tenantProfileUrl!)
                                           : null,
-                                      child:
-                                          (request.tenantProfileUrl == null ||
-                                              request.tenantProfileUrl!.isEmpty)
+                                      child: (request.tenantProfileUrl == null || request.tenantProfileUrl!.isEmpty)
                                           ? const Icon(
-                                              Icons.person_rounded,
-                                              color: Color(0xFF1E3A8A),
-                                              size: 20,
-                                            )
+                                        Icons.person_rounded,
+                                        color: Color(0xFF1E3A8A),
+                                        size: 20,
+                                      )
                                           : null,
                                     ),
                                     const SizedBox(width: 10),

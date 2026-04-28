@@ -39,6 +39,14 @@ class OwnerDashboardRemoteDataSource {
         ? List<Map<String, dynamic>>.from(viewingsResponse)
         : [];
 
+    final dynamic ownerProfileResponse = await AppSupabase.client
+        .from('profiles')
+        .select('full_name')
+        .eq('id', ownerId)
+        .maybeSingle();
+
+    final String fetchedOwnerName = ownerProfileResponse?['full_name']?.toString() ?? 'Owner';
+
     int activeListings = 0;
     int occupiedCount = 0;
     for (final p in properties) {
@@ -166,6 +174,7 @@ class OwnerDashboardRemoteDataSource {
     }
 
     return DashboardData(
+      ownerName: fetchedOwnerName,
       totalEarnings: totalEarnings,
       activeListings: activeListings,
       pendingRequests: pendingRequests,

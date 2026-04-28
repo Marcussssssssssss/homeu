@@ -15,39 +15,37 @@ class BookingReceiptDialog extends StatelessWidget {
     super.key,
     required this.payment,
     required this.property,
+    this.isRefund = false,
   });
 
   final Payment payment;
   final PropertyItem property;
+  final bool isRefund;
 
   static Future<void> show({
     required BuildContext context,
     required Payment payment,
     required PropertyItem property,
+    bool isRefund = false,
   }) async {
     return showDialog<void>(
       context: context,
-      builder: (context) =>
-          BookingReceiptDialog(payment: payment, property: property),
+      builder: (context) => BookingReceiptDialog(
+        payment: payment,
+        property: property,
+        isRefund: isRefund,
+      ),
     );
   }
 
-  Future<Uint8List> _generatePdf(
-    PdfPageFormat format,
-    BuildContext context,
-  ) async {
+  Future<Uint8List> _generatePdf(PdfPageFormat format, BuildContext context) async {
     final pdf = pw.Document();
     final l10n = context.l10n;
     final dateFormat = DateFormat('dd MMM yyyy, hh:mm a');
-    final currencyFormat = NumberFormat.currency(
-      symbol: 'RM ',
-      decimalDigits: 2,
-    );
+    final currencyFormat = NumberFormat.currency(symbol: 'RM ', decimalDigits: 2);
 
     // Malaysia Timezone Offset: UTC +8
-    final DateTime displayTime = (payment.paidAt ?? payment.createdAt)
-        .toUtc()
-        .add(const Duration(hours: 8));
+    final DateTime displayTime = (payment.paidAt ?? payment.createdAt).toUtc().add(const Duration(hours: 8));
 
     pdf.addPage(
       pw.Page(
@@ -61,31 +59,14 @@ class BookingReceiptDialog extends StatelessWidget {
                 child: pw.Row(
                   mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                   children: [
-                    pw.Text(
-                      l10n.receiptTitle,
-                      style: pw.TextStyle(
-                        fontSize: 24,
-                        fontWeight: pw.FontWeight.bold,
-                      ),
-                    ),
-                    pw.Text(
-                      l10n.statusApproved.toUpperCase(),
-                      style: pw.TextStyle(
-                        fontSize: 18,
-                        color: PdfColors.green,
-                        fontWeight: pw.FontWeight.bold,
-                      ),
-                    ),
+                    pw.Text(isRefund ? 'Refund Receipt' : l10n.receiptTitle, style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
+                    pw.Text((isRefund ? 'REFUNDED' : l10n.statusApproved).toUpperCase(), style: pw.TextStyle(fontSize: 18, color: isRefund ? PdfColors.orange : PdfColors.green, fontWeight: pw.FontWeight.bold)),
                   ],
                 ),
               ),
               pw.SizedBox(height: 20),
-              pw.Text(
-                '${l10n.receiptTransactionId}: ${payment.transactionReference}',
-              ),
-              pw.Text(
-                '${l10n.receiptPaymentDate}: ${dateFormat.format(displayTime)}',
-              ),
+              pw.Text('${isRefund ? 'Refund ID' : l10n.receiptTransactionId}: ${payment.transactionReference}'),
+              pw.Text('${isRefund ? 'Refund Date' : l10n.receiptPaymentDate}: ${dateFormat.format(displayTime)}'),
               pw.SizedBox(height: 20),
               pw.Divider(),
               pw.SizedBox(height: 10),
@@ -93,41 +74,27 @@ class BookingReceiptDialog extends StatelessWidget {
               _pdfRow(l10n.receiptLocation, property.location),
               _pdfRow(l10n.receiptPaymentMethod, payment.method),
               if (payment.monthNumber != null)
-                _pdfRow(
-                  l10n.receiptInstallment,
-                  l10n.receiptMonth(payment.monthNumber!),
-                ),
+                _pdfRow(l10n.receiptInstallment, l10n.receiptMonth(payment.monthNumber!)),
               pw.SizedBox(height: 20),
               pw.Divider(),
               pw.SizedBox(height: 10),
               pw.Row(
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
-                  pw.Text(
-                    l10n.receiptTotalAmount,
-                    style: pw.TextStyle(
-                      fontSize: 16,
-                      fontWeight: pw.FontWeight.bold,
-                    ),
-                  ),
-                  pw.Text(
-                    currencyFormat.format(payment.amount),
-                    style: pw.TextStyle(
-                      fontSize: 18,
-                      fontWeight: pw.FontWeight.bold,
-                    ),
-                  ),
+                  pw.Text(isRefund ? 'Refunded Amount' : l10n.receiptTotalAmount, style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold)),
+                  pw.Text(currencyFormat.format(payment.amount), style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
                 ],
               ),
+              if (isRefund) ...[
+                pw.SizedBox(height: 20),
+                pw.Text(
+                  'Your booking fee of ${currencyFormat.format(payment.amount)} has been refunded to your original payment method. Please allow 3-5 business days for it to appear in your account.',
+                  style: pw.TextStyle(fontSize: 10, fontStyle: pw.FontStyle.italic),
+                ),
+              ],
               pw.SizedBox(height: 40),
               pw.Center(
-                child: pw.Text(
-                  l10n.receiptFooter,
-                  style: pw.TextStyle(
-                    fontStyle: pw.FontStyle.italic,
-                    color: PdfColors.grey,
-                  ),
-                ),
+                child: pw.Text(l10n.receiptFooter, style: pw.TextStyle(fontStyle: pw.FontStyle.italic, color: PdfColors.grey)),
               ),
             ],
           );
@@ -155,15 +122,10 @@ class BookingReceiptDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final dateFormat = DateFormat('dd MMM yyyy, hh:mm a');
-    final currencyFormat = NumberFormat.currency(
-      symbol: 'RM ',
-      decimalDigits: 2,
-    );
-
+    final currencyFormat = NumberFormat.currency(symbol: 'RM ', decimalDigits: 2);
+    
     // Malaysia Timezone Offset: UTC +8
-    final DateTime displayTime = (payment.paidAt ?? payment.createdAt)
-        .toUtc()
-        .add(const Duration(hours: 8));
+    final DateTime displayTime = (payment.paidAt ?? payment.createdAt).toUtc().add(const Duration(hours: 8));
 
     return Dialog(
       backgroundColor: Colors.transparent,
@@ -174,9 +136,7 @@ class BookingReceiptDialog extends StatelessWidget {
           children: [
             Container(
               decoration: BoxDecoration(
-                color: context.isDarkMode
-                    ? const Color(0xFF1E293B)
-                    : Colors.white,
+                color: context.isDarkMode ? const Color(0xFF1E293B) : Colors.white,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
@@ -188,14 +148,14 @@ class BookingReceiptDialog extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  // Green Checkmark Header
+                  // Green/Orange Header
                   Container(
                     padding: const EdgeInsets.symmetric(vertical: 30),
                     width: double.infinity,
                     decoration: BoxDecoration(
-                      color: context.isDarkMode
-                          ? const Color(0xFF064E3B).withOpacity(0.3)
-                          : const Color(0xFFF0FDF4),
+                      color: isRefund 
+                        ? (context.isDarkMode ? const Color(0xFF7C2D12).withOpacity(0.3) : const Color(0xFFFFF7ED))
+                        : (context.isDarkMode ? const Color(0xFF064E3B).withOpacity(0.3) : const Color(0xFFF0FDF4)),
                       borderRadius: const BorderRadius.only(
                         topLeft: Radius.circular(20),
                         topRight: Radius.circular(20),
@@ -205,34 +165,34 @@ class BookingReceiptDialog extends StatelessWidget {
                       children: [
                         Container(
                           padding: const EdgeInsets.all(12),
-                          decoration: const BoxDecoration(
-                            color: Color(0xFF22C55E), // Success green
+                          decoration: BoxDecoration(
+                            color: isRefund ? Colors.orange : const Color(0xFF22C55E), // Success green or refund orange
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(
-                            Icons.check,
+                          child: Icon(
+                            isRefund ? Icons.assignment_return_outlined : Icons.check,
                             color: Colors.white,
                             size: 32,
                           ),
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          l10n.receiptSuccess,
+                          isRefund ? 'Refund Processed' : l10n.receiptSuccess,
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: context.isDarkMode
-                                ? const Color(0xFF4ADE80)
-                                : const Color(0xFF166534),
+                            color: isRefund 
+                              ? (context.isDarkMode ? const Color(0xFFFB923C) : const Color(0xFF9A3412))
+                              : (context.isDarkMode ? const Color(0xFF4ADE80) : const Color(0xFF166534)),
                           ),
                         ),
                         Text(
-                          '${l10n.receiptTransactionId}: ${payment.transactionReference}',
+                          '${isRefund ? 'Refund ID' : l10n.receiptTransactionId}: ${payment.transactionReference}',
                           style: TextStyle(
                             fontSize: 12,
-                            color: context.isDarkMode
-                                ? const Color(0xFF4ADE80).withOpacity(0.7)
-                                : const Color(0xFF166534).withOpacity(0.7),
+                            color: isRefund 
+                              ? (context.isDarkMode ? const Color(0xFFFB923C).withOpacity(0.7) : const Color(0xFF9A3412).withOpacity(0.7))
+                              : (context.isDarkMode ? const Color(0xFF4ADE80).withOpacity(0.7) : const Color(0xFF166534).withOpacity(0.7)),
                           ),
                         ),
                       ],
@@ -245,45 +205,23 @@ class BookingReceiptDialog extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildInfoRow(
-                          l10n.receiptProperty,
-                          property.name,
-                          context,
-                        ),
-                        _buildInfoRow(
-                          l10n.receiptLocation,
-                          property.location,
-                          context,
-                        ),
-                        _buildInfoRow(
-                          l10n.receiptPaymentDate,
-                          dateFormat.format(displayTime),
-                          context,
-                        ),
-                        _buildInfoRow(
-                          l10n.receiptPaymentMethod,
-                          payment.method,
-                          context,
-                        ),
+                        _buildInfoRow(l10n.receiptProperty, property.name, context),
+                        _buildInfoRow(l10n.receiptLocation, property.location, context),
+                        _buildInfoRow(isRefund ? 'Refund Date' : l10n.receiptPaymentDate, dateFormat.format(displayTime), context),
+                        _buildInfoRow(l10n.receiptPaymentMethod, payment.method, context),
                         if (payment.monthNumber != null)
-                          _buildInfoRow(
-                            l10n.receiptInstallment,
-                            l10n.receiptMonth(payment.monthNumber!),
-                            context,
-                          ),
+                          _buildInfoRow(l10n.receiptInstallment, l10n.receiptMonth(payment.monthNumber!), context),
 
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 20),
                           child: CustomPaint(
                             size: const Size(double.infinity, 1),
-                            painter: _DashedLinePainter(
-                              color: context.homeuSectionDivider,
-                            ),
+                            painter: _DashedLinePainter(color: context.homeuSectionDivider),
                           ),
                         ),
 
                         Text(
-                          l10n.receiptTotalAmount,
+                          isRefund ? 'Refunded Amount' : l10n.receiptTotalAmount,
                           style: TextStyle(
                             fontSize: 14,
                             color: context.homeuMutedText,
@@ -296,9 +234,20 @@ class BookingReceiptDialog extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
-                            color: context.homeuPrimaryText,
+                            color: isRefund ? Colors.orange : context.homeuPrimaryText,
                           ),
                         ),
+                        if (isRefund) ...[
+                          const SizedBox(height: 16),
+                          Text(
+                            'Your booking fee of ${currencyFormat.format(payment.amount)} has been refunded to your original payment method. Please allow 3-5 business days for it to appear in your account.',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: context.homeuMutedText,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -311,18 +260,10 @@ class BookingReceiptDialog extends StatelessWidget {
                         Expanded(
                           child: OutlinedButton.icon(
                             onPressed: () async {
-                              final pdfBytes = await _generatePdf(
-                                PdfPageFormat.a4,
-                                context,
-                              );
-                              await Printing.layoutPdf(
-                                onLayout: (format) => pdfBytes,
-                              );
+                              final pdfBytes = await _generatePdf(PdfPageFormat.a4, context);
+                              await Printing.layoutPdf(onLayout: (format) => pdfBytes);
                             },
-                            icon: const Icon(
-                              Icons.file_download_outlined,
-                              size: 20,
-                            ),
+                            icon: const Icon(Icons.file_download_outlined, size: 20),
                             label: Text(l10n.receiptDownload),
                             style: OutlinedButton.styleFrom(
                               foregroundColor: context.homeuAccent,
@@ -338,21 +279,16 @@ class BookingReceiptDialog extends StatelessWidget {
                         Expanded(
                           child: ElevatedButton.icon(
                             onPressed: () async {
-                              final pdfBytes = await _generatePdf(
-                                PdfPageFormat.a4,
-                                context,
-                              );
+                              final pdfBytes = await _generatePdf(PdfPageFormat.a4, context);
                               await Share.shareXFiles(
                                 [
                                   XFile.fromData(
                                     pdfBytes,
-                                    name:
-                                        'Receipt_${payment.transactionReference}.pdf',
+                                    name: 'Receipt_${payment.transactionReference}.pdf',
                                     mimeType: 'application/pdf',
                                   ),
                                 ],
-                                subject:
-                                    '${l10n.receiptTitle} - ${property.name}',
+                                subject: '${l10n.receiptTitle} - ${property.name}',
                               );
                             },
                             icon: const Icon(Icons.share_outlined, size: 20),
