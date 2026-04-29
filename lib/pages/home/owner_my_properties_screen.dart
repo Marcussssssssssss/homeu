@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:homeu/app/property/my_properties/my_properties_controller.dart';
+import 'package:homeu/core/theme/homeu_app_theme.dart';
 import 'package:homeu/pages/home/conversation_list_screen.dart';
 import 'package:homeu/pages/home/profile_screen.dart';
 import '../../app/auth/homeu_session.dart';
@@ -42,11 +43,20 @@ class _HomeUOwnerMyPropertiesScreenState
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F8FC),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text('My Properties'),
-        backgroundColor: const Color(0xFFF6F8FC),
+        title: Text(
+          'My Properties',
+          style: theme.textTheme.titleLarge?.copyWith(
+            color: colorScheme.onSurface,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
         automaticallyImplyLeading: false,
       ),
@@ -98,8 +108,8 @@ class _HomeUOwnerMyPropertiesScreenState
             )
           : null,
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: const Color(0xFF1E3A8A),
-        foregroundColor: Colors.white,
+        backgroundColor: colorScheme.primary,
+        foregroundColor: colorScheme.onPrimary,
         icon: const Icon(Icons.add),
         label: const Text('Add Property'),
         onPressed: () async {
@@ -115,9 +125,7 @@ class _HomeUOwnerMyPropertiesScreenState
         listenable: _controller,
         builder: (context, child) {
           if (_controller.isLoading && _controller.properties.isEmpty) {
-            return const Center(
-              child: CircularProgressIndicator(color: Color(0xFF1E3A8A)),
-            );
+            return const Center(child: CircularProgressIndicator());
           }
 
           if (_controller.errorMessage != null &&
@@ -146,12 +154,15 @@ class _HomeUOwnerMyPropertiesScreenState
                   Icon(
                     Icons.home_work_outlined,
                     size: 64,
-                    color: Colors.grey.shade400,
+                    color: colorScheme.onSurfaceVariant,
                   ),
                   const SizedBox(height: 16),
-                  const Text(
+                  Text(
                     'You haven\'t listed any properties yet.',
-                    style: TextStyle(color: Color(0xFF50617F), fontSize: 16),
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                      fontSize: 16,
+                    ),
                   ),
                 ],
               ),
@@ -159,7 +170,7 @@ class _HomeUOwnerMyPropertiesScreenState
           }
 
           return RefreshIndicator(
-            color: const Color(0xFF1E3A8A),
+            color: colorScheme.primary,
             onRefresh: _controller.loadProperties,
             child: ListView.separated(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 80),
@@ -178,20 +189,30 @@ class _HomeUOwnerMyPropertiesScreenState
 
                 if (displayStatus == 'Draft') {
                   statusColor = Colors.orange.shade700;
-                  statusBgColor = Colors.orange.shade50;
+                  statusBgColor = statusColor.withValues(
+                    alpha: context.isDarkMode ? 0.22 : 0.12,
+                  );
                 } else if (displayStatus == 'Booked') {
                   statusColor = Colors.teal.shade700;
-                  statusBgColor = Colors.teal.shade50;
+                  statusBgColor = statusColor.withValues(
+                    alpha: context.isDarkMode ? 0.24 : 0.12,
+                  );
                 } else if (displayStatus == 'Expiring Soon') {
                   statusColor = Colors.amber.shade700;
-                  statusBgColor = Colors.amber.shade50;
+                  statusBgColor = statusColor.withValues(
+                    alpha: context.isDarkMode ? 0.22 : 0.12,
+                  );
                 } else if (displayStatus == 'Occupied') {
                   statusColor = const Color(0xFF0F8A5F);
-                  statusBgColor = const Color(0xFFE6F7EF);
+                  statusBgColor = statusColor.withValues(
+                    alpha: context.isDarkMode ? 0.24 : 0.12,
+                  );
                 } else {
                   // Active
-                  statusColor = const Color(0xFF1E3A8A);
-                  statusBgColor = const Color(0xFFEAF2FF);
+                  statusColor = colorScheme.primary;
+                  statusBgColor = colorScheme.primary.withValues(
+                    alpha: context.isDarkMode ? 0.24 : 0.12,
+                  );
                 }
 
                 return Material(
@@ -210,11 +231,11 @@ class _HomeUOwnerMyPropertiesScreenState
                     child: Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: context.homeuCard,
                         borderRadius: BorderRadius.circular(16),
-                        boxShadow: const [
+                        boxShadow: [
                           BoxShadow(
-                            color: Color(0x0A1E3A8A),
+                            color: context.homeuCardShadow,
                             blurRadius: 10,
                             offset: Offset(0, 4),
                           ),
@@ -226,7 +247,7 @@ class _HomeUOwnerMyPropertiesScreenState
                             width: 80,
                             height: 80,
                             decoration: BoxDecoration(
-                              color: const Color(0xFFEAF2FF),
+                              color: colorScheme.surfaceContainerHighest,
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: ClipRRect(
@@ -235,13 +256,12 @@ class _HomeUOwnerMyPropertiesScreenState
                                   ? Image.network(
                                       imageUrl,
                                       fit: BoxFit.cover,
-                                      errorBuilder: (_, __, ___) =>
-                                          const Center(
-                                            child: Icon(
-                                              Icons.broken_image_outlined,
-                                              color: Color(0xFF90A4C4),
-                                            ),
-                                          ),
+                                      errorBuilder: (_, __, ___) => Center(
+                                        child: Icon(
+                                          Icons.broken_image_outlined,
+                                          color: colorScheme.onSurfaceVariant,
+                                        ),
+                                      ),
                                       loadingBuilder:
                                           (context, child, progress) {
                                             if (progress == null) return child;
@@ -257,10 +277,10 @@ class _HomeUOwnerMyPropertiesScreenState
                                             );
                                           },
                                     )
-                                  : const Center(
+                                  : Center(
                                       child: Icon(
                                         Icons.image_not_supported,
-                                        color: Color(0xFF90A4C4),
+                                        color: colorScheme.onSurfaceVariant,
                                       ),
                                     ),
                             ),
@@ -284,8 +304,8 @@ class _HomeUOwnerMyPropertiesScreenState
                                             property.title.isEmpty
                                                 ? 'Untitled Property'
                                                 : property.title,
-                                            style: const TextStyle(
-                                              color: Color(0xFF1F314F),
+                                            style: TextStyle(
+                                              color: colorScheme.onSurface,
                                               fontSize: 15,
                                               fontWeight: FontWeight.w700,
                                             ),
@@ -316,9 +336,9 @@ class _HomeUOwnerMyPropertiesScreenState
                                       ),
                                     ),
                                     PopupMenuButton<String>(
-                                      icon: const Icon(
+                                      icon: Icon(
                                         Icons.more_vert_rounded,
-                                        color: Color(0xFF90A4C4),
+                                        color: colorScheme.onSurfaceVariant,
                                       ),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(12),
@@ -362,10 +382,11 @@ class _HomeUOwnerMyPropertiesScreenState
                                               title: const Text(
                                                 'Delete Property?',
                                               ),
-                                              content: const Text(
+                                              content: Text(
                                                 'Are you sure you want to delete this listing? This action cannot be undone.',
                                                 style: TextStyle(
-                                                  color: Color(0xFF50617F),
+                                                  color: colorScheme
+                                                      .onSurfaceVariant,
                                                 ),
                                               ),
                                               actions: [
@@ -373,10 +394,11 @@ class _HomeUOwnerMyPropertiesScreenState
                                                   onPressed: () => Navigator.of(
                                                     context,
                                                   ).pop(false),
-                                                  child: const Text(
+                                                  child: Text(
                                                     'Cancel',
                                                     style: TextStyle(
-                                                      color: Color(0xFF667896),
+                                                      color: colorScheme
+                                                          .onSurfaceVariant,
                                                     ),
                                                   ),
                                                 ),
@@ -432,14 +454,14 @@ class _HomeUOwnerMyPropertiesScreenState
                                         }
                                       },
                                       itemBuilder: (context) => [
-                                        const PopupMenuItem(
+                                        PopupMenuItem(
                                           value: 'edit',
                                           child: Row(
                                             children: [
                                               Icon(
                                                 Icons.edit_rounded,
                                                 size: 20,
-                                                color: Color(0xFF1F314F),
+                                                color: colorScheme.onSurface,
                                               ),
                                               SizedBox(width: 10),
                                               Text('Edit Property'),
@@ -493,8 +515,8 @@ class _HomeUOwnerMyPropertiesScreenState
                                 const SizedBox(height: 4),
                                 Text(
                                   property.locationArea,
-                                  style: const TextStyle(
-                                    color: Color(0xFF667896),
+                                  style: TextStyle(
+                                    color: colorScheme.onSurfaceVariant,
                                     fontSize: 12,
                                   ),
                                   maxLines: 1,
@@ -503,8 +525,8 @@ class _HomeUOwnerMyPropertiesScreenState
                                 const SizedBox(height: 8),
                                 Text(
                                   'RM ${property.monthlyPrice}/mo',
-                                  style: const TextStyle(
-                                    color: Color(0xFF1E3A8A),
+                                  style: TextStyle(
+                                    color: colorScheme.primary,
                                     fontSize: 14,
                                     fontWeight: FontWeight.w800,
                                   ),

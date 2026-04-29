@@ -28,7 +28,8 @@ class HomeUOwnerBookingRequestsScreen extends StatefulWidget {
       _HomeUOwnerBookingRequestsScreenState();
 }
 
-class _HomeUOwnerBookingRequestsScreenState extends State<HomeUOwnerBookingRequestsScreen> {
+class _HomeUOwnerBookingRequestsScreenState
+    extends State<HomeUOwnerBookingRequestsScreen> {
   late final BookingRequestsController _bookingController;
   late final ViewingRequestsController _viewingController;
 
@@ -85,43 +86,46 @@ class _HomeUOwnerBookingRequestsScreenState extends State<HomeUOwnerBookingReque
 
         bottomNavigationBar: widget.showBottomNavigationBar
             ? HomeUOwnerBottomNavigationBar(
-          selectedIndex: _selectedNavIndex,
-          onDestinationSelected: (index) {
-            if (index == _selectedNavIndex) return;
+                selectedIndex: _selectedNavIndex,
+                onDestinationSelected: (index) {
+                  if (index == _selectedNavIndex) return;
 
-            void switchTabInstantly(Widget screen) {
-              Navigator.of(context).pushReplacement(
-                PageRouteBuilder(
-                  pageBuilder: (context, animation1, animation2) => screen,
-                  transitionDuration: Duration.zero,
-                  reverseTransitionDuration: Duration.zero,
-                ),
-              );
-            }
+                  void switchTabInstantly(Widget screen) {
+                    Navigator.of(context).pushReplacement(
+                      PageRouteBuilder(
+                        pageBuilder: (context, animation1, animation2) =>
+                            screen,
+                        transitionDuration: Duration.zero,
+                        reverseTransitionDuration: Duration.zero,
+                      ),
+                    );
+                  }
 
-            if (index == 0) {
-              Navigator.of(context).popUntil((route) => route.isFirst);
-              return;
-            }
-            if (index == 1) {
-              switchTabInstantly(const HomeUOwnerMyPropertiesScreen());
-              return;
-            }
-            if (index == 2) return;
-            if (index == 3) {
-              switchTabInstantly(const HomeUOwnerAnalyticsScreen());
-              return;
-            }
-            if (index == 4) {
-              switchTabInstantly(const HomeUConversationListScreen());
-              return;
-            }
-            if (index == 5) {
-              switchTabInstantly(const HomeUProfileScreen(role: HomeURole.owner));
-              return;
-            }
-          },
-        )
+                  if (index == 0) {
+                    Navigator.of(context).popUntil((route) => route.isFirst);
+                    return;
+                  }
+                  if (index == 1) {
+                    switchTabInstantly(const HomeUOwnerMyPropertiesScreen());
+                    return;
+                  }
+                  if (index == 2) return;
+                  if (index == 3) {
+                    switchTabInstantly(const HomeUOwnerAnalyticsScreen());
+                    return;
+                  }
+                  if (index == 4) {
+                    switchTabInstantly(const HomeUConversationListScreen());
+                    return;
+                  }
+                  if (index == 5) {
+                    switchTabInstantly(
+                      const HomeUProfileScreen(role: HomeURole.owner),
+                    );
+                    return;
+                  }
+                },
+              )
             : null,
 
         body: TabBarView(
@@ -209,9 +213,9 @@ class _HomeUOwnerBookingRequestsScreenState extends State<HomeUOwnerBookingReque
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           if (isSelected) ...[
-                            const Icon(
+                            Icon(
                               Icons.check,
-                              color: Colors.white,
+                              color: context.colors.onPrimary,
                               size: 16,
                             ),
                             const SizedBox(width: 6),
@@ -317,16 +321,27 @@ class _HomeUOwnerBookingRequestsScreenState extends State<HomeUOwnerBookingReque
                                       CircleAvatar(
                                         radius: 18,
                                         backgroundColor: context
-                                            .colors.surfaceContainerHighest,
-                                        backgroundImage: (request.tenantProfileUrl != null && request.tenantProfileUrl!.isNotEmpty)
-                                            ? NetworkImage(request.tenantProfileUrl!)
+                                            .colors
+                                            .surfaceContainerHighest,
+                                        backgroundImage:
+                                            (request.tenantProfileUrl != null &&
+                                                request
+                                                    .tenantProfileUrl!
+                                                    .isNotEmpty)
+                                            ? NetworkImage(
+                                                request.tenantProfileUrl!,
+                                              )
                                             : null,
-                                        child: (request.tenantProfileUrl == null || request.tenantProfileUrl!.isEmpty)
+                                        child:
+                                            (request.tenantProfileUrl == null ||
+                                                request
+                                                    .tenantProfileUrl!
+                                                    .isEmpty)
                                             ? Icon(
-                                          Icons.person_rounded,
-                                          color: context.homeuAccent,
-                                          size: 20,
-                                        )
+                                                Icons.person_rounded,
+                                                color: context.homeuAccent,
+                                                size: 20,
+                                              )
                                             : null,
                                       ),
                                       const SizedBox(width: 10),
@@ -350,12 +365,14 @@ class _HomeUOwnerBookingRequestsScreenState extends State<HomeUOwnerBookingReque
                                         decoration: BoxDecoration(
                                           color: isPending
                                               ? context.colors.tertiary
-                                                  .withValues(alpha: 0.12)
+                                                    .withValues(alpha: 0.12)
                                               : isApproved
-                                              ? context.homeuSuccess
-                                                  .withValues(alpha: 0.12)
-                                              : context.colors.error
-                                                  .withValues(alpha: 0.12),
+                                              ? context.homeuSuccess.withValues(
+                                                  alpha: 0.12,
+                                                )
+                                              : context.colors.error.withValues(
+                                                  alpha: 0.12,
+                                                ),
                                           borderRadius: BorderRadius.circular(
                                             999,
                                           ),
@@ -411,15 +428,16 @@ class _HomeUOwnerBookingRequestsScreenState extends State<HomeUOwnerBookingReque
                                         request.startDate != null
                                             ? context.l10n.ownerRequestsMoveIn(
                                                 DateFormat.yMd(
-                                                  Localizations.localeOf(context)
-                                                      .toString(),
+                                                  Localizations.localeOf(
+                                                    context,
+                                                  ).toString(),
                                                 ).format(request.startDate!),
                                                 request.durationMonths,
                                               )
                                             : context.l10n
-                                                .ownerRequestsFlexibleDuration(
-                                                request.durationMonths,
-                                              ),
+                                                  .ownerRequestsFlexibleDuration(
+                                                    request.durationMonths,
+                                                  ),
                                         style: TextStyle(
                                           color: context.homeuSecondaryText,
                                           fontSize: 13,
@@ -533,9 +551,9 @@ class _HomeUOwnerBookingRequestsScreenState extends State<HomeUOwnerBookingReque
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           if (isSelected) ...[
-                            const Icon(
+                            Icon(
                               Icons.check,
-                              color: Colors.white,
+                              color: context.colors.onPrimary,
                               size: 16,
                             ),
                             const SizedBox(width: 6),
@@ -610,12 +628,16 @@ class _HomeUOwnerBookingRequestsScreenState extends State<HomeUOwnerBookingReque
                             request.scheduledAt.hour,
                             request.scheduledAt.minute,
                           );
-                          final isPastViewingTime = DateTime.now().isAfter(exactWallTime);
+                          final isPastViewingTime = DateTime.now().isAfter(
+                            exactWallTime,
+                          );
 
-                          final locale =
-                              Localizations.localeOf(context).toString();
-                          final timeStr =
-                              DateFormat.jm(locale).format(exactWallTime);
+                          final locale = Localizations.localeOf(
+                            context,
+                          ).toString();
+                          final timeStr = DateFormat.jm(
+                            locale,
+                          ).format(exactWallTime);
 
                           return Container(
                             padding: const EdgeInsets.all(16),
@@ -637,17 +659,26 @@ class _HomeUOwnerBookingRequestsScreenState extends State<HomeUOwnerBookingReque
                                   children: [
                                     CircleAvatar(
                                       radius: 18,
-                                      backgroundColor:
-                                          context.colors.surfaceContainerHighest,
-                                      backgroundImage: (request.tenantProfileUrl != null && request.tenantProfileUrl!.isNotEmpty)
-                                          ? NetworkImage(request.tenantProfileUrl!)
+                                      backgroundColor: context
+                                          .colors
+                                          .surfaceContainerHighest,
+                                      backgroundImage:
+                                          (request.tenantProfileUrl != null &&
+                                              request
+                                                  .tenantProfileUrl!
+                                                  .isNotEmpty)
+                                          ? NetworkImage(
+                                              request.tenantProfileUrl!,
+                                            )
                                           : null,
-                                      child: (request.tenantProfileUrl == null || request.tenantProfileUrl!.isEmpty)
+                                      child:
+                                          (request.tenantProfileUrl == null ||
+                                              request.tenantProfileUrl!.isEmpty)
                                           ? Icon(
-                                        Icons.person_rounded,
-                                        color: context.homeuAccent,
-                                        size: 20,
-                                      )
+                                              Icons.person_rounded,
+                                              color: context.homeuAccent,
+                                              size: 20,
+                                            )
                                           : null,
                                     ),
                                     const SizedBox(width: 10),
@@ -669,12 +700,14 @@ class _HomeUOwnerBookingRequestsScreenState extends State<HomeUOwnerBookingReque
                                       decoration: BoxDecoration(
                                         color: isPending
                                             ? context.colors.tertiary
-                                                .withValues(alpha: 0.12)
+                                                  .withValues(alpha: 0.12)
                                             : isApproved
-                                            ? context.homeuSuccess
-                                                .withValues(alpha: 0.12)
-                                            : context.colors.error
-                                                .withValues(alpha: 0.12),
+                                            ? context.homeuSuccess.withValues(
+                                                alpha: 0.12,
+                                              )
+                                            : context.colors.error.withValues(
+                                                alpha: 0.12,
+                                              ),
                                         borderRadius: BorderRadius.circular(
                                           999,
                                         ),
@@ -726,8 +759,9 @@ class _HomeUOwnerBookingRequestsScreenState extends State<HomeUOwnerBookingReque
                                     const SizedBox(width: 8),
                                     Text(
                                       context.l10n.ownerRequestsViewingTime(
-                                        DateFormat.yMd(locale)
-                                            .format(request.scheduledAt),
+                                        DateFormat.yMd(
+                                          locale,
+                                        ).format(request.scheduledAt),
                                         timeStr,
                                       ),
                                       style: TextStyle(
