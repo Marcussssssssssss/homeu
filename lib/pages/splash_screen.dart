@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:homeu/core/localization/homeu_l10n.dart';
 import 'package:homeu/core/theme/homeu_app_theme.dart';
 import 'package:homeu/pages/onboarding/onboarding_screen_1.dart';
 
@@ -85,7 +86,7 @@ class _HomeUSplashScreenState extends State<HomeUSplashScreen> {
                       ),
                       SizedBox(height: size.height * 0.04),
                       Text(
-                        'HomeU',
+                        context.l10n.appTitle,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: context.homeuAccent,
@@ -96,7 +97,7 @@ class _HomeUSplashScreenState extends State<HomeUSplashScreen> {
                       ),
                       SizedBox(height: size.height * 0.012),
                       Text(
-                        'Find Your Perfect Home',
+                        context.l10n.splashTagline,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: context.homeuMutedText,
@@ -168,7 +169,7 @@ class _HouseIllustration extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = context.isDarkMode;
+    final colors = context.colors;
     return Container(
       width: 240,
       height: 180,
@@ -177,9 +178,7 @@ class _HouseIllustration extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: isDark
-              ? [const Color(0xFF1A263D), const Color(0xFF162B27)]
-              : [const Color(0xFFF4F8FF), const Color(0xFFE8F7F1)],
+          colors: [colors.surface, colors.surfaceContainerHighest],
         ),
         border: Border.all(color: context.homeuSoftBorder, width: 1),
       ),

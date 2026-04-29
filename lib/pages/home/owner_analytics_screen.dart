@@ -53,12 +53,12 @@ class _HomeUOwnerAnalyticsScreenState extends State<HomeUOwnerAnalyticsScreen> {
       case 4: return t.monthShortApr;
       case 5: return t.monthShortMay;
       case 6: return t.monthShortJun;
-      case 7: return 'Jul';
-      case 8: return 'Aug';
-      case 9: return 'Sep';
-      case 10: return 'Oct';
-      case 11: return 'Nov';
-      case 12: return 'Dec';
+      case 7: return t.monthShortJul;
+      case 8: return t.monthShortAug;
+      case 9: return t.monthShortSep;
+      case 10: return t.monthShortOct;
+      case 11: return t.monthShortNov;
+      case 12: return t.monthShortDec;
       default: return month.toString();
     }
   }
@@ -142,12 +142,16 @@ class _HomeUOwnerAnalyticsScreenState extends State<HomeUOwnerAnalyticsScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.error_outline, color: Colors.red, size: 40),
+                      Icon(
+                        Icons.error_outline,
+                        color: context.colors.error,
+                        size: 40,
+                      ),
                       const SizedBox(height: 16),
                       Text(_controller.errorMessage!),
                       TextButton(
                         onPressed: _controller.loadAnalytics,
-                        child: const Text('Retry'),
+                        child: Text(context.l10n.ownerRequestsRetry),
                       ),
                     ],
                   ),
@@ -184,7 +188,9 @@ class _HomeUOwnerAnalyticsScreenState extends State<HomeUOwnerAnalyticsScreen> {
                         Expanded(
                           child: _OwnerAnalyticsStatCard(
                             label: context.l10n.ownerStatNetEarnings,
-                            value: 'RM ${data.netEarnings.toStringAsFixed(0)}',
+                            value: context.l10n.paymentAmountRm(
+                              data.netEarnings.toStringAsFixed(0),
+                            ),
                             keyValue: const Key('owner_stat_net_earnings'),
                           ),
                         ),
@@ -213,21 +219,26 @@ class _HomeUOwnerAnalyticsScreenState extends State<HomeUOwnerAnalyticsScreen> {
                       children: [
                         Expanded(
                           child: _FinancialHighlightCard(
-                            title: 'Projected (30 Days)', // Change to l10n string later
+                            title: context.l10n.ownerProjected30Days,
                             amount: data.projectedRevenue,
                             icon: Icons.upcoming_rounded,
-                            iconColor: Colors.blue.shade600,
-                            bgColor: Colors.blue.shade50,
+                            iconColor: context.colors.primary,
+                            bgColor:
+                                context.colors.primary.withValues(alpha: 0.12),
                           ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: _FinancialHighlightCard(
-                            title: 'Overdue Payments', // Change to l10n string later
+                            title: context.l10n.ownerOverduePayments,
                             amount: data.overduePayments,
                             icon: Icons.warning_rounded,
-                            iconColor: data.overduePayments > 0 ? Colors.red.shade600 : Colors.green.shade600,
-                            bgColor: data.overduePayments > 0 ? Colors.red.shade50 : Colors.green.shade50,
+                            iconColor: data.overduePayments > 0
+                                ? context.colors.error
+                                : context.homeuSuccess,
+                            bgColor: data.overduePayments > 0
+                                ? context.colors.error.withValues(alpha: 0.12)
+                                : context.homeuSuccess.withValues(alpha: 0.12),
                           ),
                         ),
                       ],
@@ -305,7 +316,7 @@ class _HomeUOwnerAnalyticsScreenState extends State<HomeUOwnerAnalyticsScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Invoice Collection Rate', // Change to l10n string later
+                            context.l10n.ownerInvoiceCollectionRate,
                             style: TextStyle(
                               color: context.homeuPrimaryText,
                               fontSize: 15,
@@ -319,7 +330,11 @@ class _HomeUOwnerAnalyticsScreenState extends State<HomeUOwnerAnalyticsScreen> {
                                 width: 130,
                                 height: 130,
                                 child: CustomPaint(
-                                  painter: _CollectionPieChartPainter(data.paymentCollection),
+                                  painter: _CollectionPieChartPainter(
+                                    data.paymentCollection,
+                                    holeColor:
+                                        context.colors.surfaceContainerHighest,
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: 12),
@@ -386,7 +401,11 @@ class _HomeUOwnerAnalyticsScreenState extends State<HomeUOwnerAnalyticsScreen> {
                                 width: 130,
                                 height: 130,
                                 child: CustomPaint(
-                                  painter: _PieChartPainter(data.rentalDistribution),
+                                  painter: _PieChartPainter(
+                                    data.rentalDistribution,
+                                    holeColor:
+                                        context.colors.surfaceContainerHighest,
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: 12),
@@ -478,8 +497,8 @@ class _OwnerAnalyticsStatCard extends StatelessWidget {
         children: [
           Text(
             value,
-            style: const TextStyle(
-              color: Color(0xFF1E3A8A),
+            style: TextStyle(
+              color: context.homeuAccent,
               fontSize: 15,
               fontWeight: FontWeight.w700,
             ),
@@ -488,8 +507,8 @@ class _OwnerAnalyticsStatCard extends StatelessWidget {
           Text(
             label,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Color(0xFF667896),
+            style: TextStyle(
+              color: context.homeuMutedText,
               fontSize: 11,
               fontWeight: FontWeight.w600,
             ),
@@ -526,7 +545,7 @@ class _FinancialHighlightCard extends StatelessWidget {
         border: Border.all(color: context.homeuSoftBorder),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: context.homeuCardShadow.withValues(alpha: 0.12),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -560,7 +579,7 @@ class _FinancialHighlightCard extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           Text(
-            'RM ${amount.toStringAsFixed(0)}',
+            context.l10n.paymentAmountRm(amount.toStringAsFixed(0)),
             style: TextStyle(
               color: context.homeuPrimaryText,
               fontSize: 20,
@@ -574,8 +593,9 @@ class _FinancialHighlightCard extends StatelessWidget {
 }
 
 class _PieChartPainter extends CustomPainter {
-  _PieChartPainter(this.slices);
+  _PieChartPainter(this.slices, {required this.holeColor});
   final List<RentalTypeData> slices;
+  final Color holeColor;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -595,7 +615,7 @@ class _PieChartPainter extends CustomPainter {
     canvas.drawCircle(
       center,
       radius * 0.42,
-      Paint()..color = const Color(0xFFF6F8FC),
+      Paint()..color = holeColor,
     );
   }
 
@@ -606,8 +626,9 @@ class _PieChartPainter extends CustomPainter {
 }
 
 class _CollectionPieChartPainter extends CustomPainter {
-  _CollectionPieChartPainter(this.slices);
+  _CollectionPieChartPainter(this.slices, {required this.holeColor});
   final List<PaymentCollectionData> slices;
+  final Color holeColor;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -627,7 +648,7 @@ class _CollectionPieChartPainter extends CustomPainter {
     canvas.drawCircle(
       center,
       radius * 0.42,
-      Paint()..color = const Color(0xFFF6F8FC),
+      Paint()..color = holeColor,
     );
   }
 

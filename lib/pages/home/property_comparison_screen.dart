@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:homeu/app/property/property_comparison_controller.dart';
+import 'package:homeu/core/localization/homeu_l10n.dart';
 import 'package:homeu/core/theme/homeu_app_theme.dart';
 import 'package:homeu/pages/home/property_item.dart';
 import 'package:homeu/pages/home/property_image_gallery.dart';
@@ -18,7 +19,7 @@ class _PropertyComparisonScreenState extends State<PropertyComparisonScreen> {
     return Scaffold(
       backgroundColor: context.colors.surface,
       appBar: AppBar(
-        title: const Text('Compare Properties'),
+        title: Text(context.l10n.compareTitle),
         backgroundColor: context.colors.surface,
         elevation: 1,
         actions: [
@@ -33,7 +34,7 @@ class _PropertyComparisonScreenState extends State<PropertyComparisonScreen> {
                     PropertyComparisonController.instance.clearSelection();
                   },
                   child: Text(
-                    'Clear',
+                    context.l10n.compareClear,
                     style: TextStyle(color: context.homeuAccent),
                   ),
                 );
@@ -94,7 +95,7 @@ class _EmptyComparisonState extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           Text(
-            'No Properties Selected',
+            context.l10n.compareEmptyTitle,
             style: TextStyle(
               color: context.homeuPrimaryText,
               fontSize: 18,
@@ -103,7 +104,7 @@ class _EmptyComparisonState extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Go back and select 2 properties\nto start comparing',
+            context.l10n.compareEmptySubtitle,
             textAlign: TextAlign.center,
             style: TextStyle(color: context.homeuSecondaryText, fontSize: 14),
           ),
@@ -111,7 +112,7 @@ class _EmptyComparisonState extends StatelessWidget {
           OutlinedButton.icon(
             onPressed: () => Navigator.pop(context),
             icon: const Icon(Icons.arrow_back),
-            label: const Text('Back to Listings'),
+            label: Text(context.l10n.compareBackToListings),
           ),
         ],
       ),
@@ -194,7 +195,7 @@ class _PriceComparisonWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Price Range',
+                  context.l10n.comparePriceRangeLabel,
                   style: TextStyle(
                     color: context.homeuMutedText,
                     fontSize: 12,
@@ -202,7 +203,10 @@ class _PriceComparisonWidget extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  'RM ${minPrice.toStringAsFixed(0)} - RM ${maxPrice.toStringAsFixed(0)}',
+                  context.l10n.comparePriceRangeValue(
+                    minPrice.toStringAsFixed(0),
+                    maxPrice.toStringAsFixed(0),
+                  ),
                   style: TextStyle(
                     color: context.homeuPrice,
                     fontSize: 16,
@@ -213,7 +217,9 @@ class _PriceComparisonWidget extends StatelessWidget {
             ),
           ),
           Text(
-            'Save RM ${(maxPrice - minPrice).toStringAsFixed(0)}',
+            context.l10n.compareSaveAmount(
+              (maxPrice - minPrice).toStringAsFixed(0),
+            ),
             style: TextStyle(
               color: context.homeuSuccess,
               fontSize: 12,
@@ -265,16 +271,16 @@ class _PropertyComparisonCard extends StatelessWidget {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.5),
+                        color: context.colors.scrim.withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
                     '${index + 1}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                    ),
+                      style: TextStyle(
+                        color: context.colors.onPrimary,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
                   ),
                 ),
               ),
@@ -291,12 +297,16 @@ class _PropertyComparisonCard extends StatelessWidget {
                     width: 28,
                     height: 28,
                     decoration: BoxDecoration(
-                      color: Colors.red.withValues(alpha: 0.9),
+                        color: context.colors.error.withValues(alpha: 0.9),
                       borderRadius: BorderRadius.circular(6),
                     ),
-                    child: const Center(
-                      child: Icon(Icons.close, size: 16, color: Colors.white),
-                    ),
+                      child: Center(
+                        child: Icon(
+                          Icons.close,
+                          size: 16,
+                          color: context.colors.onError,
+                        ),
+                      ),
                   ),
                 ),
               ),
@@ -343,15 +353,30 @@ class _DetailedComparisonRows extends StatelessWidget {
    @override
    Widget build(BuildContext context) {
      final rows = [
-       (
-         'Address',
-         properties.map((p) => _fullAddressForComparison(p)).toList(),
-       ),
-       ('Type', properties.map((p) => p.propertyType).toList()),
-       ('Rooms', properties.map((p) => p.roomType).toList()),
-       ('Furnishing', properties.map((p) => p.furnishing).toList()),
-       ('Owner', properties.map((p) => p.ownerName).toList()),
-       ('Availability', properties.map((p) => p.status).toList()),
+        (
+          context.l10n.compareLabelAddress,
+          properties.map((p) => _fullAddressForComparison(p)).toList(),
+        ),
+        (
+          context.l10n.compareLabelType,
+          properties.map((p) => p.propertyType).toList(),
+        ),
+        (
+          context.l10n.compareLabelRooms,
+          properties.map((p) => p.roomType).toList(),
+        ),
+        (
+          context.l10n.compareLabelFurnishing,
+          properties.map((p) => p.furnishing).toList(),
+        ),
+        (
+          context.l10n.compareLabelOwner,
+          properties.map((p) => p.ownerName).toList(),
+        ),
+        (
+          context.l10n.compareLabelAvailability,
+          properties.map((p) => p.status).toList(),
+        ),
      ];
 
     return Column(
@@ -362,7 +387,8 @@ class _DetailedComparisonRows extends StatelessWidget {
             (entry) => _ComparisonRow(
               label: entry.value.$1,
               values: entry.value.$2,
-              truncateValues: entry.value.$1 != 'Address',
+              truncateValues:
+                  entry.value.$1 != context.l10n.compareLabelAddress,
             ),
           )
           .toList(),

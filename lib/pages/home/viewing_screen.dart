@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
+import 'package:homeu/core/localization/homeu_l10n.dart';
 import 'package:homeu/core/theme/homeu_app_theme.dart';
-import 'package:homeu/app/viewing/viewing_local_datasource.dart';
 import 'package:homeu/app/viewing/viewing_models.dart';
 import 'package:homeu/app/viewing/viewing_remote_datasource.dart';
 import 'package:homeu/core/supabase/app_supabase.dart';
@@ -88,12 +88,15 @@ class _HomeUViewingScreenState extends State<HomeUViewingScreen> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: context.colors.surface,
       appBar: AppBar(
-        title: const Text('Schedule Viewing', style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.white,
+        title: Text(
+          context.l10n.viewingScheduleTitle,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: context.colors.surface,
         elevation: 0,
-        foregroundColor: const Color(0xFF0F172A),
+        foregroundColor: context.colors.onSurface,
       ),
       bottomNavigationBar: _buildBottomBar(),
       body: _isLoading 
@@ -112,14 +115,18 @@ class _HomeUViewingScreenState extends State<HomeUViewingScreen> {
         children: [
           _buildPropertyPreview(),
           const SizedBox(height: 24),
-          const Text(
-            'Select an Available Slot',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+          Text(
+            context.l10n.viewingSelectSlotTitle,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: context.homeuPrimaryText,
+            ),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Owners only display slots they are available for. Select one to proceed.',
-            style: TextStyle(fontSize: 13, color: Color(0xFF64748B)),
+          Text(
+            context.l10n.viewingSelectSlotSubtitle,
+            style: TextStyle(fontSize: 13, color: context.homeuMutedText),
           ),
           const SizedBox(height: 16),
           ListView.builder(
@@ -139,10 +146,14 @@ class _HomeUViewingScreenState extends State<HomeUViewingScreen> {
                   child: Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: isSelected ? const Color(0xFFEFF6FF) : Colors.white,
+                        color: isSelected
+                            ? context.homeuAccent.withValues(alpha: 0.12)
+                            : context.homeuCard,
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(
-                        color: isSelected ? const Color(0xFF3B82F6) : const Color(0xFFE2E8F0),
+                        color: isSelected
+                            ? context.homeuAccent
+                            : context.homeuSoftBorder,
                         width: isSelected ? 2 : 1,
                       ),
                     ),
@@ -151,13 +162,17 @@ class _HomeUViewingScreenState extends State<HomeUViewingScreen> {
                         Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: isSelected ? const Color(0xFF3B82F6) : const Color(0xFFF1F5F9),
+                            color: isSelected
+                                ? context.homeuAccent
+                                : context.colors.surfaceContainerHighest,
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
                             Icons.calendar_today_rounded,
                             size: 18,
-                            color: isSelected ? Colors.white : const Color(0xFF64748B),
+                            color: isSelected
+                                ? context.colors.onPrimary
+                                : context.homeuMutedText,
                           ),
                         ),
                         const SizedBox(width: 16),
@@ -166,17 +181,27 @@ class _HomeUViewingScreenState extends State<HomeUViewingScreen> {
                           children: [
                             Text(
                               DateFormat('EEEE, MMM d').format(startTime),
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                                color: context.homeuPrimaryText,
+                              ),
                             ),
                             Text(
                               DateFormat('h:mm a').format(startTime),
-                              style: const TextStyle(color: Color(0xFF64748B), fontSize: 13),
+                              style: TextStyle(
+                                color: context.homeuMutedText,
+                                fontSize: 13,
+                              ),
                             ),
                           ],
                         ),
                         const Spacer(),
                         if (isSelected)
-                          const Icon(Icons.check_circle, color: Color(0xFF3B82F6)),
+                          Icon(
+                            Icons.check_circle,
+                            color: context.homeuAccent,
+                          ),
                       ],
                     ),
                   ),
@@ -193,25 +218,46 @@ class _HomeUViewingScreenState extends State<HomeUViewingScreen> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.homeuCard,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: context.homeuSoftBorder),
       ),
       child: Row(
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
             child: widget.property.imageUrls.isNotEmpty 
-              ? Image.network(widget.property.imageUrls[0], width: 60, height: 60, fit: BoxFit.cover)
-              : Container(width: 60, height: 60, color: const Color(0xFFF1F5F9)),
+              ? Image.network(
+                  widget.property.imageUrls[0],
+                  width: 60,
+                  height: 60,
+                  fit: BoxFit.cover,
+                )
+              : Container(
+                  width: 60,
+                  height: 60,
+                  color: context.colors.surfaceContainerHighest,
+                ),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(widget.property.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                Text(widget.property.location, style: const TextStyle(fontSize: 12, color: Color(0xFF64748B))),
+                Text(
+                  widget.property.name,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: context.homeuPrimaryText,
+                  ),
+                ),
+                Text(
+                  widget.property.location,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: context.homeuMutedText,
+                  ),
+                ),
               ],
             ),
           ),
@@ -227,20 +273,31 @@ class _HomeUViewingScreenState extends State<HomeUViewingScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.event_busy_rounded, size: 64, color: Color(0xFFCBD5E1)),
+            Icon(
+              Icons.event_busy_rounded,
+              size: 64,
+              color: context.homeuMutedText,
+            ),
             const SizedBox(height: 16),
-            const Text(
-              'No Available Slots',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            Text(
+              context.l10n.viewingNoSlotsTitle,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: context.homeuPrimaryText,
+              ),
             ),
             const SizedBox(height: 8),
-            const Text(
-              'The owner has not listed any availability for this property yet. Please check back later or contact the owner.',
+            Text(
+              context.l10n.viewingNoSlotsSubtitle,
               textAlign: TextAlign.center,
-              style: TextStyle(color: Color(0xFF64748B)),
+              style: TextStyle(color: context.homeuMutedText),
             ),
             const SizedBox(height: 24),
-            TextButton(onPressed: () => Navigator.pop(context), child: const Text('Go Back')),
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(context.l10n.viewingGoBack),
+            ),
           ],
         ),
       ),
@@ -256,14 +313,24 @@ class _HomeUViewingScreenState extends State<HomeUViewingScreen> {
           child: ElevatedButton(
             onPressed: (_isSubmitting || _selectedSlot == null) ? null : _confirmViewing,
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF1E3A8A),
-              foregroundColor: Colors.white,
+              backgroundColor: context.homeuAccent,
+              foregroundColor: context.colors.onPrimary,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              disabledBackgroundColor: const Color(0xFFE2E8F0),
+              disabledBackgroundColor:
+                  context.colors.surfaceContainerHighest,
             ),
             child: _isSubmitting
-                ? const CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
-                : const Text('Confirm Request', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                ? CircularProgressIndicator(
+                    color: context.colors.onPrimary,
+                    strokeWidth: 2,
+                  )
+                : Text(
+                    context.l10n.viewingConfirmRequest,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
           ),
         ),
       ),
@@ -296,7 +363,7 @@ class _HomeUViewingScreenState extends State<HomeUViewingScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: const Text('You have already scheduled a viewing for this time slot. Please check your Requests.'),
+              content: Text(context.l10n.viewingAlreadyScheduled),
               backgroundColor: context.homeuAccent,
             ),
           );
@@ -319,11 +386,17 @@ class _HomeUViewingScreenState extends State<HomeUViewingScreen> {
 
       await _viewingRemoteDataSource.createViewingRequest(request);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Request Sent!')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.viewingRequestSent)),
+        );
         Navigator.pop(context, true);
       }
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.viewingErrorWithMessage('$e'))),
+        );
+      }
     } finally {
       if (mounted) setState(() => _isSubmitting = false);
     }

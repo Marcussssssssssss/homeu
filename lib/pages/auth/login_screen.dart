@@ -97,7 +97,7 @@ class _HomeULoginScreenState extends State<HomeULoginScreen> {
 
     final success = await BiometricAuthService.instance
         .authenticateWithBiometrics(
-          localizedReason: 'Authenticate to access HomeU',
+          localizedReason: context.l10n.loginBiometricReason,
         );
 
     if (success && mounted) {
@@ -113,10 +113,8 @@ class _HomeULoginScreenState extends State<HomeULoginScreen> {
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Session expired. Please login with email and password.',
-          ),
+        SnackBar(
+          content: Text(context.l10n.loginSessionExpired),
         ),
       );
       setState(() {
@@ -125,8 +123,8 @@ class _HomeULoginScreenState extends State<HomeULoginScreen> {
       });
     } else if (!success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Biometric authentication failed or cancelled.'),
+        SnackBar(
+          content: Text(context.l10n.loginBiometricFailed),
         ),
       );
     }
@@ -302,7 +300,7 @@ class _HomeULoginScreenState extends State<HomeULoginScreen> {
                                 horizontal: 16,
                               ),
                               child: Text(
-                                'OR',
+                                t.loginDividerOr,
                                 style: TextStyle(
                                   color: context.homeuMutedText,
                                   fontSize: 12,
@@ -369,7 +367,7 @@ class _HomeULoginScreenState extends State<HomeULoginScreen> {
                           onPressed: _isLoading ? null : _handleLogin,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: context.homeuAccent,
-                            foregroundColor: Colors.white,
+                            foregroundColor: context.colors.onPrimary,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16),
                             ),
@@ -379,13 +377,13 @@ class _HomeULoginScreenState extends State<HomeULoginScreen> {
                             ),
                           ),
                           child: _isLoading
-                              ? const SizedBox(
+                              ? SizedBox(
                                   width: 22,
                                   height: 22,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2.4,
                                     valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.white,
+                                      context.colors.onPrimary,
                                     ),
                                   ),
                                 )
@@ -456,7 +454,7 @@ class _QuickLoginCard extends StatelessWidget {
       child: Column(
         children: [
           Text(
-            'Continue as $name',
+            context.l10n.loginContinueAs(name),
             style: TextStyle(
               color: context.homeuPrimaryText,
               fontSize: 16,
@@ -470,10 +468,10 @@ class _QuickLoginCard extends StatelessWidget {
             child: ElevatedButton.icon(
               onPressed: onPressed,
               icon: const Icon(Icons.fingerprint_rounded),
-              label: const Text('Use Biometrics'),
+              label: Text(context.l10n.loginUseBiometrics),
               style: ElevatedButton.styleFrom(
                 backgroundColor: context.homeuAccent,
-                foregroundColor: Colors.white,
+                foregroundColor: context.colors.onPrimary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),

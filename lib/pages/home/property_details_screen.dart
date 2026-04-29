@@ -7,6 +7,7 @@ import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
 import 'package:homeu/app/favorites/homeu_favorites_controller.dart';
 import 'package:homeu/app/profile/profile_models.dart';
+import 'package:homeu/core/localization/homeu_l10n.dart';
 import 'package:homeu/core/theme/homeu_app_theme.dart';
 import 'package:homeu/pages/home/booking_screen.dart';
 import 'package:homeu/pages/home/chat_screen.dart';
@@ -74,11 +75,13 @@ class _HomeUPropertyDetailsScreenState
   }
 
   String _normalizedAvailabilityStatus(PropertyItem property) {
-    final status = property.status.trim();
-    if (status.isEmpty) {
-      return 'Active';
+    final status = property.status.trim().toLowerCase();
+    if (status == 'occupied') {
+      return context.l10n.propertyStatusOccupied;
+    } else if (status == 'inactive') {
+      return context.l10n.propertyStatusInactive;
     }
-    return '${status[0].toUpperCase()}${status.substring(1).toLowerCase()}';
+    return context.l10n.propertyStatusActive;
   }
 
   bool _isBookNowAvailable(PropertyItem property) {
@@ -172,7 +175,7 @@ class _HomeUPropertyDetailsScreenState
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: isError ? null : Colors.green,
+        backgroundColor: isError ? context.colors.error : context.homeuSuccess,
       ),
     );
   }
@@ -180,37 +183,40 @@ class _HomeUPropertyDetailsScreenState
   String _resolveReportSubmitErrorMessage(PostgrestException error) {
     switch (error.code) {
       case '42501':
-        return 'Unable to submit report due to permission policy. Please contact support.';
+        return context.l10n.propertyReportErrorPermission;
       case '23503':
-        return 'Unable to submit report because the listing reference is invalid.';
+        return context.l10n.propertyReportErrorInvalidListing;
       case '22P02':
-        return 'Unable to submit report because the listing data is invalid.';
+        return context.l10n.propertyReportErrorInvalidData;
       default:
-        return 'Failed to submit report. Please try again later.';
+        return context.l10n.propertyReportSubmitFailed;
     }
   }
 
   Future<void> _showReportBottomSheet() async {
     final currentUserId = HomeUAuthService.instance.currentUserId;
     if (currentUserId == null) {
-      _showReportMessage('Please log in to submit a report.', isError: true);
+      _showReportMessage(context.l10n.propertyReportLoginRequired, isError: true);
       return;
     }
     if (HomeUSession.loggedInRole != HomeURole.tenant) {
       _showReportMessage(
-        'Only tenants can submit property reports.',
+        context.l10n.propertyReportTenantOnly,
         isError: true,
       );
       return;
     }
     if (currentUserId == widget.property.ownerId) {
-      _showReportMessage('You cannot report your own property.', isError: true);
+      _showReportMessage(
+        context.l10n.propertyReportOwnProperty,
+        isError: true,
+      );
       return;
     }
     if (!_isValidUuid(widget.property.id) ||
         !_isValidUuid(widget.property.ownerId)) {
       _showReportMessage(
-        'This property is missing required reporting data. Please try another listing.',
+        context.l10n.propertyReportInvalidMetadata,
         isError: true,
       );
       return;
@@ -218,11 +224,11 @@ class _HomeUPropertyDetailsScreenState
 
     String? selectedReason;
     final reasons = [
-      'Fake or misleading advertisement',
-      'Suspicious owner',
-      'Wrong property details',
-      'Inappropriate content',
-      'Other',
+      context.l10n.propertyReportReasonFake,
+      context.l10n.propertyReportReasonSuspicious,
+      context.l10n.propertyReportReasonWrongDetails,
+      context.l10n.propertyReportReasonInappropriate,
+      context.l10n.propertyReportReasonOther,
     ];
     final descriptionController = TextEditingController();
 
@@ -263,7 +269,7 @@ class _HomeUPropertyDetailsScreenState
                     ),
                     const SizedBox(height: 20),
                     Text(
-                      'Report Listing',
+                      context.l10n.propertyReportTitle,
                       style: TextStyle(
                         color: context.homeuPrimaryText,
                         fontSize: 20,
@@ -272,7 +278,7 @@ class _HomeUPropertyDetailsScreenState
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      'Please select a reason for reporting this property.',
+                      context.l10n.propertyReportSubtitle,
                       style: TextStyle(
                         color: context.homeuMutedText,
                         fontSize: 14,
@@ -311,7 +317,7 @@ class _HomeUPropertyDetailsScreenState
                       controller: descriptionController,
                       maxLines: 3,
                       decoration: InputDecoration(
-                        hintText: 'Describe the issue (optional)',
+                        hintText: context.l10n.propertyReportDescriptionHint,
                         filled: true,
                         fillColor: context.homeuRaisedCard,
                         border: OutlineInputBorder(
@@ -340,7 +346,7 @@ class _HomeUPropertyDetailsScreenState
                               ),
                               padding: const EdgeInsets.symmetric(vertical: 14),
                             ),
-                            child: const Text('Cancel'),
+                            child: Text(context.l10n.propertyReportCancel),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -356,14 +362,16 @@ class _HomeUPropertyDetailsScreenState
                                     await _submitReport(reason, desc);
                                   },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFEF4444),
-                              foregroundColor: Colors.white,
+                              backgroundColor: context.colors.error,
+                              foregroundColor: context.colors.onError,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               padding: const EdgeInsets.symmetric(vertical: 14),
                             ),
-                            child: const Text('Submit Report'),
+                            child: Text(
+                              context.l10n.propertyReportSubmit,
+                            ),
                           ),
                         ),
                       ],
@@ -382,7 +390,7 @@ class _HomeUPropertyDetailsScreenState
     try {
       if (!AppSupabase.isInitialized) {
         _showReportMessage(
-          'Reporting service is not available right now.',
+          context.l10n.propertyReportServiceUnavailable,
           isError: true,
         );
         return;
@@ -392,13 +400,16 @@ class _HomeUPropertyDetailsScreenState
       final currentUserId = currentUser?.id;
       final currentUserEmail = currentUser?.email;
       if (currentUserId == null) {
-        _showReportMessage('Please log in to submit a report.', isError: true);
+        _showReportMessage(
+          context.l10n.propertyReportLoginRequired,
+          isError: true,
+        );
         return;
       }
 
       if (HomeUSession.loggedInRole != HomeURole.tenant) {
         _showReportMessage(
-          'Only tenants can submit property reports.',
+          context.l10n.propertyReportTenantOnly,
           isError: true,
         );
         return;
@@ -406,7 +417,7 @@ class _HomeUPropertyDetailsScreenState
 
       if (currentUserId == widget.property.ownerId) {
         _showReportMessage(
-          'You cannot report your own property.',
+          context.l10n.propertyReportOwnProperty,
           isError: true,
         );
         return;
@@ -415,7 +426,7 @@ class _HomeUPropertyDetailsScreenState
       if (!_isValidUuid(widget.property.id) ||
           !_isValidUuid(widget.property.ownerId)) {
         _showReportMessage(
-          'Unable to submit report because listing metadata is invalid.',
+          context.l10n.propertyReportInvalidMetadata,
           isError: true,
         );
         return;
@@ -435,7 +446,7 @@ class _HomeUPropertyDetailsScreenState
         'status': 'pending',
       });
 
-      _showReportMessage('Report submitted. Our admin team will review it.');
+      _showReportMessage(context.l10n.propertyReportSubmitted);
     } on PostgrestException catch (e) {
       debugPrint(
         'Property report insert failed. '
@@ -446,7 +457,7 @@ class _HomeUPropertyDetailsScreenState
       debugPrint('Property report insert unexpected error: $e');
       debugPrint('$stackTrace');
       _showReportMessage(
-        'Failed to submit report. Please try again later.',
+        context.l10n.propertyReportSubmitFailed,
         isError: true,
       );
     }
@@ -486,7 +497,7 @@ class _HomeUPropertyDetailsScreenState
               icon: const Icon(Icons.arrow_back_ios_new_rounded),
             ),
             title: Text(
-              'Property Details',
+              context.l10n.propertyDetailsTitle,
               style: TextStyle(
                 color: context.homeuPrimaryText,
                 fontSize: 18,
@@ -504,17 +515,17 @@ class _HomeUPropertyDetailsScreenState
                     }
                   },
                   itemBuilder: (context) => [
-                    const PopupMenuItem(
+                      PopupMenuItem(
                       value: 'report',
                       child: Row(
                         children: [
                           Icon(
                             Icons.report_gmailerrorred_rounded,
                             size: 20,
-                            color: Colors.redAccent,
+                              color: context.colors.error,
                           ),
-                          SizedBox(width: 8),
-                          Text('Report Listing'),
+                          const SizedBox(width: 8),
+                            Text(context.l10n.propertyReportTitle),
                         ],
                       ),
                     ),
@@ -547,15 +558,15 @@ class _HomeUPropertyDetailsScreenState
                                 }
                               : null,
                           style: OutlinedButton.styleFrom(
-                            side: const BorderSide(color: Color(0xFF1E3A8A)),
+                            side: BorderSide(color: context.homeuAccent),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(14),
                             ),
                           ),
-                          child: const Text(
-                            'Schedule Viewing',
+                          child: Text(
+                            context.l10n.viewingScheduleTitle,
                             style: TextStyle(
-                              color: Color(0xFF1E3A8A),
+                              color: context.homeuAccent,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -579,8 +590,8 @@ class _HomeUPropertyDetailsScreenState
                                 }
                               : null,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF1E3A8A),
-                            foregroundColor: Colors.white,
+                            backgroundColor: context.homeuAccent,
+                            foregroundColor: context.colors.onPrimary,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16),
                             ),
@@ -589,15 +600,15 @@ class _HomeUPropertyDetailsScreenState
                               fontWeight: FontWeight.w700,
                             ),
                           ),
-                          child: const Text('Book Now'),
+                          child: Text(context.l10n.bookingBookNow),
                         ),
                       ),
                       if (!canBookNow) ...[
                         const SizedBox(height: 8),
                         Text(
                           ownerRestricted
-                              ? 'This listing is currently unavailable due to admin review.'
-                              : 'This property is currently not available for booking.',
+                              ? context.l10n.propertyUnavailableAdmin
+                              : context.l10n.propertyUnavailableBooking,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: context.homeuMutedText,
@@ -661,9 +672,10 @@ class _HomeUPropertyDetailsScreenState
                                               .requiresLogin:
                                             ScaffoldMessenger.of(context)
                                                 .showSnackBar(
-                                              const SnackBar(
+                                              SnackBar(
                                                 content: Text(
-                                                  'Please login to save favourites.',
+                                                  context.l10n
+                                                      .propertyFavoriteLoginRequired,
                                                 ),
                                               ),
                                             );
@@ -672,9 +684,10 @@ class _HomeUPropertyDetailsScreenState
                                               .requiresTenant:
                                             ScaffoldMessenger.of(context)
                                                 .showSnackBar(
-                                              const SnackBar(
+                                              SnackBar(
                                                 content: Text(
-                                                  'Favourites are only available for tenants.',
+                                                  context.l10n
+                                                      .propertyFavoriteTenantOnly,
                                                 ),
                                               ),
                                             );
@@ -683,9 +696,10 @@ class _HomeUPropertyDetailsScreenState
                                               .policyBlocked:
                                             ScaffoldMessenger.of(context)
                                                 .showSnackBar(
-                                              const SnackBar(
+                                              SnackBar(
                                                 content: Text(
-                                                  'Favourites are blocked by Supabase RLS. Run favourites_rls.sql in Supabase.',
+                                                  context.l10n
+                                                      .propertyFavoritePolicyBlocked,
                                                 ),
                                               ),
                                             );
@@ -694,9 +708,10 @@ class _HomeUPropertyDetailsScreenState
                                               .failed:
                                             ScaffoldMessenger.of(context)
                                                 .showSnackBar(
-                                              const SnackBar(
+                                              SnackBar(
                                                 content: Text(
-                                                  'Unable to update favourite. Please try again.',
+                                                  context.l10n
+                                                      .propertyFavoriteUpdateFailed,
                                                 ),
                                               ),
                                             );
@@ -708,7 +723,7 @@ class _HomeUPropertyDetailsScreenState
                                       ? Icons.favorite_rounded
                                       : Icons.favorite_border_rounded,
                                   color: isFavorited
-                                      ? Colors.red
+                                      ? context.colors.error
                                       : context.homeuMutedText,
                                 ),
                               ),
@@ -728,15 +743,15 @@ class _HomeUPropertyDetailsScreenState
                       const SizedBox(width: 12),
                       if (property.hasHighRiskReport)
                         _ModerationTag(
-                          label: 'High Risk Report',
-                          color: const Color(0xFFDC2626),
+                          label: context.l10n.propertyHighRiskTag,
+                          color: context.colors.error,
                           icon: Icons.warning_rounded,
                         ),
                     ],
                   ),
                   const SizedBox(height: 18),
                   Text(
-                    'Location',
+                    context.l10n.propertyLocationTitle,
                     style: TextStyle(
                       color: context.homeuPrimaryText,
                       fontSize: 16,
@@ -768,18 +783,18 @@ class _HomeUPropertyDetailsScreenState
                               height: 64,
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(12),
-                                gradient: const LinearGradient(
+                                gradient: LinearGradient(
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
                                   colors: [
-                                    Color(0xFFE7F0FF),
-                                    Color(0xFFDDF4EA),
+                                    context.colors.surfaceContainerHighest,
+                                    context.colors.surfaceContainerHigh,
                                   ],
                                 ),
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.location_city_rounded,
-                                color: Color(0xFF1E3A8A),
+                                color: context.homeuAccent,
                               ),
                             ),
                             const SizedBox(width: 12),
@@ -796,14 +811,16 @@ class _HomeUPropertyDetailsScreenState
                                     ),
                                   ),
                                   const SizedBox(height: 4),
-                                  Text(
-                                    'Nearby: ${property.nearbyLandmarks}',
-                                    style: TextStyle(
-                                      color: context.homeuMutedText,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w500,
+                                    Text(
+                                      context.l10n.propertyNearbyLabel(
+                                        property.nearbyLandmarks,
+                                      ),
+                                      style: TextStyle(
+                                        color: context.homeuMutedText,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                     ),
-                                  ),
                                 ],
                               ),
                             ),
@@ -815,7 +832,7 @@ class _HomeUPropertyDetailsScreenState
                   ),
                    const SizedBox(height: 18),
                    Text(
-                     'Description',
+                     context.l10n.propertyDescriptionTitle,
                      style: TextStyle(
                        color: context.homeuPrimaryText,
                        fontSize: 16,
@@ -834,7 +851,7 @@ class _HomeUPropertyDetailsScreenState
                   ),
                   const SizedBox(height: 18),
                   Text(
-                    'Facilities',
+                    context.l10n.propertyFacilitiesTitle,
                     style: TextStyle(
                       color: context.homeuPrimaryText,
                       fontSize: 16,
@@ -844,7 +861,7 @@ class _HomeUPropertyDetailsScreenState
                   const SizedBox(height: 10),
                   if (property.facilities.isEmpty)
                     Text(
-                      'No facilities listed.',
+                      context.l10n.propertyNoFacilities,
                       style: TextStyle(
                         color: context.homeuMutedText,
                         fontSize: 13,
@@ -864,7 +881,7 @@ class _HomeUPropertyDetailsScreenState
                   const SizedBox(height: 18),
                   if (!isOwner) ...[
                     Text(
-                      'Owner Information',
+                      context.l10n.propertyOwnerInfoTitle,
                       style: TextStyle(
                         color: context.homeuPrimaryText,
                         fontSize: 16,
@@ -998,8 +1015,8 @@ class _HomeUPropertyDetailsScreenState
                                               _ModerationTag(
                                                 label: ownerRiskStatus ==
                                                         HomeURiskStatus.highRisk
-                                                    ? 'High Risk'
-                                                    : 'Suspicious Owner',
+                                                    ? context.l10n.propertyOwnerHighRisk
+                                                    : context.l10n.propertyOwnerSuspicious,
                                                 color: ownerRiskStatus ==
                                                         HomeURiskStatus.highRisk
                                                     ? const Color(0xFFDC2626)
@@ -1010,8 +1027,8 @@ class _HomeUPropertyDetailsScreenState
                                               _ModerationTag(
                                                 label: ownerAccountStatus ==
                                                         HomeUAccountStatus.suspended
-                                                    ? 'Suspended'
-                                                    : 'Removed',
+                                                    ? context.l10n.propertyOwnerSuspended
+                                                    : context.l10n.propertyOwnerRemoved,
                                                 color: const Color(0xFF6B7280),
                                               ),
                                           ],
@@ -1033,7 +1050,7 @@ class _HomeUPropertyDetailsScreenState
                   ],
                   const SizedBox(height: 18),
                   Text(
-                    'Availability',
+                    context.l10n.propertyAvailabilityTitle,
                     style: TextStyle(
                       color: context.homeuPrimaryText,
                       fontSize: 16,
@@ -1057,7 +1074,7 @@ class _HomeUPropertyDetailsScreenState
                     child: Row(
                       children: [
                         Text(
-                          'Availability:',
+                          context.l10n.propertyAvailabilityLabel,
                           style: TextStyle(
                             color: context.homeuMutedText,
                             fontSize: 13,

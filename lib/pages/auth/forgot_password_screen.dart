@@ -193,9 +193,7 @@ class _HomeUForgotPasswordPageState extends State<HomeUForgotPasswordPage> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: context.isDarkMode
-                              ? const Color(0xFF11211D)
-                              : const Color(0xFFF2F9F6),
+                          color: context.homeuRaisedCard,
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
                             color: context.homeuSuccess.withValues(alpha: 0.35),
@@ -204,17 +202,17 @@ class _HomeUForgotPasswordPageState extends State<HomeUForgotPasswordPage> {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.verified_user_outlined,
-                              color: Color(0xFF10B981),
+                              color: context.homeuSuccess,
                               size: 20,
                             ),
                             const SizedBox(width: 10),
                             Expanded(
                               child: Text(
                                 t.forgotPasswordEmailNote,
-                                style: const TextStyle(
-                                  color: Color(0xFF2B4B42),
+                                style: TextStyle(
+                                  color: context.homeuMutedText,
                                   fontSize: 12.5,
                                   height: 1.4,
                                   fontWeight: FontWeight.w500,
@@ -280,7 +278,7 @@ class _HomeUForgotPasswordPageState extends State<HomeUForgotPasswordPage> {
                             onPressed: _isLoading ? null : _sendResetLink,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: context.homeuAccent,
-                              foregroundColor: Colors.white,
+                              foregroundColor: context.colors.onPrimary,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
                               ),
@@ -290,13 +288,13 @@ class _HomeUForgotPasswordPageState extends State<HomeUForgotPasswordPage> {
                               ),
                             ),
                             child: _isLoading
-                                ? const SizedBox(
+                                ? SizedBox(
                                     width: 22,
                                     height: 22,
                                     child: CircularProgressIndicator(
                                       strokeWidth: 2.4,
                                       valueColor: AlwaysStoppedAnimation<Color>(
-                                        Colors.white,
+                                        context.colors.onPrimary,
                                       ),
                                     ),
                                   )
@@ -344,15 +342,16 @@ class _HomeUForgotPasswordPageState extends State<HomeUForgotPasswordPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              const Center(
+                              Center(
                                 child: CircleAvatar(
-                                  key: Key('forgot_password_success_icon'),
+                                  key: const Key('forgot_password_success_icon'),
                                   radius: 30,
-                                  backgroundColor: Color(0x1A10B981),
+                                  backgroundColor:
+                                      context.homeuSuccess.withValues(alpha: 0.16),
                                   child: Icon(
                                     Icons.mark_email_read_rounded,
                                     size: 30,
-                                    color: Color(0xFF10B981),
+                                    color: context.homeuSuccess,
                                   ),
                                 ),
                               ),
@@ -360,8 +359,8 @@ class _HomeUForgotPasswordPageState extends State<HomeUForgotPasswordPage> {
                               Text(
                                 t.forgotPasswordCheckEmail,
                                 textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                  color: Color(0xFF1E3A8A),
+                                style: TextStyle(
+                                  color: context.homeuAccent,
                                   fontSize: 22,
                                   fontWeight: FontWeight.w700,
                                 ),
@@ -396,7 +395,7 @@ class _HomeUForgotPasswordPageState extends State<HomeUForgotPasswordPage> {
                                   onPressed: () => Navigator.of(context).pop(),
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: context.homeuAccent,
-                                    foregroundColor: Colors.white,
+                                    foregroundColor: context.colors.onPrimary,
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(14),
                                     ),

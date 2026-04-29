@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:homeu/core/supabase/app_supabase.dart';
+import 'package:homeu/core/localization/homeu_l10n.dart';
+import 'package:homeu/core/theme/homeu_app_theme.dart';
 
 import '../../app/property/my_properties/my_properties_models.dart';
 
@@ -162,13 +165,17 @@ class _HomeUOwnerViewingAvailabilityScreenState extends State<HomeUOwnerViewingA
     );
 
     if (endDateTime.isBefore(startDateTime) || endDateTime.isAtSameMomentAs(startDateTime)) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('End time must be after start time.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.ownerAvailabilityEndAfterStart)),
+      );
       return;
     }
     final now = DateTime.now();
     final nowWall = DateTime.utc(now.year, now.month, now.day, now.hour, now.minute);
     if (startDateTime.isBefore(nowWall)) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Cannot schedule in the past.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.ownerAvailabilityPastDate)),
+      );
       return;
     }
 
@@ -185,10 +192,10 @@ class _HomeUOwnerViewingAvailabilityScreenState extends State<HomeUOwnerViewingA
 
     if (hasOverlap) {
       ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('This time overlaps with an existing viewing slot.'),
-            backgroundColor: Colors.red,
-          )
+        SnackBar(
+          content: Text(context.l10n.ownerAvailabilityOverlap),
+          backgroundColor: context.colors.error,
+        ),
       );
       return;
     }
@@ -207,10 +214,14 @@ class _HomeUOwnerViewingAvailabilityScreenState extends State<HomeUOwnerViewingA
         'status': 'Available',
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Viewing slot added!')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.ownerAvailabilitySlotAdded)),
+      );
       await _fetchSlots();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to add slot.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.ownerAvailabilityAddFailed)),
+      );
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
@@ -221,33 +232,45 @@ class _HomeUOwnerViewingAvailabilityScreenState extends State<HomeUOwnerViewingA
       await AppSupabase.client.from('owner_availabilities').delete().eq('id', slotId);
       await _fetchSlots();
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Failed to delete slot.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.ownerAvailabilityDeleteFailed)),
+      );
     }
   }
 
-  String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year}';
+  String _formatDate(BuildContext context, DateTime date) {
+    final locale = Localizations.localeOf(context).toString();
+    return DateFormat.yMd(locale).format(date);
   }
   String _formatTime(TimeOfDay time) {
-    final hour = time.hour == 0 ? 12 : (time.hour > 12 ? time.hour - 12 : time.hour);
-    final period = time.hour >= 12 ? 'PM' : 'AM';
-    final minute = time.minute.toString().padLeft(2, '0');
-    return '$hour:$minute $period';
+    final now = DateTime.now();
+    final dateTime = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      time.hour,
+      time.minute,
+    );
+    final locale = Localizations.localeOf(context).toString();
+    return DateFormat.jm(locale).format(dateTime);
   }
   String _formatDateTimeString(String isoString) {
 
     final date = DateTime.parse(isoString);
     final time = TimeOfDay.fromDateTime(date);
-    return '${_formatDate(date)} at ${_formatTime(time)}';
+    return context.l10n.ownerAvailabilityDateTime(
+      _formatDate(context, date),
+      _formatTime(time),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F8FC),
+      backgroundColor: context.colors.surface,
       appBar: AppBar(
-        title: const Text('Manage Availability'),
-        backgroundColor: const Color(0xFFF6F8FC),
+        title: Text(context.l10n.ownerAvailabilityTitle),
+        backgroundColor: context.colors.surface,
         elevation: 0,
       ),
       body: Padding(
@@ -259,22 +282,44 @@ class _HomeUOwnerViewingAvailabilityScreenState extends State<HomeUOwnerViewingA
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: context.homeuCard,
                 borderRadius: BorderRadius.circular(16),
-                boxShadow: const [BoxShadow(color: Color(0x0A1E3A8A), blurRadius: 10, offset: Offset(0, 4))],
+                boxShadow: [
+                  BoxShadow(
+                    color: context.homeuCardShadow,
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Create New Slot', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF1F314F))),
+                  Text(
+                    context.l10n.ownerAvailabilityCreateSlot,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: context.homeuPrimaryText,
+                    ),
+                  ),
                   const SizedBox(height: 16),
 
                   // Date Picker
                   ListTile(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: Colors.grey.shade200)),
-                    leading: const Icon(Icons.calendar_month_rounded, color: Color(0xFF1E3A8A)),
-                    title: const Text('Select Date'),
-                    trailing: Text(_formatDate(_selectedDate), style: const TextStyle(fontWeight: FontWeight.bold)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: BorderSide(color: context.homeuSoftBorder),
+                    ),
+                    leading: Icon(
+                      Icons.calendar_month_rounded,
+                      color: context.homeuAccent,
+                    ),
+                    title: Text(context.l10n.ownerAvailabilitySelectDate),
+                    trailing: Text(
+                      _formatDate(context, _selectedDate),
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
                     onTap: () async {
                       final picked = await showDatePicker(
                         context: context,
@@ -293,9 +338,21 @@ class _HomeUOwnerViewingAvailabilityScreenState extends State<HomeUOwnerViewingA
                     children: [
                       Expanded(
                         child: ListTile(
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: Colors.grey.shade200)),
-                          title: const Text('Start Time', style: TextStyle(fontSize: 12)),
-                          subtitle: Text(_formatTime(_startTime), style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1F314F))),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: BorderSide(color: context.homeuSoftBorder),
+                          ),
+                          title: Text(
+                            context.l10n.ownerAvailabilityStartTime,
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                          subtitle: Text(
+                            _formatTime(_startTime),
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: context.homeuPrimaryText,
+                            ),
+                          ),
                           onTap: () async {
                             final picked = await showTimePicker(context: context, initialTime: _startTime);
                             if (picked != null) setState(() => _startTime = picked);
@@ -305,9 +362,21 @@ class _HomeUOwnerViewingAvailabilityScreenState extends State<HomeUOwnerViewingA
                       const SizedBox(width: 12),
                       Expanded(
                         child: ListTile(
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: BorderSide(color: Colors.grey.shade200)),
-                          title: const Text('End Time', style: TextStyle(fontSize: 12)),
-                          subtitle: Text(_formatTime(_endTime), style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1F314F))),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: BorderSide(color: context.homeuSoftBorder),
+                          ),
+                          title: Text(
+                            context.l10n.ownerAvailabilityEndTime,
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                          subtitle: Text(
+                            _formatTime(_endTime),
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: context.homeuPrimaryText,
+                            ),
+                          ),
                           onTap: () async {
                             final picked = await showTimePicker(context: context, initialTime: _endTime);
                             if (picked != null) setState(() => _endTime = picked);
@@ -323,14 +392,24 @@ class _HomeUOwnerViewingAvailabilityScreenState extends State<HomeUOwnerViewingA
                     child: ElevatedButton(
                       onPressed: _isSaving ? null : _addSlot,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF1E3A8A),
-                        foregroundColor: Colors.white,
+                        backgroundColor: context.homeuAccent,
+                        foregroundColor: context.colors.onPrimary,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                       child: _isSaving
-                          ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                          : const Text('Add Viewing Slot', style: TextStyle(fontWeight: FontWeight.bold)),
+                          ? SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                color: context.colors.onPrimary,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : Text(
+                              context.l10n.ownerAvailabilityAddSlot,
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                            ),
                     ),
                   )
                 ],
@@ -338,13 +417,29 @@ class _HomeUOwnerViewingAvailabilityScreenState extends State<HomeUOwnerViewingA
             ),
             const SizedBox(height: 24),
 
-            const Text('Your Active Slots', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF1F314F))),
+            Text(
+              context.l10n.ownerAvailabilityActiveSlots,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: context.homeuPrimaryText,
+              ),
+            ),
             const SizedBox(height: 12),
             Expanded(
               child: _isLoading
-                  ? const Center(child: CircularProgressIndicator(color: Color(0xFF1E3A8A)))
+                  ? Center(
+                      child: CircularProgressIndicator(
+                        color: context.homeuAccent,
+                      ),
+                    )
                   : _slots.isEmpty
-                  ? Center(child: Text('No viewing slots available.', style: TextStyle(color: Colors.grey.shade600)))
+                  ? Center(
+                      child: Text(
+                        context.l10n.ownerAvailabilityEmpty,
+                        style: TextStyle(color: context.homeuMutedText),
+                      ),
+                    )
                   : ListView.separated(
                 itemCount: _slots.length,
                 separatorBuilder: (_, __) => const SizedBox(height: 10),
@@ -354,27 +449,43 @@ class _HomeUOwnerViewingAvailabilityScreenState extends State<HomeUOwnerViewingA
 
                   return Container(
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: context.homeuCard,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: isBooked ? Colors.green.shade200 : Colors.grey.shade200),
+                      border: Border.all(
+                        color: isBooked
+                            ? context.homeuSuccess.withValues(alpha: 0.35)
+                            : context.homeuSoftBorder,
+                      ),
                     ),
                     child: ListTile(
                       leading: Icon(
                         isBooked ? Icons.check_circle_rounded : Icons.access_time_rounded,
-                        color: isBooked ? Colors.green : const Color(0xFF1E3A8A),
+                        color:
+                            isBooked ? context.homeuSuccess : context.homeuAccent,
                       ),
                       title: Text(
                         '${_formatDateTimeString(slot['start_time'])}',
                         style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
                       ),
                       subtitle: Text(
-                        isBooked ? 'Booked by Tenant' : 'Available',
-                        style: TextStyle(color: isBooked ? Colors.green : Colors.grey.shade600, fontWeight: isBooked ? FontWeight.bold : FontWeight.normal),
+                        isBooked
+                            ? context.l10n.ownerAvailabilityBooked
+                            : context.l10n.ownerAvailabilityAvailable,
+                        style: TextStyle(
+                          color: isBooked
+                              ? context.homeuSuccess
+                              : context.homeuMutedText,
+                          fontWeight:
+                              isBooked ? FontWeight.bold : FontWeight.normal,
+                        ),
                       ),
                       trailing: isBooked
                           ? null
                           : IconButton(
-                        icon: const Icon(Icons.delete_outline_rounded, color: Colors.red),
+                        icon: Icon(
+                          Icons.delete_outline_rounded,
+                          color: context.colors.error,
+                        ),
                         onPressed: () => _deleteSlot(slot['id']),
                       ),
                     ),

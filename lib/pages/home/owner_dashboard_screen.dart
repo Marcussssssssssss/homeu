@@ -7,6 +7,8 @@ import 'package:homeu/pages/home/owner_analytics_screen.dart';
 import 'package:homeu/pages/home/owner_bottom_navigation_bar.dart';
 import 'package:homeu/pages/home/conversation_list_screen.dart';
 import 'package:homeu/pages/home/profile_screen.dart';
+import 'package:homeu/core/localization/homeu_l10n.dart';
+import 'package:homeu/core/theme/homeu_app_theme.dart';
 
 import '../../app/property/booking_request/booking_request_models.dart';
 import '../../app/property/booking_request/booking_requests_controller.dart';
@@ -56,7 +58,7 @@ class _HomeUOwnerDashboardScreenState extends State<HomeUOwnerDashboardScreen> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F8FC),
+      backgroundColor: context.colors.surface,
       bottomNavigationBar: widget.showBottomNavigationBar
           ? HomeUOwnerBottomNavigationBar(
         selectedIndex: _selectedNavIndex,
@@ -90,12 +92,14 @@ class _HomeUOwnerDashboardScreenState extends State<HomeUOwnerDashboardScreen> {
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: _controller.loadDashboard,
-          color: const Color(0xFF1E3A8A),
+          color: context.homeuAccent,
           child: ListenableBuilder(
             listenable: _controller,
             builder: (context, _) {
               if (_controller.isLoading) {
-                return const Center(child: CircularProgressIndicator(color: Color(0xFF1E3A8A)));
+                return Center(
+                  child: CircularProgressIndicator(color: context.homeuAccent),
+                );
               }
 
               if (_controller.errorMessage != null) {
@@ -103,12 +107,16 @@ class _HomeUOwnerDashboardScreenState extends State<HomeUOwnerDashboardScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.error_outline, color: Colors.red, size: 40),
+                      Icon(
+                        Icons.error_outline,
+                        color: context.colors.error,
+                        size: 40,
+                      ),
                       const SizedBox(height: 16),
                       Text(_controller.errorMessage!),
                       TextButton(
                         onPressed: _controller.loadDashboard,
-                        child: const Text('Retry'),
+                        child: Text(context.l10n.ownerRequestsRetry),
                       ),
                     ],
                   ),
@@ -124,13 +132,21 @@ class _HomeUOwnerDashboardScreenState extends State<HomeUOwnerDashboardScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Hello, ${data.ownerName}',
-                      style: const TextStyle(color: Color(0xFF1E3A8A), fontSize: 28, fontWeight: FontWeight.w700),
+                      context.l10n.ownerGreeting(data.ownerName),
+                      style: TextStyle(
+                        color: context.homeuAccent,
+                        fontSize: 28,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                     const SizedBox(height: 6),
-                    const Text(
-                      'Manage listings, requests, and performance from one place.',
-                      style: TextStyle(color: Color(0xFF50617F), fontSize: 14, fontWeight: FontWeight.w500),
+                    Text(
+                      context.l10n.ownerDashboardSubtitle,
+                      style: TextStyle(
+                        color: context.homeuSecondaryText,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                     const SizedBox(height: 14),
                     SizedBox(
@@ -140,12 +156,12 @@ class _HomeUOwnerDashboardScreenState extends State<HomeUOwnerDashboardScreen> {
                           Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const HomeUOwnerAddPropertyScreen()));
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF1E3A8A),
-                          foregroundColor: Colors.white,
+                          backgroundColor: context.homeuAccent,
+                          foregroundColor: context.colors.onPrimary,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                         ),
                         icon: const Icon(Icons.add_business_rounded),
-                        label: const Text('Add Property'),
+                        label: Text(context.l10n.ownerAddProperty),
                       ),
                     ),
                     const SizedBox(height: 14),
@@ -153,9 +169,15 @@ class _HomeUOwnerDashboardScreenState extends State<HomeUOwnerDashboardScreen> {
                     Container(
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: context.homeuCard,
                         borderRadius: BorderRadius.circular(16),
-                        boxShadow: const [BoxShadow(color: Color(0x141E3A8A), blurRadius: 12, offset: Offset(0, 4))],
+                        boxShadow: [
+                          BoxShadow(
+                            color: context.homeuCardShadow,
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
                       child: Row(
                         children: [
@@ -163,34 +185,80 @@ class _HomeUOwnerDashboardScreenState extends State<HomeUOwnerDashboardScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text('Total Earnings', style: TextStyle(color: Color(0xFF667896), fontSize: 13, fontWeight: FontWeight.w600)),
+                                Text(
+                                  context.l10n.ownerMonthlyEarnings,
+                                  style: TextStyle(
+                                    color: context.homeuMutedText,
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                                 const SizedBox(height: 6),
                                 Text(
-                                  'RM ${data.totalEarnings.toStringAsFixed(0)}',
-                                  style: const TextStyle(color: Color(0xFF1E3A8A), fontSize: 30, fontWeight: FontWeight.w700),
+                                  context.l10n.paymentAmountRm(
+                                    data.totalEarnings.toStringAsFixed(0),
+                                  ),
+                                  style: TextStyle(
+                                    color: context.homeuAccent,
+                                    fontSize: 30,
+                                    fontWeight: FontWeight.w700,
+                                  ),
                                 ),
                               ],
                             ),
                           ),
-                          const Icon(Icons.trending_up_rounded, color: Color(0xFF10B981), size: 34),
+                          Icon(
+                            Icons.trending_up_rounded,
+                            color: context.homeuSuccess,
+                            size: 34,
+                          ),
                         ],
                       ),
                     ),
                     const SizedBox(height: 14),
-                    const Text('Quick Stats', style: TextStyle(color: Color(0xFF1F314F), fontSize: 16, fontWeight: FontWeight.w700)),
+                    Text(
+                      context.l10n.ownerQuickStats,
+                      style: TextStyle(
+                        color: context.homeuPrimaryText,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                     const SizedBox(height: 10),
 
                     Row(
                       children: [
-                        Expanded(child: _OwnerStatCard(label: 'Active Listings', value: '${data.activeListings}')),
+                        Expanded(
+                          child: _OwnerStatCard(
+                            label: context.l10n.ownerActiveListings,
+                            value: '${data.activeListings}',
+                          ),
+                        ),
                         const SizedBox(width: 8),
-                        Expanded(child: _OwnerStatCard(label: 'Pending Requests', value: '${data.pendingRequests}')),
+                        Expanded(
+                          child: _OwnerStatCard(
+                            label: context.l10n.ownerPendingRequests,
+                            value: '${data.pendingRequests}',
+                          ),
+                        ),
                         const SizedBox(width: 8),
-                        Expanded(child: _OwnerStatCard(label: 'Occupancy', value: data.occupancyRate)),
+                        Expanded(
+                          child: _OwnerStatCard(
+                            label: context.l10n.ownerOccupancy,
+                            value: data.occupancyRate,
+                          ),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 16),
-                    const Text('Recent Properties', style: TextStyle(color: Color(0xFF1F314F), fontSize: 16, fontWeight: FontWeight.w700)),
+                    Text(
+                      context.l10n.ownerRecentProperties,
+                      style: TextStyle(
+                        color: context.homeuPrimaryText,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                     const SizedBox(height: 10),
 
                     if (data.recentProperties.isEmpty)
@@ -198,19 +266,23 @@ class _HomeUOwnerDashboardScreenState extends State<HomeUOwnerDashboardScreen> {
                         width: double.infinity,
                         padding: const EdgeInsets.symmetric(vertical: 30),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: context.homeuCard,
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: const Color(0x1F1E3A8A)),
+                          border: Border.all(color: context.homeuSoftBorder),
                         ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.home_work_outlined, size: 48, color: Colors.grey.shade300),
+                            Icon(
+                              Icons.home_work_outlined,
+                              size: 48,
+                              color: context.homeuMutedText,
+                            ),
                             const SizedBox(height: 12),
-                            const Text(
-                              'No properties listed yet',
+                            Text(
+                              context.l10n.ownerNoProperties,
                               style: TextStyle(
-                                color: Color(0xFF667896),
+                                color: context.homeuMutedText,
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -221,9 +293,9 @@ class _HomeUOwnerDashboardScreenState extends State<HomeUOwnerDashboardScreen> {
                                 Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const HomeUOwnerAddPropertyScreen()));
                               },
                               icon: const Icon(Icons.add, size: 18),
-                              label: const Text('Add your first property'),
+                              label: Text(context.l10n.ownerAddFirstProperty),
                               style: TextButton.styleFrom(
-                                foregroundColor: const Color(0xFF1E3A8A),
+                                foregroundColor: context.homeuAccent,
                               ),
                             ),
                           ],
@@ -234,7 +306,9 @@ class _HomeUOwnerDashboardScreenState extends State<HomeUOwnerDashboardScreen> {
                         final propertyModel = OwnerPropertyModel.fromJson(prop);
 
                         return _OwnerPropertyCard(
-                          propertyName: propertyModel.title.isEmpty ? 'Untitled' : propertyModel.title,
+                          propertyName: propertyModel.title.isEmpty
+                              ? context.l10n.ownerUntitledProperty
+                              : propertyModel.title,
                           location: propertyModel.locationArea,
                           status: propertyModel.displayStatus,
                           onTap: () {
@@ -251,7 +325,14 @@ class _HomeUOwnerDashboardScreenState extends State<HomeUOwnerDashboardScreen> {
 
                     const SizedBox(height: 12),
 
-                    const Text('Recent Booking Requests', style: TextStyle(color: Color(0xFF1F314F), fontSize: 16, fontWeight: FontWeight.w700)),
+                    Text(
+                      context.l10n.ownerRecentBookingRequests,
+                      style: TextStyle(
+                        color: context.homeuPrimaryText,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                     const SizedBox(height: 10),
 
                     if (data.recentRequests.isEmpty)
@@ -259,18 +340,26 @@ class _HomeUOwnerDashboardScreenState extends State<HomeUOwnerDashboardScreen> {
                         width: double.infinity,
                         padding: const EdgeInsets.symmetric(vertical: 30),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: context.homeuCard,
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: const Color(0x1F1E3A8A)),
+                          border: Border.all(color: context.homeuSoftBorder),
                         ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.inbox_rounded, size: 48, color: Colors.grey.shade300),
+                            Icon(
+                              Icons.inbox_rounded,
+                              size: 48,
+                              color: context.homeuMutedText,
+                            ),
                             const SizedBox(height: 12),
-                            const Text(
-                              'No active booking requests',
-                              style: TextStyle(color: Color(0xFF667896), fontSize: 14, fontWeight: FontWeight.w500),
+                            Text(
+                              context.l10n.ownerNoBookingRequests,
+                              style: TextStyle(
+                                color: context.homeuMutedText,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ],
                         ),
@@ -288,15 +377,19 @@ class _HomeUOwnerDashboardScreenState extends State<HomeUOwnerDashboardScreen> {
                             propertyId: req['propertyId']?.toString() ?? '',
                             ownerId: req['ownerId']?.toString() ?? '',
                             tenantId: req['tenantId']?.toString() ?? '',
-                            propertyTitle: req['propertyName']?.toString() ?? 'Unknown Property',
+                            propertyTitle:
+                                req['propertyName']?.toString() ??
+                                context.l10n.ownerUnknownProperty,
                             monthlyPrice: req['monthlyPrice'] as num? ?? 0,
-                            tenantName: req['tenantName']?.toString() ?? 'Unknown Tenant',
+                            tenantName: req['tenantName']?.toString() ??
+                                context.l10n.ownerUnknownTenant,
                             tenantProfileUrl: req['profile_image_url'] as String?,
                             tenantPhone: req['tenantPhone']?.toString() ?? '',
                             tenantEmail: req['tenantEmail']?.toString() ?? '',
                             startDate: req['startDate'] as DateTime?,
                             durationMonths: req['durationMonths'] as int? ?? 1,
-                            status: req['status']?.toString() ?? 'Pending',
+                            status:
+                                req['status']?.toString() ?? 'Pending',
                           );
 
                           final bookingController = BookingRequestsController();
@@ -314,7 +407,14 @@ class _HomeUOwnerDashboardScreenState extends State<HomeUOwnerDashboardScreen> {
 
                     const SizedBox(height: 16),
 
-                    const Text('Recent Viewing Requests', style: TextStyle(color: Color(0xFF1F314F), fontSize: 16, fontWeight: FontWeight.w700)),
+                    Text(
+                      context.l10n.ownerRecentViewingRequests,
+                      style: TextStyle(
+                        color: context.homeuPrimaryText,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                     const SizedBox(height: 10),
 
                     if (data.recentViewingRequests.isEmpty)
@@ -322,18 +422,26 @@ class _HomeUOwnerDashboardScreenState extends State<HomeUOwnerDashboardScreen> {
                         width: double.infinity,
                         padding: const EdgeInsets.symmetric(vertical: 30),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: context.homeuCard,
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: const Color(0x1F1E3A8A)),
+                          border: Border.all(color: context.homeuSoftBorder),
                         ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.visibility_outlined, size: 48, color: Colors.grey.shade300),
+                            Icon(
+                              Icons.visibility_outlined,
+                              size: 48,
+                              color: context.homeuMutedText,
+                            ),
                             const SizedBox(height: 12),
-                            const Text(
-                              'No active viewing requests',
-                              style: TextStyle(color: Color(0xFF667896), fontSize: 14, fontWeight: FontWeight.w500),
+                            Text(
+                              context.l10n.ownerNoViewingRequests,
+                              style: TextStyle(
+                                color: context.homeuMutedText,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ],
                         ),
@@ -378,16 +486,16 @@ class _OwnerStatCard extends StatelessWidget {
       key: Key('owner_stat_$label'),
       padding: const EdgeInsets.symmetric(vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.homeuCard,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0x1F1E3A8A)),
+        border: Border.all(color: context.homeuSoftBorder),
       ),
       child: Column(
         children: [
           Text(
             value,
-            style: const TextStyle(
-              color: Color(0xFF1E3A8A),
+            style: TextStyle(
+              color: context.homeuAccent,
               fontSize: 16,
               fontWeight: FontWeight.w700,
             ),
@@ -396,8 +504,8 @@ class _OwnerStatCard extends StatelessWidget {
           Text(
             label,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Color(0xFF667896),
+            style: TextStyle(
+              color: context.homeuMutedText,
               fontSize: 11,
               fontWeight: FontWeight.w600,
             ),
@@ -427,20 +535,20 @@ class _OwnerPropertyCard extends StatelessWidget {
     Color statusBgColor;
 
     if (status == 'Draft') {
-      statusColor = Colors.orange.shade700;
-      statusBgColor = Colors.orange.shade50;
+      statusColor = context.colors.tertiary;
+      statusBgColor = context.colors.tertiary.withValues(alpha: 0.12);
     } else if (status == 'Booked') {
-      statusColor = Colors.teal.shade700;
-      statusBgColor = Colors.teal.shade50;
+      statusColor = context.homeuSuccess;
+      statusBgColor = context.homeuSuccess.withValues(alpha: 0.12);
     } else if (status == 'Expiring Soon') {
-      statusColor = Colors.amber.shade700;
-      statusBgColor = Colors.amber.shade50;
+      statusColor = context.colors.tertiary;
+      statusBgColor = context.colors.tertiary.withValues(alpha: 0.12);
     } else if (status == 'Occupied') {
-      statusColor = const Color(0xFF0F8A5F);
-      statusBgColor = const Color(0xFFE6F7EF);
+      statusColor = context.homeuSuccess;
+      statusBgColor = context.homeuSuccess.withValues(alpha: 0.12);
     } else {
-      statusColor = const Color(0xFF1E3A8A);
-      statusBgColor = const Color(0xFFEAF2FF);
+      statusColor = context.homeuAccent;
+      statusBgColor = context.homeuAccent.withValues(alpha: 0.12);
     }
 
     return InkWell(
@@ -450,18 +558,25 @@ class _OwnerPropertyCard extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.homeuCard,
           borderRadius: BorderRadius.circular(14),
-          boxShadow: const [
-            BoxShadow(color: Color(0x141E3A8A), blurRadius: 10, offset: Offset(0, 3)),
+          boxShadow: [
+            BoxShadow(
+              color: context.homeuCardShadow,
+              blurRadius: 10,
+              offset: const Offset(0, 3),
+            ),
           ],
         ),
         child: Row(
           children: [
-            const CircleAvatar(
+            CircleAvatar(
               radius: 20,
-              backgroundColor: Color(0x1F1E3A8A),
-              child: Icon(Icons.apartment_rounded, color: Color(0xFF1E3A8A)),
+              backgroundColor: context.homeuAccent.withValues(alpha: 0.12),
+              child: Icon(
+                Icons.apartment_rounded,
+                color: context.homeuAccent,
+              ),
             ),
             const SizedBox(width: 10),
             Expanded(
@@ -470,12 +585,20 @@ class _OwnerPropertyCard extends StatelessWidget {
                 children: [
                   Text(
                     propertyName,
-                    style: const TextStyle(color: Color(0xFF1F314F), fontSize: 14, fontWeight: FontWeight.w700),
+                    style: TextStyle(
+                      color: context.homeuPrimaryText,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   const SizedBox(height: 3),
                   Text(
                     location,
-                    style: const TextStyle(color: Color(0xFF667896), fontSize: 12, fontWeight: FontWeight.w500),
+                    style: TextStyle(
+                      color: context.homeuMutedText,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ],
               ),
@@ -524,14 +647,14 @@ class _RequestCard extends StatelessWidget {
     Color textColor;
 
     if (isPending) {
-      badgeColor = Colors.orange.shade50;
-      textColor = Colors.orange.shade800;
+      badgeColor = context.colors.tertiary.withValues(alpha: 0.12);
+      textColor = context.colors.tertiary;
     } else if (isApproved) {
-      badgeColor = Colors.green.shade50;
-      textColor = Colors.green.shade800;
+      badgeColor = context.homeuSuccess.withValues(alpha: 0.12);
+      textColor = context.homeuSuccess;
     } else {
-      badgeColor = Colors.red.shade50;
-      textColor = Colors.red.shade800;
+      badgeColor = context.colors.error.withValues(alpha: 0.12);
+      textColor = context.colors.error;
     }
 
     return InkWell(
@@ -542,10 +665,14 @@ class _RequestCard extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.homeuCard,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: const [
-            BoxShadow(color: Color(0x141E3A8A), blurRadius: 10, offset: Offset(0, 4)),
+          boxShadow: [
+            BoxShadow(
+              color: context.homeuCardShadow,
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
           ],
         ),
         child: Column(
@@ -555,19 +682,27 @@ class _RequestCard extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 18,
-                  backgroundColor: const Color(0xFFEAF2FF),
+                  backgroundColor: context.colors.surfaceContainerHighest,
                   backgroundImage: (tenantProfileUrl != null && tenantProfileUrl!.isNotEmpty)
                       ? NetworkImage(tenantProfileUrl!)
                       : null,
                   child: (tenantProfileUrl == null || tenantProfileUrl!.isEmpty)
-                      ? const Icon(Icons.person_rounded, color: Color(0xFF1E3A8A), size: 20)
+                      ? Icon(
+                          Icons.person_rounded,
+                          color: context.homeuAccent,
+                          size: 20,
+                        )
                       : null,
                 ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     tenantName,
-                    style: const TextStyle(color: Color(0xFF1F314F), fontSize: 15, fontWeight: FontWeight.w700),
+                    style: TextStyle(
+                      color: context.homeuPrimaryText,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
                 Container(
@@ -584,23 +719,39 @@ class _RequestCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            const Text(
-              'Property',
-              style: TextStyle(color: Color(0xFF667896), fontSize: 11, fontWeight: FontWeight.w600),
+            Text(
+              context.l10n.ownerPropertyLabel,
+              style: TextStyle(
+                color: context.homeuMutedText,
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+              ),
             ),
             const SizedBox(height: 2),
             Text(
               propertyName,
-              style: const TextStyle(color: Color(0xFF1F314F), fontSize: 14, fontWeight: FontWeight.w700),
+              style: TextStyle(
+                color: context.homeuPrimaryText,
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+              ),
             ),
             const SizedBox(height: 10),
-            const Row(
+            Row(
               children: [
-                Icon(Icons.chevron_right_rounded, color: Color(0xFF1E3A8A), size: 20),
-                SizedBox(width: 2),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: context.homeuAccent,
+                  size: 20,
+                ),
+                const SizedBox(width: 2),
                 Text(
-                  'Tap to review request',
-                  style: TextStyle(color: Color(0xFF1E3A8A), fontSize: 12, fontWeight: FontWeight.w700),
+                  context.l10n.ownerTapToReviewRequest,
+                  style: TextStyle(
+                    color: context.homeuAccent,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ],
             ),
@@ -637,14 +788,14 @@ class _ViewingRequestCard extends StatelessWidget {
     Color textColor;
 
     if (isPending) {
-      badgeColor = Colors.orange.shade50;
-      textColor = Colors.orange.shade800;
+      badgeColor = context.colors.tertiary.withValues(alpha: 0.12);
+      textColor = context.colors.tertiary;
     } else if (isApproved) {
-      badgeColor = Colors.green.shade50;
-      textColor = Colors.green.shade800;
+      badgeColor = context.homeuSuccess.withValues(alpha: 0.12);
+      textColor = context.homeuSuccess;
     } else {
-      badgeColor = Colors.blueGrey.shade50;
-      textColor = Colors.blueGrey.shade800;
+      badgeColor = context.colors.surfaceContainerHighest;
+      textColor = context.homeuMutedText;
     }
 
     return InkWell(
@@ -655,10 +806,14 @@ class _ViewingRequestCard extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.homeuCard,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: const [
-            BoxShadow(color: Color(0x141E3A8A), blurRadius: 10, offset: Offset(0, 4)),
+          boxShadow: [
+            BoxShadow(
+              color: context.homeuCardShadow,
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
           ],
         ),
         child: Column(
@@ -668,19 +823,27 @@ class _ViewingRequestCard extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 18,
-                  backgroundColor: const Color(0xFFEAF2FF),
+                  backgroundColor: context.colors.surfaceContainerHighest,
                   backgroundImage: (tenantProfileUrl != null && tenantProfileUrl!.isNotEmpty)
                       ? NetworkImage(tenantProfileUrl!)
                       : null,
                   child: (tenantProfileUrl == null || tenantProfileUrl!.isEmpty)
-                      ? const Icon(Icons.person_rounded, color: Color(0xFF1E3A8A), size: 20)
+                      ? Icon(
+                          Icons.person_rounded,
+                          color: context.homeuAccent,
+                          size: 20,
+                        )
                       : null,
                 ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     tenantName,
-                    style: const TextStyle(color: Color(0xFF1F314F), fontSize: 15, fontWeight: FontWeight.w700),
+                    style: TextStyle(
+                      color: context.homeuPrimaryText,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
                 Container(
@@ -697,23 +860,39 @@ class _ViewingRequestCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            const Text(
-              'Property',
-              style: TextStyle(color: Color(0xFF667896), fontSize: 11, fontWeight: FontWeight.w600),
+            Text(
+              context.l10n.ownerPropertyLabel,
+              style: TextStyle(
+                color: context.homeuMutedText,
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+              ),
             ),
             const SizedBox(height: 2),
             Text(
               propertyName,
-              style: const TextStyle(color: Color(0xFF1F314F), fontSize: 14, fontWeight: FontWeight.w700),
+              style: TextStyle(
+                color: context.homeuPrimaryText,
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+              ),
             ),
             const SizedBox(height: 10),
-            const Row(
+            Row(
               children: [
-                Icon(Icons.visibility_outlined, color: Color(0xFF1E3A8A), size: 18),
-                SizedBox(width: 6),
+                Icon(
+                  Icons.visibility_outlined,
+                  color: context.homeuAccent,
+                  size: 18,
+                ),
+                const SizedBox(width: 6),
                 Text(
-                  'Tap to review viewing',
-                  style: TextStyle(color: Color(0xFF1E3A8A), fontSize: 12, fontWeight: FontWeight.w700),
+                  context.l10n.ownerTapToReviewViewing,
+                  style: TextStyle(
+                    color: context.homeuAccent,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ],
             ),

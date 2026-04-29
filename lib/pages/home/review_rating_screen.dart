@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
+import 'package:homeu/core/localization/homeu_l10n.dart';
 import 'package:homeu/core/theme/homeu_app_theme.dart';
 
 class HomeUReviewRatingScreen extends StatefulWidget {
@@ -37,7 +38,7 @@ class _HomeUReviewRatingScreenState extends State<HomeUReviewRatingScreen> {
     return Scaffold(
       backgroundColor: context.colors.surface,
       appBar: AppBar(
-        title: const Text('Review & Rating'),
+        title: Text(context.l10n.reviewRatingTitle),
         backgroundColor: context.colors.surface,
       ),
       body: SafeArea(
@@ -56,7 +57,7 @@ class _HomeUReviewRatingScreenState extends State<HomeUReviewRatingScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Share your experience to help future tenants make better decisions.',
+                context.l10n.reviewRatingSubtitle,
                 style: TextStyle(
                   color: context.homeuMutedText,
                   fontSize: 14,
@@ -84,10 +85,10 @@ class _HomeUReviewRatingScreenState extends State<HomeUReviewRatingScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'Average Rating',
+                          Text(
+                            context.l10n.reviewAverageLabel,
                             style: TextStyle(
-                              color: Color(0xFF667896),
+                              color: context.homeuMutedText,
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
                             ),
@@ -95,8 +96,8 @@ class _HomeUReviewRatingScreenState extends State<HomeUReviewRatingScreen> {
                           const SizedBox(height: 4),
                           Text(
                             _averageRating.toStringAsFixed(1),
-                            style: const TextStyle(
-                              color: Color(0xFF1E3A8A),
+                            style: TextStyle(
+                              color: context.homeuAccent,
                               fontSize: 30,
                               fontWeight: FontWeight.w700,
                             ),
@@ -104,9 +105,9 @@ class _HomeUReviewRatingScreenState extends State<HomeUReviewRatingScreen> {
                         ],
                       ),
                     ),
-                    const Icon(
+                    Icon(
                       Icons.star_rounded,
-                      color: Color(0xFFF59E0B),
+                      color: context.colors.secondary,
                       size: 34,
                     ),
                   ],
@@ -158,10 +159,10 @@ class _HomeUReviewRatingScreenState extends State<HomeUReviewRatingScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Your Rating',
+                    Text(
+                      context.l10n.reviewYourRatingLabel,
                       style: TextStyle(
-                        color: Color(0xFF1F314F),
+                        color: context.homeuPrimaryText,
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
                       ),
@@ -182,7 +183,7 @@ class _HomeUReviewRatingScreenState extends State<HomeUReviewRatingScreen> {
                             isFilled
                                 ? Icons.star_rounded
                                 : Icons.star_outline_rounded,
-                            color: const Color(0xFFF59E0B),
+                            color: context.colors.secondary,
                             size: 30,
                           ),
                         );
@@ -210,22 +211,21 @@ class _HomeUReviewRatingScreenState extends State<HomeUReviewRatingScreen> {
                   controller: _commentController,
                   maxLines: 5,
                   decoration: InputDecoration(
-                    labelText: 'Comment',
+                    labelText: context.l10n.reviewCommentLabel,
                     alignLabelWithHint: true,
-                    hintText:
-                        'Tell us about cleanliness, owner communication, and your overall experience.',
+                    hintText: context.l10n.reviewCommentHint,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(color: Color(0x1F1E3A8A)),
+                      borderSide: BorderSide(color: context.homeuSoftBorder),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(color: Color(0x1F1E3A8A)),
+                      borderSide: BorderSide(color: context.homeuSoftBorder),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: const BorderSide(
-                        color: Color(0xFF1E3A8A),
+                      borderSide: BorderSide(
+                        color: context.homeuAccent,
                         width: 1.2,
                       ),
                     ),
@@ -240,17 +240,15 @@ class _HomeUReviewRatingScreenState extends State<HomeUReviewRatingScreen> {
                   key: const Key('submit_review_button'),
                   onPressed: () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'Thank you. Your review has been submitted.',
-                        ),
+                      SnackBar(
+                        content: Text(context.l10n.reviewSubmitSuccess),
                       ),
                     );
                     Navigator.of(context).pop();
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: context.homeuAccent,
-                    foregroundColor: Colors.white,
+                    foregroundColor: context.colors.onPrimary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
@@ -259,7 +257,7 @@ class _HomeUReviewRatingScreenState extends State<HomeUReviewRatingScreen> {
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  child: const Text('Submit'),
+                  child: Text(context.l10n.reviewSubmitLabel),
                 ),
               ),
             ],
@@ -290,9 +288,9 @@ class _RatingDistributionRow extends StatelessWidget {
         SizedBox(
           width: 44,
           child: Text(
-            '$stars star',
-            style: const TextStyle(
-              color: Color(0xFF667896),
+            context.l10n.reviewStarLabel(stars),
+            style: TextStyle(
+              color: context.homeuMutedText,
               fontSize: 12,
               fontWeight: FontWeight.w600,
             ),
@@ -305,7 +303,7 @@ class _RatingDistributionRow extends StatelessWidget {
             child: LinearProgressIndicator(
               minHeight: 9,
               value: value,
-              backgroundColor: const Color(0xFFEAF0FA),
+              backgroundColor: context.colors.surfaceContainerHighest,
               valueColor: AlwaysStoppedAnimation<Color>(context.homeuAccent),
             ),
           ),
@@ -316,8 +314,8 @@ class _RatingDistributionRow extends StatelessWidget {
           child: Text(
             '$count',
             textAlign: TextAlign.right,
-            style: const TextStyle(
-              color: Color(0xFF667896),
+            style: TextStyle(
+              color: context.homeuMutedText,
               fontSize: 12,
               fontWeight: FontWeight.w600,
             ),

@@ -10,7 +10,8 @@ import 'package:homeu/pages/home/payment_screen.dart';
 import 'package:homeu/pages/home/property_item.dart';
 import 'package:homeu/pages/home/dialogs/booking_receipt_dialog.dart';
 import 'package:homeu/app/booking/payment_models.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:homeu/core/localization/homeu_l10n.dart';
+import 'package:homeu/core/theme/homeu_app_theme.dart';
 
 class BookingDetailsScreen extends StatefulWidget {
   const BookingDetailsScreen({
@@ -107,11 +108,14 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F8FC),
+      backgroundColor: context.colors.surface,
       appBar: AppBar(
-        title: const Text('Booking Details', style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        title: Text(
+          context.l10n.bookingDetailsTitle,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: context.colors.surface,
+        foregroundColor: context.colors.onSurface,
         elevation: 0,
       ),
       body: RefreshIndicator(
@@ -124,15 +128,21 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
             children: [
               _buildPropertyOverview(),
               const SizedBox(height: 24),
-              const Text(
-                'Payment Schedule',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+              Text(
+                context.l10n.bookingPaymentScheduleTitle,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: context.homeuPrimaryText,
+                ),
               ),
               const SizedBox(height: 12),
               if (_isLoading && _schedules.isEmpty)
                 const Center(child: CircularProgressIndicator())
               else if (_schedules.isEmpty)
-                const Center(child: Text('No payment schedule generated yet.'))
+                Center(
+                  child: Text(context.l10n.bookingPaymentScheduleEmpty),
+                )
               else
                 ..._schedules.map((s) => _buildScheduleCard(s)),
             ],
@@ -146,9 +156,14 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.homeuCard,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 10)],
+        boxShadow: [
+          BoxShadow(
+            color: context.homeuCardShadow,
+            blurRadius: 10,
+          ),
+        ],
       ),
       child: Row(
         children: [
@@ -167,9 +182,22 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(widget.property.name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    Text(
+                      widget.property.name,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: context.homeuPrimaryText,
+                      ),
+                    ),
                     const SizedBox(height: 4),
-                    Text(widget.property.location, style: TextStyle(color: Colors.grey[600], fontSize: 14)),
+                    Text(
+                      widget.property.location,
+                      style: TextStyle(
+                        color: context.homeuMutedText,
+                        fontSize: 14,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -181,7 +209,10 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
   Widget _buildScheduleCard(PaymentSchedule schedule) {
     final bool isPaid = schedule.status.toLowerCase() == 'paid';
     final bool isOverdue = schedule.isOverdue;
-    
+    final colors = context.colors;
+    final success = context.homeuSuccess;
+    final neutral = context.homeuMutedText;
+
     // Sequential Payment Logic: Find if this is the NEXT pending item
     final int firstPendingMonth = _schedules
         .firstWhere((s) => s.status.toLowerCase() != 'paid', orElse: () => _schedules.last)
@@ -194,10 +225,12 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.homeuCard,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isNextToPay && isOverdue ? Colors.red.withOpacity(0.3) : Colors.transparent,
+          color: isNextToPay && isOverdue
+              ? colors.error.withValues(alpha: 0.3)
+              : Colors.transparent,
           width: 1,
         ),
       ),
@@ -206,12 +239,21 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: (isPaid ? Colors.green : (isNextToPay ? (isOverdue ? Colors.red : Colors.blue) : Colors.grey)).withOpacity(0.1),
+              color: (isPaid
+                      ? success
+                      : (isNextToPay
+                          ? (isOverdue ? colors.error : colors.primary)
+                          : neutral))
+                  .withValues(alpha: 0.12),
               shape: BoxShape.circle,
             ),
             child: Icon(
               isPaid ? Icons.check : (isNextToPay && isOverdue ? Icons.priority_high : Icons.calendar_month),
-              color: isPaid ? Colors.green : (isNextToPay ? (isOverdue ? Colors.red : Colors.blue) : Colors.grey),
+              color: isPaid
+                  ? success
+                  : (isNextToPay
+                      ? (isOverdue ? colors.error : colors.primary)
+                      : neutral),
               size: 20,
             ),
           ),
@@ -221,13 +263,23 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Month ${schedule.monthNumber}${schedule.monthNumber == 1 ? " (Booking Fee)" : ""}', 
+                  schedule.monthNumber == 1
+                      ? context.l10n.bookingMonthWithFee(schedule.monthNumber)
+                      : context.l10n.bookingMonthLabel(schedule.monthNumber),
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: isPaid || isNextToPay ? Colors.black : Colors.grey,
+                    color: isPaid || isNextToPay
+                        ? context.homeuPrimaryText
+                        : context.homeuMutedText,
                   ),
                 ),
-                Text('Due: ${df.format(schedule.dueDate)}', style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+                Text(
+                  context.l10n.bookingDueLabel(df.format(schedule.dueDate)),
+                  style: TextStyle(
+                    color: context.homeuMutedText,
+                    fontSize: 12,
+                  ),
+                ),
               ],
             ),
           ),
@@ -241,34 +293,60 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
                     IconButton(
                       visualDensity: VisualDensity.compact,
                       onPressed: () => _showReceiptForSchedule(schedule),
-                      icon: const Icon(Icons.receipt_long_outlined, size: 20, color: Color(0xFF6366F1)),
-                      tooltip: 'View Receipt',
+                      icon: Icon(
+                        Icons.receipt_long_outlined,
+                        size: 20,
+                        color: colors.primary,
+                      ),
+                      tooltip: context.l10n.bookingViewReceipt,
                     ),
                   Text(
-                    'RM ${schedule.amount.toStringAsFixed(2)}', 
+                    context.l10n.bookingAmountRm(
+                      schedule.amount.toStringAsFixed(2),
+                    ),
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: isPaid || isNextToPay ? Colors.black : Colors.grey,
+                      color: isPaid || isNextToPay
+                          ? context.homeuPrimaryText
+                          : context.homeuMutedText,
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 4),
               if (isPaid)
-                const Text('PAID', style: TextStyle(color: Colors.green, fontWeight: FontWeight.w800, fontSize: 10))
+                Text(
+                  context.l10n.bookingPaid,
+                  style: TextStyle(
+                    color: success,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 10,
+                  ),
+                )
               else if (isNextToPay)
                 ElevatedButton(
                   onPressed: () => _payInstallment(schedule),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: isOverdue ? Colors.red : const Color(0xFF3B82F6),
-                    foregroundColor: Colors.white,
+                    backgroundColor:
+                        isOverdue ? colors.error : colors.primary,
+                    foregroundColor: colors.onPrimary,
                     minimumSize: const Size(80, 30),
                     padding: EdgeInsets.zero,
                   ),
-                  child: const Text('Pay Now', style: TextStyle(fontSize: 11)),
+                  child: Text(
+                    context.l10n.bookingPayNow,
+                    style: const TextStyle(fontSize: 11),
+                  ),
                 )
               else
-                const Text('UPCOMING', style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w800, fontSize: 10)),
+                Text(
+                  context.l10n.bookingUpcoming,
+                  style: TextStyle(
+                    color: context.homeuMutedText,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 10,
+                  ),
+                ),
             ],
           ),
         ],
@@ -296,7 +374,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
 
       if (payment == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No receipt found for this payment.')),
+          SnackBar(content: Text(context.l10n.bookingReceiptNotFound)),
         );
         return;
       }
@@ -310,7 +388,9 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
       if (!mounted) return;
       Navigator.pop(context); // Pop loading
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error loading receipt: $e')),
+        SnackBar(
+          content: Text(context.l10n.bookingReceiptError('$e')),
+        ),
       );
     }
   }

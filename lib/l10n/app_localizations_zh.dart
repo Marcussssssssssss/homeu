@@ -12,6 +12,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get appTitle => 'HomeU';
 
   @override
+  String get splashTagline => '找到你的理想居所';
+
+  @override
   String get navHome => '首页';
 
   @override
@@ -418,6 +421,26 @@ class AppLocalizationsZh extends AppLocalizations {
   String get loginSubtitle => '登录以继续你的 HomeU 旅程。';
 
   @override
+  String get loginDividerOr => '或';
+
+  @override
+  String get loginBiometricReason => '验证以访问 HomeU';
+
+  @override
+  String get loginSessionExpired => '会话已过期，请使用邮箱和密码登录。';
+
+  @override
+  String get loginBiometricFailed => '生物识别验证失败或已取消。';
+
+  @override
+  String loginContinueAs(Object name) {
+    return '以 $name 继续';
+  }
+
+  @override
+  String get loginUseBiometrics => '使用生物识别';
+
+  @override
   String get loginPasswordHint => '输入你的密码';
 
   @override
@@ -463,6 +486,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get registerNameHint => '你的姓名';
 
   @override
+  String get registerPhoneHint => '+60 12 345 6789';
+
+  @override
   String get registerPasswordHint => '创建密码';
 
   @override
@@ -505,7 +531,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get registerErrorNetwork => '网络错误，请检查网络连接后重试。';
 
   @override
-  String get registerErrorGeneric => '暂时无法注册，请稍后重试。';
+  String get registerErrorGeneric => '暂时无法注册，请稍后再试。';
 
   @override
   String get forgotPasswordTitle => '忘记密码';
@@ -526,7 +552,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get forgotPasswordCheckEmail => '请检查邮箱';
 
   @override
-  String get forgotPasswordNoEmailHint => '没收到邮件？请检查垃圾邮箱或稍后重试。';
+  String get forgotPasswordNoEmailHint => '没收到邮件？请检查垃圾邮箱或稍后再试。';
 
   @override
   String get forgotPasswordSuccessDefault => '重置密码链接已发送到你的邮箱。';
@@ -538,7 +564,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get forgotPasswordErrorNetwork => '网络错误，请检查网络连接后重试。';
 
   @override
-  String get forgotPasswordErrorGeneric => '暂时无法发送重置链接，请稍后重试。';
+  String get forgotPasswordErrorGeneric => '暂时无法发送重置链接，请稍后再试。';
 
   @override
   String get onboardingSkip => '跳过';
@@ -616,6 +642,162 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get onboardingProtected => '已保护';
+
+  @override
+  String get viewingScheduleTitle => '预约看房';
+
+  @override
+  String get viewingSelectSlotTitle => '选择可用时段';
+
+  @override
+  String get viewingSelectSlotSubtitle => '房东只展示可用时段。请选择一个继续。';
+
+  @override
+  String get viewingNoSlotsTitle => '暂无可用时段';
+
+  @override
+  String get viewingNoSlotsSubtitle => '房东尚未为该房源设置可用时间。请稍后再试或联系房东。';
+
+  @override
+  String get viewingGoBack => '返回';
+
+  @override
+  String get viewingConfirmRequest => '确认预约';
+
+  @override
+  String get viewingAlreadyScheduled => '你已为该时段预约过看房。请查看你的请求。';
+
+  @override
+  String get viewingRequestSent => '请求已发送！';
+
+  @override
+  String viewingErrorWithMessage(Object message) {
+    return '错误：$message';
+  }
+
+  @override
+  String get bookingDetailsTitle => '预订详情';
+
+  @override
+  String get bookingPaymentScheduleTitle => '付款计划';
+
+  @override
+  String get bookingPaymentScheduleEmpty => '暂无生成付款计划。';
+
+  @override
+  String bookingMonthLabel(Object number) {
+    return '第 $number 个月';
+  }
+
+  @override
+  String bookingMonthWithFee(Object number) {
+    return '第 $number 个月（预订费）';
+  }
+
+  @override
+  String bookingDueLabel(Object date) {
+    return '到期：$date';
+  }
+
+  @override
+  String get bookingViewReceipt => '查看收据';
+
+  @override
+  String bookingAmountRm(Object amount) {
+    return 'RM $amount';
+  }
+
+  @override
+  String get bookingPaid => '已支付';
+
+  @override
+  String get bookingUpcoming => '即将到期';
+
+  @override
+  String get bookingPayNow => '立即支付';
+
+  @override
+  String get bookingReceiptNotFound => '未找到该付款的收据。';
+
+  @override
+  String bookingReceiptError(Object message) {
+    return '加载收据出错：$message';
+  }
+
+  @override
+  String get reviewRatingTitle => '评价与评分';
+
+  @override
+  String get reviewRatingSubtitle => '分享你的体验，帮助未来的租客做出更好的决定。';
+
+  @override
+  String get reviewAverageLabel => '平均评分';
+
+  @override
+  String get reviewYourRatingLabel => '你的评分';
+
+  @override
+  String get reviewCommentLabel => '评论';
+
+  @override
+  String get reviewCommentHint => '告诉我们有关清洁度、房东沟通以及整体体验。';
+
+  @override
+  String get reviewSubmitLabel => '提交';
+
+  @override
+  String get reviewSubmitSuccess => '谢谢，你的评价已提交。';
+
+  @override
+  String reviewStarLabel(Object count) {
+    return '$count 星';
+  }
+
+  @override
+  String get compareTitle => '对比房源';
+
+  @override
+  String get compareClear => '清除';
+
+  @override
+  String get compareEmptyTitle => '未选择房源';
+
+  @override
+  String get compareEmptySubtitle => '返回并选择 2 个房源\n开始对比';
+
+  @override
+  String get compareBackToListings => '返回列表';
+
+  @override
+  String get comparePriceRangeLabel => '价格区间';
+
+  @override
+  String comparePriceRangeValue(Object min, Object max) {
+    return 'RM $min - RM $max';
+  }
+
+  @override
+  String compareSaveAmount(Object amount) {
+    return '节省 RM $amount';
+  }
+
+  @override
+  String get compareLabelAddress => '地址';
+
+  @override
+  String get compareLabelType => '类型';
+
+  @override
+  String get compareLabelRooms => '房间';
+
+  @override
+  String get compareLabelFurnishing => '家具';
+
+  @override
+  String get compareLabelOwner => '房东';
+
+  @override
+  String get compareLabelAvailability => '可用性';
 
   @override
   String get updatePasswordSuccessMessage => '你的密码已成功更新。';
@@ -764,4 +946,1159 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get receiptFooter => '感谢您使用 HomeU！';
+
+  @override
+  String paymentAmountRm(Object amount) {
+    return 'RM $amount';
+  }
+
+  @override
+  String get bookingTitle => '预订';
+
+  @override
+  String get bookingConflictDetected => '检测到与现有预订冲突。';
+
+  @override
+  String get bookingFeeNotice => '支付预订费会锁定该房源，剩余款项需在房东批准后支付。';
+
+  @override
+  String bookingPayFee(Object amount) {
+    return '支付预订费（RM $amount）';
+  }
+
+  @override
+  String get bookingSelectedProperty => '已选房源';
+
+  @override
+  String bookingConflictDetails(Object date) {
+    return '该房源从 $date 起已被预订。请缩短租期或选择其他开始日期。';
+  }
+
+  @override
+  String get bookingDurationTitle => '租期';
+
+  @override
+  String bookingDurationMonths(Object count) {
+    return '$count 个月';
+  }
+
+  @override
+  String get bookingStartDateTitle => '开始日期';
+
+  @override
+  String bookingOccupiedUntil(Object date) {
+    return '房源已被占用至 $date';
+  }
+
+  @override
+  String get bookingTotalPriceTitle => '总价计算';
+
+  @override
+  String get bookingMonthlyPriceLabel => '月租';
+
+  @override
+  String bookingDurationSummary(Object months) {
+    return '时长（$months 个月）';
+  }
+
+  @override
+  String get bookingEstimatedTotalLabel => '预计总价';
+
+  @override
+  String get paymentSupabaseUnavailable => 'Supabase 未初始化，请稍后再试。';
+
+  @override
+  String get bookingLoginRequired => '请先登录以继续预订。';
+
+  @override
+  String get bookingDurationJustBooked => '抱歉，该时长刚被其他租客预订。';
+
+  @override
+  String get bookingCreateFailed => '无法创建预订，请稍后再试。';
+
+  @override
+  String bookingCreateError(Object error) {
+    return '创建预订失败：$error';
+  }
+
+  @override
+  String get statusAll => '全部';
+
+  @override
+  String get ownerRequestsTitle => '请求';
+
+  @override
+  String get ownerRequestsBookingsTab => '预订';
+
+  @override
+  String get ownerRequestsViewingsTab => '看房';
+
+  @override
+  String get ownerRequestsRetry => '重试';
+
+  @override
+  String ownerRequestsEmpty(Object filter) {
+    return '没有“$filter”请求。';
+  }
+
+  @override
+  String ownerRequestsMoveIn(Object date, Object months) {
+    return '入住：$date  •  $months 个月';
+  }
+
+  @override
+  String ownerRequestsFlexibleDuration(Object months) {
+    return '灵活  •  $months 个月';
+  }
+
+  @override
+  String ownerRequestsMonthlyPrice(Object price) {
+    return 'RM $price / 月';
+  }
+
+  @override
+  String get ownerRequestsReview => '查看';
+
+  @override
+  String ownerRequestsViewingsEmpty(Object filter) {
+    return '没有“$filter”看房请求。';
+  }
+
+  @override
+  String ownerRequestsViewingTime(Object date, Object time) {
+    return '$date  •  $time';
+  }
+
+  @override
+  String get ownerRequestsDecline => '拒绝';
+
+  @override
+  String get ownerRequestsApprove => '批准';
+
+  @override
+  String get ownerRequestsMarkCompleted => '标记为已完成';
+
+  @override
+  String ownerGreeting(Object name) {
+    return '你好，$name';
+  }
+
+  @override
+  String get ownerRecentProperties => '最新房源';
+
+  @override
+  String get ownerNoProperties => '尚未发布房源';
+
+  @override
+  String get ownerAddFirstProperty => '添加你的第一套房源';
+
+  @override
+  String get ownerUntitledProperty => '未命名';
+
+  @override
+  String get ownerRecentBookingRequests => '最新预订请求';
+
+  @override
+  String get ownerNoBookingRequests => '暂无活跃的预订请求';
+
+  @override
+  String get ownerUnknownProperty => '未知房源';
+
+  @override
+  String get ownerUnknownTenant => '未知租客';
+
+  @override
+  String get ownerRecentViewingRequests => '最新看房请求';
+
+  @override
+  String get ownerNoViewingRequests => '暂无活跃的看房请求';
+
+  @override
+  String get ownerTapToReviewViewing => '点击查看看房';
+
+  @override
+  String get ownerProjected30Days => '预计（30 天）';
+
+  @override
+  String get ownerOverduePayments => '逾期款项';
+
+  @override
+  String get ownerInvoiceCollectionRate => '发票收款率';
+
+  @override
+  String get monthShortJul => '7月';
+
+  @override
+  String get monthShortAug => '8月';
+
+  @override
+  String get monthShortSep => '9月';
+
+  @override
+  String get monthShortOct => '10月';
+
+  @override
+  String get monthShortNov => '11月';
+
+  @override
+  String get monthShortDec => '12月';
+
+  @override
+  String get profileBiometricUnavailable => '该设备未启用或不支持生物识别认证。';
+
+  @override
+  String get profileBiometricReason => '请验证以启用生物识别登录';
+
+  @override
+  String get profileBiometricEnabled => '生物识别登录已启用。';
+
+  @override
+  String get profileBiometricSaveFailed => '无法更新生物识别偏好。';
+
+  @override
+  String get profileBiometricDisabled => '生物识别登录已关闭。';
+
+  @override
+  String get profileErrorSaveBiometric => '无法保存生物识别偏好。';
+
+  @override
+  String get profileLogoutTitle => '退出登录？';
+
+  @override
+  String get profileLogoutMessage => '确定要退出你的 HomeU 账号吗？';
+
+  @override
+  String get profileLogoutCancel => '取消';
+
+  @override
+  String get profileLogoutConfirm => '退出登录';
+
+  @override
+  String get profileFavoritesSubtitle => '查看你保存的房源';
+
+  @override
+  String get profileBiometricTitle => '生物识别登录';
+
+  @override
+  String get profileBiometricSubtitle => '使用生物识别解锁 HomeU';
+
+  @override
+  String get adminDashboardLoadError => '无法加载系统概览，请检查网络连接。';
+
+  @override
+  String get adminDashboardTitle => '管理员仪表盘';
+
+  @override
+  String get adminDashboardWelcome => '欢迎，管理员';
+
+  @override
+  String get adminDashboardOverview => '系统概览';
+
+  @override
+  String get adminTotalUsers => '用户总数';
+
+  @override
+  String get adminTotalOwners => '房东';
+
+  @override
+  String get adminTotalTenants => '租客';
+
+  @override
+  String get adminPendingReports => '待处理举报';
+
+  @override
+  String get adminManagementTitle => '管理';
+
+  @override
+  String get adminReportsReview => '举报审核';
+
+  @override
+  String adminReportsSummary(Object pending, Object total) {
+    return '$pending 条待处理 / 共 $total 条举报';
+  }
+
+  @override
+  String get adminManagementTile => '管理员管理';
+
+  @override
+  String get adminManagementSubtitle => '管理系统管理员';
+
+  @override
+  String get adminAuditLogsTitle => '审计日志';
+
+  @override
+  String get adminAuditLogsSubtitle => '查看全系统活动日志';
+
+  @override
+  String get adminCreatedSuccess => '管理员账号创建成功。';
+
+  @override
+  String get adminUpdateDetailsTitle => '更新管理员信息';
+
+  @override
+  String get adminUpdateDetailsConfirm => '更新';
+
+  @override
+  String get adminDetailsUpdated => '管理员信息已更新。';
+
+  @override
+  String adminUpdateError(Object error) {
+    return '错误：$error';
+  }
+
+  @override
+  String get adminCannotRemoveSelf => '安全提示：你不能移除自己的管理员权限。';
+
+  @override
+  String get adminRemoveTitle => '移除管理员？';
+
+  @override
+  String adminRemoveMessage(Object name) {
+    return '要移除 $name 的管理员权限吗？他们将恢复为租客角色。';
+  }
+
+  @override
+  String get adminRemoveConfirm => '移除';
+
+  @override
+  String get adminRemovedSuccess => '管理员权限已移除。';
+
+  @override
+  String adminRemoveError(Object error) {
+    return '错误：$error';
+  }
+
+  @override
+  String get adminAddButton => '添加管理员';
+
+  @override
+  String get adminNoAdminsFound => '未找到管理员。';
+
+  @override
+  String get adminNavDashboard => '仪表盘';
+
+  @override
+  String get adminNavReports => '举报';
+
+  @override
+  String get adminNavChat => '聊天';
+
+  @override
+  String get adminNavLogs => '日志';
+
+  @override
+  String get adminNavProfile => '个人资料';
+
+  @override
+  String get commonCancel => '取消';
+
+  @override
+  String get commonConfirm => '确认';
+
+  @override
+  String get commonRefreshTooltip => '刷新';
+
+  @override
+  String get statusReviewed => '已审核';
+
+  @override
+  String get statusDismissed => '已驳回';
+
+  @override
+  String get adminReportsTitle => '举报审核';
+
+  @override
+  String get adminReportsSearchHint => '搜索举报、房东、租客、房源...';
+
+  @override
+  String get adminReportsFilterTooltip => '筛选举报';
+
+  @override
+  String get adminReportsActiveFilterLabel => '当前筛选：';
+
+  @override
+  String get adminReportsNoMatches => '没有举报符合当前筛选条件。';
+
+  @override
+  String get adminReportsFilterTitle => '筛选举报';
+
+  @override
+  String get adminReportsFilterSectionStatus => '举报状态';
+
+  @override
+  String get adminReportsFilterClear => '清除筛选';
+
+  @override
+  String get adminReportsFilterApply => '应用筛选';
+
+  @override
+  String get adminReportsUnknownListing => '未知房源';
+
+  @override
+  String get adminReportsUnknownReportId => '未知';
+
+  @override
+  String adminReportsPropertyIdFallback(Object propertyId) {
+    return '房源 #$propertyId';
+  }
+
+  @override
+  String get adminReportsNotAvailable => '暂无';
+
+  @override
+  String get adminReportsUnknownOwner => '未知房东';
+
+  @override
+  String get adminReportsUnknownReporter => '未知举报人';
+
+  @override
+  String get adminReportsUnknownEmail => '-';
+
+  @override
+  String adminReportsLoadError(Object error) {
+    return '加载举报失败：$error';
+  }
+
+  @override
+  String get adminReportsMissingOwnerOrPropertyChat => '缺少房东或房源信息，无法发起聊天。';
+
+  @override
+  String get adminReportsMissingTenantOrPropertyChat => '缺少租客或房源信息，无法发起聊天。';
+
+  @override
+  String get adminReportsAuditContactOwnerReason => '已打开与房东的聊天以跟进举报。';
+
+  @override
+  String get adminReportsAuditContactTenantReason => '已打开与租客的聊天以跟进举报。';
+
+  @override
+  String adminReportsChatOpenError(Object error) {
+    return '无法打开聊天：$error';
+  }
+
+  @override
+  String get adminReportsRecordRiskLevelAction => '记录风险等级';
+
+  @override
+  String get adminReportsRiskRecorded => '风险等级已记录。';
+
+  @override
+  String adminReportsRiskRecordError(Object error) {
+    return '风险评估失败：$error';
+  }
+
+  @override
+  String adminReportsActionCompleted(Object actionLabel) {
+    return '$actionLabel 已完成。';
+  }
+
+  @override
+  String adminReportsUpdateError(Object error) {
+    return '更新举报失败：$error';
+  }
+
+  @override
+  String adminReportsReportTitle(Object reportId) {
+    return '举报 #$reportId';
+  }
+
+  @override
+  String adminReportsSubmittedOn(Object date) {
+    return '提交于 $date';
+  }
+
+  @override
+  String get adminReportsSectionProperty => '房源';
+
+  @override
+  String get adminReportsSectionOwner => '房东';
+
+  @override
+  String get adminReportsSectionReporter => '举报人';
+
+  @override
+  String get adminReportsSectionComplaint => '投诉';
+
+  @override
+  String get adminReportsFieldPropertyId => '房源 ID';
+
+  @override
+  String get adminReportsFieldTitle => '标题';
+
+  @override
+  String get adminReportsFieldName => '姓名';
+
+  @override
+  String get adminReportsFieldEmail => '邮箱';
+
+  @override
+  String get adminReportsFieldTotalReports => '举报总数';
+
+  @override
+  String get adminReportsFieldReason => '原因';
+
+  @override
+  String get adminReportsFieldDescription => '说明';
+
+  @override
+  String get adminReportsFieldStatus => '状态';
+
+  @override
+  String get adminReportsRiskSectionTitle => '风险评估';
+
+  @override
+  String get adminReportsRiskSectionHint => '仅用于内部审核，不会影响房源展示或账号状态。';
+
+  @override
+  String get adminReportsReviewedConfirmTitle => '我已审核该投诉。';
+
+  @override
+  String get adminReportsReviewedConfirmSubtitle => '确认后可进行风险评估和状态更新。';
+
+  @override
+  String get adminReportsActionsTitle => '操作';
+
+  @override
+  String get adminReportsActionsHint => '先通过聊天跟进，然后记录内部风险等级或更新举报状态。';
+
+  @override
+  String get adminReportsContactOwner => '联系房东';
+
+  @override
+  String get adminReportsContactReporter => '联系举报人';
+
+  @override
+  String get adminReportsSaveRisk => '保存风险等级';
+
+  @override
+  String get adminReportsMarkReviewed => '标记已审核';
+
+  @override
+  String get adminReportsDismissReport => '驳回举报';
+
+  @override
+  String adminReportsOwnerLabel(Object name) {
+    return '房东：$name';
+  }
+
+  @override
+  String adminReportsReporterLabel(Object name) {
+    return '举报人：$name';
+  }
+
+  @override
+  String adminReportsReasonLabel(Object reason) {
+    return '原因：$reason';
+  }
+
+  @override
+  String get adminReportsReasonDialogPrompt => '请提供原因并确认此审核操作。';
+
+  @override
+  String get adminReportsReasonDialogLabel => '管理员原因';
+
+  @override
+  String get adminReportsReasonDialogHint => '添加清晰的审核说明';
+
+  @override
+  String get adminReportsReasonDialogConfirm => '我确认此操作。';
+
+  @override
+  String get adminReportsRiskLow => '低';
+
+  @override
+  String get adminReportsRiskMedium => '中';
+
+  @override
+  String get adminReportsRiskHigh => '高';
+
+  @override
+  String get adminReportsRiskInvalid => '无效';
+
+  @override
+  String get adminAuditTitle => '系统审计日志';
+
+  @override
+  String get adminAuditClearFiltersTooltip => '清除筛选';
+
+  @override
+  String get adminAuditSearchHint => '搜索描述...';
+
+  @override
+  String get adminAuditAllDates => '所有日期';
+
+  @override
+  String adminAuditDateRange(Object start, Object end) {
+    return '$start - $end';
+  }
+
+  @override
+  String get adminAuditTableFilterHint => '表';
+
+  @override
+  String get adminAuditActionFilterHint => '操作';
+
+  @override
+  String get adminAuditEmptyState => '没有符合条件的审计日志。';
+
+  @override
+  String get adminAuditClearAllFilters => '清除所有筛选';
+
+  @override
+  String get adminAuditUnknownTime => '时间未知';
+
+  @override
+  String get adminAuditNoDetails => '暂无详情';
+
+  @override
+  String get adminAuditSystemActor => '系统 / 匿名';
+
+  @override
+  String get adminAuditUnknownRole => '未知';
+
+  @override
+  String get adminAuditNotAvailable => '暂无';
+
+  @override
+  String get adminAuditActorLabel => '操作者';
+
+  @override
+  String get adminAuditTargetTableLabel => '目标表';
+
+  @override
+  String get adminAuditTargetIdLabel => '目标 ID';
+
+  @override
+  String get adminAuditTableProfiles => '用户资料';
+
+  @override
+  String get adminAuditTableProperties => '房源';
+
+  @override
+  String get adminAuditTableBookings => '预订';
+
+  @override
+  String get adminAuditTablePropertyReports => '房源举报';
+
+  @override
+  String get adminAuditTableReports => '举报';
+
+  @override
+  String get adminAuditTableAuditLogs => '审计日志';
+
+  @override
+  String get adminAuditActionAdminCreated => '管理员已创建';
+
+  @override
+  String get adminAuditActionAdminUpdated => '管理员已更新';
+
+  @override
+  String get adminAuditActionAdminRemoved => '管理员已移除';
+
+  @override
+  String get adminAuditActionReportContactOwner => '举报：联系房东';
+
+  @override
+  String get adminAuditActionReportContactTenant => '举报：联系租客';
+
+  @override
+  String get adminAuditActionReportRiskLow => '举报：低风险';
+
+  @override
+  String get adminAuditActionReportRiskMedium => '举报：中风险';
+
+  @override
+  String get adminAuditActionReportRiskHigh => '举报：高风险';
+
+  @override
+  String get adminAuditActionReportRiskInvalid => '举报：无效风险';
+
+  @override
+  String get adminAuditActionReportReviewed => '举报：已审核';
+
+  @override
+  String get adminAuditActionReportDismissed => '举报：已驳回';
+
+  @override
+  String get adminAuditActionPropertyApproved => '房源已批准';
+
+  @override
+  String get adminAuditActionPropertyRejected => '房源已拒绝';
+
+  @override
+  String get adminAuditActionProfileUpdate => '资料已更新';
+
+  @override
+  String adminAuditLoadError(Object error) {
+    return '加载日志失败：$error';
+  }
+
+  @override
+  String get propertyReportTitle => '举报房源';
+
+  @override
+  String get propertyReportSubtitle => '请选择举报该房源的原因。我们的团队将尽快审核。';
+
+  @override
+  String get propertyReportReasonFake => '虚假房源 / 诈骗';
+
+  @override
+  String get propertyReportReasonSuspicious => '可疑活动';
+
+  @override
+  String get propertyReportReasonWrongDetails => '房源信息错误';
+
+  @override
+  String get propertyReportReasonInappropriate => '不当内容';
+
+  @override
+  String get propertyReportReasonOther => '其他原因';
+
+  @override
+  String get propertyReportDescriptionHint => '提供更多详情（可选）';
+
+  @override
+  String get propertyReportCancel => '取消';
+
+  @override
+  String get propertyReportSubmit => '提交举报';
+
+  @override
+  String get propertyReportSubmitted => '举报已提交，谢谢。';
+
+  @override
+  String get propertyReportSubmitFailed => '提交举报失败，请稍后重试。';
+
+  @override
+  String get propertyReportServiceUnavailable => '举报服务暂时不可用，请检查网络连接。';
+
+  @override
+  String get propertyReportLoginRequired => '请先登录以提交举报。';
+
+  @override
+  String get propertyReportTenantOnly => '只有租客可以提交房源举报。';
+
+  @override
+  String get propertyReportOwnProperty => '你不能举报自己的房源。';
+
+  @override
+  String get propertyReportInvalidMetadata => '房源元数据无效，无法举报。';
+
+  @override
+  String get propertyFacilitiesTitle => '设施';
+
+  @override
+  String get propertyNoFacilities => '暂无设施信息。';
+
+  @override
+  String get propertyOwnerInfoTitle => '房东信息';
+
+  @override
+  String get propertyOwnerHighRisk => '高风险';
+
+  @override
+  String get propertyOwnerSuspicious => '可疑房东';
+
+  @override
+  String get propertyOwnerSuspended => '已停用';
+
+  @override
+  String get propertyOwnerRemoved => '已移除';
+
+  @override
+  String get propertyAvailabilityTitle => '房源状态';
+
+  @override
+  String get propertyAvailabilityLabel => '房源状态：';
+
+  @override
+  String get propertyStatusActive => '出租中';
+
+  @override
+  String get propertyStatusOccupied => '已出租';
+
+  @override
+  String get propertyStatusInactive => '已下架';
+
+  @override
+  String get propertyReportErrorPermission => '由于权限限制，无法提交举报。请联系支持团队。';
+
+  @override
+  String get propertyReportErrorInvalidListing => '由于房源引用无效，无法提交举报。';
+
+  @override
+  String get propertyReportErrorInvalidData => '由于举报数据无效，无法提交举报。';
+
+  @override
+  String propertyNearbyLabel(Object landmarks) {
+    return '周边：$landmarks';
+  }
+
+  @override
+  String get propertyDetailsTitle => '房源详情';
+
+  @override
+  String get propertyUnavailableAdmin => '该房源目前因审核中而无法查看。';
+
+  @override
+  String get propertyUnavailableBooking => '该房源目前已出租，暂时无法预订。';
+
+  @override
+  String get propertyFavoriteLoginRequired => '请先登录以添加至收藏。';
+
+  @override
+  String get propertyFavoriteTenantOnly => '只有租客可以收藏房源。';
+
+  @override
+  String get propertyFavoritePolicyBlocked => '由于安全策略，无法更新收藏状态。';
+
+  @override
+  String get propertyFavoriteUpdateFailed => '更新收藏失败，请稍后再试。';
+
+  @override
+  String get propertyHighRiskTag => '高风险';
+
+  @override
+  String get propertyLocationTitle => '位置信息';
+
+  @override
+  String get propertyDescriptionTitle => '房源描述';
+
+  @override
+  String get bookingBookNow => '立即预订';
+
+  @override
+  String get bookingHistoryEmpty => '没有符合条件的预订记录。';
+
+  @override
+  String get ownerAvailabilityEndAfterStart => '结束时间必须晚于开始时间。';
+
+  @override
+  String get ownerAvailabilityPastDate => '不能为过去日期添加时段。';
+
+  @override
+  String get ownerAvailabilityOverlap => '该时段与已有时段重叠。';
+
+  @override
+  String get ownerAvailabilitySlotAdded => '看房时段已成功添加。';
+
+  @override
+  String get ownerAvailabilityAddFailed => '添加时段失败，请重试。';
+
+  @override
+  String get ownerAvailabilityDeleteFailed => '删除时段失败，请重试。';
+
+  @override
+  String ownerAvailabilityDateTime(Object date, Object time) {
+    return '$date 于 $time';
+  }
+
+  @override
+  String get ownerAvailabilityCreateSlot => '创建新的看房时段';
+
+  @override
+  String get ownerAvailabilitySelectDate => '选择日期';
+
+  @override
+  String get ownerAvailabilityStartTime => '开始时间';
+
+  @override
+  String get ownerAvailabilityEndTime => '结束时间';
+
+  @override
+  String get ownerAvailabilityActiveSlots => '你的可用时段';
+
+  @override
+  String get ownerAvailabilityStatusAvailable => '可用';
+
+  @override
+  String get ownerAvailabilityStatusBooked => '已预订';
+
+  @override
+  String get ownerAvailabilityStatusApproved => '已批准';
+
+  @override
+  String get ownerAvailabilityDeleteConfirmTitle => '删除时段？';
+
+  @override
+  String get ownerAvailabilityDeleteConfirmMessage => '确定要删除这个可用时段吗？';
+
+  @override
+  String get ownerAvailabilityEmpty => '尚未添加可用时段。';
+
+  @override
+  String get ownerAvailabilityAddSlot => '添加时段';
+
+  @override
+  String get ownerAvailabilityBooked => '已预订';
+
+  @override
+  String get ownerAvailabilityAvailable => '可用';
+
+  @override
+  String get ownerAvailabilityTitle => '看房可用时间';
+
+  @override
+  String get paymentCardIncomplete => '请输入完整的到期日期。';
+
+  @override
+  String get paymentCardInvalidMonth => '月份无效（01-12）。';
+
+  @override
+  String get paymentCardExpired => '卡已过期。';
+
+  @override
+  String get paymentCardInvalidFormat => '到期日期格式无效（MM/YY）。';
+
+  @override
+  String get paymentTitle => '付款';
+
+  @override
+  String get paymentCompletedLabel => '付款已完成';
+
+  @override
+  String get paymentPayNow => '立即支付';
+
+  @override
+  String get paymentMethodTitle => '支付方式';
+
+  @override
+  String get paymentMethodCard => '信用卡/借记卡';
+
+  @override
+  String get paymentMethodBanking => '网上银行';
+
+  @override
+  String get paymentSelectBank => '选择银行';
+
+  @override
+  String get paymentCardNumberLabel => '卡号';
+
+  @override
+  String get paymentCardNumberHint => 'XXXX XXXX XXXX XXXX';
+
+  @override
+  String get paymentExpiryLabel => '到期日期';
+
+  @override
+  String get paymentExpiryHint => 'MM/YY';
+
+  @override
+  String get paymentCvvLabel => 'CVV';
+
+  @override
+  String get paymentCvvHint => 'XXX';
+
+  @override
+  String get paymentAmountLabel => '需支付金额';
+
+  @override
+  String get paymentTotalLabel => '总价';
+
+  @override
+  String get paymentProcessing => '付款处理中...';
+
+  @override
+  String get paymentSuccess => '付款成功！';
+
+  @override
+  String paymentSuccessSubtitle(Object amount) {
+    return '你已支付 RM $amount。';
+  }
+
+  @override
+  String get paymentBackToHome => '返回首页';
+
+  @override
+  String paymentError(Object message) {
+    return '付款错误：$message';
+  }
+
+  @override
+  String get paymentMethodEwallet => '电子钱包';
+
+  @override
+  String get paymentSelectEwallet => '选择电子钱包';
+
+  @override
+  String get paymentSelectEwalletError => '请选择电子钱包。';
+
+  @override
+  String get paymentCardNumberInvalid => '卡号无效。';
+
+  @override
+  String get paymentCvvInvalid => 'CVV 无效。';
+
+  @override
+  String get paymentSummaryTitle => '付款摘要';
+
+  @override
+  String get paymentSummaryProperty => '房源';
+
+  @override
+  String get paymentSummaryStartDate => '开始日期';
+
+  @override
+  String get paymentSummaryDuration => '时长';
+
+  @override
+  String get paymentSummaryMonthlyRent => '月租';
+
+  @override
+  String paymentDurationMonths(Object count) {
+    return '$count 个月';
+  }
+
+  @override
+  String get paymentSummaryMethod => '方式';
+
+  @override
+  String paymentMethodWithBank(Object bank) {
+    return '网上银行（$bank）';
+  }
+
+  @override
+  String paymentMethodWithEwallet(Object wallet) {
+    return '电子钱包（$wallet）';
+  }
+
+  @override
+  String get paymentSummaryStatus => '状态';
+
+  @override
+  String paymentRentMonth(Object number) {
+    return '第 $number 个月租金';
+  }
+
+  @override
+  String get paymentBookingFeeOneMonth => '预订费（1 个月）';
+
+  @override
+  String get paymentSelectBankError => '请选择银行。';
+
+  @override
+  String get paymentConfirmTitle => '确认付款';
+
+  @override
+  String get paymentConfirmMessage => '确定要继续付款吗？';
+
+  @override
+  String get paymentSummaryAmount => '金额';
+
+  @override
+  String get paymentSummaryMethodLabel => '支付方式';
+
+  @override
+  String get paymentCancel => '取消';
+
+  @override
+  String get paymentConfirmPay => '确认并支付';
+
+  @override
+  String get paymentFailed => '付款失败，请重试。';
+
+  @override
+  String get paymentSuccessMessage => '付款已成功处理。';
+
+  @override
+  String paymentFailedWithMessage(Object message) {
+    return '付款失败：$message';
+  }
+
+  @override
+  String get paymentErrorDetailsAction => '详情';
+
+  @override
+  String get paymentErrorDetailsTitle => '错误详情';
+
+  @override
+  String get paymentOk => '确定';
+
+  @override
+  String get paymentSuccessTitle => '付款成功';
+
+  @override
+  String get paymentViewReceipt => '查看收据';
+
+  @override
+  String get paymentDismiss => '关闭';
+
+  @override
+  String get paymentMethodCardShort => '卡';
+
+  @override
+  String get paymentLoginRequired => '请登录后再付款。';
+
+  @override
+  String get viewingHistoryPleaseLogin => '请登录查看你的看房记录。';
+
+  @override
+  String get viewingHistoryTitle => '看房记录';
+
+  @override
+  String viewingHistoryErrorWithMessage(Object message) {
+    return '错误：$message';
+  }
+
+  @override
+  String get viewingHistoryCancelTitle => '取消看房';
+
+  @override
+  String get viewingHistoryCancelMessage => '确定要取消该看房预约吗？';
+
+  @override
+  String get viewingHistoryKeepAppointment => '保留预约';
+
+  @override
+  String get viewingHistoryConfirmCancellation => '确认取消';
+
+  @override
+  String get viewingHistoryCancelledSuccess => '看房预约已取消';
+
+  @override
+  String viewingHistoryCancelFailed(Object error) {
+    return '取消看房失败：$error';
+  }
+
+  @override
+  String get viewingHistoryEmptyAll => '暂无看房请求。';
+
+  @override
+  String get viewingHistoryEmptyForStatus => '该状态暂无看房请求。';
+
+  @override
+  String get viewingHistoryFallbackLocation => '位置不可用';
+
+  @override
+  String get viewingHistoryFallbackPrice => '价格不可用';
+
+  @override
+  String get viewingHistoryFallbackDescription => '房源详情暂不可用。';
+
+  @override
+  String get viewingHistoryFallbackHostRole => '房东';
+
+  @override
+  String get viewingHistoryDateLabel => '看房日期';
+
+  @override
+  String get viewingHistoryTimeLabel => '看房时间';
+
+  @override
+  String get viewingHistoryScheduledLabel => '已预约';
+
+  @override
+  String get viewingHistoryCancelAction => '取消';
+
+  @override
+  String get statusCancelled => '已取消';
+
+  @override
+  String get statusRescheduled => '已改期';
+
+  @override
+  String get statusSlotTaken => '时段已占用';
+
+  @override
+  String get statusPropertyRented => '房源已出租';
 }

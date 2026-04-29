@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
+import 'package:homeu/core/localization/homeu_l10n.dart';
 import 'package:homeu/core/theme/homeu_app_theme.dart';
 import 'package:homeu/app/profile/admin_dashboard_models.dart';
 import 'package:homeu/app/profile/admin_dashboard_repository.dart';
@@ -53,8 +54,7 @@ class _HomeUAdminDashboardScreenState extends State<HomeUAdminDashboardScreen> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _errorMessage =
-              'Failed to load system overview. Please check your connection.';
+          _errorMessage = context.l10n.adminDashboardLoadError;
           _isLoading = false;
         });
       }
@@ -94,7 +94,7 @@ class _HomeUAdminDashboardScreenState extends State<HomeUAdminDashboardScreen> {
     return Scaffold(
       backgroundColor: context.colors.surface,
       appBar: AppBar(
-        title: const Text('Admin Dashboard'),
+        title: Text(context.l10n.adminDashboardTitle),
         backgroundColor: context.colors.surface,
         elevation: 0,
         centerTitle: false,
@@ -116,7 +116,7 @@ class _HomeUAdminDashboardScreenState extends State<HomeUAdminDashboardScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Welcome, Admin',
+                  context.l10n.adminDashboardWelcome,
                   style: TextStyle(
                     color: context.homeuPrimaryText,
                     fontSize: 24,
@@ -125,7 +125,7 @@ class _HomeUAdminDashboardScreenState extends State<HomeUAdminDashboardScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'System Overview',
+                  context.l10n.adminDashboardOverview,
                   style: TextStyle(
                     color: context.homeuMutedText,
                     fontSize: 16,
@@ -135,10 +135,12 @@ class _HomeUAdminDashboardScreenState extends State<HomeUAdminDashboardScreen> {
                 const SizedBox(height: 24),
 
                 if (_isLoading)
-                  const Center(
+                  Center(
                     child: Padding(
-                      padding: EdgeInsets.symmetric(vertical: 40),
-                      child: CircularProgressIndicator(),
+                      padding: const EdgeInsets.symmetric(vertical: 40),
+                      child: CircularProgressIndicator(
+                        color: context.homeuAccent,
+                      ),
                     ),
                   )
                 else if (_errorMessage != null)
@@ -157,28 +159,28 @@ class _HomeUAdminDashboardScreenState extends State<HomeUAdminDashboardScreen> {
                     childAspectRatio: 1.4,
                     children: [
                       _SummaryCard(
-                        title: 'Total Users',
+                        title: context.l10n.adminTotalUsers,
                         value: _stats.totalUsers.toString(),
                         icon: Icons.people_outline_rounded,
-                        color: Colors.blue,
+                        color: context.colors.primary,
                       ),
                       _SummaryCard(
-                        title: 'Owners',
+                        title: context.l10n.adminTotalOwners,
                         value: _stats.totalOwners.toString(),
                         icon: Icons.business_center_outlined,
-                        color: Colors.indigo,
+                        color: context.colors.secondary,
                       ),
                       _SummaryCard(
-                        title: 'Tenants',
+                        title: context.l10n.adminTotalTenants,
                         value: _stats.totalTenants.toString(),
                         icon: Icons.person_outline_rounded,
-                        color: Colors.teal,
+                        color: context.colors.tertiary,
                       ),
                       _SummaryCard(
-                        title: 'Pending Reports',
+                        title: context.l10n.adminPendingReports,
                         value: _stats.pendingComplaints.toString(),
                         icon: Icons.report_problem_outlined,
-                        color: Colors.orange,
+                        color: context.colors.error,
                       ),
                     ],
                   ),
@@ -186,7 +188,7 @@ class _HomeUAdminDashboardScreenState extends State<HomeUAdminDashboardScreen> {
                 const SizedBox(height: 32),
 
                 Text(
-                  'Management',
+                  context.l10n.adminManagementTitle,
                   style: TextStyle(
                     color: context.homeuPrimaryText,
                     fontSize: 18,
@@ -197,15 +199,17 @@ class _HomeUAdminDashboardScreenState extends State<HomeUAdminDashboardScreen> {
 
                 // Menu Options
                 _ManagementTile(
-                  title: 'Reports Review',
-                  subtitle:
-                      '${_stats.pendingComplaints} pending of ${_stats.totalComplaints} total reports',
+                  title: context.l10n.adminReportsReview,
+                  subtitle: context.l10n.adminReportsSummary(
+                    _stats.pendingComplaints,
+                    _stats.totalComplaints,
+                  ),
                   icon: Icons.gavel_rounded,
                   onTap: _openReportsModeration,
                 ),
                 _ManagementTile(
-                  title: 'Admin Management',
-                  subtitle: 'Manage system administrators',
+                  title: context.l10n.adminManagementTile,
+                  subtitle: context.l10n.adminManagementSubtitle,
                   icon: Icons.admin_panel_settings_outlined,
                   onTap: () {
                     Navigator.of(context).push(
@@ -216,8 +220,8 @@ class _HomeUAdminDashboardScreenState extends State<HomeUAdminDashboardScreen> {
                   },
                 ),
                 _ManagementTile(
-                  title: 'Audit Logs',
-                  subtitle: 'View system-wide activity logs',
+                  title: context.l10n.adminAuditLogsTitle,
+                  subtitle: context.l10n.adminAuditLogsSubtitle,
                   icon: Icons.history_rounded,
                   onTap: _openAuditLogs,
                 ),
@@ -241,22 +245,24 @@ class _ErrorCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.red.withValues(alpha: 0.05),
+        color: context.colors.errorContainer,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.red.withValues(alpha: 0.1)),
+        border: Border.all(
+          color: context.colors.errorContainer.withValues(alpha: 0.7),
+        ),
       ),
       child: Column(
         children: [
           Text(
             message,
             textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.red),
+            style: TextStyle(color: context.colors.onErrorContainer),
           ),
           const SizedBox(height: 12),
           TextButton.icon(
             onPressed: onRetry,
             icon: const Icon(Icons.refresh, size: 18),
-            label: const Text('Retry'),
+            label: Text(context.l10n.ownerRequestsRetry),
           ),
         ],
       ),

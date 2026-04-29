@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:homeu/core/localization/homeu_l10n.dart';
 import 'package:homeu/core/theme/homeu_app_theme.dart';
 
 class HomeUAdminBottomNavigationBar extends StatelessWidget {
@@ -43,31 +44,31 @@ class HomeUAdminBottomNavigationBar extends StatelessWidget {
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         selectedIndex: selectedIndex,
         onDestinationSelected: onDestinationSelected,
-        destinations: const [
+        destinations: [
           NavigationDestination(
-            icon: Icon(Icons.dashboard_outlined),
-            selectedIcon: Icon(Icons.dashboard_rounded),
-            label: 'Dashboard',
+            icon: const Icon(Icons.dashboard_outlined),
+            selectedIcon: const Icon(Icons.dashboard_rounded),
+            label: context.l10n.adminNavDashboard,
           ),
           NavigationDestination(
-            icon: Icon(Icons.report_gmailerrorred_outlined),
-            selectedIcon: Icon(Icons.report_gmailerrorred_rounded),
-            label: 'Reports',
+            icon: const Icon(Icons.report_gmailerrorred_outlined),
+            selectedIcon: const Icon(Icons.report_gmailerrorred_rounded),
+            label: context.l10n.adminNavReports,
           ),
           NavigationDestination(
-            icon: Icon(Icons.chat_bubble_outline_rounded),
-            selectedIcon: Icon(Icons.chat_bubble_rounded),
-            label: 'Chat',
+            icon: const Icon(Icons.chat_bubble_outline_rounded),
+            selectedIcon: const Icon(Icons.chat_bubble_rounded),
+            label: context.l10n.adminNavChat,
           ),
           NavigationDestination(
-            icon: Icon(Icons.history_rounded),
-            selectedIcon: Icon(Icons.history_toggle_off_rounded),
-            label: 'Logs',
+            icon: const Icon(Icons.history_rounded),
+            selectedIcon: const Icon(Icons.history_toggle_off_rounded),
+            label: context.l10n.adminNavLogs,
           ),
           NavigationDestination(
-            icon: Icon(Icons.person_outline_rounded),
-            selectedIcon: Icon(Icons.person_rounded),
-            label: 'Profile',
+            icon: const Icon(Icons.person_outline_rounded),
+            selectedIcon: const Icon(Icons.person_rounded),
+            label: context.l10n.adminNavProfile,
           ),
         ],
       ),

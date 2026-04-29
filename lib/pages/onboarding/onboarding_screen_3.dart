@@ -105,7 +105,7 @@ class HomeUOnboardingScreen3 extends StatelessWidget {
                                 },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: context.homeuAccent,
-                              foregroundColor: Colors.white,
+                              foregroundColor: context.colors.onPrimary,
                               elevation: 0,
                               padding: const EdgeInsets.symmetric(vertical: 16),
                               shape: RoundedRectangleBorder(
@@ -182,7 +182,7 @@ class _SecurePaymentIllustration extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = context.isDarkMode;
+    final colors = context.colors;
     final card = context.homeuCard;
     final accent = context.homeuAccent;
     final success = context.homeuSuccess;
@@ -193,9 +193,7 @@ class _SecurePaymentIllustration extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: isDark
-              ? [const Color(0xFF1A263D), const Color(0xFF162B27)]
-              : [const Color(0xFFF4F8FF), const Color(0xFFEAF8F2)],
+          colors: [colors.surface, colors.surfaceContainerHighest],
         ),
         boxShadow: [
           BoxShadow(

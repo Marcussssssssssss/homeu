@@ -1,6 +1,7 @@
 {
   "@@locale": "en",
   "appTitle": "HomeU",
+  "splashTagline": "Find Your Perfect Home",
   "navHome": "Home",
   "navFavorites": "Favourite",
   "navBookings": "Booking",
@@ -145,6 +146,17 @@
   "authHidePassword": "Hide password",
   "loginTitle": "Welcome Back",
   "loginSubtitle": "Login to continue your HomeU journey.",
+  "loginDividerOr": "OR",
+  "loginBiometricReason": "Authenticate to access HomeU",
+  "loginSessionExpired": "Session expired. Please login with email and password.",
+  "loginBiometricFailed": "Biometric authentication failed or cancelled.",
+  "loginContinueAs": "Continue as {name}",
+  "@loginContinueAs": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "loginUseBiometrics": "Use Biometrics",
   "loginPasswordHint": "Enter your password",
   "loginForgotPassword": "Forgot password?",
   "loginNewHere": "New here?",
@@ -160,6 +172,7 @@
   "registerTitle": "Create Your Account",
   "registerSubtitle": "Join HomeU and start your rental journey.",
   "registerNameHint": "Your full name",
+  "registerPhoneHint": "+60 12 345 6789",
   "registerPasswordHint": "Create a password",
   "registerConfirmPassword": "Confirm Password",
   "registerConfirmPasswordHint": "Re-enter your password",
@@ -210,6 +223,7 @@
   "onboardingExampleListing2Subtitle": "1 Bed • Near Campus",
   "onboardingExampleListing2Price": "$780/mo",
   "onboardingStep2Title": "List Your Property Easily",
+  "onboardingStep2Title": "List Your Property Easily",
   "onboardingStep2Subtitle": "Add your property, upload photos, and manage rental requests in one place.",
   "ownerNewListing": "New Listing",
   "ownerPropertyType": "Property Type",
@@ -221,6 +235,98 @@
   "onboardingViewingConfirmed": "Viewing Confirmed",
   "onboardingSecurePayment": "Secure Payment",
   "onboardingProtected": "Protected",
+  "viewingScheduleTitle": "Schedule Viewing",
+  "viewingSelectSlotTitle": "Select an Available Slot",
+  "viewingSelectSlotSubtitle": "Owners only display slots they are available for. Select one to proceed.",
+  "viewingNoSlotsTitle": "No Available Slots",
+  "viewingNoSlotsSubtitle": "The owner has not listed any availability for this property yet. Please check back later or contact the owner.",
+  "viewingGoBack": "Go Back",
+  "viewingConfirmRequest": "Confirm Request",
+  "viewingAlreadyScheduled": "You have already scheduled a viewing for this time slot. Please check your Requests.",
+  "viewingRequestSent": "Request Sent!",
+  "viewingErrorWithMessage": "Error: {message}",
+  "@viewingErrorWithMessage": {
+    "placeholders": {
+      "message": {}
+    }
+  },
+  "bookingDetailsTitle": "Booking Details",
+  "bookingPaymentScheduleTitle": "Payment Schedule",
+  "bookingPaymentScheduleEmpty": "No payment schedule generated yet.",
+  "bookingMonthLabel": "Month {number}",
+  "@bookingMonthLabel": {
+    "placeholders": {
+      "number": {}
+    }
+  },
+  "bookingMonthWithFee": "Month {number} (Booking Fee)",
+  "@bookingMonthWithFee": {
+    "placeholders": {
+      "number": {}
+    }
+  },
+  "bookingDueLabel": "Due: {date}",
+  "@bookingDueLabel": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "bookingViewReceipt": "View Receipt",
+  "bookingAmountRm": "RM {amount}",
+  "@bookingAmountRm": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "bookingPaid": "PAID",
+  "bookingUpcoming": "UPCOMING",
+  "bookingPayNow": "Pay Now",
+  "bookingReceiptNotFound": "No receipt found for this payment.",
+  "bookingReceiptError": "Error loading receipt: {message}",
+  "@bookingReceiptError": {
+    "placeholders": {
+      "message": {}
+    }
+  },
+  "reviewRatingTitle": "Review & Rating",
+  "reviewRatingSubtitle": "Share your experience to help future tenants make better decisions.",
+  "reviewAverageLabel": "Average Rating",
+  "reviewYourRatingLabel": "Your Rating",
+  "reviewCommentLabel": "Comment",
+  "reviewCommentHint": "Tell us about cleanliness, owner communication, and your overall experience.",
+  "reviewSubmitLabel": "Submit",
+  "reviewSubmitSuccess": "Thank you. Your review has been submitted.",
+  "reviewStarLabel": "{count} star",
+  "@reviewStarLabel": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "compareTitle": "Compare Properties",
+  "compareClear": "Clear",
+  "compareEmptyTitle": "No Properties Selected",
+  "compareEmptySubtitle": "Go back and select 2 properties\nto start comparing",
+  "compareBackToListings": "Back to Listings",
+  "comparePriceRangeLabel": "Price Range",
+  "comparePriceRangeValue": "RM {min} - RM {max}",
+  "@comparePriceRangeValue": {
+    "placeholders": {
+      "min": {},
+      "max": {}
+    }
+  },
+  "compareSaveAmount": "Save RM {amount}",
+  "@compareSaveAmount": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "compareLabelAddress": "Address",
+  "compareLabelType": "Type",
+  "compareLabelRooms": "Rooms",
+  "compareLabelFurnishing": "Furnishing",
+  "compareLabelOwner": "Owner",
+  "compareLabelAvailability": "Availability",
   "updatePasswordSuccessMessage": "Your password has been updated successfully.",
   "updatePasswordStrongPasswordTip": "Use a strong password with letters, numbers, and symbols.",
   "updatePasswordCurrentPasswordLabel": "Current Password",
@@ -273,5 +379,577 @@
   "receiptTotalAmount": "Total Amount",
   "receiptDownload": "Download",
   "receiptShare": "Share",
-  "receiptFooter": "Thank you for using HomeU!"
+  "receiptFooter": "Thank you for using HomeU!",
+  "paymentAmountRm": "RM {amount}",
+  "@paymentAmountRm": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "bookingTitle": "Booking",
+  "bookingConflictDetected": "Conflict detected with an existing booking.",
+  "bookingFeeNotice": "Paying the booking fee locks this property. The remaining balance is due after owner approval.",
+  "bookingPayFee": "Pay Booking Fee (RM {amount})",
+  "@bookingPayFee": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "bookingSelectedProperty": "Selected Property",
+  "bookingConflictDetails": "Property is already booked starting from {date}. Please choose a shorter duration or different start date.",
+  "@bookingConflictDetails": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "bookingDurationTitle": "Rental Duration",
+  "bookingDurationMonths": "{count} months",
+  "@bookingDurationMonths": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "bookingStartDateTitle": "Start Date",
+  "bookingOccupiedUntil": "Property is occupied until {date}",
+  "@bookingOccupiedUntil": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "bookingTotalPriceTitle": "Total Price Calculation",
+  "bookingMonthlyPriceLabel": "Monthly Price",
+  "bookingDurationSummary": "Duration ({months} months)",
+  "@bookingDurationSummary": {
+    "placeholders": {
+      "months": {}
+    }
+  },
+  "bookingEstimatedTotalLabel": "Estimated Total",
+  "paymentSupabaseUnavailable": "Supabase is not initialized. Please try again later.",
+  "bookingLoginRequired": "Please log in to continue booking.",
+  "bookingDurationJustBooked": "Sorry, this duration was just booked by another tenant.",
+  "bookingCreateFailed": "Unable to create booking. Please try again.",
+  "bookingCreateError": "Create booking failed: {error}",
+  "@bookingCreateError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "statusAll": "All",
+  "ownerRequestsTitle": "Requests",
+  "ownerRequestsBookingsTab": "Bookings",
+  "ownerRequestsViewingsTab": "Viewings",
+  "ownerRequestsRetry": "Retry",
+  "ownerRequestsEmpty": "No \"{filter}\" requests.",
+  "@ownerRequestsEmpty": {
+    "placeholders": {
+      "filter": {}
+    }
+  },
+  "ownerRequestsMoveIn": "Moves in: {date}  •  {months} months",
+  "@ownerRequestsMoveIn": {
+    "placeholders": {
+      "date": {},
+      "months": {}
+    }
+  },
+  "ownerRequestsFlexibleDuration": "Flexible  •  {months} months",
+  "@ownerRequestsFlexibleDuration": {
+    "placeholders": {
+      "months": {}
+    }
+  },
+  "ownerRequestsMonthlyPrice": "RM {price} / mo",
+  "@ownerRequestsMonthlyPrice": {
+    "placeholders": {
+      "price": {}
+    }
+  },
+  "ownerRequestsReview": "Review",
+  "ownerRequestsViewingsEmpty": "No \"{filter}\" viewing requests.",
+  "@ownerRequestsViewingsEmpty": {
+    "placeholders": {
+      "filter": {}
+    }
+  },
+  "ownerRequestsViewingTime": "{date}  •  {time}",
+  "@ownerRequestsViewingTime": {
+    "placeholders": {
+      "date": {},
+      "time": {}
+    }
+  },
+  "ownerRequestsDecline": "Decline",
+  "ownerRequestsApprove": "Approve",
+  "ownerRequestsMarkCompleted": "Mark as Completed",
+  "ownerGreeting": "Hello, {name}",
+  "@ownerGreeting": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "ownerRecentProperties": "Recent Properties",
+  "ownerNoProperties": "No properties listed yet",
+  "ownerAddFirstProperty": "Add your first property",
+  "ownerUntitledProperty": "Untitled",
+  "ownerRecentBookingRequests": "Recent Booking Requests",
+  "ownerNoBookingRequests": "No active booking requests",
+  "ownerUnknownProperty": "Unknown Property",
+  "ownerUnknownTenant": "Unknown Tenant",
+  "ownerRecentViewingRequests": "Recent Viewing Requests",
+  "ownerNoViewingRequests": "No active viewing requests",
+  "ownerTapToReviewViewing": "Tap to review viewing",
+  "ownerProjected30Days": "Projected (30 Days)",
+  "ownerOverduePayments": "Overdue Payments",
+  "ownerInvoiceCollectionRate": "Invoice Collection Rate",
+  "monthShortJul": "Jul",
+  "monthShortAug": "Aug",
+  "monthShortSep": "Sep",
+  "monthShortOct": "Oct",
+  "monthShortNov": "Nov",
+  "monthShortDec": "Dec",
+  "profileBiometricUnavailable": "Biometric authentication is not available or not set up on this device.",
+  "profileBiometricReason": "Please authenticate to enable biometric login",
+  "profileBiometricEnabled": "Biometric login enabled successfully.",
+  "profileBiometricSaveFailed": "Failed to update biometric preference.",
+  "profileBiometricDisabled": "Biometric login disabled.",
+  "profileErrorSaveBiometric": "Failed to save biometric preference.",
+  "profileLogoutTitle": "Log out?",
+  "profileLogoutMessage": "Are you sure you want to log out of your HomeU account?",
+  "profileLogoutCancel": "Cancel",
+  "profileLogoutConfirm": "Log Out",
+  "profileFavoritesSubtitle": "View your saved properties",
+  "profileBiometricTitle": "Biometric Login",
+  "profileBiometricSubtitle": "Unlock HomeU with biometrics",
+  "adminDashboardLoadError": "Failed to load system overview. Please check your connection.",
+  "adminDashboardTitle": "Admin Dashboard",
+  "adminDashboardWelcome": "Welcome, Admin",
+  "adminDashboardOverview": "System Overview",
+  "adminTotalUsers": "Total Users",
+  "adminTotalOwners": "Owners",
+  "adminTotalTenants": "Tenants",
+  "adminPendingReports": "Pending Reports",
+  "adminManagementTitle": "Management",
+  "adminReportsReview": "Reports Review",
+  "adminReportsSummary": "{pending} pending of {total} total reports",
+  "@adminReportsSummary": {
+    "placeholders": {
+      "pending": {},
+      "total": {}
+    }
+  },
+  "adminManagementTile": "Admin Management",
+  "adminManagementSubtitle": "Manage system administrators",
+  "adminAuditLogsTitle": "Audit Logs",
+  "adminAuditLogsSubtitle": "View system-wide activity logs",
+  "adminCreatedSuccess": "Admin account created successfully.",
+  "adminUpdateDetailsTitle": "Update Admin Details",
+  "adminUpdateDetailsConfirm": "Update",
+  "adminDetailsUpdated": "Admin details updated.",
+  "adminUpdateError": "Error: {error}",
+  "@adminUpdateError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "adminCannotRemoveSelf": "Security: You cannot remove your own admin access.",
+  "adminRemoveTitle": "Remove Admin?",
+  "adminRemoveMessage": "Remove admin privileges from {name}? They will revert to a Tenant role.",
+  "@adminRemoveMessage": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "adminRemoveConfirm": "Remove",
+  "adminRemovedSuccess": "Admin privileges removed.",
+  "adminRemoveError": "Error: {error}",
+  "@adminRemoveError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "adminAddButton": "Add Admin",
+  "adminNoAdminsFound": "No admins found.",
+  "adminNavDashboard": "Dashboard",
+  "adminNavReports": "Reports",
+  "adminNavChat": "Chat",
+  "adminNavLogs": "Logs",
+  "adminNavProfile": "Profile",
+  "commonCancel": "Cancel",
+  "commonConfirm": "Confirm",
+  "commonRefreshTooltip": "Refresh",
+  "statusReviewed": "Reviewed",
+  "statusDismissed": "Dismissed",
+  "adminReportsTitle": "Reports Review",
+  "adminReportsSearchHint": "Search report, owner, tenant, listing...",
+  "adminReportsFilterTooltip": "Filter reports",
+  "adminReportsActiveFilterLabel": "Active filter:",
+  "adminReportsNoMatches": "No reports match the current filters.",
+  "adminReportsFilterTitle": "Filter Reports",
+  "adminReportsFilterSectionStatus": "Report Status",
+  "adminReportsFilterClear": "Clear Filter",
+  "adminReportsFilterApply": "Apply Filter",
+  "adminReportsUnknownListing": "Unknown listing",
+  "adminReportsUnknownReportId": "Unknown",
+  "adminReportsPropertyIdFallback": "Property #{propertyId}",
+  "@adminReportsPropertyIdFallback": {
+    "placeholders": {
+      "propertyId": {}
+    }
+  },
+  "adminReportsNotAvailable": "N/A",
+  "adminReportsUnknownOwner": "Unknown owner",
+  "adminReportsUnknownReporter": "Unknown reporter",
+  "adminReportsUnknownEmail": "-",
+  "adminReportsLoadError": "Failed to load reports: {error}",
+  "@adminReportsLoadError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "adminReportsMissingOwnerOrPropertyChat": "Missing owner or property context for chat.",
+  "adminReportsMissingTenantOrPropertyChat": "Missing tenant or property context for chat.",
+  "adminReportsAuditContactOwnerReason": "Opened owner chat for report follow-up.",
+  "adminReportsAuditContactTenantReason": "Opened tenant chat for report follow-up.",
+  "adminReportsChatOpenError": "Unable to open chat: {error}",
+  "@adminReportsChatOpenError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "adminReportsRecordRiskLevelAction": "Record Risk Level",
+  "adminReportsRiskRecorded": "Risk level recorded.",
+  "adminReportsRiskRecordError": "Risk evaluation failed: {error}",
+  "@adminReportsRiskRecordError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "adminReportsActionCompleted": "{actionLabel} completed.",
+  "@adminReportsActionCompleted": {
+    "placeholders": {
+      "actionLabel": {}
+    }
+  },
+  "adminReportsUpdateError": "Report update failed: {error}",
+  "@adminReportsUpdateError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "adminReportsReportTitle": "Report #{reportId}",
+  "@adminReportsReportTitle": {
+    "placeholders": {
+      "reportId": {}
+    }
+  },
+  "adminReportsSubmittedOn": "Submitted on {date}",
+  "@adminReportsSubmittedOn": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "adminReportsSectionProperty": "Property",
+  "adminReportsSectionOwner": "Owner",
+  "adminReportsSectionReporter": "Reporter",
+  "adminReportsSectionComplaint": "Complaint",
+  "adminReportsFieldPropertyId": "Property ID",
+  "adminReportsFieldTitle": "Title",
+  "adminReportsFieldName": "Name",
+  "adminReportsFieldEmail": "Email",
+  "adminReportsFieldTotalReports": "Total reports",
+  "adminReportsFieldReason": "Reason",
+  "adminReportsFieldDescription": "Description",
+  "adminReportsFieldStatus": "Status",
+  "adminReportsRiskSectionTitle": "Risk evaluation",
+  "adminReportsRiskSectionHint": "Internal review only. This does not change listing visibility or account status.",
+  "adminReportsReviewedConfirmTitle": "I have reviewed this complaint.",
+  "adminReportsReviewedConfirmSubtitle": "Risk evaluation and status updates unlock after this confirmation.",
+  "adminReportsActionsTitle": "Actions",
+  "adminReportsActionsHint": "Use chat for follow-up, then record the internal risk level or update the report status.",
+  "adminReportsContactOwner": "Contact Owner",
+  "adminReportsContactReporter": "Contact Reporter",
+  "adminReportsSaveRisk": "Save Risk Level",
+  "adminReportsMarkReviewed": "Mark Reviewed",
+  "adminReportsDismissReport": "Dismiss Report",
+  "adminReportsOwnerLabel": "Owner: {name}",
+  "@adminReportsOwnerLabel": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "adminReportsReporterLabel": "Reporter: {name}",
+  "@adminReportsReporterLabel": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "adminReportsReasonLabel": "Reason: {reason}",
+  "@adminReportsReasonLabel": {
+    "placeholders": {
+      "reason": {}
+    }
+  },
+  "adminReportsReasonDialogPrompt": "Provide a reason and confirm this moderation action.",
+  "adminReportsReasonDialogLabel": "Admin reason",
+  "adminReportsReasonDialogHint": "Add clear moderation context",
+  "adminReportsReasonDialogConfirm": "I confirm this action.",
+  "adminReportsRiskLow": "Low",
+  "adminReportsRiskMedium": "Medium",
+  "adminReportsRiskHigh": "High",
+  "adminReportsRiskInvalid": "Invalid",
+  "adminAuditTitle": "System Audit Logs",
+  "adminAuditClearFiltersTooltip": "Clear Filters",
+  "adminAuditSearchHint": "Search descriptions...",
+  "adminAuditAllDates": "All Dates",
+  "adminAuditDateRange": "{start} - {end}",
+  "@adminAuditDateRange": {
+    "placeholders": {
+      "start": {},
+      "end": {}
+    }
+  },
+  "adminAuditTableFilterHint": "Table",
+  "adminAuditActionFilterHint": "Action",
+  "adminAuditEmptyState": "No audit logs found matching your criteria.",
+  "adminAuditClearAllFilters": "Clear all filters",
+  "adminAuditUnknownTime": "Unknown Time",
+  "adminAuditNoDetails": "No details available",
+  "adminAuditSystemActor": "System / Anonymous",
+  "adminAuditUnknownRole": "unknown",
+  "adminAuditNotAvailable": "N/A",
+  "adminAuditActorLabel": "Actor",
+  "adminAuditTargetTableLabel": "Target Table",
+  "adminAuditTargetIdLabel": "Target ID",
+  "adminAuditTableProfiles": "Profiles",
+  "adminAuditTableProperties": "Properties",
+  "adminAuditTableBookings": "Bookings",
+  "adminAuditTablePropertyReports": "Property Reports",
+  "adminAuditTableReports": "Reports",
+  "adminAuditTableAuditLogs": "Audit Logs",
+  "adminAuditActionAdminCreated": "Admin Created",
+  "adminAuditActionAdminUpdated": "Admin Updated",
+  "adminAuditActionAdminRemoved": "Admin Removed",
+  "adminAuditActionReportContactOwner": "Report: Contact Owner",
+  "adminAuditActionReportContactTenant": "Report: Contact Tenant",
+  "adminAuditActionReportRiskLow": "Report: Risk Low",
+  "adminAuditActionReportRiskMedium": "Report: Risk Medium",
+  "adminAuditActionReportRiskHigh": "Report: Risk High",
+  "adminAuditActionReportRiskInvalid": "Report: Risk Invalid",
+  "adminAuditActionReportReviewed": "Report: Reviewed",
+  "adminAuditActionReportDismissed": "Report: Dismissed",
+  "adminAuditActionPropertyApproved": "Property Approved",
+  "adminAuditActionPropertyRejected": "Property Rejected",
+  "adminAuditActionProfileUpdate": "Profile Updated",
+  "adminAuditLoadError": "Failed to load logs: {error}",
+  "@adminAuditLoadError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "propertyReportTitle": "Report Property",
+  "propertyReportSubtitle": "Please select a reason for reporting this property. Our team will review it shortly.",
+  "propertyReportReasonFake": "Fake listing / Scam",
+  "propertyReportReasonSuspicious": "Suspicious activity",
+  "propertyReportReasonWrongDetails": "Incorrect property details",
+  "propertyReportReasonInappropriate": "Inappropriate content",
+  "propertyReportReasonOther": "Other",
+  "propertyReportDescriptionHint": "Provide additional details (optional)",
+  "propertyReportCancel": "Cancel",
+  "propertyReportSubmit": "Submit Report",
+  "propertyReportSubmitted": "Report submitted successfully. Thank you.",
+  "propertyReportSubmitFailed": "Failed to submit report. Please try again.",
+  "propertyReportServiceUnavailable": "Report service is currently unavailable. Please check your connection.",
+  "propertyReportLoginRequired": "Please log in to submit a report.",
+  "propertyReportTenantOnly": "Only tenants can submit property reports.",
+  "propertyReportOwnProperty": "You cannot report your own property.",
+  "propertyReportInvalidMetadata": "Invalid property metadata. Unable to report.",
+  "propertyFacilitiesTitle": "Facilities",
+  "propertyNoFacilities": "No facilities listed.",
+  "propertyOwnerInfoTitle": "Owner Information",
+  "propertyOwnerHighRisk": "High Risk",
+  "propertyOwnerSuspicious": "Suspicious Owner",
+  "propertyOwnerSuspended": "Suspended",
+  "propertyOwnerRemoved": "Removed",
+  "propertyAvailabilityTitle": "Availability",
+  "propertyAvailabilityLabel": "Availability:",
+  "propertyStatusActive": "Active",
+  "propertyStatusOccupied": "Occupied",
+  "propertyStatusInactive": "Inactive",
+  "propertyReportErrorPermission": "Unable to submit report due to permission policy. Please contact support.",
+  "propertyReportErrorInvalidListing": "Unable to submit report because the listing reference is invalid.",
+  "propertyReportErrorInvalidData": "Unable to submit report because the listing data is invalid.",
+  "propertyNearbyLabel": "Nearby: {landmarks}",
+  "@propertyNearbyLabel": {
+    "placeholders": {
+      "landmarks": {}
+    }
+  },
+  "propertyDetailsTitle": "Property Details",
+  "propertyUnavailableAdmin": "This property is currently unavailable due to moderation.",
+  "propertyUnavailableBooking": "This property is currently occupied and not available for booking.",
+  "propertyFavoriteLoginRequired": "Please login to add to favorites.",
+  "propertyFavoriteTenantOnly": "Only tenants can save favorites.",
+  "propertyFavoritePolicyBlocked": "Unable to update favorite due to security policy.",
+  "propertyFavoriteUpdateFailed": "Failed to update favorite. Please try again.",
+  "propertyHighRiskTag": "High Risk",
+  "propertyLocationTitle": "Location",
+  "propertyDescriptionTitle": "Description",
+  "bookingBookNow": "Book Now",
+  "bookingHistoryEmpty": "No bookings found matching your criteria.",
+  "ownerAvailabilityEndAfterStart": "End time must be after start time.",
+  "ownerAvailabilityPastDate": "Cannot add slots for past dates.",
+  "ownerAvailabilityOverlap": "This slot overlaps with an existing one.",
+  "ownerAvailabilitySlotAdded": "Availability slot added successfully.",
+  "ownerAvailabilityAddFailed": "Failed to add availability slot. Please try again.",
+  "ownerAvailabilityDeleteFailed": "Failed to delete slot. Please try again.",
+  "ownerAvailabilityDateTime": "{date} at {time}",
+  "@ownerAvailabilityDateTime": {
+    "placeholders": {
+      "date": {},
+      "time": {}
+    }
+  },
+  "ownerAvailabilityCreateSlot": "Create New Availability Slot",
+  "ownerAvailabilitySelectDate": "Select Date",
+  "ownerAvailabilityStartTime": "Start Time",
+  "ownerAvailabilityEndTime": "End Time",
+  "ownerAvailabilityActiveSlots": "Your Available Slots",
+  "ownerAvailabilityStatusAvailable": "Available",
+  "ownerAvailabilityStatusBooked": "Booked",
+  "ownerAvailabilityStatusApproved": "Approved",
+  "ownerAvailabilityDeleteConfirmTitle": "Delete Slot?",
+  "ownerAvailabilityDeleteConfirmMessage": "Are you sure you want to delete this availability slot?",
+  "ownerAvailabilityEmpty": "No availability slots added yet.",
+  "ownerAvailabilityAddSlot": "Add Slot",
+  "ownerAvailabilityBooked": "Booked",
+  "ownerAvailabilityAvailable": "Available",
+  "ownerAvailabilityTitle": "Viewing Availability",
+  "paymentCardIncomplete": "Please enter a full card expiry date.",
+  "paymentCardInvalidMonth": "Invalid month (01-12).",
+  "paymentCardExpired": "Card has expired.",
+  "paymentCardInvalidFormat": "Invalid expiry format (MM/YY).",
+  "paymentTitle": "Payment",
+  "paymentCompletedLabel": "Payment Completed",
+  "paymentPayNow": "Pay Now",
+  "paymentMethodTitle": "Payment Method",
+  "paymentMethodCard": "Credit/Debit Card",
+  "paymentMethodBanking": "Online Banking",
+  "paymentSelectBank": "Select Bank",
+  "paymentCardNumberLabel": "Card Number",
+  "paymentCardNumberHint": "XXXX XXXX XXXX XXXX",
+  "paymentExpiryLabel": "Expiry Date",
+  "paymentExpiryHint": "MM/YY",
+  "paymentCvvLabel": "CVV",
+  "paymentCvvHint": "XXX",
+  "paymentAmountLabel": "Amount to Pay",
+  "paymentTotalLabel": "Total Price",
+  "paymentProcessing": "Processing Payment...",
+  "paymentSuccess": "Payment Successful!",
+  "paymentSuccessSubtitle": "You have paid RM {amount}.",
+  "@paymentSuccessSubtitle": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "paymentBackToHome": "Back to Home",
+  "paymentError": "Payment Error: {message}",
+  "@paymentError": {
+    "placeholders": {
+      "message": {}
+    }
+  },
+  "paymentMethodEwallet": "E-Wallet",
+  "paymentSelectEwallet": "Select E-Wallet",
+  "paymentSelectEwalletError": "Please select an E-Wallet.",
+  "paymentCardNumberInvalid": "Invalid card number.",
+  "paymentCvvInvalid": "Invalid CVV.",
+  "paymentSummaryTitle": "Payment Summary",
+  "paymentSummaryProperty": "Property",
+  "paymentSummaryStartDate": "Start Date",
+  "paymentSummaryDuration": "Duration",
+  "paymentSummaryMonthlyRent": "Monthly Rent",
+  "paymentDurationMonths": "{count} months",
+  "@paymentDurationMonths": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "paymentSummaryMethod": "Method",
+  "paymentMethodWithBank": "Online Banking ({bank})",
+  "@paymentMethodWithBank": {
+    "placeholders": {
+      "bank": {}
+    }
+  },
+  "paymentMethodWithEwallet": "E-Wallet ({wallet})",
+  "@paymentMethodWithEwallet": {
+    "placeholders": {
+      "wallet": {}
+    }
+  },
+  "paymentSummaryStatus": "Status",
+  "paymentRentMonth": "Rent for Month {number}",
+  "@paymentRentMonth": {
+    "placeholders": {
+      "number": {}
+    }
+  },
+  "paymentBookingFeeOneMonth": "Booking Fee (1 Month)",
+  "paymentSelectBankError": "Please select a bank.",
+  "paymentConfirmTitle": "Confirm Payment",
+  "paymentConfirmMessage": "Are you sure you want to proceed with the payment?",
+  "paymentSummaryAmount": "Amount",
+  "paymentSummaryMethodLabel": "Payment Method",
+  "paymentCancel": "Cancel",
+  "paymentConfirmPay": "Confirm & Pay",
+  "paymentFailed": "Payment failed. Please try again.",
+  "paymentSuccessMessage": "Payment processed successfully.",
+  "paymentFailedWithMessage": "Payment failed: {message}",
+  "@paymentFailedWithMessage": {
+    "placeholders": {
+      "message": {}
+    }
+  },
+  "paymentErrorDetailsAction": "Details",
+  "paymentErrorDetailsTitle": "Error Details",
+  "paymentOk": "OK",
+  "paymentSuccessTitle": "Payment Successful",
+  "paymentViewReceipt": "View Receipt",
+  "paymentDismiss": "Dismiss",
+  "paymentMethodCardShort": "Card",
+  "paymentLoginRequired": "Please log in to make a payment.",
+  "viewingHistoryPleaseLogin": "Please log in to view your viewing history.",
+  "viewingHistoryTitle": "Viewing History",
+  "viewingHistoryErrorWithMessage": "Error: {message}",
+  "@viewingHistoryErrorWithMessage": {
+    "placeholders": {
+      "message": {}
+    }
+  },
+  "viewingHistoryCancelTitle": "Cancel Viewing",
+  "viewingHistoryCancelMessage": "Are you sure you want to cancel this viewing appointment?",
+  "viewingHistoryKeepAppointment": "Keep Appointment",
+  "viewingHistoryConfirmCancellation": "Confirm Cancellation",
+  "viewingHistoryCancelledSuccess": "Viewing appointment cancelled",
+  "viewingHistoryCancelFailed": "Failed to cancel viewing: {error}",
+  "@viewingHistoryCancelFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "viewingHistoryEmptyAll": "No viewing requests yet.",
+  "viewingHistoryEmptyForStatus": "No viewing requests found for this status.",
+  "viewingHistoryFallbackLocation": "Location unavailable",
+  "viewingHistoryFallbackPrice": "Price unavailable",
+  "viewingHistoryFallbackDescription": "Property details are currently unavailable.",
+  "viewingHistoryFallbackHostRole": "Host",
+  "viewingHistoryDateLabel": "Viewing Date",
+  "viewingHistoryTimeLabel": "Viewing Time",
+  "viewingHistoryScheduledLabel": "Scheduled",
+  "viewingHistoryCancelAction": "Cancel",
+  "statusCancelled": "Cancelled",
+  "statusRescheduled": "Rescheduled",
+  "statusSlotTaken": "Slot Taken",
+  "statusPropertyRented": "Property Rented"
 }

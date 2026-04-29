@@ -3,6 +3,7 @@ import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
 import 'package:homeu/core/theme/homeu_app_theme.dart';
 import 'package:homeu/core/supabase/app_supabase.dart';
+import 'package:homeu/core/localization/homeu_l10n.dart';
 import 'package:intl/intl.dart';
 
 class HomeUAdminAuditLogsScreen extends StatefulWidget {
@@ -86,7 +87,7 @@ class _HomeUAdminAuditLogsScreenState extends State<HomeUAdminAuditLogsScreen> {
           _isLoading = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to load logs: $e')),
+          SnackBar(content: Text(context.l10n.adminAuditLoadError('$e'))),
         );
       }
     }
@@ -127,6 +128,60 @@ class _HomeUAdminAuditLogsScreenState extends State<HomeUAdminAuditLogsScreen> {
     }
   }
 
+  String _tableLabel(BuildContext context, String table) {
+    switch (table) {
+      case 'profiles':
+        return context.l10n.adminAuditTableProfiles;
+      case 'properties':
+        return context.l10n.adminAuditTableProperties;
+      case 'bookings':
+        return context.l10n.adminAuditTableBookings;
+      case 'property_reports':
+        return context.l10n.adminAuditTablePropertyReports;
+      case 'reports':
+        return context.l10n.adminAuditTableReports;
+      case 'audit_logs':
+        return context.l10n.adminAuditTableAuditLogs;
+      default:
+        return table;
+    }
+  }
+
+  String _actionLabel(BuildContext context, String action) {
+    switch (action) {
+      case 'admin_created':
+        return context.l10n.adminAuditActionAdminCreated;
+      case 'admin_updated':
+        return context.l10n.adminAuditActionAdminUpdated;
+      case 'admin_removed':
+        return context.l10n.adminAuditActionAdminRemoved;
+      case 'report_contact_owner':
+        return context.l10n.adminAuditActionReportContactOwner;
+      case 'report_contact_tenant':
+        return context.l10n.adminAuditActionReportContactTenant;
+      case 'report_risk_low':
+        return context.l10n.adminAuditActionReportRiskLow;
+      case 'report_risk_medium':
+        return context.l10n.adminAuditActionReportRiskMedium;
+      case 'report_risk_high':
+        return context.l10n.adminAuditActionReportRiskHigh;
+      case 'report_risk_invalid':
+        return context.l10n.adminAuditActionReportRiskInvalid;
+      case 'report_reviewed':
+        return context.l10n.adminAuditActionReportReviewed;
+      case 'report_dismissed':
+        return context.l10n.adminAuditActionReportDismissed;
+      case 'property_approved':
+        return context.l10n.adminAuditActionPropertyApproved;
+      case 'property_rejected':
+        return context.l10n.adminAuditActionPropertyRejected;
+      case 'profile_update':
+        return context.l10n.adminAuditActionProfileUpdate;
+      default:
+        return action.replaceAll('_', ' ');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // Access control
@@ -137,42 +192,43 @@ class _HomeUAdminAuditLogsScreenState extends State<HomeUAdminAuditLogsScreen> {
     return Scaffold(
       backgroundColor: context.colors.surface,
       appBar: AppBar(
-        title: const Text('System Audit Logs'),
+        title: Text(context.l10n.adminAuditTitle),
         backgroundColor: context.colors.surface,
         elevation: 0,
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
             onPressed: _fetchLogs,
-            tooltip: 'Refresh',
+            tooltip: context.l10n.commonRefreshTooltip,
           ),
           IconButton(
             icon: const Icon(Icons.filter_alt_off_outlined),
             onPressed: _resetFilters,
-            tooltip: 'Clear Filters',
+            tooltip: context.l10n.adminAuditClearFiltersTooltip,
           ),
           const SizedBox(width: 8),
         ],
       ),
       body: Column(
         children: [
-          // Filter & Search Header
           _buildHeader(context),
-
-          // Logs List
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : RefreshIndicator(
-              onRefresh: _fetchLogs,
-              child: _logs.isEmpty
-                  ? _buildEmptyState(context)
-                  : ListView.builder(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-                itemCount: _logs.length,
-                itemBuilder: (context, index) => _AuditLogCard(log: _logs[index]),
-              ),
-            ),
+                    onRefresh: _fetchLogs,
+                    child: _logs.isEmpty
+                        ? _buildEmptyState(context)
+                        : ListView.builder(
+                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
+                            itemCount: _logs.length,
+                            itemBuilder: (context, index) => _AuditLogCard(
+                              log: _logs[index],
+                              tableLabel: _tableLabel(context, _logs[index]['target_table']?.toString() ?? ''),
+                              actionLabel: _actionLabel(context, _logs[index]['action']?.toString() ?? ''),
+                            ),
+                          ),
+                  ),
           ),
         ],
       ),
@@ -194,7 +250,7 @@ class _HomeUAdminAuditLogsScreenState extends State<HomeUAdminAuditLogsScreen> {
               _fetchLogs();
             },
             decoration: InputDecoration(
-              hintText: 'Search descriptions...',
+              hintText: context.l10n.adminAuditSearchHint,
               prefixIcon: const Icon(Icons.search_rounded),
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               contentPadding: EdgeInsets.zero,
@@ -209,17 +265,21 @@ class _HomeUAdminAuditLogsScreenState extends State<HomeUAdminAuditLogsScreen> {
               children: [
                 _FilterChip(
                   label: _dateRange == null
-                      ? 'All Dates'
-                      : '${DateFormat('MMM d').format(_dateRange!.start)} - ${DateFormat('MMM d').format(_dateRange!.end)}',
+                      ? context.l10n.adminAuditAllDates
+                      : context.l10n.adminAuditDateRange(
+                          DateFormat('MMM d', Localizations.localeOf(context).toString()).format(_dateRange!.start),
+                          DateFormat('MMM d', Localizations.localeOf(context).toString()).format(_dateRange!.end),
+                        ),
                   isSelected: _dateRange != null,
                   onTap: _selectDateRange,
                   icon: Icons.calendar_today_rounded,
                 ),
                 const SizedBox(width: 8),
                 _DropdownFilter(
-                  hint: 'Table',
+                  hint: context.l10n.adminAuditTableFilterHint,
                   value: _selectedTable,
                   items: _tables,
+                  itemLabel: (item) => _tableLabel(context, item),
                   onChanged: (val) {
                     setState(() => _selectedTable = val);
                     _fetchLogs();
@@ -227,9 +287,10 @@ class _HomeUAdminAuditLogsScreenState extends State<HomeUAdminAuditLogsScreen> {
                 ),
                 const SizedBox(width: 8),
                 _DropdownFilter(
-                  hint: 'Action',
+                  hint: context.l10n.adminAuditActionFilterHint,
                   value: _selectedAction,
                   items: _actions,
+                  itemLabel: (item) => _actionLabel(context, item),
                   onChanged: (val) {
                     setState(() => _selectedAction = val);
                     _fetchLogs();
@@ -251,12 +312,12 @@ class _HomeUAdminAuditLogsScreenState extends State<HomeUAdminAuditLogsScreen> {
           Icon(Icons.history_toggle_off_rounded, size: 64, color: context.homeuMutedText),
           const SizedBox(height: 16),
           Text(
-            'No audit logs found matching your criteria.',
+            context.l10n.adminAuditEmptyState,
             textAlign: TextAlign.center,
             style: TextStyle(color: context.homeuMutedText, fontSize: 15),
           ),
           const SizedBox(height: 8),
-          TextButton(onPressed: _resetFilters, child: const Text('Clear all filters')),
+          TextButton(onPressed: _resetFilters, child: Text(context.l10n.adminAuditClearAllFilters)),
         ],
       ),
     );
@@ -275,11 +336,11 @@ class _FilterChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return ActionChip(
       onPressed: onTap,
-      avatar: Icon(icon, size: 14, color: isSelected ? Colors.white : context.homeuAccent),
+      avatar: Icon(icon, size: 14, color: isSelected ? context.colors.onPrimary : context.homeuAccent),
       label: Text(label),
       backgroundColor: isSelected ? context.homeuAccent : context.homeuCard,
       labelStyle: TextStyle(
-        color: isSelected ? Colors.white : context.homeuSecondaryText,
+        color: isSelected ? context.colors.onPrimary : context.homeuSecondaryText,
         fontSize: 12,
         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
       ),
@@ -293,9 +354,16 @@ class _DropdownFilter extends StatelessWidget {
   final String hint;
   final String? value;
   final List<String> items;
+  final String Function(String) itemLabel;
   final Function(String?) onChanged;
 
-  const _DropdownFilter({required this.hint, required this.value, required this.items, required this.onChanged});
+  const _DropdownFilter({
+    required this.hint,
+    required this.value,
+    required this.items,
+    required this.itemLabel,
+    required this.onChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -316,7 +384,7 @@ class _DropdownFilter extends StatelessWidget {
           items: items.map((String item) {
             return DropdownMenuItem<String>(
               value: item,
-              child: Text(item),
+              child: Text(itemLabel(item)),
             );
           }).toList(),
           onChanged: onChanged,
@@ -328,25 +396,26 @@ class _DropdownFilter extends StatelessWidget {
 
 class _AuditLogCard extends StatelessWidget {
   final Map<String, dynamic> log;
-  const _AuditLogCard({required this.log});
+  final String tableLabel;
+  final String actionLabel;
+  const _AuditLogCard({required this.log, required this.tableLabel, required this.actionLabel});
 
   @override
   Widget build(BuildContext context) {
     final createdAt = log['created_at'];
-    String formattedTime = 'Unknown Time';
+    String formattedTime = context.l10n.adminAuditUnknownTime;
     String formattedDate = '';
     if (createdAt != null) {
       final date = DateTime.parse(createdAt.toString());
-      formattedTime = DateFormat('HH:mm:ss').format(date);
-      formattedDate = DateFormat('MMM d, yyyy').format(date);
+      final localeName = Localizations.localeOf(context).toString();
+      formattedTime = DateFormat('HH:mm:ss', localeName).format(date);
+      formattedDate = DateFormat('MMM d, yyyy', localeName).format(date);
     }
 
-    final action = log['action']?.toString() ?? 'unknown_action';
-    final description = log['description']?.toString() ?? 'No details available';
-    final actorEmail = log['actor_email']?.toString() ?? 'System / Anonymous';
-    final actorRole = log['actor_role']?.toString() ?? 'unknown';
-    final targetTable = log['target_table']?.toString() ?? 'N/A';
-    final targetId = log['target_id']?.toString() ?? 'N/A';
+    final description = log['description']?.toString() ?? context.l10n.adminAuditNoDetails;
+    final actorEmail = log['actor_email']?.toString() ?? context.l10n.adminAuditSystemActor;
+    final actorRole = log['actor_role']?.toString() ?? context.l10n.adminAuditUnknownRole;
+    final targetId = log['target_id']?.toString() ?? context.l10n.adminAuditNotAvailable;
 
     return Card(
       margin: const EdgeInsets.only(top: 12),
@@ -360,7 +429,7 @@ class _AuditLogCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                _ActionBadge(action: action),
+                _ActionBadge(action: actionLabel),
                 const Spacer(),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
@@ -386,11 +455,11 @@ class _AuditLogCard extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  _DetailRow(label: 'Actor', value: actorEmail, subValue: actorRole.toUpperCase()),
+                  _DetailRow(label: context.l10n.adminAuditActorLabel, value: actorEmail, subValue: actorRole.toUpperCase()),
                   const Padding(padding: EdgeInsets.symmetric(vertical: 6), child: Divider(height: 1)),
-                  _DetailRow(label: 'Target Table', value: targetTable),
+                  _DetailRow(label: context.l10n.adminAuditTargetTableLabel, value: tableLabel),
                   const SizedBox(height: 8),
-                  _DetailRow(label: 'Target ID', value: targetId, isCode: true),
+                  _DetailRow(label: context.l10n.adminAuditTargetIdLabel, value: targetId, isCode: true),
                 ],
               ),
             ),
@@ -407,19 +476,19 @@ class _ActionBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color color = Colors.blueGrey;
+    Color color = context.colors.outline;
     final a = action.toLowerCase();
 
     if (a.contains('create') || a.contains('add') || a.contains('restore')) {
-      color = Colors.green;
+      color = context.colors.tertiary;
     } else if (a.contains('contact') || a.contains('chat')) {
-      color = Colors.indigo;
+      color = context.colors.primary;
     } else if (a.contains('update') || a.contains('edit') || a.contains('review')) {
-      color = Colors.blue;
+      color = context.colors.secondary;
     } else if (a.contains('suspend') || a.contains('deactivate') || a.contains('remove')) {
-      color = Colors.red;
+      color = context.colors.error;
     } else if (a.contains('flag') || a.contains('risk') || a.contains('reject') || a.contains('dismiss')) {
-      color = Colors.orange;
+      color = context.colors.tertiary;
     }
 
     return Container(
@@ -430,7 +499,7 @@ class _ActionBadge extends StatelessWidget {
         border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Text(
-        action.replaceAll('_', ' ').toUpperCase(),
+        action.toUpperCase(),
         style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.5),
       ),
     );
