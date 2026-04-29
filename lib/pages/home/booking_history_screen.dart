@@ -57,19 +57,19 @@ class _HomeUBookingHistoryScreenState extends State<HomeUBookingHistoryScreen> {
     final t = context.l10n;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F8FC),
+      backgroundColor: context.colors.surface,
       appBar: widget.isStandalone
           ? AppBar(
               title: Text(
                 t.bookingHistoryTitle,
-                style: const TextStyle(
-                  color: Color(0xFF0F172A),
+                style: TextStyle(
+                  color: context.colors.onSurface,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              backgroundColor: const Color(0xFFF6F8FC),
+              backgroundColor: context.colors.surface,
               elevation: 0,
-              iconTheme: const IconThemeData(color: Color(0xFF0F172A)),
+              iconTheme: IconThemeData(color: context.colors.onSurface),
             )
           : null,
       body: SafeArea(
@@ -98,7 +98,7 @@ class _HomeUBookingHistoryScreenState extends State<HomeUBookingHistoryScreen> {
             Expanded(
               child: RefreshIndicator(
                 onRefresh: _loadBookings,
-                color: const Color(0xFF1E3A8A),
+                color: context.homeuAccent,
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(16, 4, 16, 20),
                   children: [
@@ -112,21 +112,21 @@ class _HomeUBookingHistoryScreenState extends State<HomeUBookingHistoryScreen> {
                         padding: const EdgeInsets.only(bottom: 12),
                         child: Text(
                           _loadError!,
-                          style: const TextStyle(
-                            color: Color(0xFFC53030),
+                          style: TextStyle(
+                            color: context.colors.error,
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
                     if (!_isLoading && visibleBookings.isEmpty)
-                      const Padding(
-                        padding: EdgeInsets.only(top: 60),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 60),
                         child: Center(
                           child: Text(
-                            'No bookings found for this status.',
+                            t.bookingHistoryEmpty,
                             style: TextStyle(
-                              color: Color(0xFF667896),
+                              color: context.homeuMutedText,
                               fontSize: 13,
                               fontWeight: FontWeight.w500,
                             ),
@@ -207,7 +207,7 @@ class _HomeUBookingHistoryScreenState extends State<HomeUBookingHistoryScreen> {
 
       if (payment == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No receipt found for this booking.')),
+          SnackBar(content: Text(context.l10n.bookingReceiptNotFound)),
         );
         return;
       }
@@ -222,7 +222,7 @@ class _HomeUBookingHistoryScreenState extends State<HomeUBookingHistoryScreen> {
       if (!mounted) return;
       Navigator.pop(context); // Pop loading
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error loading receipt: $e')),
+        SnackBar(content: Text(context.l10n.bookingReceiptError('$e'))),
       );
     }
   }
@@ -231,7 +231,7 @@ class _HomeUBookingHistoryScreenState extends State<HomeUBookingHistoryScreen> {
     final t = context.l10n;
     switch (status) {
       case HomeUBookingStatus.all:
-        return 'All';
+        return t.statusAll;
       case HomeUBookingStatus.pending:
         return t.statusPending;
       case HomeUBookingStatus.approved:
@@ -251,7 +251,7 @@ class _HomeUBookingHistoryScreenState extends State<HomeUBookingHistoryScreen> {
       setState(() {
         _bookings = const <_BookingHistoryItem>[];
         _isLoading = false;
-        _loadError = 'Supabase is not initialized.';
+        _loadError = context.l10n.paymentSupabaseUnavailable;
       });
       return;
     }
@@ -331,17 +331,17 @@ class _HomeUBookingHistoryScreenState extends State<HomeUBookingHistoryScreen> {
       id: booking.propertyId,
       ownerId: booking.ownerId,
       name: booking.propertyId,
-      location: 'Location unavailable',
+      location: context.l10n.viewingHistoryFallbackLocation,
       pricePerMonth: 'RM ${booking.totalAmount.toStringAsFixed(0)} / total',
       rating: 4.5,
-      accentColor: const Color(0xFF1E3A8A),
-      description: 'Property details are currently unavailable.',
+      accentColor: context.homeuAccent,
+      description: context.l10n.viewingHistoryFallbackDescription,
       ownerName: booking.ownerId,
-      ownerRole: 'Host',
-      photoColors: const [
-        Color(0xFF5D7FBF),
-        Color(0xFF4A68A8),
-        Color(0xFF2F4F8F),
+      ownerRole: context.l10n.viewingHistoryFallbackHostRole,
+      photoColors: [
+        context.homeuAccent.withValues(alpha: 0.6),
+        context.homeuAccent.withValues(alpha: 0.75),
+        context.homeuAccent,
       ],
     );
   }

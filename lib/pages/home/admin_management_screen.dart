@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
+import 'package:homeu/core/localization/homeu_l10n.dart';
 import 'package:homeu/core/theme/homeu_app_theme.dart';
 import 'package:homeu/core/supabase/app_supabase.dart';
 import 'package:homeu/app/profile/profile_models.dart';
 import 'package:homeu/pages/home/create_admin_screen.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class HomeUAdminManagementScreen extends StatefulWidget {
   const HomeUAdminManagementScreen({super.key});
@@ -74,7 +74,7 @@ class _HomeUAdminManagementScreenState extends State<HomeUAdminManagementScreen>
 
     if (created == true) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Admin account created successfully.')),
+        SnackBar(content: Text(context.l10n.adminCreatedSuccess)),
       );
       _fetchAdmins();
     }
@@ -87,27 +87,34 @@ class _HomeUAdminManagementScreenState extends State<HomeUAdminManagementScreen>
     final updated = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Update Admin Details'),
+        title: Text(context.l10n.adminUpdateDetailsTitle),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: nameController,
-              decoration: const InputDecoration(labelText: 'Full Name'),
+              decoration: InputDecoration(
+                labelText: context.l10n.profileEditFieldFullName,
+              ),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: phoneController,
-              decoration: const InputDecoration(labelText: 'Phone Number'),
+              decoration: InputDecoration(
+                labelText: context.l10n.profileEditFieldPhone,
+              ),
               keyboardType: TextInputType.phone,
             ),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(context.l10n.profileLogoutCancel),
+          ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Update'),
+            child: Text(context.l10n.adminUpdateDetailsConfirm),
           ),
         ],
       ),
@@ -120,14 +127,24 @@ class _HomeUAdminManagementScreenState extends State<HomeUAdminManagementScreen>
           'phone_number': phoneController.text.trim(),
         }).eq('id', admin.userId);
 
-        await _logAction('admin_updated', admin.userId, 'Updated details for Admin ${admin.fullName}.');
+        await _logAction(
+          'admin_updated',
+          admin.userId,
+          'Updated details for Admin ${admin.fullName}.',
+        );
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Admin details updated.')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(context.l10n.adminDetailsUpdated)),
+          );
           _fetchAdmins();
         }
       } catch (e) {
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(context.l10n.adminUpdateError('$e'))),
+          );
+        }
       }
     }
   }
@@ -136,7 +153,9 @@ class _HomeUAdminManagementScreenState extends State<HomeUAdminManagementScreen>
     final currentUserId = AppSupabase.auth.currentUser?.id;
     if (admin.userId == currentUserId) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Security: You cannot remove your own admin access.')),
+        SnackBar(
+          content: Text(context.l10n.adminCannotRemoveSelf),
+        ),
       );
       return;
     }
@@ -144,14 +163,22 @@ class _HomeUAdminManagementScreenState extends State<HomeUAdminManagementScreen>
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Remove Admin?'),
-        content: Text('Remove admin privileges from ${admin.fullName}? They will revert to a Tenant role.'),
+        title: Text(context.l10n.adminRemoveTitle),
+        content: Text(
+          context.l10n.adminRemoveMessage(admin.fullName),
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(context.l10n.profileLogoutCancel),
+          ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Remove', style: TextStyle(color: Colors.white)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: context.colors.error,
+              foregroundColor: context.colors.onError,
+            ),
+            child: Text(context.l10n.adminRemoveConfirm),
           ),
         ],
       ),
@@ -164,14 +191,24 @@ class _HomeUAdminManagementScreenState extends State<HomeUAdminManagementScreen>
             .update({'role': 'tenant', 'account_status': 'active'})
             .eq('id', admin.userId);
 
-        await _logAction('admin_removed', admin.userId, 'Removed Admin privileges from ${admin.fullName}. Reverted to Tenant.');
+        await _logAction(
+          'admin_removed',
+          admin.userId,
+          'Removed Admin privileges from ${admin.fullName}. Reverted to Tenant.',
+        );
 
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Admin privileges removed.')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(context.l10n.adminRemovedSuccess)),
+          );
           _fetchAdmins();
         }
       } catch (e) {
-        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(context.l10n.adminRemoveError('$e'))),
+          );
+        }
       }
     }
   }
@@ -185,22 +222,25 @@ class _HomeUAdminManagementScreenState extends State<HomeUAdminManagementScreen>
     return Scaffold(
       backgroundColor: context.colors.surface,
       appBar: AppBar(
-        title: const Text('Admin Management'),
+        title: Text(context.l10n.adminManagementTitle),
         backgroundColor: context.colors.surface,
         elevation: 0,
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _openCreateAdmin,
         backgroundColor: context.homeuAccent,
-        icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text('Add Admin', style: TextStyle(color: Colors.white)),
+        icon: Icon(Icons.add, color: context.colors.onPrimary),
+        label: Text(
+          context.l10n.adminAddButton,
+          style: TextStyle(color: context.colors.onPrimary),
+        ),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
         onRefresh: _fetchAdmins,
         child: _admins.isEmpty
-            ? const Center(child: Text('No admins found.'))
+            ? Center(child: Text(context.l10n.adminNoAdminsFound))
             : ListView.builder(
           padding: const EdgeInsets.all(16),
           itemCount: _admins.length,
@@ -234,9 +274,15 @@ class _AdminUserCard extends StatelessWidget {
       child: ListTile(
         leading: CircleAvatar(
           backgroundColor: context.homeuAccent.withValues(alpha: 0.1),
-          child: const Icon(Icons.admin_panel_settings, color: Colors.blue),
+          child: Icon(
+            Icons.admin_panel_settings,
+            color: context.homeuAccent,
+          ),
         ),
-        title: Text(admin.fullName, style: const TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(
+          admin.fullName,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -247,12 +293,16 @@ class _AdminUserCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
-                color: Colors.green.withValues(alpha: 0.1),
+                color: context.homeuSuccess.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Text(
                 admin.accountStatus.name.toUpperCase(),
-                style: const TextStyle(color: Colors.green, fontSize: 9, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: context.homeuSuccess,
+                  fontSize: 9,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ],
@@ -261,7 +311,14 @@ class _AdminUserCard extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             IconButton(icon: const Icon(Icons.edit_outlined, size: 20), onPressed: onEdit),
-            IconButton(icon: const Icon(Icons.person_remove_outlined, color: Colors.red, size: 20), onPressed: onRemove),
+            IconButton(
+              icon: Icon(
+                Icons.person_remove_outlined,
+                color: context.colors.error,
+                size: 20,
+              ),
+              onPressed: onRemove,
+            ),
           ],
         ),
       ),

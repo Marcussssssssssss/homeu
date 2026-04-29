@@ -4,6 +4,7 @@ import 'package:homeu/app/auth/role_access_widget.dart';
 import 'package:homeu/app/chat/chat_remote_datasource.dart';
 import 'package:homeu/core/supabase/app_supabase.dart';
 import 'package:homeu/core/theme/homeu_app_theme.dart';
+import 'package:homeu/core/localization/homeu_l10n.dart';
 import 'package:homeu/pages/home/chat_screen.dart';
 import 'package:intl/intl.dart';
 
@@ -19,11 +20,11 @@ class _HomeUAdminReportsModerationScreenState
     extends State<HomeUAdminReportsModerationScreen> {
   final ChatRemoteDataSource _chatRemoteDataSource = const ChatRemoteDataSource();
 
-  static const List<Map<String, String>> _statusFilters = <Map<String, String>>[
-    {'key': 'all', 'label': 'All'},
-    {'key': 'pending', 'label': 'Pending'},
-    {'key': 'reviewed', 'label': 'Reviewed'},
-    {'key': 'dismissed', 'label': 'Dismissed'},
+  static const List<String> _statusFilters = <String>[
+    'all',
+    'pending',
+    'reviewed',
+    'dismissed',
   ];
 
   bool _isLoading = true;
@@ -92,7 +93,7 @@ class _HomeUAdminReportsModerationScreenState
         if (propertyRows is List) {
           propertyTitles = {
             for (final row in propertyRows.whereType<Map<String, dynamic>>())
-              row['id']?.toString() ?? '': row['title']?.toString() ?? 'Unknown listing',
+              row['id']?.toString() ?? '': row['title']?.toString() ?? context.l10n.adminReportsUnknownListing,
           };
         }
       }
@@ -111,21 +112,21 @@ class _HomeUAdminReportsModerationScreenState
         final ownerProfile = profilesById[ownerId] ?? {};
         final tenantProfile = profilesById[tenantId] ?? {};
         return _ReportRecord(
-          reportId: row['report_id']?.toString() ?? 'Unknown',
+          reportId: row['report_id']?.toString() ?? context.l10n.adminReportsUnknownReportId,
           propertyId: propertyId,
           ownerId: ownerId,
           tenantId: tenantId,
-          propertyTitle:
-              propertyTitles[propertyId] ?? 'Property #${propertyId.isNotEmpty ? propertyId : 'N/A'}',
-          ownerName: ownerProfile['full_name']?.toString() ?? 'Unknown owner',
-          ownerEmail: ownerProfile['email']?.toString() ?? '-',
-          tenantName: tenantProfile['full_name']?.toString() ?? 'Unknown reporter',
-          tenantEmail: tenantProfile['email']?.toString() ?? '-',
-          reason: row['reason']?.toString() ?? '-',
-          description: row['description']?.toString() ?? '',
-          status: _normalizeReportStatus(row['status']?.toString()),
-          riskLevel: row['risk_level']?.toString()?.toLowerCase() ?? 'low',
-          createdAt: _parseDate(row['created_at']) ?? DateTime.now(),
+          propertyTitle: propertyTitles[propertyId] ??
+              context.l10n.adminReportsPropertyIdFallback(propertyId.isNotEmpty ? propertyId : context.l10n.adminReportsNotAvailable),
+          ownerName: ownerProfile['full_name']?.toString() ?? context.l10n.adminReportsUnknownOwner,
+          ownerEmail: ownerProfile['email']?.toString() ?? context.l10n.adminReportsUnknownEmail,
+          tenantName: tenantProfile['full_name']?.toString() ?? context.l10n.adminReportsUnknownReporter,
+          tenantEmail: tenantProfile['email']?.toString() ?? context.l10n.adminReportsUnknownEmail,
+           reason: row['reason']?.toString() ?? context.l10n.adminReportsNotAvailable,
+           description: row['description']?.toString() ?? '',
+           status: _normalizeReportStatus(row['status']?.toString()),
+           riskLevel: row['risk_level']?.toString().toLowerCase() ?? 'low',
+           createdAt: _parseDate(row['created_at']) ?? DateTime.now(),
           previousReportCount: ownerReportCount[ownerId] ?? 0,
         );
       }).toList(growable: false);
@@ -142,7 +143,7 @@ class _HomeUAdminReportsModerationScreenState
         _isLoading = false;
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to load reports: $e')),
+        SnackBar(content: Text(context.l10n.adminReportsLoadError('$e'))),
       );
     }
   }
@@ -168,26 +169,33 @@ class _HomeUAdminReportsModerationScreenState
     return filtered;
   }
 
-  bool _matchesSelectedFilter(_ReportRecord report) {
-    switch (_selectedFilterKey) {
-      case 'pending':
-      case 'reviewed':
-      case 'dismissed':
-        return report.status == _selectedFilterKey;
-      case 'all':
-      default:
-        return true;
-    }
-  }
+   bool _matchesSelectedFilter(_ReportRecord report) {
+     switch (_selectedFilterKey) {
+       case 'pending':
+       case 'reviewed':
+       case 'dismissed':
+         return report.status == _selectedFilterKey;
+       case 'all':
+       default:
+         return true;
+     }
+   }
 
-  String _filterLabelForKey(String key) {
-    for (final filter in _statusFilters) {
-      if (filter['key'] == key) {
-        return filter['label'] ?? 'All';
-      }
-    }
-    return 'All';
-  }
+   String _filterLabelForKey(BuildContext context, String key) {
+     switch (key) {
+       case 'pending':
+         return context.l10n.statusPending;
+       case 'reviewed':
+         return context.l10n.statusReviewed;
+       case 'dismissed':
+         return context.l10n.statusDismissed;
+       case 'all':
+       default:
+         return context.l10n.statusAll;
+     }
+   }
+
+
 
   Future<void> _showFilterBottomSheet() async {
     String tempFilterKey = _selectedFilterKey;
@@ -209,7 +217,7 @@ class _HomeUAdminReportsModerationScreenState
               padding: EdgeInsets.fromLTRB(16, 16, 16, 12 + bottomInset),
               child: StatefulBuilder(
                 builder: (context, setSheetState) {
-                  Widget buildSection({required String title, required List<Map<String, String>> filters}) {
+                  Widget buildSection({required String title, required List<String> filters}) {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -222,9 +230,8 @@ class _HomeUAdminReportsModerationScreenState
                           ),
                         ),
                         const SizedBox(height: 8),
-                        ...filters.map((filter) {
-                          final key = filter['key']!;
-                          final label = filter['label']!;
+                        ...filters.map((key) {
+                          final label = _filterLabelForKey(context, key);
                           final isSelected = tempFilterKey == key;
                           return Container(
                             margin: const EdgeInsets.only(bottom: 6),
@@ -258,7 +265,7 @@ class _HomeUAdminReportsModerationScreenState
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Filter Reports',
+                        context.l10n.adminReportsFilterTitle,
                         style: TextStyle(
                           color: context.homeuPrimaryText,
                           fontSize: 18,
@@ -272,7 +279,10 @@ class _HomeUAdminReportsModerationScreenState
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              buildSection(title: 'Report Status', filters: _statusFilters),
+                              buildSection(
+                                title: context.l10n.adminReportsFilterSectionStatus,
+                                filters: _statusFilters,
+                              ),
                               const SizedBox(height: 16),
                             ],
                           ),
@@ -286,7 +296,7 @@ class _HomeUAdminReportsModerationScreenState
                                 setState(() => _selectedFilterKey = 'all');
                                 Navigator.of(sheetContext).pop();
                               },
-                              child: const Text('Clear Filter'),
+                              child: Text(context.l10n.adminReportsFilterClear),
                             ),
                           ),
                           const SizedBox(width: 10),
@@ -296,7 +306,7 @@ class _HomeUAdminReportsModerationScreenState
                                 setState(() => _selectedFilterKey = tempFilterKey);
                                 Navigator.of(sheetContext).pop();
                               },
-                              child: const Text('Apply Filter'),
+                              child: Text(context.l10n.adminReportsFilterApply),
                             ),
                           ),
                         ],
@@ -324,14 +334,14 @@ class _HomeUAdminReportsModerationScreenState
             report,
             nextStatus: 'dismissed',
             action: 'report_dismissed',
-            actionLabel: 'Dismiss Report',
+            actionLabel: context.l10n.adminReportsDismissReport,
             riskLevel: riskLevel,
           ),
           onMarkReviewed: (riskLevel) => _updateReportStatus(
             report,
             nextStatus: 'reviewed',
             action: 'report_reviewed',
-            actionLabel: 'Mark as Reviewed',
+            actionLabel: context.l10n.adminReportsMarkReviewed,
             riskLevel: riskLevel,
           ),
         ),
@@ -350,7 +360,7 @@ class _HomeUAdminReportsModerationScreenState
 
     if (report.propertyId.isEmpty || report.ownerId.isEmpty) {
       messenger.showSnackBar(
-        const SnackBar(content: Text('Missing owner or property context for chat.')),
+        SnackBar(content: Text(context.l10n.adminReportsMissingOwnerOrPropertyChat)),
       );
       return null;
     }
@@ -366,7 +376,7 @@ class _HomeUAdminReportsModerationScreenState
       await _insertAudit(
         action: 'report_contact_owner',
         report: report,
-        reason: 'Opened owner chat for report follow-up.',
+        reason: context.l10n.adminReportsAuditContactOwnerReason,
         metadata: {
           'report_id': report.reportId,
           'property_id': report.propertyId,
@@ -382,7 +392,7 @@ class _HomeUAdminReportsModerationScreenState
     } catch (e) {
       if (!mounted) return null;
       messenger.showSnackBar(
-        SnackBar(content: Text('Unable to open chat: $e')),
+        SnackBar(content: Text(context.l10n.adminReportsChatOpenError('$e'))),
       );
       return null;
     }
@@ -396,7 +406,7 @@ class _HomeUAdminReportsModerationScreenState
 
     if (report.propertyId.isEmpty || report.tenantId.isEmpty) {
       messenger.showSnackBar(
-        const SnackBar(content: Text('Missing tenant or property context for chat.')),
+        SnackBar(content: Text(context.l10n.adminReportsMissingTenantOrPropertyChat)),
       );
       return null;
     }
@@ -412,7 +422,7 @@ class _HomeUAdminReportsModerationScreenState
       await _insertAudit(
         action: 'report_contact_tenant',
         report: report,
-        reason: 'Opened tenant chat for report follow-up.',
+        reason: context.l10n.adminReportsAuditContactTenantReason,
         metadata: {
           'report_id': report.reportId,
           'property_id': report.propertyId,
@@ -428,7 +438,7 @@ class _HomeUAdminReportsModerationScreenState
     } catch (e) {
       if (!mounted) return null;
       messenger.showSnackBar(
-        SnackBar(content: Text('Unable to open chat: $e')),
+        SnackBar(content: Text(context.l10n.adminReportsChatOpenError('$e'))),
       );
       return null;
     }
@@ -438,7 +448,7 @@ class _HomeUAdminReportsModerationScreenState
     _ReportRecord report, {
     required String riskLevel,
   }) async {
-    final reason = await _askReasonAndConfirm('Record Risk Level');
+    final reason = await _askReasonAndConfirm(context.l10n.adminReportsRecordRiskLevelAction);
     if (reason == null) return null;
 
     try {
@@ -459,11 +469,11 @@ class _HomeUAdminReportsModerationScreenState
           'risk_level': riskLevel.toLowerCase(),
         },
       );
-      return 'Risk level recorded.';
+      return context.l10n.adminReportsRiskRecorded;
     } catch (e) {
       if (!mounted) return null;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Risk evaluation failed: $e')),
+        SnackBar(content: Text(context.l10n.adminReportsRiskRecordError('$e'))),
       );
       return null;
     }
@@ -504,11 +514,11 @@ class _HomeUAdminReportsModerationScreenState
           'risk_level': riskLevel.toLowerCase(),
         },
       );
-      return '$actionLabel completed.';
+      return context.l10n.adminReportsActionCompleted(actionLabel);
     } catch (e) {
       if (!mounted) return null;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Report update failed: $e')),
+        SnackBar(content: Text(context.l10n.adminReportsUpdateError('$e'))),
       );
       return null;
     }
@@ -551,11 +561,11 @@ class _HomeUAdminReportsModerationScreenState
     return Scaffold(
       backgroundColor: context.colors.surface,
       appBar: AppBar(
-        title: const Text('Reports Review'),
+        title: Text(context.l10n.adminReportsTitle),
         backgroundColor: context.colors.surface,
         actions: [
           IconButton(
-            tooltip: 'Refresh',
+            tooltip: context.l10n.commonRefreshTooltip,
             icon: const Icon(Icons.refresh_rounded),
             onPressed: _loadReports,
           ),
@@ -573,7 +583,7 @@ class _HomeUAdminReportsModerationScreenState
                     Expanded(
                       child: TextField(
                         decoration: InputDecoration(
-                          hintText: 'Search report, owner, tenant, listing...',
+                          hintText: context.l10n.adminReportsSearchHint,
                           prefixIcon: const Icon(Icons.search_rounded),
                           filled: true,
                           fillColor: context.homeuCard,
@@ -599,7 +609,7 @@ class _HomeUAdminReportsModerationScreenState
                         border: Border.all(color: context.homeuSoftBorder),
                       ),
                       child: IconButton(
-                        tooltip: 'Filter reports',
+                        tooltip: context.l10n.adminReportsFilterTooltip,
                         icon: Icon(Icons.filter_list_rounded, color: context.homeuAccent),
                         onPressed: _showFilterBottomSheet,
                       ),
@@ -610,7 +620,7 @@ class _HomeUAdminReportsModerationScreenState
                 Row(
                   children: [
                     Text(
-                      'Active filter:',
+                      context.l10n.adminReportsActiveFilterLabel,
                       style: TextStyle(
                         color: context.homeuMutedText,
                         fontSize: 12.5,
@@ -619,7 +629,7 @@ class _HomeUAdminReportsModerationScreenState
                     ),
                     const SizedBox(width: 8),
                     Chip(
-                      label: Text(_filterLabelForKey(_selectedFilterKey)),
+                      label: Text(_filterLabelForKey(context, _selectedFilterKey)),
                       backgroundColor: context.homeuAccent.withValues(alpha: 0.12),
                       side: BorderSide(color: context.homeuAccent.withValues(alpha: 0.25)),
                       labelStyle: TextStyle(
@@ -650,7 +660,7 @@ class _HomeUAdminReportsModerationScreenState
                               const SizedBox(height: 12),
                               Center(
                                 child: Text(
-                                  'No reports match the current filters.',
+                                  context.l10n.adminReportsNoMatches,
                                   style: TextStyle(color: context.homeuMutedText),
                                 ),
                               ),
@@ -775,66 +785,103 @@ class _ReportDetailsScreenState extends State<_ReportDetailsScreen> {
     }
   }
 
-  Future<void> _runAction(Future<String?> Function() action) async {
-    final result = await action();
-    if (!mounted || result == null) return;
-    Navigator.of(context).pop(result);
-  }
+   Future<void> _runAction(Future<String?> Function() action) async {
+     final result = await action();
+     if (!mounted || result == null) return;
+     Navigator.of(context).pop(result);
+   }
+
+   String _filterLabelForKey(BuildContext context, String key) {
+     switch (key) {
+       case 'pending':
+         return context.l10n.statusPending;
+       case 'reviewed':
+         return context.l10n.statusReviewed;
+       case 'dismissed':
+         return context.l10n.statusDismissed;
+       case 'all':
+       default:
+         return context.l10n.statusAll;
+     }
+   }
+
+   String _riskLabel(BuildContext context, String level) {
+     switch (level) {
+       case 'high':
+         return context.l10n.adminReportsRiskHigh;
+       case 'medium':
+         return context.l10n.adminReportsRiskMedium;
+       case 'invalid':
+         return context.l10n.adminReportsRiskInvalid;
+       case 'low':
+       default:
+         return context.l10n.adminReportsRiskLow;
+     }
+   }
 
   @override
   Widget build(BuildContext context) {
     final report = widget.report;
-    final dateText = DateFormat('MMM d, yyyy HH:mm').format(report.createdAt.toLocal());
+    final localeName = Localizations.localeOf(context).toString();
+    final dateText = DateFormat('MMM d, yyyy HH:mm', localeName).format(report.createdAt.toLocal());
 
     return Scaffold(
       backgroundColor: context.colors.surface,
       appBar: AppBar(
         backgroundColor: context.colors.surface,
-        title: Text('Report #${report.shortReportId}'),
+        title: Text(context.l10n.adminReportsReportTitle(report.shortReportId)),
       ),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
           children: [
             Text(
-              'Submitted on $dateText',
+              context.l10n.adminReportsSubmittedOn(dateText),
               style: TextStyle(color: context.homeuMutedText, fontSize: 12.5),
             ),
             const SizedBox(height: 12),
             _InfoCard(
-              title: 'Property',
+              title: context.l10n.adminReportsSectionProperty,
               rows: [
-                _InfoRowData(label: 'Property ID', value: report.propertyId),
-                _InfoRowData(label: 'Title', value: report.propertyTitle),
+                _InfoRowData(label: context.l10n.adminReportsFieldPropertyId, value: report.propertyId),
+                _InfoRowData(label: context.l10n.adminReportsFieldTitle, value: report.propertyTitle),
               ],
             ),
             const SizedBox(height: 10),
             _InfoCard(
-              title: 'Owner',
+              title: context.l10n.adminReportsSectionOwner,
               rows: [
-                _InfoRowData(label: 'Name', value: report.ownerName),
-                _InfoRowData(label: 'Email', value: report.ownerEmail),
-                _InfoRowData(label: 'Total reports', value: report.previousReportCount.toString()),
-              ],
-            ),
-            const SizedBox(height: 10),
-            _InfoCard(
-              title: 'Reporter',
-              rows: [
-                _InfoRowData(label: 'Name', value: report.tenantName),
-                _InfoRowData(label: 'Email', value: report.tenantEmail),
-              ],
-            ),
-            const SizedBox(height: 10),
-            _InfoCard(
-              title: 'Complaint',
-              rows: [
-                _InfoRowData(label: 'Reason', value: report.reason),
+                _InfoRowData(label: context.l10n.adminReportsFieldName, value: report.ownerName),
+                _InfoRowData(label: context.l10n.adminReportsFieldEmail, value: report.ownerEmail),
                 _InfoRowData(
-                  label: 'Description',
-                  value: report.description.trim().isEmpty ? '-' : report.description.trim(),
+                  label: context.l10n.adminReportsFieldTotalReports,
+                  value: report.previousReportCount.toString(),
                 ),
-                _InfoRowData(label: 'Status', value: report.status.toUpperCase()),
+              ],
+            ),
+            const SizedBox(height: 10),
+            _InfoCard(
+              title: context.l10n.adminReportsSectionReporter,
+              rows: [
+                _InfoRowData(label: context.l10n.adminReportsFieldName, value: report.tenantName),
+                _InfoRowData(label: context.l10n.adminReportsFieldEmail, value: report.tenantEmail),
+              ],
+            ),
+            const SizedBox(height: 10),
+            _InfoCard(
+              title: context.l10n.adminReportsSectionComplaint,
+              rows: [
+                _InfoRowData(label: context.l10n.adminReportsFieldReason, value: report.reason),
+                _InfoRowData(
+                  label: context.l10n.adminReportsFieldDescription,
+                  value: report.description.trim().isEmpty
+                      ? context.l10n.adminReportsNotAvailable
+                      : report.description.trim(),
+                ),
+                _InfoRowData(
+                  label: context.l10n.adminReportsFieldStatus,
+                  value: _filterLabelForKey(context, report.status).toUpperCase(),
+                ),
               ],
             ),
             const SizedBox(height: 10),
@@ -850,7 +897,7 @@ class _ReportDetailsScreenState extends State<_ReportDetailsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Risk evaluation',
+                    context.l10n.adminReportsRiskSectionTitle,
                     style: TextStyle(
                       color: context.homeuPrimaryText,
                       fontSize: 15,
@@ -859,7 +906,7 @@ class _ReportDetailsScreenState extends State<_ReportDetailsScreen> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Internal review only. This does not change listing visibility or account status.',
+                    context.l10n.adminReportsRiskSectionHint,
                     style: TextStyle(color: context.homeuMutedText, fontSize: 12.5),
                   ),
                   const SizedBox(height: 10),
@@ -869,7 +916,7 @@ class _ReportDetailsScreenState extends State<_ReportDetailsScreen> {
                     children: _riskLevels.map((level) {
                       final selected = _selectedRiskLevel == level;
                       return ChoiceChip(
-                        label: Text(level.toUpperCase()),
+                        label: Text(_riskLabel(context, level).toUpperCase()),
                         selected: selected,
                         onSelected: (value) {
                           if (!value) return;
@@ -894,9 +941,9 @@ class _ReportDetailsScreenState extends State<_ReportDetailsScreen> {
                 value: _hasReviewedComplaint,
                 dense: true,
                 contentPadding: EdgeInsets.zero,
-                title: const Text('I have reviewed this complaint.'),
+                title: Text(context.l10n.adminReportsReviewedConfirmTitle),
                 subtitle: Text(
-                  'Risk evaluation and status updates unlock after this confirmation.',
+                  context.l10n.adminReportsReviewedConfirmSubtitle,
                   style: TextStyle(color: context.homeuMutedText, fontSize: 12),
                 ),
                 controlAffinity: ListTileControlAffinity.leading,
@@ -918,7 +965,7 @@ class _ReportDetailsScreenState extends State<_ReportDetailsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Actions',
+                    context.l10n.adminReportsActionsTitle,
                     style: TextStyle(
                       color: context.homeuPrimaryText,
                       fontSize: 15,
@@ -927,7 +974,7 @@ class _ReportDetailsScreenState extends State<_ReportDetailsScreen> {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Use chat for follow-up, then record the internal risk level or update the report status.',
+                    context.l10n.adminReportsActionsHint,
                     style: TextStyle(color: context.homeuMutedText, fontSize: 12.5),
                   ),
                   const SizedBox(height: 12),
@@ -936,39 +983,39 @@ class _ReportDetailsScreenState extends State<_ReportDetailsScreen> {
                     runSpacing: 8,
                     children: [
                       _ActionChip(
-                        label: 'Contact Owner',
+                        label: context.l10n.adminReportsContactOwner,
                         icon: Icons.chat_bubble_outline_rounded,
-                        color: Colors.indigo,
+                        color: context.colors.primary,
                         onTap: () => _runAction(widget.onContactOwner),
                       ),
                       _ActionChip(
-                        label: 'Contact Reporter',
+                        label: context.l10n.adminReportsContactReporter,
                         icon: Icons.forum_outlined,
-                        color: Colors.indigo,
+                        color: context.colors.primary,
                         onTap: () => _runAction(widget.onContactTenant),
                       ),
                       _ActionChip(
-                        label: 'Save Risk Level',
+                        label: context.l10n.adminReportsSaveRisk,
                         icon: Icons.save_rounded,
-                        color: Colors.orange,
+                        color: context.colors.tertiary,
                         enabled: _hasReviewedComplaint,
                         onTap: () => _runAction(
                           () => widget.onRecordRiskLevel(_selectedRiskLevel),
                         ),
                       ),
                       _ActionChip(
-                        label: 'Mark Reviewed',
+                        label: context.l10n.adminReportsMarkReviewed,
                         icon: Icons.fact_check_outlined,
-                        color: Colors.blue,
+                        color: context.colors.secondary,
                         enabled: _hasReviewedComplaint,
                         onTap: () => _runAction(
                           () => widget.onMarkReviewed(_selectedRiskLevel),
                         ),
                       ),
                       _ActionChip(
-                        label: 'Dismiss Report',
+                        label: context.l10n.adminReportsDismissReport,
                         icon: Icons.close_rounded,
-                        color: Colors.blueGrey,
+                        color: context.colors.error,
                         enabled: _hasReviewedComplaint,
                         onTap: () => _runAction(
                           () => widget.onDismissReport(_selectedRiskLevel),
@@ -987,13 +1034,42 @@ class _ReportDetailsScreenState extends State<_ReportDetailsScreen> {
 }
 
 class _ReportCard extends StatelessWidget {
-  const _ReportCard({required this.report, required this.onTap});
-  final _ReportRecord report;
-  final VoidCallback onTap;
+   const _ReportCard({required this.report, required this.onTap});
+   final _ReportRecord report;
+   final VoidCallback onTap;
+
+   static String _riskLabel(BuildContext context, String level) {
+     switch (level) {
+       case 'high':
+         return context.l10n.adminReportsRiskHigh;
+       case 'medium':
+         return context.l10n.adminReportsRiskMedium;
+       case 'invalid':
+         return context.l10n.adminReportsRiskInvalid;
+       case 'low':
+       default:
+         return context.l10n.adminReportsRiskLow;
+     }
+   }
+
+   static Color _riskColor(BuildContext context, String level) {
+     switch (level) {
+       case 'high':
+         return context.colors.error;
+       case 'medium':
+         return context.colors.tertiary;
+       case 'invalid':
+         return context.colors.outline;
+       case 'low':
+       default:
+         return context.colors.primary;
+     }
+   }
 
   @override
   Widget build(BuildContext context) {
-    final createdLabel = DateFormat('MMM d, yyyy HH:mm').format(report.createdAt.toLocal());
+    final localeName = Localizations.localeOf(context).toString();
+    final createdLabel = DateFormat('MMM d, yyyy HH:mm', localeName).format(report.createdAt.toLocal());
     return Card(
       margin: const EdgeInsets.only(top: 10),
       color: context.homeuCard,
@@ -1014,7 +1090,7 @@ class _ReportCard extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      'Report #${report.shortReportId}',
+                      context.l10n.adminReportsReportTitle(report.shortReportId),
                       style: TextStyle(
                         color: context.homeuPrimaryText,
                         fontSize: 15,
@@ -1033,11 +1109,24 @@ class _ReportCard extends StatelessWidget {
                 style: TextStyle(color: context.homeuPrimaryText, fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 4),
-              Text('Owner: ${report.ownerName}', style: TextStyle(color: context.homeuSecondaryText, fontSize: 12.5)),
+              Text(
+                context.l10n.adminReportsOwnerLabel(report.ownerName),
+                style: TextStyle(color: context.homeuSecondaryText, fontSize: 12.5),
+              ),
               const SizedBox(height: 2),
-              Text('Reporter: ${report.tenantName}', style: TextStyle(color: context.homeuSecondaryText, fontSize: 12.5)),
+              Text(
+                context.l10n.adminReportsReporterLabel(report.tenantName),
+                style: TextStyle(color: context.homeuSecondaryText, fontSize: 12.5),
+              ),
               const SizedBox(height: 6),
-              Text('Reason: ${report.reason}', style: TextStyle(color: context.homeuPrimaryText, fontSize: 13.3, fontWeight: FontWeight.w600)),
+              Text(
+                context.l10n.adminReportsReasonLabel(report.reason),
+                style: TextStyle(
+                  color: context.homeuPrimaryText,
+                  fontSize: 13.3,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
               const SizedBox(height: 8),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1047,13 +1136,13 @@ class _ReportCard extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
-                        color: _getRiskColor(report.riskLevel).withValues(alpha: 0.1),
+                        color: _riskColor(context, report.riskLevel).withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
-                        report.riskLevel.toUpperCase(),
+                        _riskLabel(context, report.riskLevel).toUpperCase(),
                         style: TextStyle(
-                          color: _getRiskColor(report.riskLevel),
+                          color: _riskColor(context, report.riskLevel),
                           fontSize: 10,
                           fontWeight: FontWeight.w800,
                         ),
@@ -1067,27 +1156,32 @@ class _ReportCard extends StatelessWidget {
       ),
     );
   }
-
-  Color _getRiskColor(String level) {
-    switch (level) {
-      case 'high': return Colors.red;
-      case 'medium': return Colors.orange;
-      case 'invalid': return Colors.grey;
-      default: return Colors.blue;
-    }
-  }
 }
 
 class _StatusBadge extends StatelessWidget {
-  const _StatusBadge({required this.status});
-  final String status;
+   const _StatusBadge({required this.status});
+   final String status;
+
+   static String _filterLabelForKey(BuildContext context, String key) {
+     switch (key) {
+       case 'pending':
+         return context.l10n.statusPending;
+       case 'reviewed':
+         return context.l10n.statusReviewed;
+       case 'dismissed':
+         return context.l10n.statusDismissed;
+       case 'all':
+       default:
+         return context.l10n.statusAll;
+     }
+   }
 
   @override
   Widget build(BuildContext context) {
-    Color color = Colors.grey;
-    if (status == 'pending') color = Colors.orange;
-    if (status == 'reviewed') color = Colors.blue;
-    if (status == 'dismissed') color = Colors.blueGrey;
+    Color color = context.colors.outline;
+    if (status == 'pending') color = context.colors.tertiary;
+    if (status == 'reviewed') color = context.colors.primary;
+    if (status == 'dismissed') color = context.colors.secondary;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
@@ -1095,7 +1189,7 @@ class _StatusBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
-        status.replaceAll('_', ' ').toUpperCase(),
+        _filterLabelForKey(context, status).toUpperCase(),
         style: TextStyle(color: color, fontSize: 10.5, fontWeight: FontWeight.w800),
       ),
     );
@@ -1237,7 +1331,7 @@ class _ModerationReasonConfirmDialogState extends State<_ModerationReasonConfirm
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text('Provide a reason and confirm this moderation action.'),
+          Text(context.l10n.adminReportsReasonDialogPrompt),
           const SizedBox(height: 12),
           TextField(
             controller: _reasonController,
@@ -1247,17 +1341,17 @@ class _ModerationReasonConfirmDialogState extends State<_ModerationReasonConfirm
               if (!mounted || _isClosing) return;
               setState(() {});
             },
-            decoration: const InputDecoration(
-              labelText: 'Admin reason',
-              hintText: 'Add clear moderation context',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: context.l10n.adminReportsReasonDialogLabel,
+              hintText: context.l10n.adminReportsReasonDialogHint,
+              border: const OutlineInputBorder(),
             ),
           ),
           const SizedBox(height: 8),
           CheckboxListTile(
             value: _confirmChecked,
             contentPadding: EdgeInsets.zero,
-            title: const Text('I confirm this action.'),
+            title: Text(context.l10n.adminReportsReasonDialogConfirm),
             controlAffinity: ListTileControlAffinity.leading,
             onChanged: (value) {
               if (!mounted || _isClosing) return;
@@ -1269,11 +1363,11 @@ class _ModerationReasonConfirmDialogState extends State<_ModerationReasonConfirm
       actions: [
         TextButton(
           onPressed: () => _closeWithResult(null),
-          child: const Text('Cancel'),
+          child: Text(context.l10n.commonCancel),
         ),
         ElevatedButton(
           onPressed: canConfirm ? () => _closeWithResult(trimmedReason) : null,
-          child: const Text('Confirm'),
+          child: Text(context.l10n.commonConfirm),
         ),
       ],
     );

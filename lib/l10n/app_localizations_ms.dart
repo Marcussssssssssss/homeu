@@ -12,6 +12,9 @@ class AppLocalizationsMs extends AppLocalizations {
   String get appTitle => 'HomeU';
 
   @override
+  String get splashTagline => 'Cari Rumah Impian Anda';
+
+  @override
   String get navHome => 'Laman Utama';
 
   @override
@@ -434,6 +437,28 @@ class AppLocalizationsMs extends AppLocalizations {
       'Log masuk untuk meneruskan perjalanan HomeU anda.';
 
   @override
+  String get loginDividerOr => 'ATAU';
+
+  @override
+  String get loginBiometricReason => 'Sahkan untuk mengakses HomeU';
+
+  @override
+  String get loginSessionExpired =>
+      'Sesi tamat. Sila log masuk dengan e-mel dan kata laluan.';
+
+  @override
+  String get loginBiometricFailed =>
+      'Pengesahan biometrik gagal atau dibatalkan.';
+
+  @override
+  String loginContinueAs(Object name) {
+    return 'Teruskan sebagai $name';
+  }
+
+  @override
+  String get loginUseBiometrics => 'Guna Biometrik';
+
+  @override
   String get loginPasswordHint => 'Masukkan kata laluan anda';
 
   @override
@@ -486,6 +511,9 @@ class AppLocalizationsMs extends AppLocalizations {
 
   @override
   String get registerNameHint => 'Nama penuh anda';
+
+  @override
+  String get registerPhoneHint => '+60 12 345 6789';
 
   @override
   String get registerPasswordHint => 'Cipta kata laluan';
@@ -660,6 +688,168 @@ class AppLocalizationsMs extends AppLocalizations {
   String get onboardingProtected => 'Dilindungi';
 
   @override
+  String get viewingScheduleTitle => 'Jadualkan Lawatan';
+
+  @override
+  String get viewingSelectSlotTitle => 'Pilih Slot Tersedia';
+
+  @override
+  String get viewingSelectSlotSubtitle =>
+      'Pemilik hanya memaparkan slot yang tersedia. Pilih satu untuk meneruskan.';
+
+  @override
+  String get viewingNoSlotsTitle => 'Tiada Slot Tersedia';
+
+  @override
+  String get viewingNoSlotsSubtitle =>
+      'Pemilik belum menyenaraikan sebarang ketersediaan untuk hartanah ini. Sila semak semula kemudian atau hubungi pemilik.';
+
+  @override
+  String get viewingGoBack => 'Kembali';
+
+  @override
+  String get viewingConfirmRequest => 'Sahkan Permintaan';
+
+  @override
+  String get viewingAlreadyScheduled =>
+      'Anda telah menjadualkan lawatan untuk slot masa ini. Sila semak Permintaan anda.';
+
+  @override
+  String get viewingRequestSent => 'Permintaan Dihantar!';
+
+  @override
+  String viewingErrorWithMessage(Object message) {
+    return 'Ralat: $message';
+  }
+
+  @override
+  String get bookingDetailsTitle => 'Butiran Tempahan';
+
+  @override
+  String get bookingPaymentScheduleTitle => 'Jadual Bayaran';
+
+  @override
+  String get bookingPaymentScheduleEmpty => 'Tiada jadual bayaran dijana lagi.';
+
+  @override
+  String bookingMonthLabel(Object number) {
+    return 'Bulan $number';
+  }
+
+  @override
+  String bookingMonthWithFee(Object number) {
+    return 'Bulan $number (Yuran Tempahan)';
+  }
+
+  @override
+  String bookingDueLabel(Object date) {
+    return 'Tarikh akhir: $date';
+  }
+
+  @override
+  String get bookingViewReceipt => 'Lihat Resit';
+
+  @override
+  String bookingAmountRm(Object amount) {
+    return 'RM $amount';
+  }
+
+  @override
+  String get bookingPaid => 'DIBAYAR';
+
+  @override
+  String get bookingUpcoming => 'AKAN DATANG';
+
+  @override
+  String get bookingPayNow => 'Bayar Sekarang';
+
+  @override
+  String get bookingReceiptNotFound => 'Tiada resit untuk bayaran ini.';
+
+  @override
+  String bookingReceiptError(Object message) {
+    return 'Ralat memuat resit: $message';
+  }
+
+  @override
+  String get reviewRatingTitle => 'Ulasan & Penilaian';
+
+  @override
+  String get reviewRatingSubtitle =>
+      'Kongsi pengalaman anda untuk membantu penyewa lain membuat keputusan yang lebih baik.';
+
+  @override
+  String get reviewAverageLabel => 'Penilaian Purata';
+
+  @override
+  String get reviewYourRatingLabel => 'Penilaian Anda';
+
+  @override
+  String get reviewCommentLabel => 'Ulasan';
+
+  @override
+  String get reviewCommentHint =>
+      'Beritahu kami tentang kebersihan, komunikasi pemilik, dan pengalaman keseluruhan anda.';
+
+  @override
+  String get reviewSubmitLabel => 'Hantar';
+
+  @override
+  String get reviewSubmitSuccess => 'Terima kasih. Ulasan anda telah dihantar.';
+
+  @override
+  String reviewStarLabel(Object count) {
+    return '$count bintang';
+  }
+
+  @override
+  String get compareTitle => 'Bandingkan Hartanah';
+
+  @override
+  String get compareClear => 'Kosongkan';
+
+  @override
+  String get compareEmptyTitle => 'Tiada Hartanah Dipilih';
+
+  @override
+  String get compareEmptySubtitle =>
+      'Kembali dan pilih 2 hartanah\nuntuk mula membandingkan';
+
+  @override
+  String get compareBackToListings => 'Kembali ke Senarai';
+
+  @override
+  String get comparePriceRangeLabel => 'Julat Harga';
+
+  @override
+  String comparePriceRangeValue(Object min, Object max) {
+    return 'RM $min - RM $max';
+  }
+
+  @override
+  String compareSaveAmount(Object amount) {
+    return 'Jimat RM $amount';
+  }
+
+  @override
+  String get compareLabelAddress => 'Alamat';
+
+  @override
+  String get compareLabelType => 'Jenis';
+
+  @override
+  String get compareLabelRooms => 'Bilik';
+
+  @override
+  String get compareLabelFurnishing => 'Perabot';
+
+  @override
+  String get compareLabelOwner => 'Pemilik';
+
+  @override
+  String get compareLabelAvailability => 'Ketersediaan';
+
+  @override
   String get updatePasswordSuccessMessage =>
       'Kata laluan anda berjaya dikemas kini.';
 
@@ -720,7 +910,7 @@ class AppLocalizationsMs extends AppLocalizations {
 
   @override
   String get updatePasswordErrorSessionExpired =>
-      'Pautan tetapan semula tidak sah atau telah tamat tempoh. Sila minta e-mel tetapan semula kata laluan baharu.';
+      'Pautan tetapan semula tidak sah atau telah tamat expoh. Sila minta e-mel tetapan semula kata laluan baharu.';
 
   @override
   String get updatePasswordErrorNewPasswordMustDiffer =>
@@ -820,4 +1010,1216 @@ class AppLocalizationsMs extends AppLocalizations {
 
   @override
   String get receiptFooter => 'Terima kasih kerana menggunakan HomeU!';
+
+  @override
+  String paymentAmountRm(Object amount) {
+    return 'RM $amount';
+  }
+
+  @override
+  String get bookingTitle => 'Tempahan';
+
+  @override
+  String get bookingConflictDetected =>
+      'Konflik dikesan dengan tempahan sedia ada.';
+
+  @override
+  String get bookingFeeNotice =>
+      'Membayar yuran tempahan akan mengunci hartanah ini. Baki selebihnya perlu dibayar selepas kelulusan pemilik.';
+
+  @override
+  String bookingPayFee(Object amount) {
+    return 'Bayar Yuran Tempahan (RM $amount)';
+  }
+
+  @override
+  String get bookingSelectedProperty => 'Hartanah Dipilih';
+
+  @override
+  String bookingConflictDetails(Object date) {
+    return 'Hartanah telah ditempah bermula $date. Sila pilih tempoh lebih pendek atau tarikh mula berbeza.';
+  }
+
+  @override
+  String get bookingDurationTitle => 'Tempoh Sewa';
+
+  @override
+  String bookingDurationMonths(Object count) {
+    return '$count bulan';
+  }
+
+  @override
+  String get bookingStartDateTitle => 'Tarikh Mula';
+
+  @override
+  String bookingOccupiedUntil(Object date) {
+    return 'Hartanah diduduki hingga $date';
+  }
+
+  @override
+  String get bookingTotalPriceTitle => 'Pengiraan Jumlah Harga';
+
+  @override
+  String get bookingMonthlyPriceLabel => 'Harga Bulanan';
+
+  @override
+  String bookingDurationSummary(Object months) {
+    return 'Tempoh ($months bulan)';
+  }
+
+  @override
+  String get bookingEstimatedTotalLabel => 'Jumlah Anggaran';
+
+  @override
+  String get paymentSupabaseUnavailable =>
+      'Supabase belum dimulakan. Sila cuba lagi kemudian.';
+
+  @override
+  String get bookingLoginRequired =>
+      'Sila log masuk untuk meneruskan tempahan.';
+
+  @override
+  String get bookingDurationJustBooked =>
+      'Maaf, tempoh ini baru ditempah oleh penyewa lain.';
+
+  @override
+  String get bookingCreateFailed =>
+      'Tidak dapat membuat tempahan. Sila cuba lagi.';
+
+  @override
+  String bookingCreateError(Object error) {
+    return 'Gagal membuat tempahan: $error';
+  }
+
+  @override
+  String get statusAll => 'Semua';
+
+  @override
+  String get ownerRequestsTitle => 'Permintaan';
+
+  @override
+  String get ownerRequestsBookingsTab => 'Tempahan';
+
+  @override
+  String get ownerRequestsViewingsTab => 'Lawatan';
+
+  @override
+  String get ownerRequestsRetry => 'Cuba Lagi';
+
+  @override
+  String ownerRequestsEmpty(Object filter) {
+    return 'Tiada permintaan \"$filter\".';
+  }
+
+  @override
+  String ownerRequestsMoveIn(Object date, Object months) {
+    return 'Masuk: $date  •  $months bulan';
+  }
+
+  @override
+  String ownerRequestsFlexibleDuration(Object months) {
+    return 'Fleksibel  •  $months bulan';
+  }
+
+  @override
+  String ownerRequestsMonthlyPrice(Object price) {
+    return 'RM $price / bln';
+  }
+
+  @override
+  String get ownerRequestsReview => 'Semak';
+
+  @override
+  String ownerRequestsViewingsEmpty(Object filter) {
+    return 'Tiada permintaan lawatan \"$filter\".';
+  }
+
+  @override
+  String ownerRequestsViewingTime(Object date, Object time) {
+    return '$date  •  $time';
+  }
+
+  @override
+  String get ownerRequestsDecline => 'Tolak';
+
+  @override
+  String get ownerRequestsApprove => 'Lulus';
+
+  @override
+  String get ownerRequestsMarkCompleted => 'Tandakan Selesai';
+
+  @override
+  String ownerGreeting(Object name) {
+    return 'Hai, $name';
+  }
+
+  @override
+  String get ownerRecentProperties => 'Hartanah Terkini';
+
+  @override
+  String get ownerNoProperties => 'Belum ada hartanah disenaraikan';
+
+  @override
+  String get ownerAddFirstProperty => 'Tambah hartanah pertama anda';
+
+  @override
+  String get ownerUntitledProperty => 'Tanpa Tajuk';
+
+  @override
+  String get ownerRecentBookingRequests => 'Permintaan Tempahan Terkini';
+
+  @override
+  String get ownerNoBookingRequests => 'Tiada permintaan tempahan aktif';
+
+  @override
+  String get ownerUnknownProperty => 'Hartanah Tidak Diketahui';
+
+  @override
+  String get ownerUnknownTenant => 'Penyewa Tidak Diketahui';
+
+  @override
+  String get ownerRecentViewingRequests => 'Permintaan Lawatan Terkini';
+
+  @override
+  String get ownerNoViewingRequests => 'Tiada permintaan lawatan aktif';
+
+  @override
+  String get ownerTapToReviewViewing => 'Ketik untuk semak lawatan';
+
+  @override
+  String get ownerProjected30Days => 'Unjuran (30 Hari)';
+
+  @override
+  String get ownerOverduePayments => 'Bayaran Tertunggak';
+
+  @override
+  String get ownerInvoiceCollectionRate => 'Kadar Kutipan Invois';
+
+  @override
+  String get monthShortJul => 'Jul';
+
+  @override
+  String get monthShortAug => 'Ogos';
+
+  @override
+  String get monthShortSep => 'Sep';
+
+  @override
+  String get monthShortOct => 'Okt';
+
+  @override
+  String get monthShortNov => 'Nov';
+
+  @override
+  String get monthShortDec => 'Dis';
+
+  @override
+  String get profileBiometricUnavailable =>
+      'Pengesahan biometrik tidak tersedia atau belum disediakan pada peranti ini.';
+
+  @override
+  String get profileBiometricReason =>
+      'Sila sahkan untuk mengaktifkan log masuk biometrik';
+
+  @override
+  String get profileBiometricEnabled =>
+      'Log masuk biometrik berjaya diaktifkan.';
+
+  @override
+  String get profileBiometricSaveFailed =>
+      'Gagal mengemas kini pilihan biometrik.';
+
+  @override
+  String get profileBiometricDisabled => 'Log masuk biometrik dinyahaktifkan.';
+
+  @override
+  String get profileErrorSaveBiometric => 'Gagal menyimpan pilihan biometrik.';
+
+  @override
+  String get profileLogoutTitle => 'Log keluar?';
+
+  @override
+  String get profileLogoutMessage =>
+      'Adakah anda pasti mahu log keluar daripada akaun HomeU anda?';
+
+  @override
+  String get profileLogoutCancel => 'Batal';
+
+  @override
+  String get profileLogoutConfirm => 'Log Keluar';
+
+  @override
+  String get profileFavoritesSubtitle => 'Lihat hartanah disimpan anda';
+
+  @override
+  String get profileBiometricTitle => 'Log Masuk Biometrik';
+
+  @override
+  String get profileBiometricSubtitle => 'Buka HomeU dengan biometrik';
+
+  @override
+  String get adminDashboardLoadError =>
+      'Gagal memuat gambaran sistem. Sila semak sambungan anda.';
+
+  @override
+  String get adminDashboardTitle => 'Papan Pemuka Admin';
+
+  @override
+  String get adminDashboardWelcome => 'Selamat datang, Admin';
+
+  @override
+  String get adminDashboardOverview => 'Gambaran Sistem';
+
+  @override
+  String get adminTotalUsers => 'Jumlah Pengguna';
+
+  @override
+  String get adminTotalOwners => 'Pemilik';
+
+  @override
+  String get adminTotalTenants => 'Penyewa';
+
+  @override
+  String get adminPendingReports => 'Laporan Menunggu';
+
+  @override
+  String get adminManagementTitle => 'Pengurusan';
+
+  @override
+  String get adminReportsReview => 'Semakan Laporan';
+
+  @override
+  String adminReportsSummary(Object pending, Object total) {
+    return '$pending menunggu daripada $total jumlah laporan';
+  }
+
+  @override
+  String get adminManagementTile => 'Pengurusan Admin';
+
+  @override
+  String get adminManagementSubtitle => 'Urus pentadbir sistem';
+
+  @override
+  String get adminAuditLogsTitle => 'Log Audit';
+
+  @override
+  String get adminAuditLogsSubtitle => 'Lihat log aktiviti seluruh sistem';
+
+  @override
+  String get adminCreatedSuccess => 'Akaun admin berjaya dicipta.';
+
+  @override
+  String get adminUpdateDetailsTitle => 'Kemaskini Butiran Admin';
+
+  @override
+  String get adminUpdateDetailsConfirm => 'Kemaskini';
+
+  @override
+  String get adminDetailsUpdated => 'Butiran admin dikemas kini.';
+
+  @override
+  String adminUpdateError(Object error) {
+    return 'Ralat: $error';
+  }
+
+  @override
+  String get adminCannotRemoveSelf =>
+      'Keselamatan: Anda tidak boleh buang akses admin sendiri.';
+
+  @override
+  String get adminRemoveTitle => 'Buang Admin?';
+
+  @override
+  String adminRemoveMessage(Object name) {
+    return 'Buang keistimewaan admin daripada $name? Mereka akan kembali kepada peranan Penyewa.';
+  }
+
+  @override
+  String get adminRemoveConfirm => 'Buang';
+
+  @override
+  String get adminRemovedSuccess => 'Keistimewaan admin dibuang.';
+
+  @override
+  String adminRemoveError(Object error) {
+    return 'Ralat: $error';
+  }
+
+  @override
+  String get adminAddButton => 'Tambah Admin';
+
+  @override
+  String get adminNoAdminsFound => 'Tiada admin ditemui.';
+
+  @override
+  String get adminNavDashboard => 'Papan Pemuka';
+
+  @override
+  String get adminNavReports => 'Laporan';
+
+  @override
+  String get adminNavChat => 'Sembang';
+
+  @override
+  String get adminNavLogs => 'Log';
+
+  @override
+  String get adminNavProfile => 'Profil';
+
+  @override
+  String get commonCancel => 'Batal';
+
+  @override
+  String get commonConfirm => 'Sahkan';
+
+  @override
+  String get commonRefreshTooltip => 'Segar Semula';
+
+  @override
+  String get statusReviewed => 'Disemak';
+
+  @override
+  String get statusDismissed => 'Ditolak';
+
+  @override
+  String get adminReportsTitle => 'Semakan Laporan';
+
+  @override
+  String get adminReportsSearchHint =>
+      'Cari laporan, pemilik, penyewa, hartanah...';
+
+  @override
+  String get adminReportsFilterTooltip => 'Tapis laporan';
+
+  @override
+  String get adminReportsActiveFilterLabel => 'Penapis aktif:';
+
+  @override
+  String get adminReportsNoMatches =>
+      'Tiada laporan sepadan dengan penapis semasa.';
+
+  @override
+  String get adminReportsFilterTitle => 'Tapis Laporan';
+
+  @override
+  String get adminReportsFilterSectionStatus => 'Status Laporan';
+
+  @override
+  String get adminReportsFilterClear => 'Kosongkan Penapis';
+
+  @override
+  String get adminReportsFilterApply => 'Gunakan Penapis';
+
+  @override
+  String get adminReportsUnknownListing => 'Senarai tidak diketahui';
+
+  @override
+  String get adminReportsUnknownReportId => 'Tidak diketahui';
+
+  @override
+  String adminReportsPropertyIdFallback(Object propertyId) {
+    return 'Hartanah #$propertyId';
+  }
+
+  @override
+  String get adminReportsNotAvailable => 'N/A';
+
+  @override
+  String get adminReportsUnknownOwner => 'Pemilik tidak diketahui';
+
+  @override
+  String get adminReportsUnknownReporter => 'Pelapor tidak diketahui';
+
+  @override
+  String get adminReportsUnknownEmail => '-';
+
+  @override
+  String adminReportsLoadError(Object error) {
+    return 'Gagal memuat laporan: $error';
+  }
+
+  @override
+  String get adminReportsMissingOwnerOrPropertyChat =>
+      'Konteks pemilik atau hartanah untuk sembang tiada.';
+
+  @override
+  String get adminReportsMissingTenantOrPropertyChat =>
+      'Konteks penyewa atau hartanah untuk sembang tiada.';
+
+  @override
+  String get adminReportsAuditContactOwnerReason =>
+      'Membuka sembang pemilik untuk susulan laporan.';
+
+  @override
+  String get adminReportsAuditContactTenantReason =>
+      'Membuka sembang penyewa untuk susulan laporan.';
+
+  @override
+  String adminReportsChatOpenError(Object error) {
+    return 'Tidak dapat membuka sembang: $error';
+  }
+
+  @override
+  String get adminReportsRecordRiskLevelAction => 'Rekod Tahap Risiko';
+
+  @override
+  String get adminReportsRiskRecorded => 'Tahap risiko direkodkan.';
+
+  @override
+  String adminReportsRiskRecordError(Object error) {
+    return 'Penilaian risiko gagal: $error';
+  }
+
+  @override
+  String adminReportsActionCompleted(Object actionLabel) {
+    return '$actionLabel selesai.';
+  }
+
+  @override
+  String adminReportsUpdateError(Object error) {
+    return 'Kemas kini laporan gagal: $error';
+  }
+
+  @override
+  String adminReportsReportTitle(Object reportId) {
+    return 'Laporan #$reportId';
+  }
+
+  @override
+  String adminReportsSubmittedOn(Object date) {
+    return 'Dihantar pada $date';
+  }
+
+  @override
+  String get adminReportsSectionProperty => 'Hartanah';
+
+  @override
+  String get adminReportsSectionOwner => 'Pemilik';
+
+  @override
+  String get adminReportsSectionReporter => 'Pelapor';
+
+  @override
+  String get adminReportsSectionComplaint => 'Aduan';
+
+  @override
+  String get adminReportsFieldPropertyId => 'ID Hartanah';
+
+  @override
+  String get adminReportsFieldTitle => 'Tajuk';
+
+  @override
+  String get adminReportsFieldName => 'Nama';
+
+  @override
+  String get adminReportsFieldEmail => 'E-mel';
+
+  @override
+  String get adminReportsFieldTotalReports => 'Jumlah laporan';
+
+  @override
+  String get adminReportsFieldReason => 'Sebab';
+
+  @override
+  String get adminReportsFieldDescription => 'Perihalan';
+
+  @override
+  String get adminReportsFieldStatus => 'Status';
+
+  @override
+  String get adminReportsRiskSectionTitle => 'Penilaian risiko';
+
+  @override
+  String get adminReportsRiskSectionHint =>
+      'Semakan dalaman sahaja. Ini tidak menukar keterlihatan senarai atau status akaun.';
+
+  @override
+  String get adminReportsReviewedConfirmTitle =>
+      'Saya telah menyemak aduan ini.';
+
+  @override
+  String get adminReportsReviewedConfirmSubtitle =>
+      'Penilaian risiko dan kemas kini status dibuka selepas pengesahan ini.';
+
+  @override
+  String get adminReportsActionsTitle => 'Tindakan';
+
+  @override
+  String get adminReportsActionsHint =>
+      'Gunakan sembang untuk susulan, kemudian rekod tahap risiko dalaman atau kemas kini status laporan.';
+
+  @override
+  String get adminReportsContactOwner => 'Hubungi Pemilik';
+
+  @override
+  String get adminReportsContactReporter => 'Hubungi Pelapor';
+
+  @override
+  String get adminReportsSaveRisk => 'Simpan Tahap Risiko';
+
+  @override
+  String get adminReportsMarkReviewed => 'Tandakan Disemak';
+
+  @override
+  String get adminReportsDismissReport => 'Tolak Laporan';
+
+  @override
+  String adminReportsOwnerLabel(Object name) {
+    return 'Pemilik: $name';
+  }
+
+  @override
+  String adminReportsReporterLabel(Object name) {
+    return 'Pelapor: $name';
+  }
+
+  @override
+  String adminReportsReasonLabel(Object reason) {
+    return 'Sebab: $reason';
+  }
+
+  @override
+  String get adminReportsReasonDialogPrompt =>
+      'Berikan sebab dan sahkan tindakan moderasi ini.';
+
+  @override
+  String get adminReportsReasonDialogLabel => 'Sebab admin';
+
+  @override
+  String get adminReportsReasonDialogHint =>
+      'Tambah konteks moderasi yang jelas';
+
+  @override
+  String get adminReportsReasonDialogConfirm => 'Saya sahkan tindakan ini.';
+
+  @override
+  String get adminReportsRiskLow => 'Rendah';
+
+  @override
+  String get adminReportsRiskMedium => 'Sederhana';
+
+  @override
+  String get adminReportsRiskHigh => 'Tinggi';
+
+  @override
+  String get adminReportsRiskInvalid => 'Tidak sah';
+
+  @override
+  String get adminAuditTitle => 'Log Audit Sistem';
+
+  @override
+  String get adminAuditClearFiltersTooltip => 'Kosongkan Penapis';
+
+  @override
+  String get adminAuditSearchHint => 'Cari deskripsi...';
+
+  @override
+  String get adminAuditAllDates => 'Semua Tarikh';
+
+  @override
+  String adminAuditDateRange(Object start, Object end) {
+    return '$start - $end';
+  }
+
+  @override
+  String get adminAuditTableFilterHint => 'Jadual';
+
+  @override
+  String get adminAuditActionFilterHint => 'Tindakan';
+
+  @override
+  String get adminAuditEmptyState =>
+      'Tiada log audit sepadan dengan kriteria anda.';
+
+  @override
+  String get adminAuditClearAllFilters => 'Kosongkan semua penapis';
+
+  @override
+  String get adminAuditUnknownTime => 'Masa Tidak Diketahui';
+
+  @override
+  String get adminAuditNoDetails => 'No details available';
+
+  @override
+  String get adminAuditSystemActor => 'Sistem / Tanpa Nama';
+
+  @override
+  String get adminAuditUnknownRole => 'tidak diketahui';
+
+  @override
+  String get adminAuditNotAvailable => 'N/A';
+
+  @override
+  String get adminAuditActorLabel => 'Pelaku';
+
+  @override
+  String get adminAuditTargetTableLabel => 'Jadual Sasaran';
+
+  @override
+  String get adminAuditTargetIdLabel => 'ID Sasaran';
+
+  @override
+  String get adminAuditTableProfiles => 'Profil';
+
+  @override
+  String get adminAuditTableProperties => 'Hartanah';
+
+  @override
+  String get adminAuditTableBookings => 'Tempahan';
+
+  @override
+  String get adminAuditTablePropertyReports => 'Laporan Hartanah';
+
+  @override
+  String get adminAuditTableReports => 'Laporan';
+
+  @override
+  String get adminAuditTableAuditLogs => 'Log Audit';
+
+  @override
+  String get adminAuditActionAdminCreated => 'Admin Dicipta';
+
+  @override
+  String get adminAuditActionAdminUpdated => 'Admin Dikemas Kini';
+
+  @override
+  String get adminAuditActionAdminRemoved => 'Admin Dibuang';
+
+  @override
+  String get adminAuditActionReportContactOwner => 'Laporan: Hubungi Pemilik';
+
+  @override
+  String get adminAuditActionReportContactTenant => 'Laporan: Hubungi Penyewa';
+
+  @override
+  String get adminAuditActionReportRiskLow => 'Laporan: Risiko Rendah';
+
+  @override
+  String get adminAuditActionReportRiskMedium => 'Laporan: Risiko Sederhana';
+
+  @override
+  String get adminAuditActionReportRiskHigh => 'Laporan: Risiko Tinggi';
+
+  @override
+  String get adminAuditActionReportRiskInvalid => 'Laporan: Risiko Tidak Sah';
+
+  @override
+  String get adminAuditActionReportReviewed => 'Laporan: Disemak';
+
+  @override
+  String get adminAuditActionReportDismissed => 'Laporan: Ditolak';
+
+  @override
+  String get adminAuditActionPropertyApproved => 'Hartanah Diluluskan';
+
+  @override
+  String get adminAuditActionPropertyRejected => 'Hartanah Ditolak';
+
+  @override
+  String get adminAuditActionProfileUpdate => 'Profil Dikemas Kini';
+
+  @override
+  String adminAuditLoadError(Object error) {
+    return 'Gagal memuat log: $error';
+  }
+
+  @override
+  String get propertyReportTitle => 'Lapor Hartanah';
+
+  @override
+  String get propertyReportSubtitle =>
+      'Sila pilih sebab untuk melaporkan hartanah ini. Pasukan kami akan menyemaknya tidak lama lagi.';
+
+  @override
+  String get propertyReportReasonFake => 'Iklan palsu / Scam';
+
+  @override
+  String get propertyReportReasonSuspicious => 'Aktiviti mencurigakan';
+
+  @override
+  String get propertyReportReasonWrongDetails => 'Butiran hartanah salah';
+
+  @override
+  String get propertyReportReasonInappropriate => 'Kandungan tidak sesuai';
+
+  @override
+  String get propertyReportReasonOther => 'Lain-lain';
+
+  @override
+  String get propertyReportDescriptionHint =>
+      'Berikan butiran tambahan (pilihan)';
+
+  @override
+  String get propertyReportCancel => 'Batal';
+
+  @override
+  String get propertyReportSubmit => 'Hantar Laporan';
+
+  @override
+  String get propertyReportSubmitted =>
+      'Laporan berjaya dihantar. Terima kasih.';
+
+  @override
+  String get propertyReportSubmitFailed =>
+      'Gagal menghantar laporan. Sila cuba lagi.';
+
+  @override
+  String get propertyReportServiceUnavailable =>
+      'Perkhidmatan laporan tidak tersedia buat masa ini. Sila semak sambungan anda.';
+
+  @override
+  String get propertyReportLoginRequired =>
+      'Sila log masuk untuk menghantar laporan.';
+
+  @override
+  String get propertyReportTenantOnly =>
+      'Hanya penyewa boleh menghantar laporan hartanah.';
+
+  @override
+  String get propertyReportOwnProperty =>
+      'Anda tidak boleh melaporkan hartanah anda sendiri.';
+
+  @override
+  String get propertyReportInvalidMetadata =>
+      'Metadata hartanah tidak sah. Tidak dapat melaporkan.';
+
+  @override
+  String get propertyFacilitiesTitle => 'Kemudahan';
+
+  @override
+  String get propertyNoFacilities => 'Tiada kemudahan disenaraikan.';
+
+  @override
+  String get propertyOwnerInfoTitle => 'Maklumat Pemilik';
+
+  @override
+  String get propertyOwnerHighRisk => 'Risiko Tinggi';
+
+  @override
+  String get propertyOwnerSuspicious => 'Pemilik Mencurigakan';
+
+  @override
+  String get propertyOwnerSuspended => 'Digantung';
+
+  @override
+  String get propertyOwnerRemoved => 'Dibuang';
+
+  @override
+  String get propertyAvailabilityTitle => 'Ketersediaan';
+
+  @override
+  String get propertyAvailabilityLabel => 'Ketersediaan:';
+
+  @override
+  String get propertyStatusActive => 'Aktif';
+
+  @override
+  String get propertyStatusOccupied => 'Diduduki';
+
+  @override
+  String get propertyStatusInactive => 'Tidak Aktif';
+
+  @override
+  String get propertyReportErrorPermission =>
+      'Tidak dapat menghantar laporan kerana polisi kebenaran. Sila hubungi sokongan.';
+
+  @override
+  String get propertyReportErrorInvalidListing =>
+      'Tidak dapat menghantar laporan kerana rujukan iklan tidak sah.';
+
+  @override
+  String get propertyReportErrorInvalidData =>
+      'Tidak dapat menghantar laporan kerana data iklan tidak sah.';
+
+  @override
+  String propertyNearbyLabel(Object landmarks) {
+    return 'Berdekatan: $landmarks';
+  }
+
+  @override
+  String get propertyDetailsTitle => 'Butiran Hartanah';
+
+  @override
+  String get propertyUnavailableAdmin =>
+      'Hartanah ini tidak tersedia buat masa ini kerana moderasi.';
+
+  @override
+  String get propertyUnavailableBooking =>
+      'Hartanah ini sedang diduduki dan tidak tersedia untuk tempahan.';
+
+  @override
+  String get propertyFavoriteLoginRequired =>
+      'Sila log masuk untuk menambah ke kegemaran.';
+
+  @override
+  String get propertyFavoriteTenantOnly =>
+      'Hanya penyewa boleh menyimpan kegemaran.';
+
+  @override
+  String get propertyFavoritePolicyBlocked =>
+      'Tidak dapat mengemas kini kegemaran kerana polisi keselamatan.';
+
+  @override
+  String get propertyFavoriteUpdateFailed =>
+      'Gagal mengemas kini kegemaran. Sila cuba lagi.';
+
+  @override
+  String get propertyHighRiskTag => 'Risiko Tinggi';
+
+  @override
+  String get propertyLocationTitle => 'Lokasi';
+
+  @override
+  String get propertyDescriptionTitle => 'Perihalan';
+
+  @override
+  String get bookingBookNow => 'Tempah Sekarang';
+
+  @override
+  String get bookingHistoryEmpty =>
+      'Tiada tempahan ditemui yang sepadan dengan kriteria anda.';
+
+  @override
+  String get ownerAvailabilityEndAfterStart =>
+      'Masa tamat mestilah selepas masa mula.';
+
+  @override
+  String get ownerAvailabilityPastDate =>
+      'Tidak boleh tambah slot untuk tarikh lalu.';
+
+  @override
+  String get ownerAvailabilityOverlap =>
+      'Slot ini bertindih dengan slot sedia ada.';
+
+  @override
+  String get ownerAvailabilitySlotAdded =>
+      'Slot ketersediaan berjaya ditambah.';
+
+  @override
+  String get ownerAvailabilityAddFailed =>
+      'Gagal menambah slot ketersediaan. Sila cuba lagi.';
+
+  @override
+  String get ownerAvailabilityDeleteFailed =>
+      'Gagal memadam slot. Sila cuba lagi.';
+
+  @override
+  String ownerAvailabilityDateTime(Object date, Object time) {
+    return '$date pada $time';
+  }
+
+  @override
+  String get ownerAvailabilityCreateSlot => 'Cipta Slot Ketersediaan Baharu';
+
+  @override
+  String get ownerAvailabilitySelectDate => 'Pilih Tarikh';
+
+  @override
+  String get ownerAvailabilityStartTime => 'Masa Mula';
+
+  @override
+  String get ownerAvailabilityEndTime => 'Masa Tamat';
+
+  @override
+  String get ownerAvailabilityActiveSlots => 'Slot Tersedia Anda';
+
+  @override
+  String get ownerAvailabilityStatusAvailable => 'Tersedia';
+
+  @override
+  String get ownerAvailabilityStatusBooked => 'Ditempah';
+
+  @override
+  String get ownerAvailabilityStatusApproved => 'Diluluskan';
+
+  @override
+  String get ownerAvailabilityDeleteConfirmTitle => 'Padam Slot?';
+
+  @override
+  String get ownerAvailabilityDeleteConfirmMessage =>
+      'Adakah anda pasti mahu memadam slot ketersediaan ini?';
+
+  @override
+  String get ownerAvailabilityEmpty => 'Tiada slot ketersediaan ditambah lagi.';
+
+  @override
+  String get ownerAvailabilityAddSlot => 'Tambah Slot';
+
+  @override
+  String get ownerAvailabilityBooked => 'Ditempah';
+
+  @override
+  String get ownerAvailabilityAvailable => 'Tersedia';
+
+  @override
+  String get ownerAvailabilityTitle => 'Ketersediaan Lawatan';
+
+  @override
+  String get paymentCardIncomplete => 'Sila masukkan tarikh luput kad penuh.';
+
+  @override
+  String get paymentCardInvalidMonth => 'Bulan tidak sah (01-12).';
+
+  @override
+  String get paymentCardExpired => 'Kad telah tamat tempoh.';
+
+  @override
+  String get paymentCardInvalidFormat => 'Format luput tidak sah (MM/YY).';
+
+  @override
+  String get paymentTitle => 'Pembayaran';
+
+  @override
+  String get paymentCompletedLabel => 'Pembayaran Selesai';
+
+  @override
+  String get paymentPayNow => 'Bayar Sekarang';
+
+  @override
+  String get paymentMethodTitle => 'Kaedah Pembayaran';
+
+  @override
+  String get paymentMethodCard => 'Kad Kredit/Debit';
+
+  @override
+  String get paymentMethodBanking => 'Perbankan Dalam Talian';
+
+  @override
+  String get paymentSelectBank => 'Pilih Bank';
+
+  @override
+  String get paymentCardNumberLabel => 'Nombor Kad';
+
+  @override
+  String get paymentCardNumberHint => 'XXXX XXXX XXXX XXXX';
+
+  @override
+  String get paymentExpiryLabel => 'Tarikh Luput';
+
+  @override
+  String get paymentExpiryHint => 'MM/YY';
+
+  @override
+  String get paymentCvvLabel => 'CVV';
+
+  @override
+  String get paymentCvvHint => 'XXX';
+
+  @override
+  String get paymentAmountLabel => 'Amaun Untuk Dibayar';
+
+  @override
+  String get paymentTotalLabel => 'Jumlah Harga';
+
+  @override
+  String get paymentProcessing => 'Memproses Pembayaran...';
+
+  @override
+  String get paymentSuccess => 'Pembayaran Berjaya!';
+
+  @override
+  String paymentSuccessSubtitle(Object amount) {
+    return 'Anda telah membayar RM $amount.';
+  }
+
+  @override
+  String get paymentBackToHome => 'Kembali ke Laman Utama';
+
+  @override
+  String paymentError(Object message) {
+    return 'Ralat Pembayaran: $message';
+  }
+
+  @override
+  String get paymentMethodEwallet => 'E-Wallet';
+
+  @override
+  String get paymentSelectEwallet => 'Pilih E-Wallet';
+
+  @override
+  String get paymentSelectEwalletError => 'Sila pilih E-Wallet.';
+
+  @override
+  String get paymentCardNumberInvalid => 'Nombor kad tidak sah.';
+
+  @override
+  String get paymentCvvInvalid => 'CVV tidak sah.';
+
+  @override
+  String get paymentSummaryTitle => 'Ringkasan Pembayaran';
+
+  @override
+  String get paymentSummaryProperty => 'Hartanah';
+
+  @override
+  String get paymentSummaryStartDate => 'Tarikh Mula';
+
+  @override
+  String get paymentSummaryDuration => 'Tempoh';
+
+  @override
+  String get paymentSummaryMonthlyRent => 'Sewa Bulanan';
+
+  @override
+  String paymentDurationMonths(Object count) {
+    return '$count bulan';
+  }
+
+  @override
+  String get paymentSummaryMethod => 'Kaedah';
+
+  @override
+  String paymentMethodWithBank(Object bank) {
+    return 'Perbankan Dalam Talian ($bank)';
+  }
+
+  @override
+  String paymentMethodWithEwallet(Object wallet) {
+    return 'E-Wallet ($wallet)';
+  }
+
+  @override
+  String get paymentSummaryStatus => 'Status';
+
+  @override
+  String paymentRentMonth(Object number) {
+    return 'Sewa untuk Bulan $number';
+  }
+
+  @override
+  String get paymentBookingFeeOneMonth => 'Yuran Tempahan (1 Bulan)';
+
+  @override
+  String get paymentSelectBankError => 'Sila pilih bank.';
+
+  @override
+  String get paymentConfirmTitle => 'Sahkan Pembayaran';
+
+  @override
+  String get paymentConfirmMessage =>
+      'Adakah anda pasti mahu meneruskan pembayaran?';
+
+  @override
+  String get paymentSummaryAmount => 'Amaun';
+
+  @override
+  String get paymentSummaryMethodLabel => 'Kaedah Pembayaran';
+
+  @override
+  String get paymentCancel => 'Batal';
+
+  @override
+  String get paymentConfirmPay => 'Sahkan & Bayar';
+
+  @override
+  String get paymentFailed => 'Pembayaran gagal. Sila cuba lagi.';
+
+  @override
+  String get paymentSuccessMessage => 'Pembayaran berjaya diproses.';
+
+  @override
+  String paymentFailedWithMessage(Object message) {
+    return 'Pembayaran gagal: $message';
+  }
+
+  @override
+  String get paymentErrorDetailsAction => 'Butiran';
+
+  @override
+  String get paymentErrorDetailsTitle => 'Butiran Ralat';
+
+  @override
+  String get paymentOk => 'OK';
+
+  @override
+  String get paymentSuccessTitle => 'Pembayaran Berjaya';
+
+  @override
+  String get paymentViewReceipt => 'Lihat Resit';
+
+  @override
+  String get paymentDismiss => 'Tutup';
+
+  @override
+  String get paymentMethodCardShort => 'Kad';
+
+  @override
+  String get paymentLoginRequired => 'Sila log masuk untuk membuat pembayaran.';
+
+  @override
+  String get viewingHistoryPleaseLogin =>
+      'Sila log masuk untuk melihat sejarah lawatan anda.';
+
+  @override
+  String get viewingHistoryTitle => 'Sejarah Lawatan';
+
+  @override
+  String viewingHistoryErrorWithMessage(Object message) {
+    return 'Ralat: $message';
+  }
+
+  @override
+  String get viewingHistoryCancelTitle => 'Batal Lawatan';
+
+  @override
+  String get viewingHistoryCancelMessage =>
+      'Adakah anda pasti mahu membatalkan temujanji lawatan ini?';
+
+  @override
+  String get viewingHistoryKeepAppointment => 'Kekalkan Temujanji';
+
+  @override
+  String get viewingHistoryConfirmCancellation => 'Sahkan Pembatalan';
+
+  @override
+  String get viewingHistoryCancelledSuccess => 'Temujanji lawatan dibatalkan';
+
+  @override
+  String viewingHistoryCancelFailed(Object error) {
+    return 'Gagal membatalkan lawatan: $error';
+  }
+
+  @override
+  String get viewingHistoryEmptyAll => 'Tiada permintaan lawatan lagi.';
+
+  @override
+  String get viewingHistoryEmptyForStatus =>
+      'Tiada permintaan lawatan ditemui untuk status ini.';
+
+  @override
+  String get viewingHistoryFallbackLocation => 'Lokasi tidak tersedia';
+
+  @override
+  String get viewingHistoryFallbackPrice => 'Harga tidak tersedia';
+
+  @override
+  String get viewingHistoryFallbackDescription =>
+      'Butiran hartanah tidak tersedia buat masa ini.';
+
+  @override
+  String get viewingHistoryFallbackHostRole => 'Hos';
+
+  @override
+  String get viewingHistoryDateLabel => 'Tarikh Lawatan';
+
+  @override
+  String get viewingHistoryTimeLabel => 'Masa Lawatan';
+
+  @override
+  String get viewingHistoryScheduledLabel => 'Dijadualkan';
+
+  @override
+  String get viewingHistoryCancelAction => 'Batal';
+
+  @override
+  String get statusCancelled => 'Dibatalkan';
+
+  @override
+  String get statusRescheduled => 'Dijadualkan Semula';
+
+  @override
+  String get statusSlotTaken => 'Slot Diambil';
+
+  @override
+  String get statusPropertyRented => 'Hartanah Disewa';
 }

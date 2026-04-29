@@ -2,8 +2,10 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
+import 'package:homeu/core/localization/homeu_l10n.dart';
 import 'package:homeu/core/theme/homeu_app_theme.dart';
 import 'package:homeu/core/config/app_env.dart';
 import 'package:homeu/app/booking/payment_models.dart';
@@ -117,14 +119,14 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
 
   String? _getExpiryError(String value) {
     if (value.isEmpty) return null;
-    if (value.length < 5) return 'Incomplete';
+    if (value.length < 5) return context.l10n.paymentCardIncomplete;
 
     try {
       final month = int.parse(value.substring(0, 2));
       final year = int.parse(value.substring(3, 5));
 
       if (month < 1 || month > 12) {
-        return 'Invalid Month';
+        return context.l10n.paymentCardInvalidMonth;
       }
 
       final now = DateTime.now();
@@ -132,14 +134,14 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
       final currentMonth = now.month;
 
       if (year < currentYear) {
-        return 'Card has expired';
+        return context.l10n.paymentCardExpired;
       }
 
       if (year == currentYear && month < currentMonth) {
-        return 'Card has expired';
+        return context.l10n.paymentCardExpired;
       }
     } catch (e) {
-      return 'Invalid Format';
+      return context.l10n.paymentCardInvalidFormat;
     }
 
     return null;
@@ -179,7 +181,7 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
     return Scaffold(
       backgroundColor: context.colors.surface,
       appBar: AppBar(
-        title: const Text('Payment'),
+        title: Text(context.l10n.paymentTitle),
         backgroundColor: context.colors.surface,
       ),
       bottomNavigationBar: SafeArea(
@@ -193,9 +195,9 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
                 : _submitPayment,
             style: ElevatedButton.styleFrom(
               backgroundColor: (isSuccess || !_isFormValid)
-                  ? Colors.grey
+                  ? context.colors.surfaceContainerHighest
                   : context.homeuAccent,
-              foregroundColor: Colors.white,
+              foregroundColor: context.colors.onPrimary,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
@@ -205,15 +207,19 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
               ),
             ),
             child: _isSubmittingPayment
-                ? const SizedBox(
+                ? SizedBox(
                     width: 18,
                     height: 18,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: Colors.white,
+                      color: context.colors.onPrimary,
                     ),
                   )
-                : Text(isSuccess ? 'Payment Completed' : 'Pay Now'),
+                : Text(
+                    isSuccess
+                        ? context.l10n.paymentCompletedLabel
+                        : context.l10n.paymentPayNow,
+                  ),
           ),
         ),
       ),
@@ -224,7 +230,7 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Payment Method',
+                context.l10n.paymentMethodTitle,
                 style: TextStyle(
                   color: context.homeuPrimaryText,
                   fontSize: 16,
@@ -233,7 +239,7 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
               ),
               const SizedBox(height: 10),
               _PaymentMethodTile(
-                label: 'Credit / Debit Card',
+                label: context.l10n.paymentMethodCard,
                 icon: Icons.credit_card_rounded,
                 selected: _selectedMethod == HomeUPaymentMethod.card,
                 onTap: () {
@@ -243,7 +249,7 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
                 },
               ),
               _PaymentMethodTile(
-                label: 'Online Banking',
+                label: context.l10n.paymentMethodBanking,
                 icon: Icons.account_balance_rounded,
                 selected: _selectedMethod == HomeUPaymentMethod.banking,
                 onTap: () {
@@ -257,7 +263,7 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
               if (_selectedMethod == HomeUPaymentMethod.banking) ...[
                 const SizedBox(height: 14),
                 Text(
-                  'Select Bank',
+                  context.l10n.paymentSelectBank,
                   style: TextStyle(
                     color: context.homeuPrimaryText,
                     fontSize: 15,
@@ -291,19 +297,19 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           color: isSelected
-                              ? const Color(0xFF1E3A8A).withOpacity(0.05)
-                              : Colors.white,
+                              ? context.homeuAccent.withValues(alpha: 0.08)
+                              : context.homeuCard,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
                             color: isSelected
-                                ? const Color(0xFF1E3A8A)
-                                : Colors.grey[200]!,
+                                ? context.homeuAccent
+                                : context.homeuSoftBorder,
                             width: isSelected ? 2.0 : 1.0,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(
-                                isSelected ? 0.08 : 0.04,
+                              color: context.homeuCardShadow.withValues(
+                                alpha: isSelected ? 0.22 : 0.12,
                               ),
                               blurRadius: isSelected ? 8 : 4,
                               offset: isSelected
@@ -327,17 +333,18 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
                                           (context, child, loadingProgress) {
                                             if (loadingProgress == null)
                                               return child;
-                                            return const Center(
+                                            return Center(
                                               child: CircularProgressIndicator(
                                                 strokeWidth: 2,
+                                                color: context.homeuAccent,
                                               ),
                                             );
                                           },
                                       errorBuilder:
                                           (context, error, stackTrace) =>
-                                              const Icon(
+                                              Icon(
                                                 Icons.account_balance_rounded,
-                                                color: Colors.grey,
+                                                color: context.homeuMutedText,
                                                 size: 32,
                                               ),
                                     ),
@@ -351,19 +358,19 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
                                     fontSize: 13,
                                     fontWeight: FontWeight.w600,
                                     color: isSelected
-                                        ? const Color(0xFF1E3A8A)
+                                        ? context.homeuAccent
                                         : context.homeuPrimaryText,
                                   ),
                                 ),
                               ],
                             ),
                             if (isSelected)
-                              const Positioned(
+                              Positioned(
                                 top: -4,
                                 right: -4,
                                 child: Icon(
                                   Icons.check_circle_rounded,
-                                  color: Color(0xFF1E3A8A),
+                                  color: context.homeuAccent,
                                   size: 22,
                                 ),
                               ),
@@ -375,7 +382,7 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
                 ),
               ],
               _PaymentMethodTile(
-                label: 'E-wallet',
+                label: context.l10n.paymentMethodEwallet,
                 icon: Icons.account_balance_wallet_rounded,
                 selected: _selectedMethod == HomeUPaymentMethod.ewallet,
                 onTap: () {
@@ -390,7 +397,7 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
               if (_selectedMethod == HomeUPaymentMethod.ewallet) ...[
                 const SizedBox(height: 14),
                 Text(
-                  'Select E-Wallet',
+                  context.l10n.paymentSelectEwallet,
                   style: TextStyle(
                     color: context.homeuPrimaryText,
                     fontSize: 15,
@@ -424,19 +431,19 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           color: isSelected
-                              ? const Color(0xFF1E3A8A).withOpacity(0.05)
-                              : Colors.white,
+                              ? context.homeuAccent.withValues(alpha: 0.08)
+                              : context.homeuCard,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
                             color: isSelected
-                                ? const Color(0xFF1E3A8A)
-                                : Colors.grey[200]!,
+                                ? context.homeuAccent
+                                : context.homeuSoftBorder,
                             width: isSelected ? 2.0 : 1.0,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(
-                                isSelected ? 0.08 : 0.04,
+                              color: context.homeuCardShadow.withValues(
+                                alpha: isSelected ? 0.22 : 0.12,
                               ),
                               blurRadius: isSelected ? 8 : 4,
                               offset: isSelected
@@ -460,21 +467,22 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
                                           (context, child, loadingProgress) {
                                             if (loadingProgress == null)
                                               return child;
-                                            return const Center(
-                                              child: CircularProgressIndicator(
-                                                strokeWidth: 2,
-                                              ),
-                                            );
+                                             return Center(
+                                               child: CircularProgressIndicator(
+                                                 strokeWidth: 2,
+                                                 color: context.homeuAccent,
+                                               ),
+                                             );
                                           },
                                       errorBuilder:
                                           (
                                             context,
                                             error,
                                             stackTrace,
-                                          ) => const Icon(
+                                           ) => Icon(
                                             Icons
                                                 .account_balance_wallet_rounded,
-                                            color: Colors.grey,
+                                            color: context.homeuMutedText,
                                             size: 32,
                                           ),
                                     ),
@@ -488,19 +496,19 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
                                     fontSize: 13,
                                     fontWeight: FontWeight.w600,
                                     color: isSelected
-                                        ? const Color(0xFF1E3A8A)
+                                        ? context.homeuAccent
                                         : context.homeuPrimaryText,
                                   ),
                                 ),
                               ],
                             ),
                             if (isSelected)
-                              const Positioned(
+                              Positioned(
                                 top: -4,
                                 right: -4,
                                 child: Icon(
                                   Icons.check_circle_rounded,
-                                  color: Color(0xFF1E3A8A),
+                                  color: context.homeuAccent,
                                   size: 22,
                                 ),
                               ),
@@ -540,15 +548,15 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
                   ],
                   decoration: _fieldDecoration(
                     context,
-                    'Card Number',
-                    '1234 5678 9012 3456',
+                    context.l10n.paymentCardNumberLabel,
+                    context.l10n.paymentCardNumberHint,
                     errorText:
                         _cardNumberController.text.isNotEmpty &&
                             _cardNumberController.text
                                     .replaceAll(' ', '')
                                     .length <
                                 16
-                        ? 'Enter a valid 16-digit card number'
+                        ? context.l10n.paymentCardNumberInvalid
                         : null,
                   ),
                 ),
@@ -576,8 +584,8 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
                         ],
                         decoration: _fieldDecoration(
                           context,
-                          'Expiry',
-                          'MM/YY',
+                          context.l10n.paymentExpiryLabel,
+                          context.l10n.paymentExpiryHint,
                           errorText: _getExpiryError(_expiryController.text),
                         ),
                       ),
@@ -603,12 +611,12 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
                         ],
                         decoration: _fieldDecoration(
                           context,
-                          'CVV',
-                          '***',
+                          context.l10n.paymentCvvLabel,
+                          context.l10n.paymentCvvHint,
                           errorText:
                               _cvvController.text.isNotEmpty &&
                                   _cvvController.text.length < 3
-                              ? 'Invalid'
+                              ? context.l10n.paymentCvvInvalid
                               : null,
                         ),
                       ),
@@ -635,7 +643,7 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Payment Summary',
+                      context.l10n.paymentSummaryTitle,
                       style: TextStyle(
                         color: context.homeuPrimaryText,
                         fontSize: 15,
@@ -643,32 +651,51 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
                       ),
                     ),
                     const SizedBox(height: 10),
-                    _summaryRow('Property', widget.property.name),
-                    _summaryRow('Start Date', _formatDate(widget.startDate)),
                     _summaryRow(
-                      'Duration',
-                      widget.isInstallment
-                          ? 'Monthly Rent'
-                          : '${widget.durationMonths} months',
+                      context.l10n.paymentSummaryProperty,
+                      widget.property.name,
                     ),
                     _summaryRow(
-                      'Payment Method',
+                      context.l10n.paymentSummaryStartDate,
+                      _formatDate(context, widget.startDate),
+                    ),
+                    _summaryRow(
+                      context.l10n.paymentSummaryDuration,
+                      widget.isInstallment
+                          ? context.l10n.paymentSummaryMonthlyRent
+                          : context.l10n.paymentDurationMonths(
+                              widget.durationMonths,
+                            ),
+                    ),
+                    _summaryRow(
+                      context.l10n.paymentSummaryMethod,
                       _selectedMethod == HomeUPaymentMethod.banking &&
                               _selectedBank != null
-                          ? 'Online Banking ($_selectedBank)'
+                          ? context.l10n.paymentMethodWithBank(
+                              _selectedBank!,
+                            )
                           : _selectedMethod == HomeUPaymentMethod.ewallet &&
                                 _selectedEWallet != null
-                          ? 'E-Wallet ($_selectedEWallet)'
+                          ? context.l10n.paymentMethodWithEwallet(
+                              _selectedEWallet!,
+                            )
                           : _methodLabel(_selectedMethod),
                     ),
                     if (_latestPayment != null)
-                      _summaryRow('Payment Status', _latestPayment!.status),
+                      _summaryRow(
+                        context.l10n.paymentSummaryStatus,
+                        _latestPayment!.status,
+                      ),
                     const Divider(height: 18),
                     _summaryRow(
                       widget.isInstallment
-                          ? 'Rent Payment (Month ${widget.monthNumber})'
-                          : 'Booking Fee (1 Month)',
-                      'RM ${_formatCurrency(widget.totalPrice)}',
+                          ? context.l10n.paymentRentMonth(
+                              widget.monthNumber ?? 1,
+                            )
+                          : context.l10n.paymentBookingFeeOneMonth,
+                      context.l10n.paymentAmountRm(
+                        _formatCurrency(widget.totalPrice),
+                      ),
                       emphasize: true,
                     ),
                   ],
@@ -707,11 +734,11 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
       ),
       errorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: Colors.red, width: 1.0),
+          borderSide: BorderSide(color: context.colors.error, width: 1.0),
       ),
       focusedErrorBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: Colors.red, width: 1.2),
+          borderSide: BorderSide(color: context.colors.error, width: 1.2),
       ),
     );
   }
@@ -761,23 +788,9 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
     return buffer.toString();
   }
 
-  String _formatDate(DateTime date) {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-
-    return '${date.day} ${months[date.month - 1]} ${date.year}';
+  String _formatDate(BuildContext context, DateTime date) {
+    final locale = Localizations.localeOf(context).toString();
+    return DateFormat.yMMMd(locale).format(date);
   }
 
   Future<void> _loadLatestPayment() async {
@@ -800,8 +813,8 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
   Future<void> _submitPayment() async {
     if (!AppSupabase.isInitialized) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Supabase is not initialized. Please try again later.'),
+        SnackBar(
+          content: Text(context.l10n.paymentSupabaseUnavailable),
         ),
       );
       return;
@@ -810,7 +823,7 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
     final payerId = AppSupabase.auth.currentUser?.id;
     if (payerId == null || payerId.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please log in to continue payment.')),
+        SnackBar(content: Text(context.l10n.paymentLoginRequired)),
       );
       return;
     }
@@ -819,7 +832,7 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
       if (_selectedMethod == HomeUPaymentMethod.banking &&
           _selectedBank == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please select a bank to continue.')),
+          SnackBar(content: Text(context.l10n.paymentSelectBankError)),
         );
         return;
       }
@@ -827,8 +840,8 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
       if (_selectedMethod == HomeUPaymentMethod.ewallet &&
           _selectedEWallet == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Please select an e-wallet to continue.'),
+          SnackBar(
+            content: Text(context.l10n.paymentSelectEwalletError),
           ),
         );
         return;
@@ -842,7 +855,7 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
             borderRadius: BorderRadius.circular(20),
           ),
           title: Text(
-            'Confirm Payment',
+            context.l10n.paymentConfirmTitle,
             style: TextStyle(
               color: context.homeuPrimaryText,
               fontWeight: FontWeight.w700,
@@ -853,7 +866,7 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Are you sure you want to proceed with this payment?',
+                context.l10n.paymentConfirmMessage,
                 style: TextStyle(color: context.homeuSecondaryText),
               ),
               const SizedBox(height: 16),
@@ -870,18 +883,24 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
                 child: Column(
                   children: [
                     _summaryRow(
-                      'Amount',
-                      'RM ${_formatCurrency(widget.totalPrice)}',
+                      context.l10n.paymentSummaryAmount,
+                      context.l10n.paymentAmountRm(
+                        _formatCurrency(widget.totalPrice),
+                      ),
                       emphasize: true,
                     ),
                     const Divider(height: 16),
                     _summaryRow(
-                      'Method',
+                      context.l10n.paymentSummaryMethodLabel,
                       _selectedMethod == HomeUPaymentMethod.banking
-                          ? 'Online Banking ($_selectedBank)'
+                          ? context.l10n.paymentMethodWithBank(
+                              _selectedBank!,
+                            )
                           : _selectedMethod == HomeUPaymentMethod.ewallet
-                          ? 'E-Wallet ($_selectedEWallet)'
-                          : 'Credit / Debit Card',
+                          ? context.l10n.paymentMethodWithEwallet(
+                              _selectedEWallet!,
+                            )
+                          : context.l10n.paymentMethodCard,
                     ),
                   ],
                 ),
@@ -892,7 +911,7 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
             TextButton(
               onPressed: () => Navigator.pop(context, false),
               child: Text(
-                'Cancel',
+                context.l10n.paymentCancel,
                 style: TextStyle(color: context.homeuMutedText),
               ),
             ),
@@ -900,7 +919,7 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
               onPressed: () => Navigator.pop(context, true),
               style: ElevatedButton.styleFrom(
                 backgroundColor: context.homeuAccent,
-                foregroundColor: Colors.white,
+                foregroundColor: context.colors.onPrimary,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 20,
                   vertical: 12,
@@ -910,7 +929,7 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
                 ),
                 elevation: 0,
               ),
-              child: const Text('Confirm & Pay'),
+              child: Text(context.l10n.paymentConfirmPay),
             ),
           ],
         ),
@@ -962,7 +981,7 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
 
       if (payment == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Payment failed. Please try again.')),
+          SnackBar(content: Text(context.l10n.paymentFailed)),
         );
         setState(() {
           _isSubmittingPayment = false;
@@ -976,8 +995,8 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
         SnackBar(
           content: Text(
             isSuccessful
-                ? 'Payment completed successfully.'
-                : 'Payment failed. Please try again.',
+                ? context.l10n.paymentSuccessMessage
+                : context.l10n.paymentFailed,
           ),
         ),
       );
@@ -1010,20 +1029,20 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
       debugPrint('Payment processing error: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Payment failed: $e'),
+          content: Text(context.l10n.paymentFailedWithMessage('$e')),
           duration: const Duration(seconds: 5),
           action: SnackBarAction(
-            label: 'Details',
+            label: context.l10n.paymentErrorDetailsAction,
             onPressed: () {
               showDialog(
                 context: context,
                 builder: (context) => AlertDialog(
-                  title: const Text('Error Details'),
+                  title: Text(context.l10n.paymentErrorDetailsTitle),
                   content: SingleChildScrollView(child: Text(e.toString())),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: const Text('OK'),
+                      child: Text(context.l10n.paymentOk),
                     ),
                   ],
                 ),
@@ -1051,14 +1070,14 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
+            Icon(
               Icons.check_circle_rounded,
-              color: Color(0xFF10B981),
+              color: context.homeuSuccess,
               size: 64,
             ),
             const SizedBox(height: 16),
             Text(
-              'Payment Successful!',
+              context.l10n.paymentSuccessTitle,
               style: TextStyle(
                 color: context.homeuPrimaryText,
                 fontSize: 18,
@@ -1067,7 +1086,9 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Your payment of RM ${_formatCurrency(payment.amount)} has been processed.',
+              context.l10n.paymentSuccessSubtitle(
+                _formatCurrency(payment.amount),
+              ),
               textAlign: TextAlign.center,
               style: TextStyle(color: context.homeuSecondaryText),
             ),
@@ -1078,13 +1099,13 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
                 onPressed: () => Navigator.pop(context, true),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: context.homeuAccent,
-                  foregroundColor: Colors.white,
+                  foregroundColor: context.colors.onPrimary,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
-                child: const Text('View Receipt'),
+                child: Text(context.l10n.paymentViewReceipt),
               ),
             ),
             const SizedBox(height: 12),
@@ -1093,7 +1114,7 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
               child: TextButton(
                 onPressed: () => Navigator.pop(context, false),
                 child: Text(
-                  'Dismiss',
+                  context.l10n.paymentDismiss,
                   style: TextStyle(color: context.homeuMutedText),
                 ),
               ),
@@ -1116,11 +1137,11 @@ class _HomeUPaymentScreenState extends State<HomeUPaymentScreen> {
   String _methodLabel(HomeUPaymentMethod method) {
     switch (method) {
       case HomeUPaymentMethod.card:
-        return 'Card';
+        return context.l10n.paymentMethodCardShort;
       case HomeUPaymentMethod.banking:
-        return 'Online Banking';
+        return context.l10n.paymentMethodBanking;
       case HomeUPaymentMethod.ewallet:
-        return 'E-Wallet';
+        return context.l10n.paymentMethodEwallet;
     }
   }
 }

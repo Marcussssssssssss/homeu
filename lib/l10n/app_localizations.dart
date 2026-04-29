@@ -106,6 +106,12 @@ abstract class AppLocalizations {
   /// **'HomeU'**
   String get appTitle;
 
+  /// No description provided for @splashTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'Find Your Perfect Home'**
+  String get splashTagline;
+
   /// No description provided for @navHome.
   ///
   /// In en, this message translates to:
@@ -910,6 +916,42 @@ abstract class AppLocalizations {
   /// **'Login to continue your HomeU journey.'**
   String get loginSubtitle;
 
+  /// No description provided for @loginDividerOr.
+  ///
+  /// In en, this message translates to:
+  /// **'OR'**
+  String get loginDividerOr;
+
+  /// No description provided for @loginBiometricReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Authenticate to access HomeU'**
+  String get loginBiometricReason;
+
+  /// No description provided for @loginSessionExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Session expired. Please login with email and password.'**
+  String get loginSessionExpired;
+
+  /// No description provided for @loginBiometricFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Biometric authentication failed or cancelled.'**
+  String get loginBiometricFailed;
+
+  /// No description provided for @loginContinueAs.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue as {name}'**
+  String loginContinueAs(Object name);
+
+  /// No description provided for @loginUseBiometrics.
+  ///
+  /// In en, this message translates to:
+  /// **'Use Biometrics'**
+  String get loginUseBiometrics;
+
   /// No description provided for @loginPasswordHint.
   ///
   /// In en, this message translates to:
@@ -999,6 +1041,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your full name'**
   String get registerNameHint;
+
+  /// No description provided for @registerPhoneHint.
+  ///
+  /// In en, this message translates to:
+  /// **'+60 12 345 6789'**
+  String get registerPhoneHint;
 
   /// No description provided for @registerPasswordHint.
   ///
@@ -1306,6 +1354,282 @@ abstract class AppLocalizations {
   /// **'Protected'**
   String get onboardingProtected;
 
+  /// No description provided for @viewingScheduleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule Viewing'**
+  String get viewingScheduleTitle;
+
+  /// No description provided for @viewingSelectSlotTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select an Available Slot'**
+  String get viewingSelectSlotTitle;
+
+  /// No description provided for @viewingSelectSlotSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Owners only display slots they are available for. Select one to proceed.'**
+  String get viewingSelectSlotSubtitle;
+
+  /// No description provided for @viewingNoSlotsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No Available Slots'**
+  String get viewingNoSlotsTitle;
+
+  /// No description provided for @viewingNoSlotsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The owner has not listed any availability for this property yet. Please check back later or contact the owner.'**
+  String get viewingNoSlotsSubtitle;
+
+  /// No description provided for @viewingGoBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Go Back'**
+  String get viewingGoBack;
+
+  /// No description provided for @viewingConfirmRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Request'**
+  String get viewingConfirmRequest;
+
+  /// No description provided for @viewingAlreadyScheduled.
+  ///
+  /// In en, this message translates to:
+  /// **'You have already scheduled a viewing for this time slot. Please check your Requests.'**
+  String get viewingAlreadyScheduled;
+
+  /// No description provided for @viewingRequestSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Request Sent!'**
+  String get viewingRequestSent;
+
+  /// No description provided for @viewingErrorWithMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Error: {message}'**
+  String viewingErrorWithMessage(Object message);
+
+  /// No description provided for @bookingDetailsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking Details'**
+  String get bookingDetailsTitle;
+
+  /// No description provided for @bookingPaymentScheduleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Schedule'**
+  String get bookingPaymentScheduleTitle;
+
+  /// No description provided for @bookingPaymentScheduleEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No payment schedule generated yet.'**
+  String get bookingPaymentScheduleEmpty;
+
+  /// No description provided for @bookingMonthLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Month {number}'**
+  String bookingMonthLabel(Object number);
+
+  /// No description provided for @bookingMonthWithFee.
+  ///
+  /// In en, this message translates to:
+  /// **'Month {number} (Booking Fee)'**
+  String bookingMonthWithFee(Object number);
+
+  /// No description provided for @bookingDueLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Due: {date}'**
+  String bookingDueLabel(Object date);
+
+  /// No description provided for @bookingViewReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'View Receipt'**
+  String get bookingViewReceipt;
+
+  /// No description provided for @bookingAmountRm.
+  ///
+  /// In en, this message translates to:
+  /// **'RM {amount}'**
+  String bookingAmountRm(Object amount);
+
+  /// No description provided for @bookingPaid.
+  ///
+  /// In en, this message translates to:
+  /// **'PAID'**
+  String get bookingPaid;
+
+  /// No description provided for @bookingUpcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'UPCOMING'**
+  String get bookingUpcoming;
+
+  /// No description provided for @bookingPayNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay Now'**
+  String get bookingPayNow;
+
+  /// No description provided for @bookingReceiptNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No receipt found for this payment.'**
+  String get bookingReceiptNotFound;
+
+  /// No description provided for @bookingReceiptError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading receipt: {message}'**
+  String bookingReceiptError(Object message);
+
+  /// No description provided for @reviewRatingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review & Rating'**
+  String get reviewRatingTitle;
+
+  /// No description provided for @reviewRatingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Share your experience to help future tenants make better decisions.'**
+  String get reviewRatingSubtitle;
+
+  /// No description provided for @reviewAverageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Average Rating'**
+  String get reviewAverageLabel;
+
+  /// No description provided for @reviewYourRatingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Rating'**
+  String get reviewYourRatingLabel;
+
+  /// No description provided for @reviewCommentLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Comment'**
+  String get reviewCommentLabel;
+
+  /// No description provided for @reviewCommentHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us about cleanliness, owner communication, and your overall experience.'**
+  String get reviewCommentHint;
+
+  /// No description provided for @reviewSubmitLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit'**
+  String get reviewSubmitLabel;
+
+  /// No description provided for @reviewSubmitSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Thank you. Your review has been submitted.'**
+  String get reviewSubmitSuccess;
+
+  /// No description provided for @reviewStarLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} star'**
+  String reviewStarLabel(Object count);
+
+  /// No description provided for @compareTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare Properties'**
+  String get compareTitle;
+
+  /// No description provided for @compareClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get compareClear;
+
+  /// No description provided for @compareEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No Properties Selected'**
+  String get compareEmptyTitle;
+
+  /// No description provided for @compareEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Go back and select 2 properties\nto start comparing'**
+  String get compareEmptySubtitle;
+
+  /// No description provided for @compareBackToListings.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Listings'**
+  String get compareBackToListings;
+
+  /// No description provided for @comparePriceRangeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Price Range'**
+  String get comparePriceRangeLabel;
+
+  /// No description provided for @comparePriceRangeValue.
+  ///
+  /// In en, this message translates to:
+  /// **'RM {min} - RM {max}'**
+  String comparePriceRangeValue(Object min, Object max);
+
+  /// No description provided for @compareSaveAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Save RM {amount}'**
+  String compareSaveAmount(Object amount);
+
+  /// No description provided for @compareLabelAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get compareLabelAddress;
+
+  /// No description provided for @compareLabelType.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get compareLabelType;
+
+  /// No description provided for @compareLabelRooms.
+  ///
+  /// In en, this message translates to:
+  /// **'Rooms'**
+  String get compareLabelRooms;
+
+  /// No description provided for @compareLabelFurnishing.
+  ///
+  /// In en, this message translates to:
+  /// **'Furnishing'**
+  String get compareLabelFurnishing;
+
+  /// No description provided for @compareLabelOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner'**
+  String get compareLabelOwner;
+
+  /// No description provided for @compareLabelAvailability.
+  ///
+  /// In en, this message translates to:
+  /// **'Availability'**
+  String get compareLabelAvailability;
+
   /// No description provided for @updatePasswordSuccessMessage.
   ///
   /// In en, this message translates to:
@@ -1593,6 +1917,2148 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Thank you for using HomeU!'**
   String get receiptFooter;
+
+  /// No description provided for @paymentAmountRm.
+  ///
+  /// In en, this message translates to:
+  /// **'RM {amount}'**
+  String paymentAmountRm(Object amount);
+
+  /// No description provided for @bookingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking'**
+  String get bookingTitle;
+
+  /// No description provided for @bookingConflictDetected.
+  ///
+  /// In en, this message translates to:
+  /// **'Conflict detected with an existing booking.'**
+  String get bookingConflictDetected;
+
+  /// No description provided for @bookingFeeNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'Paying the booking fee locks this property. The remaining balance is due after owner approval.'**
+  String get bookingFeeNotice;
+
+  /// No description provided for @bookingPayFee.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay Booking Fee (RM {amount})'**
+  String bookingPayFee(Object amount);
+
+  /// No description provided for @bookingSelectedProperty.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected Property'**
+  String get bookingSelectedProperty;
+
+  /// No description provided for @bookingConflictDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Property is already booked starting from {date}. Please choose a shorter duration or different start date.'**
+  String bookingConflictDetails(Object date);
+
+  /// No description provided for @bookingDurationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rental Duration'**
+  String get bookingDurationTitle;
+
+  /// No description provided for @bookingDurationMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} months'**
+  String bookingDurationMonths(Object count);
+
+  /// No description provided for @bookingStartDateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Date'**
+  String get bookingStartDateTitle;
+
+  /// No description provided for @bookingOccupiedUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'Property is occupied until {date}'**
+  String bookingOccupiedUntil(Object date);
+
+  /// No description provided for @bookingTotalPriceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Price Calculation'**
+  String get bookingTotalPriceTitle;
+
+  /// No description provided for @bookingMonthlyPriceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly Price'**
+  String get bookingMonthlyPriceLabel;
+
+  /// No description provided for @bookingDurationSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration ({months} months)'**
+  String bookingDurationSummary(Object months);
+
+  /// No description provided for @bookingEstimatedTotalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Estimated Total'**
+  String get bookingEstimatedTotalLabel;
+
+  /// No description provided for @paymentSupabaseUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Supabase is not initialized. Please try again later.'**
+  String get paymentSupabaseUnavailable;
+
+  /// No description provided for @bookingLoginRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please log in to continue booking.'**
+  String get bookingLoginRequired;
+
+  /// No description provided for @bookingDurationJustBooked.
+  ///
+  /// In en, this message translates to:
+  /// **'Sorry, this duration was just booked by another tenant.'**
+  String get bookingDurationJustBooked;
+
+  /// No description provided for @bookingCreateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to create booking. Please try again.'**
+  String get bookingCreateFailed;
+
+  /// No description provided for @bookingCreateError.
+  ///
+  /// In en, this message translates to:
+  /// **'Create booking failed: {error}'**
+  String bookingCreateError(Object error);
+
+  /// No description provided for @statusAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get statusAll;
+
+  /// No description provided for @ownerRequestsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Requests'**
+  String get ownerRequestsTitle;
+
+  /// No description provided for @ownerRequestsBookingsTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Bookings'**
+  String get ownerRequestsBookingsTab;
+
+  /// No description provided for @ownerRequestsViewingsTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Viewings'**
+  String get ownerRequestsViewingsTab;
+
+  /// No description provided for @ownerRequestsRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get ownerRequestsRetry;
+
+  /// No description provided for @ownerRequestsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No \"{filter}\" requests.'**
+  String ownerRequestsEmpty(Object filter);
+
+  /// No description provided for @ownerRequestsMoveIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Moves in: {date}  •  {months} months'**
+  String ownerRequestsMoveIn(Object date, Object months);
+
+  /// No description provided for @ownerRequestsFlexibleDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Flexible  •  {months} months'**
+  String ownerRequestsFlexibleDuration(Object months);
+
+  /// No description provided for @ownerRequestsMonthlyPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'RM {price} / mo'**
+  String ownerRequestsMonthlyPrice(Object price);
+
+  /// No description provided for @ownerRequestsReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Review'**
+  String get ownerRequestsReview;
+
+  /// No description provided for @ownerRequestsViewingsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No \"{filter}\" viewing requests.'**
+  String ownerRequestsViewingsEmpty(Object filter);
+
+  /// No description provided for @ownerRequestsViewingTime.
+  ///
+  /// In en, this message translates to:
+  /// **'{date}  •  {time}'**
+  String ownerRequestsViewingTime(Object date, Object time);
+
+  /// No description provided for @ownerRequestsDecline.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline'**
+  String get ownerRequestsDecline;
+
+  /// No description provided for @ownerRequestsApprove.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve'**
+  String get ownerRequestsApprove;
+
+  /// No description provided for @ownerRequestsMarkCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as Completed'**
+  String get ownerRequestsMarkCompleted;
+
+  /// No description provided for @ownerGreeting.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello, {name}'**
+  String ownerGreeting(Object name);
+
+  /// No description provided for @ownerRecentProperties.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Properties'**
+  String get ownerRecentProperties;
+
+  /// No description provided for @ownerNoProperties.
+  ///
+  /// In en, this message translates to:
+  /// **'No properties listed yet'**
+  String get ownerNoProperties;
+
+  /// No description provided for @ownerAddFirstProperty.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your first property'**
+  String get ownerAddFirstProperty;
+
+  /// No description provided for @ownerUntitledProperty.
+  ///
+  /// In en, this message translates to:
+  /// **'Untitled'**
+  String get ownerUntitledProperty;
+
+  /// No description provided for @ownerRecentBookingRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Booking Requests'**
+  String get ownerRecentBookingRequests;
+
+  /// No description provided for @ownerNoBookingRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'No active booking requests'**
+  String get ownerNoBookingRequests;
+
+  /// No description provided for @ownerUnknownProperty.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown Property'**
+  String get ownerUnknownProperty;
+
+  /// No description provided for @ownerUnknownTenant.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown Tenant'**
+  String get ownerUnknownTenant;
+
+  /// No description provided for @ownerRecentViewingRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Viewing Requests'**
+  String get ownerRecentViewingRequests;
+
+  /// No description provided for @ownerNoViewingRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'No active viewing requests'**
+  String get ownerNoViewingRequests;
+
+  /// No description provided for @ownerTapToReviewViewing.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to review viewing'**
+  String get ownerTapToReviewViewing;
+
+  /// No description provided for @ownerProjected30Days.
+  ///
+  /// In en, this message translates to:
+  /// **'Projected (30 Days)'**
+  String get ownerProjected30Days;
+
+  /// No description provided for @ownerOverduePayments.
+  ///
+  /// In en, this message translates to:
+  /// **'Overdue Payments'**
+  String get ownerOverduePayments;
+
+  /// No description provided for @ownerInvoiceCollectionRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Invoice Collection Rate'**
+  String get ownerInvoiceCollectionRate;
+
+  /// No description provided for @monthShortJul.
+  ///
+  /// In en, this message translates to:
+  /// **'Jul'**
+  String get monthShortJul;
+
+  /// No description provided for @monthShortAug.
+  ///
+  /// In en, this message translates to:
+  /// **'Aug'**
+  String get monthShortAug;
+
+  /// No description provided for @monthShortSep.
+  ///
+  /// In en, this message translates to:
+  /// **'Sep'**
+  String get monthShortSep;
+
+  /// No description provided for @monthShortOct.
+  ///
+  /// In en, this message translates to:
+  /// **'Oct'**
+  String get monthShortOct;
+
+  /// No description provided for @monthShortNov.
+  ///
+  /// In en, this message translates to:
+  /// **'Nov'**
+  String get monthShortNov;
+
+  /// No description provided for @monthShortDec.
+  ///
+  /// In en, this message translates to:
+  /// **'Dec'**
+  String get monthShortDec;
+
+  /// No description provided for @profileBiometricUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Biometric authentication is not available or not set up on this device.'**
+  String get profileBiometricUnavailable;
+
+  /// No description provided for @profileBiometricReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Please authenticate to enable biometric login'**
+  String get profileBiometricReason;
+
+  /// No description provided for @profileBiometricEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Biometric login enabled successfully.'**
+  String get profileBiometricEnabled;
+
+  /// No description provided for @profileBiometricSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update biometric preference.'**
+  String get profileBiometricSaveFailed;
+
+  /// No description provided for @profileBiometricDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Biometric login disabled.'**
+  String get profileBiometricDisabled;
+
+  /// No description provided for @profileErrorSaveBiometric.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save biometric preference.'**
+  String get profileErrorSaveBiometric;
+
+  /// No description provided for @profileLogoutTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Log out?'**
+  String get profileLogoutTitle;
+
+  /// No description provided for @profileLogoutMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to log out of your HomeU account?'**
+  String get profileLogoutMessage;
+
+  /// No description provided for @profileLogoutCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get profileLogoutCancel;
+
+  /// No description provided for @profileLogoutConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Log Out'**
+  String get profileLogoutConfirm;
+
+  /// No description provided for @profileFavoritesSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'View your saved properties'**
+  String get profileFavoritesSubtitle;
+
+  /// No description provided for @profileBiometricTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Biometric Login'**
+  String get profileBiometricTitle;
+
+  /// No description provided for @profileBiometricSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock HomeU with biometrics'**
+  String get profileBiometricSubtitle;
+
+  /// No description provided for @adminDashboardLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load system overview. Please check your connection.'**
+  String get adminDashboardLoadError;
+
+  /// No description provided for @adminDashboardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin Dashboard'**
+  String get adminDashboardTitle;
+
+  /// No description provided for @adminDashboardWelcome.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome, Admin'**
+  String get adminDashboardWelcome;
+
+  /// No description provided for @adminDashboardOverview.
+  ///
+  /// In en, this message translates to:
+  /// **'System Overview'**
+  String get adminDashboardOverview;
+
+  /// No description provided for @adminTotalUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Users'**
+  String get adminTotalUsers;
+
+  /// No description provided for @adminTotalOwners.
+  ///
+  /// In en, this message translates to:
+  /// **'Owners'**
+  String get adminTotalOwners;
+
+  /// No description provided for @adminTotalTenants.
+  ///
+  /// In en, this message translates to:
+  /// **'Tenants'**
+  String get adminTotalTenants;
+
+  /// No description provided for @adminPendingReports.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Reports'**
+  String get adminPendingReports;
+
+  /// No description provided for @adminManagementTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Management'**
+  String get adminManagementTitle;
+
+  /// No description provided for @adminReportsReview.
+  ///
+  /// In en, this message translates to:
+  /// **'Reports Review'**
+  String get adminReportsReview;
+
+  /// No description provided for @adminReportsSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{pending} pending of {total} total reports'**
+  String adminReportsSummary(Object pending, Object total);
+
+  /// No description provided for @adminManagementTile.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin Management'**
+  String get adminManagementTile;
+
+  /// No description provided for @adminManagementSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage system administrators'**
+  String get adminManagementSubtitle;
+
+  /// No description provided for @adminAuditLogsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Audit Logs'**
+  String get adminAuditLogsTitle;
+
+  /// No description provided for @adminAuditLogsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'View system-wide activity logs'**
+  String get adminAuditLogsSubtitle;
+
+  /// No description provided for @adminCreatedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin account created successfully.'**
+  String get adminCreatedSuccess;
+
+  /// No description provided for @adminUpdateDetailsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Admin Details'**
+  String get adminUpdateDetailsTitle;
+
+  /// No description provided for @adminUpdateDetailsConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get adminUpdateDetailsConfirm;
+
+  /// No description provided for @adminDetailsUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin details updated.'**
+  String get adminDetailsUpdated;
+
+  /// No description provided for @adminUpdateError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error: {error}'**
+  String adminUpdateError(Object error);
+
+  /// No description provided for @adminCannotRemoveSelf.
+  ///
+  /// In en, this message translates to:
+  /// **'Security: You cannot remove your own admin access.'**
+  String get adminCannotRemoveSelf;
+
+  /// No description provided for @adminRemoveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove Admin?'**
+  String get adminRemoveTitle;
+
+  /// No description provided for @adminRemoveMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove admin privileges from {name}? They will revert to a Tenant role.'**
+  String adminRemoveMessage(Object name);
+
+  /// No description provided for @adminRemoveConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get adminRemoveConfirm;
+
+  /// No description provided for @adminRemovedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin privileges removed.'**
+  String get adminRemovedSuccess;
+
+  /// No description provided for @adminRemoveError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error: {error}'**
+  String adminRemoveError(Object error);
+
+  /// No description provided for @adminAddButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Admin'**
+  String get adminAddButton;
+
+  /// No description provided for @adminNoAdminsFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No admins found.'**
+  String get adminNoAdminsFound;
+
+  /// No description provided for @adminNavDashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Dashboard'**
+  String get adminNavDashboard;
+
+  /// No description provided for @adminNavReports.
+  ///
+  /// In en, this message translates to:
+  /// **'Reports'**
+  String get adminNavReports;
+
+  /// No description provided for @adminNavChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat'**
+  String get adminNavChat;
+
+  /// No description provided for @adminNavLogs.
+  ///
+  /// In en, this message translates to:
+  /// **'Logs'**
+  String get adminNavLogs;
+
+  /// No description provided for @adminNavProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get adminNavProfile;
+
+  /// No description provided for @commonCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get commonCancel;
+
+  /// No description provided for @commonConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get commonConfirm;
+
+  /// No description provided for @commonRefreshTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get commonRefreshTooltip;
+
+  /// No description provided for @statusReviewed.
+  ///
+  /// In en, this message translates to:
+  /// **'Reviewed'**
+  String get statusReviewed;
+
+  /// No description provided for @statusDismissed.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismissed'**
+  String get statusDismissed;
+
+  /// No description provided for @adminReportsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reports Review'**
+  String get adminReportsTitle;
+
+  /// No description provided for @adminReportsSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search report, owner, tenant, listing...'**
+  String get adminReportsSearchHint;
+
+  /// No description provided for @adminReportsFilterTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter reports'**
+  String get adminReportsFilterTooltip;
+
+  /// No description provided for @adminReportsActiveFilterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Active filter:'**
+  String get adminReportsActiveFilterLabel;
+
+  /// No description provided for @adminReportsNoMatches.
+  ///
+  /// In en, this message translates to:
+  /// **'No reports match the current filters.'**
+  String get adminReportsNoMatches;
+
+  /// No description provided for @adminReportsFilterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter Reports'**
+  String get adminReportsFilterTitle;
+
+  /// No description provided for @adminReportsFilterSectionStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Report Status'**
+  String get adminReportsFilterSectionStatus;
+
+  /// No description provided for @adminReportsFilterClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Filter'**
+  String get adminReportsFilterClear;
+
+  /// No description provided for @adminReportsFilterApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply Filter'**
+  String get adminReportsFilterApply;
+
+  /// No description provided for @adminReportsUnknownListing.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown listing'**
+  String get adminReportsUnknownListing;
+
+  /// No description provided for @adminReportsUnknownReportId.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get adminReportsUnknownReportId;
+
+  /// No description provided for @adminReportsPropertyIdFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Property #{propertyId}'**
+  String adminReportsPropertyIdFallback(Object propertyId);
+
+  /// No description provided for @adminReportsNotAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'N/A'**
+  String get adminReportsNotAvailable;
+
+  /// No description provided for @adminReportsUnknownOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown owner'**
+  String get adminReportsUnknownOwner;
+
+  /// No description provided for @adminReportsUnknownReporter.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown reporter'**
+  String get adminReportsUnknownReporter;
+
+  /// No description provided for @adminReportsUnknownEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'-'**
+  String get adminReportsUnknownEmail;
+
+  /// No description provided for @adminReportsLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load reports: {error}'**
+  String adminReportsLoadError(Object error);
+
+  /// No description provided for @adminReportsMissingOwnerOrPropertyChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Missing owner or property context for chat.'**
+  String get adminReportsMissingOwnerOrPropertyChat;
+
+  /// No description provided for @adminReportsMissingTenantOrPropertyChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Missing tenant or property context for chat.'**
+  String get adminReportsMissingTenantOrPropertyChat;
+
+  /// No description provided for @adminReportsAuditContactOwnerReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Opened owner chat for report follow-up.'**
+  String get adminReportsAuditContactOwnerReason;
+
+  /// No description provided for @adminReportsAuditContactTenantReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Opened tenant chat for report follow-up.'**
+  String get adminReportsAuditContactTenantReason;
+
+  /// No description provided for @adminReportsChatOpenError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to open chat: {error}'**
+  String adminReportsChatOpenError(Object error);
+
+  /// No description provided for @adminReportsRecordRiskLevelAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Record Risk Level'**
+  String get adminReportsRecordRiskLevelAction;
+
+  /// No description provided for @adminReportsRiskRecorded.
+  ///
+  /// In en, this message translates to:
+  /// **'Risk level recorded.'**
+  String get adminReportsRiskRecorded;
+
+  /// No description provided for @adminReportsRiskRecordError.
+  ///
+  /// In en, this message translates to:
+  /// **'Risk evaluation failed: {error}'**
+  String adminReportsRiskRecordError(Object error);
+
+  /// No description provided for @adminReportsActionCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'{actionLabel} completed.'**
+  String adminReportsActionCompleted(Object actionLabel);
+
+  /// No description provided for @adminReportsUpdateError.
+  ///
+  /// In en, this message translates to:
+  /// **'Report update failed: {error}'**
+  String adminReportsUpdateError(Object error);
+
+  /// No description provided for @adminReportsReportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Report #{reportId}'**
+  String adminReportsReportTitle(Object reportId);
+
+  /// No description provided for @adminReportsSubmittedOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted on {date}'**
+  String adminReportsSubmittedOn(Object date);
+
+  /// No description provided for @adminReportsSectionProperty.
+  ///
+  /// In en, this message translates to:
+  /// **'Property'**
+  String get adminReportsSectionProperty;
+
+  /// No description provided for @adminReportsSectionOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner'**
+  String get adminReportsSectionOwner;
+
+  /// No description provided for @adminReportsSectionReporter.
+  ///
+  /// In en, this message translates to:
+  /// **'Reporter'**
+  String get adminReportsSectionReporter;
+
+  /// No description provided for @adminReportsSectionComplaint.
+  ///
+  /// In en, this message translates to:
+  /// **'Complaint'**
+  String get adminReportsSectionComplaint;
+
+  /// No description provided for @adminReportsFieldPropertyId.
+  ///
+  /// In en, this message translates to:
+  /// **'Property ID'**
+  String get adminReportsFieldPropertyId;
+
+  /// No description provided for @adminReportsFieldTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get adminReportsFieldTitle;
+
+  /// No description provided for @adminReportsFieldName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get adminReportsFieldName;
+
+  /// No description provided for @adminReportsFieldEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get adminReportsFieldEmail;
+
+  /// No description provided for @adminReportsFieldTotalReports.
+  ///
+  /// In en, this message translates to:
+  /// **'Total reports'**
+  String get adminReportsFieldTotalReports;
+
+  /// No description provided for @adminReportsFieldReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get adminReportsFieldReason;
+
+  /// No description provided for @adminReportsFieldDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get adminReportsFieldDescription;
+
+  /// No description provided for @adminReportsFieldStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get adminReportsFieldStatus;
+
+  /// No description provided for @adminReportsRiskSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Risk evaluation'**
+  String get adminReportsRiskSectionTitle;
+
+  /// No description provided for @adminReportsRiskSectionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Internal review only. This does not change listing visibility or account status.'**
+  String get adminReportsRiskSectionHint;
+
+  /// No description provided for @adminReportsReviewedConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'I have reviewed this complaint.'**
+  String get adminReportsReviewedConfirmTitle;
+
+  /// No description provided for @adminReportsReviewedConfirmSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Risk evaluation and status updates unlock after this confirmation.'**
+  String get adminReportsReviewedConfirmSubtitle;
+
+  /// No description provided for @adminReportsActionsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Actions'**
+  String get adminReportsActionsTitle;
+
+  /// No description provided for @adminReportsActionsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Use chat for follow-up, then record the internal risk level or update the report status.'**
+  String get adminReportsActionsHint;
+
+  /// No description provided for @adminReportsContactOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact Owner'**
+  String get adminReportsContactOwner;
+
+  /// No description provided for @adminReportsContactReporter.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact Reporter'**
+  String get adminReportsContactReporter;
+
+  /// No description provided for @adminReportsSaveRisk.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Risk Level'**
+  String get adminReportsSaveRisk;
+
+  /// No description provided for @adminReportsMarkReviewed.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark Reviewed'**
+  String get adminReportsMarkReviewed;
+
+  /// No description provided for @adminReportsDismissReport.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss Report'**
+  String get adminReportsDismissReport;
+
+  /// No description provided for @adminReportsOwnerLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner: {name}'**
+  String adminReportsOwnerLabel(Object name);
+
+  /// No description provided for @adminReportsReporterLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reporter: {name}'**
+  String adminReportsReporterLabel(Object name);
+
+  /// No description provided for @adminReportsReasonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason: {reason}'**
+  String adminReportsReasonLabel(Object reason);
+
+  /// No description provided for @adminReportsReasonDialogPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Provide a reason and confirm this moderation action.'**
+  String get adminReportsReasonDialogPrompt;
+
+  /// No description provided for @adminReportsReasonDialogLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin reason'**
+  String get adminReportsReasonDialogLabel;
+
+  /// No description provided for @adminReportsReasonDialogHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add clear moderation context'**
+  String get adminReportsReasonDialogHint;
+
+  /// No description provided for @adminReportsReasonDialogConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'I confirm this action.'**
+  String get adminReportsReasonDialogConfirm;
+
+  /// No description provided for @adminReportsRiskLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get adminReportsRiskLow;
+
+  /// No description provided for @adminReportsRiskMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get adminReportsRiskMedium;
+
+  /// No description provided for @adminReportsRiskHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get adminReportsRiskHigh;
+
+  /// No description provided for @adminReportsRiskInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid'**
+  String get adminReportsRiskInvalid;
+
+  /// No description provided for @adminAuditTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'System Audit Logs'**
+  String get adminAuditTitle;
+
+  /// No description provided for @adminAuditClearFiltersTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Filters'**
+  String get adminAuditClearFiltersTooltip;
+
+  /// No description provided for @adminAuditSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search descriptions...'**
+  String get adminAuditSearchHint;
+
+  /// No description provided for @adminAuditAllDates.
+  ///
+  /// In en, this message translates to:
+  /// **'All Dates'**
+  String get adminAuditAllDates;
+
+  /// No description provided for @adminAuditDateRange.
+  ///
+  /// In en, this message translates to:
+  /// **'{start} - {end}'**
+  String adminAuditDateRange(Object start, Object end);
+
+  /// No description provided for @adminAuditTableFilterHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Table'**
+  String get adminAuditTableFilterHint;
+
+  /// No description provided for @adminAuditActionFilterHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Action'**
+  String get adminAuditActionFilterHint;
+
+  /// No description provided for @adminAuditEmptyState.
+  ///
+  /// In en, this message translates to:
+  /// **'No audit logs found matching your criteria.'**
+  String get adminAuditEmptyState;
+
+  /// No description provided for @adminAuditClearAllFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all filters'**
+  String get adminAuditClearAllFilters;
+
+  /// No description provided for @adminAuditUnknownTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown Time'**
+  String get adminAuditUnknownTime;
+
+  /// No description provided for @adminAuditNoDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'No details available'**
+  String get adminAuditNoDetails;
+
+  /// No description provided for @adminAuditSystemActor.
+  ///
+  /// In en, this message translates to:
+  /// **'System / Anonymous'**
+  String get adminAuditSystemActor;
+
+  /// No description provided for @adminAuditUnknownRole.
+  ///
+  /// In en, this message translates to:
+  /// **'unknown'**
+  String get adminAuditUnknownRole;
+
+  /// No description provided for @adminAuditNotAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'N/A'**
+  String get adminAuditNotAvailable;
+
+  /// No description provided for @adminAuditActorLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Actor'**
+  String get adminAuditActorLabel;
+
+  /// No description provided for @adminAuditTargetTableLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Target Table'**
+  String get adminAuditTargetTableLabel;
+
+  /// No description provided for @adminAuditTargetIdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Target ID'**
+  String get adminAuditTargetIdLabel;
+
+  /// No description provided for @adminAuditTableProfiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Profiles'**
+  String get adminAuditTableProfiles;
+
+  /// No description provided for @adminAuditTableProperties.
+  ///
+  /// In en, this message translates to:
+  /// **'Properties'**
+  String get adminAuditTableProperties;
+
+  /// No description provided for @adminAuditTableBookings.
+  ///
+  /// In en, this message translates to:
+  /// **'Bookings'**
+  String get adminAuditTableBookings;
+
+  /// No description provided for @adminAuditTablePropertyReports.
+  ///
+  /// In en, this message translates to:
+  /// **'Property Reports'**
+  String get adminAuditTablePropertyReports;
+
+  /// No description provided for @adminAuditTableReports.
+  ///
+  /// In en, this message translates to:
+  /// **'Reports'**
+  String get adminAuditTableReports;
+
+  /// No description provided for @adminAuditTableAuditLogs.
+  ///
+  /// In en, this message translates to:
+  /// **'Audit Logs'**
+  String get adminAuditTableAuditLogs;
+
+  /// No description provided for @adminAuditActionAdminCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin Created'**
+  String get adminAuditActionAdminCreated;
+
+  /// No description provided for @adminAuditActionAdminUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin Updated'**
+  String get adminAuditActionAdminUpdated;
+
+  /// No description provided for @adminAuditActionAdminRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin Removed'**
+  String get adminAuditActionAdminRemoved;
+
+  /// No description provided for @adminAuditActionReportContactOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'Report: Contact Owner'**
+  String get adminAuditActionReportContactOwner;
+
+  /// No description provided for @adminAuditActionReportContactTenant.
+  ///
+  /// In en, this message translates to:
+  /// **'Report: Contact Tenant'**
+  String get adminAuditActionReportContactTenant;
+
+  /// No description provided for @adminAuditActionReportRiskLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Report: Risk Low'**
+  String get adminAuditActionReportRiskLow;
+
+  /// No description provided for @adminAuditActionReportRiskMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Report: Risk Medium'**
+  String get adminAuditActionReportRiskMedium;
+
+  /// No description provided for @adminAuditActionReportRiskHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'Report: Risk High'**
+  String get adminAuditActionReportRiskHigh;
+
+  /// No description provided for @adminAuditActionReportRiskInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Report: Risk Invalid'**
+  String get adminAuditActionReportRiskInvalid;
+
+  /// No description provided for @adminAuditActionReportReviewed.
+  ///
+  /// In en, this message translates to:
+  /// **'Report: Reviewed'**
+  String get adminAuditActionReportReviewed;
+
+  /// No description provided for @adminAuditActionReportDismissed.
+  ///
+  /// In en, this message translates to:
+  /// **'Report: Dismissed'**
+  String get adminAuditActionReportDismissed;
+
+  /// No description provided for @adminAuditActionPropertyApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Property Approved'**
+  String get adminAuditActionPropertyApproved;
+
+  /// No description provided for @adminAuditActionPropertyRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Property Rejected'**
+  String get adminAuditActionPropertyRejected;
+
+  /// No description provided for @adminAuditActionProfileUpdate.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile Updated'**
+  String get adminAuditActionProfileUpdate;
+
+  /// No description provided for @adminAuditLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load logs: {error}'**
+  String adminAuditLoadError(Object error);
+
+  /// No description provided for @propertyReportTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Report Property'**
+  String get propertyReportTitle;
+
+  /// No description provided for @propertyReportSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a reason for reporting this property. Our team will review it shortly.'**
+  String get propertyReportSubtitle;
+
+  /// No description provided for @propertyReportReasonFake.
+  ///
+  /// In en, this message translates to:
+  /// **'Fake listing / Scam'**
+  String get propertyReportReasonFake;
+
+  /// No description provided for @propertyReportReasonSuspicious.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspicious activity'**
+  String get propertyReportReasonSuspicious;
+
+  /// No description provided for @propertyReportReasonWrongDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect property details'**
+  String get propertyReportReasonWrongDetails;
+
+  /// No description provided for @propertyReportReasonInappropriate.
+  ///
+  /// In en, this message translates to:
+  /// **'Inappropriate content'**
+  String get propertyReportReasonInappropriate;
+
+  /// No description provided for @propertyReportReasonOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get propertyReportReasonOther;
+
+  /// No description provided for @propertyReportDescriptionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Provide additional details (optional)'**
+  String get propertyReportDescriptionHint;
+
+  /// No description provided for @propertyReportCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get propertyReportCancel;
+
+  /// No description provided for @propertyReportSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit Report'**
+  String get propertyReportSubmit;
+
+  /// No description provided for @propertyReportSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'Report submitted successfully. Thank you.'**
+  String get propertyReportSubmitted;
+
+  /// No description provided for @propertyReportSubmitFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to submit report. Please try again.'**
+  String get propertyReportSubmitFailed;
+
+  /// No description provided for @propertyReportServiceUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Report service is currently unavailable. Please check your connection.'**
+  String get propertyReportServiceUnavailable;
+
+  /// No description provided for @propertyReportLoginRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please log in to submit a report.'**
+  String get propertyReportLoginRequired;
+
+  /// No description provided for @propertyReportTenantOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Only tenants can submit property reports.'**
+  String get propertyReportTenantOnly;
+
+  /// No description provided for @propertyReportOwnProperty.
+  ///
+  /// In en, this message translates to:
+  /// **'You cannot report your own property.'**
+  String get propertyReportOwnProperty;
+
+  /// No description provided for @propertyReportInvalidMetadata.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid property metadata. Unable to report.'**
+  String get propertyReportInvalidMetadata;
+
+  /// No description provided for @propertyFacilitiesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Facilities'**
+  String get propertyFacilitiesTitle;
+
+  /// No description provided for @propertyNoFacilities.
+  ///
+  /// In en, this message translates to:
+  /// **'No facilities listed.'**
+  String get propertyNoFacilities;
+
+  /// No description provided for @propertyOwnerInfoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner Information'**
+  String get propertyOwnerInfoTitle;
+
+  /// No description provided for @propertyOwnerHighRisk.
+  ///
+  /// In en, this message translates to:
+  /// **'High Risk'**
+  String get propertyOwnerHighRisk;
+
+  /// No description provided for @propertyOwnerSuspicious.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspicious Owner'**
+  String get propertyOwnerSuspicious;
+
+  /// No description provided for @propertyOwnerSuspended.
+  ///
+  /// In en, this message translates to:
+  /// **'Suspended'**
+  String get propertyOwnerSuspended;
+
+  /// No description provided for @propertyOwnerRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed'**
+  String get propertyOwnerRemoved;
+
+  /// No description provided for @propertyAvailabilityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Availability'**
+  String get propertyAvailabilityTitle;
+
+  /// No description provided for @propertyAvailabilityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Availability:'**
+  String get propertyAvailabilityLabel;
+
+  /// No description provided for @propertyStatusActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get propertyStatusActive;
+
+  /// No description provided for @propertyStatusOccupied.
+  ///
+  /// In en, this message translates to:
+  /// **'Occupied'**
+  String get propertyStatusOccupied;
+
+  /// No description provided for @propertyStatusInactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactive'**
+  String get propertyStatusInactive;
+
+  /// No description provided for @propertyReportErrorPermission.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to submit report due to permission policy. Please contact support.'**
+  String get propertyReportErrorPermission;
+
+  /// No description provided for @propertyReportErrorInvalidListing.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to submit report because the listing reference is invalid.'**
+  String get propertyReportErrorInvalidListing;
+
+  /// No description provided for @propertyReportErrorInvalidData.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to submit report because the listing data is invalid.'**
+  String get propertyReportErrorInvalidData;
+
+  /// No description provided for @propertyNearbyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Nearby: {landmarks}'**
+  String propertyNearbyLabel(Object landmarks);
+
+  /// No description provided for @propertyDetailsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Property Details'**
+  String get propertyDetailsTitle;
+
+  /// No description provided for @propertyUnavailableAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'This property is currently unavailable due to moderation.'**
+  String get propertyUnavailableAdmin;
+
+  /// No description provided for @propertyUnavailableBooking.
+  ///
+  /// In en, this message translates to:
+  /// **'This property is currently occupied and not available for booking.'**
+  String get propertyUnavailableBooking;
+
+  /// No description provided for @propertyFavoriteLoginRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please login to add to favorites.'**
+  String get propertyFavoriteLoginRequired;
+
+  /// No description provided for @propertyFavoriteTenantOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Only tenants can save favorites.'**
+  String get propertyFavoriteTenantOnly;
+
+  /// No description provided for @propertyFavoritePolicyBlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to update favorite due to security policy.'**
+  String get propertyFavoritePolicyBlocked;
+
+  /// No description provided for @propertyFavoriteUpdateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update favorite. Please try again.'**
+  String get propertyFavoriteUpdateFailed;
+
+  /// No description provided for @propertyHighRiskTag.
+  ///
+  /// In en, this message translates to:
+  /// **'High Risk'**
+  String get propertyHighRiskTag;
+
+  /// No description provided for @propertyLocationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get propertyLocationTitle;
+
+  /// No description provided for @propertyDescriptionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get propertyDescriptionTitle;
+
+  /// No description provided for @bookingBookNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Book Now'**
+  String get bookingBookNow;
+
+  /// No description provided for @bookingHistoryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No bookings found matching your criteria.'**
+  String get bookingHistoryEmpty;
+
+  /// No description provided for @ownerAvailabilityEndAfterStart.
+  ///
+  /// In en, this message translates to:
+  /// **'End time must be after start time.'**
+  String get ownerAvailabilityEndAfterStart;
+
+  /// No description provided for @ownerAvailabilityPastDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot add slots for past dates.'**
+  String get ownerAvailabilityPastDate;
+
+  /// No description provided for @ownerAvailabilityOverlap.
+  ///
+  /// In en, this message translates to:
+  /// **'This slot overlaps with an existing one.'**
+  String get ownerAvailabilityOverlap;
+
+  /// No description provided for @ownerAvailabilitySlotAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Availability slot added successfully.'**
+  String get ownerAvailabilitySlotAdded;
+
+  /// No description provided for @ownerAvailabilityAddFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to add availability slot. Please try again.'**
+  String get ownerAvailabilityAddFailed;
+
+  /// No description provided for @ownerAvailabilityDeleteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete slot. Please try again.'**
+  String get ownerAvailabilityDeleteFailed;
+
+  /// No description provided for @ownerAvailabilityDateTime.
+  ///
+  /// In en, this message translates to:
+  /// **'{date} at {time}'**
+  String ownerAvailabilityDateTime(Object date, Object time);
+
+  /// No description provided for @ownerAvailabilityCreateSlot.
+  ///
+  /// In en, this message translates to:
+  /// **'Create New Availability Slot'**
+  String get ownerAvailabilityCreateSlot;
+
+  /// No description provided for @ownerAvailabilitySelectDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Date'**
+  String get ownerAvailabilitySelectDate;
+
+  /// No description provided for @ownerAvailabilityStartTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Time'**
+  String get ownerAvailabilityStartTime;
+
+  /// No description provided for @ownerAvailabilityEndTime.
+  ///
+  /// In en, this message translates to:
+  /// **'End Time'**
+  String get ownerAvailabilityEndTime;
+
+  /// No description provided for @ownerAvailabilityActiveSlots.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Available Slots'**
+  String get ownerAvailabilityActiveSlots;
+
+  /// No description provided for @ownerAvailabilityStatusAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Available'**
+  String get ownerAvailabilityStatusAvailable;
+
+  /// No description provided for @ownerAvailabilityStatusBooked.
+  ///
+  /// In en, this message translates to:
+  /// **'Booked'**
+  String get ownerAvailabilityStatusBooked;
+
+  /// No description provided for @ownerAvailabilityStatusApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved'**
+  String get ownerAvailabilityStatusApproved;
+
+  /// No description provided for @ownerAvailabilityDeleteConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Slot?'**
+  String get ownerAvailabilityDeleteConfirmTitle;
+
+  /// No description provided for @ownerAvailabilityDeleteConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this availability slot?'**
+  String get ownerAvailabilityDeleteConfirmMessage;
+
+  /// No description provided for @ownerAvailabilityEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No availability slots added yet.'**
+  String get ownerAvailabilityEmpty;
+
+  /// No description provided for @ownerAvailabilityAddSlot.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Slot'**
+  String get ownerAvailabilityAddSlot;
+
+  /// No description provided for @ownerAvailabilityBooked.
+  ///
+  /// In en, this message translates to:
+  /// **'Booked'**
+  String get ownerAvailabilityBooked;
+
+  /// No description provided for @ownerAvailabilityAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Available'**
+  String get ownerAvailabilityAvailable;
+
+  /// No description provided for @ownerAvailabilityTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Viewing Availability'**
+  String get ownerAvailabilityTitle;
+
+  /// No description provided for @paymentCardIncomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a full card expiry date.'**
+  String get paymentCardIncomplete;
+
+  /// No description provided for @paymentCardInvalidMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid month (01-12).'**
+  String get paymentCardInvalidMonth;
+
+  /// No description provided for @paymentCardExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Card has expired.'**
+  String get paymentCardExpired;
+
+  /// No description provided for @paymentCardInvalidFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid expiry format (MM/YY).'**
+  String get paymentCardInvalidFormat;
+
+  /// No description provided for @paymentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment'**
+  String get paymentTitle;
+
+  /// No description provided for @paymentCompletedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Completed'**
+  String get paymentCompletedLabel;
+
+  /// No description provided for @paymentPayNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Pay Now'**
+  String get paymentPayNow;
+
+  /// No description provided for @paymentMethodTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Method'**
+  String get paymentMethodTitle;
+
+  /// No description provided for @paymentMethodCard.
+  ///
+  /// In en, this message translates to:
+  /// **'Credit/Debit Card'**
+  String get paymentMethodCard;
+
+  /// No description provided for @paymentMethodBanking.
+  ///
+  /// In en, this message translates to:
+  /// **'Online Banking'**
+  String get paymentMethodBanking;
+
+  /// No description provided for @paymentSelectBank.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Bank'**
+  String get paymentSelectBank;
+
+  /// No description provided for @paymentCardNumberLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Card Number'**
+  String get paymentCardNumberLabel;
+
+  /// No description provided for @paymentCardNumberHint.
+  ///
+  /// In en, this message translates to:
+  /// **'XXXX XXXX XXXX XXXX'**
+  String get paymentCardNumberHint;
+
+  /// No description provided for @paymentExpiryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Expiry Date'**
+  String get paymentExpiryLabel;
+
+  /// No description provided for @paymentExpiryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'MM/YY'**
+  String get paymentExpiryHint;
+
+  /// No description provided for @paymentCvvLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'CVV'**
+  String get paymentCvvLabel;
+
+  /// No description provided for @paymentCvvHint.
+  ///
+  /// In en, this message translates to:
+  /// **'XXX'**
+  String get paymentCvvHint;
+
+  /// No description provided for @paymentAmountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount to Pay'**
+  String get paymentAmountLabel;
+
+  /// No description provided for @paymentTotalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Price'**
+  String get paymentTotalLabel;
+
+  /// No description provided for @paymentProcessing.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing Payment...'**
+  String get paymentProcessing;
+
+  /// No description provided for @paymentSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Successful!'**
+  String get paymentSuccess;
+
+  /// No description provided for @paymentSuccessSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You have paid RM {amount}.'**
+  String paymentSuccessSubtitle(Object amount);
+
+  /// No description provided for @paymentBackToHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Home'**
+  String get paymentBackToHome;
+
+  /// No description provided for @paymentError.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Error: {message}'**
+  String paymentError(Object message);
+
+  /// No description provided for @paymentMethodEwallet.
+  ///
+  /// In en, this message translates to:
+  /// **'E-Wallet'**
+  String get paymentMethodEwallet;
+
+  /// No description provided for @paymentSelectEwallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Select E-Wallet'**
+  String get paymentSelectEwallet;
+
+  /// No description provided for @paymentSelectEwalletError.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select an E-Wallet.'**
+  String get paymentSelectEwalletError;
+
+  /// No description provided for @paymentCardNumberInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid card number.'**
+  String get paymentCardNumberInvalid;
+
+  /// No description provided for @paymentCvvInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid CVV.'**
+  String get paymentCvvInvalid;
+
+  /// No description provided for @paymentSummaryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Summary'**
+  String get paymentSummaryTitle;
+
+  /// No description provided for @paymentSummaryProperty.
+  ///
+  /// In en, this message translates to:
+  /// **'Property'**
+  String get paymentSummaryProperty;
+
+  /// No description provided for @paymentSummaryStartDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Date'**
+  String get paymentSummaryStartDate;
+
+  /// No description provided for @paymentSummaryDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration'**
+  String get paymentSummaryDuration;
+
+  /// No description provided for @paymentSummaryMonthlyRent.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly Rent'**
+  String get paymentSummaryMonthlyRent;
+
+  /// No description provided for @paymentDurationMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} months'**
+  String paymentDurationMonths(Object count);
+
+  /// No description provided for @paymentSummaryMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Method'**
+  String get paymentSummaryMethod;
+
+  /// No description provided for @paymentMethodWithBank.
+  ///
+  /// In en, this message translates to:
+  /// **'Online Banking ({bank})'**
+  String paymentMethodWithBank(Object bank);
+
+  /// No description provided for @paymentMethodWithEwallet.
+  ///
+  /// In en, this message translates to:
+  /// **'E-Wallet ({wallet})'**
+  String paymentMethodWithEwallet(Object wallet);
+
+  /// No description provided for @paymentSummaryStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get paymentSummaryStatus;
+
+  /// No description provided for @paymentRentMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Rent for Month {number}'**
+  String paymentRentMonth(Object number);
+
+  /// No description provided for @paymentBookingFeeOneMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking Fee (1 Month)'**
+  String get paymentBookingFeeOneMonth;
+
+  /// No description provided for @paymentSelectBankError.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a bank.'**
+  String get paymentSelectBankError;
+
+  /// No description provided for @paymentConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Payment'**
+  String get paymentConfirmTitle;
+
+  /// No description provided for @paymentConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to proceed with the payment?'**
+  String get paymentConfirmMessage;
+
+  /// No description provided for @paymentSummaryAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get paymentSummaryAmount;
+
+  /// No description provided for @paymentSummaryMethodLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Method'**
+  String get paymentSummaryMethodLabel;
+
+  /// No description provided for @paymentCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get paymentCancel;
+
+  /// No description provided for @paymentConfirmPay.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm & Pay'**
+  String get paymentConfirmPay;
+
+  /// No description provided for @paymentFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment failed. Please try again.'**
+  String get paymentFailed;
+
+  /// No description provided for @paymentSuccessMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment processed successfully.'**
+  String get paymentSuccessMessage;
+
+  /// No description provided for @paymentFailedWithMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment failed: {message}'**
+  String paymentFailedWithMessage(Object message);
+
+  /// No description provided for @paymentErrorDetailsAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Details'**
+  String get paymentErrorDetailsAction;
+
+  /// No description provided for @paymentErrorDetailsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Error Details'**
+  String get paymentErrorDetailsTitle;
+
+  /// No description provided for @paymentOk.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get paymentOk;
+
+  /// No description provided for @paymentSuccessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Successful'**
+  String get paymentSuccessTitle;
+
+  /// No description provided for @paymentViewReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'View Receipt'**
+  String get paymentViewReceipt;
+
+  /// No description provided for @paymentDismiss.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismiss'**
+  String get paymentDismiss;
+
+  /// No description provided for @paymentMethodCardShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Card'**
+  String get paymentMethodCardShort;
+
+  /// No description provided for @paymentLoginRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please log in to make a payment.'**
+  String get paymentLoginRequired;
+
+  /// No description provided for @viewingHistoryPleaseLogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Please log in to view your viewing history.'**
+  String get viewingHistoryPleaseLogin;
+
+  /// No description provided for @viewingHistoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Viewing History'**
+  String get viewingHistoryTitle;
+
+  /// No description provided for @viewingHistoryErrorWithMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Error: {message}'**
+  String viewingHistoryErrorWithMessage(Object message);
+
+  /// No description provided for @viewingHistoryCancelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel Viewing'**
+  String get viewingHistoryCancelTitle;
+
+  /// No description provided for @viewingHistoryCancelMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to cancel this viewing appointment?'**
+  String get viewingHistoryCancelMessage;
+
+  /// No description provided for @viewingHistoryKeepAppointment.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep Appointment'**
+  String get viewingHistoryKeepAppointment;
+
+  /// No description provided for @viewingHistoryConfirmCancellation.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Cancellation'**
+  String get viewingHistoryConfirmCancellation;
+
+  /// No description provided for @viewingHistoryCancelledSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Viewing appointment cancelled'**
+  String get viewingHistoryCancelledSuccess;
+
+  /// No description provided for @viewingHistoryCancelFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to cancel viewing: {error}'**
+  String viewingHistoryCancelFailed(Object error);
+
+  /// No description provided for @viewingHistoryEmptyAll.
+  ///
+  /// In en, this message translates to:
+  /// **'No viewing requests yet.'**
+  String get viewingHistoryEmptyAll;
+
+  /// No description provided for @viewingHistoryEmptyForStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'No viewing requests found for this status.'**
+  String get viewingHistoryEmptyForStatus;
+
+  /// No description provided for @viewingHistoryFallbackLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Location unavailable'**
+  String get viewingHistoryFallbackLocation;
+
+  /// No description provided for @viewingHistoryFallbackPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Price unavailable'**
+  String get viewingHistoryFallbackPrice;
+
+  /// No description provided for @viewingHistoryFallbackDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Property details are currently unavailable.'**
+  String get viewingHistoryFallbackDescription;
+
+  /// No description provided for @viewingHistoryFallbackHostRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Host'**
+  String get viewingHistoryFallbackHostRole;
+
+  /// No description provided for @viewingHistoryDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Viewing Date'**
+  String get viewingHistoryDateLabel;
+
+  /// No description provided for @viewingHistoryTimeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Viewing Time'**
+  String get viewingHistoryTimeLabel;
+
+  /// No description provided for @viewingHistoryScheduledLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled'**
+  String get viewingHistoryScheduledLabel;
+
+  /// No description provided for @viewingHistoryCancelAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get viewingHistoryCancelAction;
+
+  /// No description provided for @statusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get statusCancelled;
+
+  /// No description provided for @statusRescheduled.
+  ///
+  /// In en, this message translates to:
+  /// **'Rescheduled'**
+  String get statusRescheduled;
+
+  /// No description provided for @statusSlotTaken.
+  ///
+  /// In en, this message translates to:
+  /// **'Slot Taken'**
+  String get statusSlotTaken;
+
+  /// No description provided for @statusPropertyRented.
+  ///
+  /// In en, this message translates to:
+  /// **'Property Rented'**
+  String get statusPropertyRented;
 }
 
 class _AppLocalizationsDelegate

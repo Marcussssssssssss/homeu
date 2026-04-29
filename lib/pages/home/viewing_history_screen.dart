@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
+import 'package:homeu/core/localization/homeu_l10n.dart';
 import 'package:homeu/core/theme/homeu_app_theme.dart';
 import 'package:homeu/app/property/property_remote_datasource.dart';
 import 'package:homeu/app/viewing/viewing_local_datasource.dart';
@@ -84,23 +85,25 @@ class HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
     }
 
     if (_tenantId == null) {
-      return const Scaffold(body: Center(child: Text('Please log in')));
+      return Scaffold(
+        body: Center(child: Text(context.l10n.viewingHistoryPleaseLogin)),
+      );
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F8FC),
+      backgroundColor: context.colors.surface,
       appBar: widget.isStandalone
           ? AppBar(
-              title: const Text(
-                'Viewing History',
+              title: Text(
+                context.l10n.viewingHistoryTitle,
                 style: TextStyle(
-                  color: Color(0xFF0F172A),
+                  color: context.colors.onSurface,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              backgroundColor: const Color(0xFFF6F8FC),
+              backgroundColor: context.colors.surface,
               elevation: 0,
-              iconTheme: const IconThemeData(color: Color(0xFF0F172A)),
+              iconTheme: IconThemeData(color: context.colors.onSurface),
             )
           : null,
       body: SafeArea(
@@ -133,7 +136,7 @@ class HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
                 onRefresh: () async {
                   refresh();
                 },
-                color: const Color(0xFF1E3A8A),
+                color: context.homeuAccent,
                 child: StreamBuilder<List<ViewingRequest>>(
                   stream: _viewingStream,
                   builder: (context, snapshot) {
@@ -143,7 +146,11 @@ class HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
                           Center(
                             child: Padding(
                               padding: const EdgeInsets.only(top: 40),
-                              child: Text('Error: ${snapshot.error}'),
+                              child: Text(
+                                context.l10n.viewingHistoryErrorWithMessage(
+                                  '${snapshot.error}',
+                                ),
+                              ),
                             ),
                           ),
                         ],
@@ -231,7 +238,7 @@ class HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
       context: context,
       barrierDismissible: true,
       barrierLabel: '',
-      barrierColor: Colors.black54,
+      barrierColor: context.colors.scrim.withValues(alpha: 0.54),
       transitionDuration: const Duration(milliseconds: 200),
       pageBuilder: (context, anim1, anim2) => const SizedBox(),
       transitionBuilder: (context, anim1, anim2, child) {
@@ -249,18 +256,18 @@ class HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.redAccent.withOpacity(0.1),
+                      color: context.colors.error.withValues(alpha: 0.12),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.cancel_outlined,
-                      color: Colors.redAccent,
+                      color: context.colors.error,
                       size: 32,
                     ),
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    'Cancel Viewing',
+                    context.l10n.viewingHistoryCancelTitle,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: context.homeuPrimaryText,
@@ -270,7 +277,7 @@ class HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'Are you sure you want to cancel this viewing appointment?',
+                    context.l10n.viewingHistoryCancelMessage,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: context.homeuMutedText,
@@ -286,14 +293,14 @@ class HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
                           onPressed: () => Navigator.pop(context, false),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: context.homeuAccent,
-                            foregroundColor: Colors.white,
+                            foregroundColor: context.colors.onPrimary,
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                             elevation: 0,
                           ),
-                          child: const Text(
-                            'Keep Appointment',
-                            style: TextStyle(fontWeight: FontWeight.w600),
+                          child: Text(
+                            context.l10n.viewingHistoryKeepAppointment,
+                            style: const TextStyle(fontWeight: FontWeight.w600),
                           ),
                         ),
                       ),
@@ -303,12 +310,12 @@ class HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
                         child: TextButton(
                           onPressed: () => Navigator.pop(context, true),
                           style: TextButton.styleFrom(
-                            foregroundColor: Colors.redAccent,
+                            foregroundColor: context.colors.error,
                             padding: const EdgeInsets.symmetric(vertical: 14),
                           ),
-                          child: const Text(
-                            'Confirm Cancellation',
-                            style: TextStyle(fontWeight: FontWeight.w600),
+                          child: Text(
+                            context.l10n.viewingHistoryConfirmCancellation,
+                            style: const TextStyle(fontWeight: FontWeight.w600),
                           ),
                         ),
                       ),
@@ -330,13 +337,19 @@ class HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
         );
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Viewing appointment cancelled')),
+            SnackBar(
+              content: Text(context.l10n.viewingHistoryCancelledSuccess),
+            ),
           );
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to cancel viewing: $e')),
+            SnackBar(
+              content: Text(
+                context.l10n.viewingHistoryCancelFailed('$e'),
+              ),
+            ),
           );
         }
       }
@@ -351,11 +364,11 @@ class HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
           child: Center(
             child: Text(
               _selectedStatus == HomeUViewingFilterStatus.all
-                  ? 'No viewing requests yet.'
-                  : 'No viewing requests found for this status.',
+                  ? context.l10n.viewingHistoryEmptyAll
+                  : context.l10n.viewingHistoryEmptyForStatus,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Color(0xFF667896),
+              style: TextStyle(
+                color: context.homeuMutedText,
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
               ),
@@ -406,17 +419,17 @@ class HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
       id: viewing.propertyId,
       ownerId: viewing.ownerId,
       name: viewing.propertyId,
-      location: 'Location unavailable',
-      pricePerMonth: 'Price unavailable',
+      location: context.l10n.viewingHistoryFallbackLocation,
+      pricePerMonth: context.l10n.viewingHistoryFallbackPrice,
       rating: 4.5,
-      accentColor: const Color(0xFF1E3A8A),
-      description: 'Property details are currently unavailable.',
+      accentColor: context.homeuAccent,
+      description: context.l10n.viewingHistoryFallbackDescription,
       ownerName: viewing.ownerId,
-      ownerRole: 'Host',
-      photoColors: const [
-        Color(0xFF5D7FBF),
-        Color(0xFF4A68A8),
-        Color(0xFF2F4F8F),
+      ownerRole: context.l10n.viewingHistoryFallbackHostRole,
+      photoColors: [
+        context.homeuAccent.withValues(alpha: 0.6),
+        context.homeuAccent.withValues(alpha: 0.75),
+        context.homeuAccent,
       ],
     );
   }
@@ -449,23 +462,23 @@ class HomeUViewingHistoryScreenState extends State<HomeUViewingHistoryScreen> {
   String _statusLabel(HomeUViewingFilterStatus status) {
     switch (status) {
       case HomeUViewingFilterStatus.all:
-        return 'All';
+        return context.l10n.statusAll;
       case HomeUViewingFilterStatus.pending:
-        return 'Pending';
+        return context.l10n.statusPending;
       case HomeUViewingFilterStatus.approved:
-        return 'Approved';
+        return context.l10n.statusApproved;
       case HomeUViewingFilterStatus.rejected:
-        return 'Rejected';
+        return context.l10n.statusRejected;
       case HomeUViewingFilterStatus.completed:
-        return 'Completed';
+        return context.l10n.statusCompleted;
       case HomeUViewingFilterStatus.cancelled:
-        return 'Cancelled';
+        return context.l10n.statusCancelled;
       case HomeUViewingFilterStatus.rescheduleRequested:
-        return 'Rescheduled';
+        return context.l10n.statusRescheduled;
       case HomeUViewingFilterStatus.slotTaken:
-        return 'Slot Taken';
+        return context.l10n.statusSlotTaken;
       case HomeUViewingFilterStatus.propertyRented:
-        return 'Property Rented';
+        return context.l10n.statusPropertyRented;
     }
   }
 }
@@ -489,8 +502,8 @@ class _ViewingHistoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const purpleAccent = Color(0xFF6366F1);
-    const grayBorder = Color(0xFFF1F5F9);
+    final accent = context.homeuAccent;
+    final border = context.homeuSoftBorder;
     final isPast = viewing.status.toLowerCase() == 'completed' ||
                    viewing.status.toLowerCase() == 'cancelled' ||
                    viewing.status.toLowerCase() == 'rejected' ||
@@ -511,6 +524,7 @@ class _ViewingHistoryCard extends StatelessWidget {
         ClipRRect(
           borderRadius: BorderRadius.circular(20),
           child: _buildImage(
+            context,
             property.imageUrls.isNotEmpty ? property.imageUrls[0] : null,
             110,
             130,
@@ -522,7 +536,11 @@ class _ViewingHistoryCard extends StatelessWidget {
         Expanded(
           child: Opacity(
             opacity: isPast ? 0.6 : 1.0,
-            child: _buildInfoSection(context, purpleAccent, showCancelButton: showCancelButton),
+            child: _buildInfoSection(
+              context,
+              accent,
+              showCancelButton: showCancelButton,
+            ),
           ),
         ),
       ],
@@ -546,12 +564,12 @@ class _ViewingHistoryCard extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.homeuCard,
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: grayBorder, width: 1.5),
+          border: Border.all(color: border, width: 1.5),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: context.homeuCardShadow,
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
@@ -567,17 +585,22 @@ class _ViewingHistoryCard extends StatelessWidget {
                 constraints: const BoxConstraints(maxWidth: 80),
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: showRentedKillSwitch ? const Color(0xFF94A3B8) : _getStatusColor(statusEnum),
+                  color: showRentedKillSwitch
+                      ? context.colors.surfaceContainerHighest
+                      : _getStatusColor(context, statusEnum),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
                   child: Text(
-                    (showRentedKillSwitch ? 'Cancelled' : status).toUpperCase(),
-                    style: const TextStyle(
+                    (showRentedKillSwitch
+                            ? context.l10n.statusCancelled
+                            : status)
+                        .toUpperCase(),
+                    style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w800,
-                      color: Colors.white,
+                      color: context.colors.onPrimary,
                       letterSpacing: 0.5,
                     ),
                   ),
@@ -590,14 +613,18 @@ class _ViewingHistoryCard extends StatelessWidget {
     );
   }
 
-  Widget _buildImage(String? url, double width, double height, {bool applyGrayscale = false}) {
+  Widget _buildImage(BuildContext context, String? url, double width, double height, {bool applyGrayscale = false}) {
     Widget image;
     if (url == null || url.isEmpty) {
       image = Container(
         width: width,
         height: height,
-        color: const Color(0xFFF1F5F9),
-        child: const Icon(Icons.image_outlined, color: Color(0xFF94A3B8), size: 24),
+        color: context.colors.surfaceContainerHighest,
+        child: Icon(
+          Icons.image_outlined,
+          color: context.homeuMutedText,
+          size: 24,
+        ),
       );
     } else {
       image = Image.network(
@@ -608,8 +635,12 @@ class _ViewingHistoryCard extends StatelessWidget {
         errorBuilder: (_, __, ___) => Container(
           width: width,
           height: height,
-          color: const Color(0xFFF1F5F9),
-          child: const Icon(Icons.broken_image_outlined, color: Color(0xFF94A3B8), size: 24),
+          color: context.colors.surfaceContainerHighest,
+          child: Icon(
+            Icons.broken_image_outlined,
+            color: context.homeuMutedText,
+            size: 24,
+          ),
         ),
       );
     }
@@ -628,7 +659,11 @@ class _ViewingHistoryCard extends StatelessWidget {
     return image;
   }
 
-  Widget _buildInfoSection(BuildContext context, Color purpleAccent, {bool showCancelButton = false}) {
+  Widget _buildInfoSection(
+    BuildContext context,
+    Color accent, {
+    bool showCancelButton = false,
+  }) {
     final dateFormat = DateFormat('MMM d');
     final dayFormat = DateFormat('EEEE');
     final timeFormat = DateFormat('h:mm a');
@@ -643,10 +678,10 @@ class _ViewingHistoryCard extends StatelessWidget {
           padding: const EdgeInsets.only(right: 60),
           child: Text(
             property.name,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF0F172A),
+              color: context.homeuPrimaryText,
               height: 1.2,
             ),
             maxLines: 1,
@@ -657,14 +692,14 @@ class _ViewingHistoryCard extends StatelessWidget {
         // Location
         Row(
           children: [
-            Icon(Icons.location_on, size: 16, color: purpleAccent),
+            Icon(Icons.location_on, size: 16, color: accent),
             const SizedBox(width: 4),
             Expanded(
               child: Text(
                 property.location,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 13,
-                  color: Color(0xFF64748B),
+                  color: context.homeuMutedText,
                   fontWeight: FontWeight.w500,
                 ),
                 maxLines: 1,
@@ -679,31 +714,33 @@ class _ViewingHistoryCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             _buildDetailColumn(
-              'Viewing Date',
+              context,
+              context.l10n.viewingHistoryDateLabel,
               dateFormat.format(scheduledAt),
               dayFormat.format(scheduledAt),
-              purpleAccent,
+              accent,
             ),
             const SizedBox(width: 14),
             _buildDetailColumn(
-              'Viewing Time',
+              context,
+              context.l10n.viewingHistoryTimeLabel,
               timeFormat.format(scheduledAt),
-              'Scheduled',
-              purpleAccent,
+              context.l10n.viewingHistoryScheduledLabel,
+              accent,
             ),
             if (showCancelButton) ...[
               const Spacer(),
               OutlinedButton(
                 onPressed: onCancel,
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.redAccent,
-                  side: const BorderSide(color: Colors.redAccent, width: 1.0),
+                  foregroundColor: context.colors.error,
+                  side: BorderSide(color: context.colors.error, width: 1.0),
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
                   minimumSize: const Size(0, 28),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
                 ),
-                child: const Text('Cancel'),
+                child: Text(context.l10n.viewingHistoryCancelAction),
               ),
             ],
           ],
@@ -712,7 +749,7 @@ class _ViewingHistoryCard extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailColumn(String label, String value, String subValue, Color accentColor) {
+  Widget _buildDetailColumn(BuildContext context, String label, String value, String subValue, Color accentColor) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -727,39 +764,39 @@ class _ViewingHistoryCard extends StatelessWidget {
         const SizedBox(height: 2),
         Text(
           value,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF334155),
+            color: context.homeuPrimaryText,
           ),
         ),
         Text(
           subValue,
-          style: const TextStyle(fontSize: 10, color: Color(0xFF94A3B8)),
+          style: TextStyle(fontSize: 10, color: context.homeuMutedText),
         ),
       ],
     );
   }
 
-  Color _getStatusColor(HomeUViewingFilterStatus status) {
+  Color _getStatusColor(BuildContext context, HomeUViewingFilterStatus status) {
     switch (status) {
       case HomeUViewingFilterStatus.approved:
-        return const Color(0xFF10B981); // Green
+        return context.homeuSuccess;
       case HomeUViewingFilterStatus.pending:
-        return const Color(0xFF3B82F6); // Blue
+        return context.colors.primary;
       case HomeUViewingFilterStatus.cancelled:
-        return const Color(0xFF94A3B8); // Muted Gray
+        return context.colors.surfaceContainerHighest;
       case HomeUViewingFilterStatus.rejected:
-        return const Color(0xFFEF4444); // Red
+        return context.colors.error;
       case HomeUViewingFilterStatus.completed:
-        return const Color(0xFF6366F1); // Indigo
+        return context.colors.secondary;
       case HomeUViewingFilterStatus.rescheduleRequested:
-        return const Color(0xFFF59E0B); // Amber
+        return context.colors.tertiary;
       case HomeUViewingFilterStatus.slotTaken:
       case HomeUViewingFilterStatus.propertyRented:
-        return const Color(0xFFEF4444); // Red
+        return context.colors.error;
       default:
-        return const Color(0xFF1E3A8A);
+        return context.homeuAccent;
     }
   }
 }

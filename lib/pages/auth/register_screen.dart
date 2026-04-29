@@ -273,7 +273,7 @@ class _HomeURegisterScreenState extends State<HomeURegisterScreen> {
                       const SizedBox(height: 14),
                       _LabeledInput(
                         label: t.profileFieldPhone,
-                        hintText: '+60 12 345 6789',
+                        hintText: t.registerPhoneHint,
                         keyboardType: TextInputType.phone,
                         prefixIcon: Icons.phone_outlined,
                         fieldKey: const Key('register_phone_field'),
@@ -355,7 +355,7 @@ class _HomeURegisterScreenState extends State<HomeURegisterScreen> {
                                 selectedColor: context.homeuAccent,
                                 labelStyle: TextStyle(
                                   color: _selectedRole == HomeURole.tenant
-                                      ? Colors.white
+                                      ? context.colors.onPrimary
                                       : context.homeuAccent,
                                   fontWeight: FontWeight.w700,
                                 ),
@@ -386,7 +386,7 @@ class _HomeURegisterScreenState extends State<HomeURegisterScreen> {
                                 selectedColor: context.homeuAccent,
                                 labelStyle: TextStyle(
                                   color: _selectedRole == HomeURole.owner
-                                      ? Colors.white
+                                      ? context.colors.onPrimary
                                       : context.homeuAccent,
                                   fontWeight: FontWeight.w700,
                                 ),
@@ -408,9 +408,7 @@ class _HomeURegisterScreenState extends State<HomeURegisterScreen> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: context.isDarkMode
-                              ? const Color(0xFF121C2B)
-                              : const Color(0xFFF4F8FF),
+                          color: context.homeuRaisedCard,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
@@ -430,7 +428,7 @@ class _HomeURegisterScreenState extends State<HomeURegisterScreen> {
                           onPressed: _isLoading ? null : _handleRegister,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: context.homeuAccent,
-                            foregroundColor: Colors.white,
+                            foregroundColor: context.colors.onPrimary,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16),
                             ),
@@ -440,13 +438,13 @@ class _HomeURegisterScreenState extends State<HomeURegisterScreen> {
                             ),
                           ),
                           child: _isLoading
-                              ? const SizedBox(
+                              ? SizedBox(
                                   width: 22,
                                   height: 22,
                                   child: CircularProgressIndicator(
                                     strokeWidth: 2.4,
                                     valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.white,
+                                      context.colors.onPrimary,
                                     ),
                                   ),
                                 )

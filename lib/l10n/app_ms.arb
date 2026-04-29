@@ -1,6 +1,7 @@
 {
   "@@locale": "ms",
   "appTitle": "HomeU",
+  "splashTagline": "Cari Rumah Impian Anda",
   "navHome": "Laman Utama",
   "navFavorites": "Kegemaran",
   "navBookings": "Tempahan",
@@ -145,6 +146,17 @@
   "authHidePassword": "Sembunyi kata laluan",
   "loginTitle": "Selamat Kembali",
   "loginSubtitle": "Log masuk untuk meneruskan perjalanan HomeU anda.",
+  "loginDividerOr": "ATAU",
+  "loginBiometricReason": "Sahkan untuk mengakses HomeU",
+  "loginSessionExpired": "Sesi tamat. Sila log masuk dengan e-mel dan kata laluan.",
+  "loginBiometricFailed": "Pengesahan biometrik gagal atau dibatalkan.",
+  "loginContinueAs": "Teruskan sebagai {name}",
+  "@loginContinueAs": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "loginUseBiometrics": "Guna Biometrik",
   "loginPasswordHint": "Masukkan kata laluan anda",
   "loginForgotPassword": "Lupa kata laluan?",
   "loginNewHere": "Baru di sini?",
@@ -160,6 +172,7 @@
   "registerTitle": "Cipta Akaun Anda",
   "registerSubtitle": "Sertai HomeU and mulakan perjalanan sewaan anda.",
   "registerNameHint": "Nama penuh anda",
+  "registerPhoneHint": "+60 12 345 6789",
   "registerPasswordHint": "Cipta kata laluan",
   "registerConfirmPassword": "Sahkan Kata Laluan",
   "registerConfirmPasswordHint": "Masukkan semula kata laluan",
@@ -221,6 +234,98 @@
   "onboardingViewingConfirmed": "Lawatan Disahkan",
   "onboardingSecurePayment": "Bayaran Selamat",
   "onboardingProtected": "Dilindungi",
+  "viewingScheduleTitle": "Jadualkan Lawatan",
+  "viewingSelectSlotTitle": "Pilih Slot Tersedia",
+  "viewingSelectSlotSubtitle": "Pemilik hanya memaparkan slot yang tersedia. Pilih satu untuk meneruskan.",
+  "viewingNoSlotsTitle": "Tiada Slot Tersedia",
+  "viewingNoSlotsSubtitle": "Pemilik belum menyenaraikan sebarang ketersediaan untuk hartanah ini. Sila semak semula kemudian atau hubungi pemilik.",
+  "viewingGoBack": "Kembali",
+  "viewingConfirmRequest": "Sahkan Permintaan",
+  "viewingAlreadyScheduled": "Anda telah menjadualkan lawatan untuk slot masa ini. Sila semak Permintaan anda.",
+  "viewingRequestSent": "Permintaan Dihantar!",
+  "viewingErrorWithMessage": "Ralat: {message}",
+  "@viewingErrorWithMessage": {
+    "placeholders": {
+      "message": {}
+    }
+  },
+  "bookingDetailsTitle": "Butiran Tempahan",
+  "bookingPaymentScheduleTitle": "Jadual Bayaran",
+  "bookingPaymentScheduleEmpty": "Tiada jadual bayaran dijana lagi.",
+  "bookingMonthLabel": "Bulan {number}",
+  "@bookingMonthLabel": {
+    "placeholders": {
+      "number": {}
+    }
+  },
+  "bookingMonthWithFee": "Bulan {number} (Yuran Tempahan)",
+  "@bookingMonthWithFee": {
+    "placeholders": {
+      "number": {}
+    }
+  },
+  "bookingDueLabel": "Tarikh akhir: {date}",
+  "@bookingDueLabel": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "bookingViewReceipt": "Lihat Resit",
+  "bookingAmountRm": "RM {amount}",
+  "@bookingAmountRm": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "bookingPaid": "DIBAYAR",
+  "bookingUpcoming": "AKAN DATANG",
+  "bookingPayNow": "Bayar Sekarang",
+  "bookingReceiptNotFound": "Tiada resit untuk bayaran ini.",
+  "bookingReceiptError": "Ralat memuat resit: {message}",
+  "@bookingReceiptError": {
+    "placeholders": {
+      "message": {}
+    }
+  },
+  "reviewRatingTitle": "Ulasan & Penilaian",
+  "reviewRatingSubtitle": "Kongsi pengalaman anda untuk membantu penyewa lain membuat keputusan yang lebih baik.",
+  "reviewAverageLabel": "Penilaian Purata",
+  "reviewYourRatingLabel": "Penilaian Anda",
+  "reviewCommentLabel": "Ulasan",
+  "reviewCommentHint": "Beritahu kami tentang kebersihan, komunikasi pemilik, dan pengalaman keseluruhan anda.",
+  "reviewSubmitLabel": "Hantar",
+  "reviewSubmitSuccess": "Terima kasih. Ulasan anda telah dihantar.",
+  "reviewStarLabel": "{count} bintang",
+  "@reviewStarLabel": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "compareTitle": "Bandingkan Hartanah",
+  "compareClear": "Kosongkan",
+  "compareEmptyTitle": "Tiada Hartanah Dipilih",
+  "compareEmptySubtitle": "Kembali dan pilih 2 hartanah\nuntuk mula membandingkan",
+  "compareBackToListings": "Kembali ke Senarai",
+  "comparePriceRangeLabel": "Julat Harga",
+  "comparePriceRangeValue": "RM {min} - RM {max}",
+  "@comparePriceRangeValue": {
+    "placeholders": {
+      "min": {},
+      "max": {}
+    }
+  },
+  "compareSaveAmount": "Jimat RM {amount}",
+  "@compareSaveAmount": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "compareLabelAddress": "Alamat",
+  "compareLabelType": "Jenis",
+  "compareLabelRooms": "Bilik",
+  "compareLabelFurnishing": "Perabot",
+  "compareLabelOwner": "Pemilik",
+  "compareLabelAvailability": "Ketersediaan",
   "updatePasswordSuccessMessage": "Kata laluan anda berjaya dikemas kini.",
   "updatePasswordStrongPasswordTip": "Gunakan kata laluan yang kuat dengan huruf, nombor dan simbol.",
   "updatePasswordCurrentPasswordLabel": "Kata Laluan Semasa",
@@ -237,7 +342,7 @@
   "updatePasswordErrorCurrentPasswordIncorrect": "Kata laluan semasa tidak betul.",
   "updatePasswordErrorBackendNotInitialized": "Backend belum dimulakan. Sila semak konfigurasi Supabase.",
   "updatePasswordErrorVerifyCurrentPasswordUnavailable": "Tidak dapat mengesahkan kata laluan semasa anda sekarang. Sila log masuk semula.",
-  "updatePasswordErrorSessionExpired": "Pautan tetapan semula tidak sah atau telah tamat tempoh. Sila minta e-mel tetapan semula kata laluan baharu.",
+  "updatePasswordErrorSessionExpired": "Pautan tetapan semula tidak sah atau telah tamat expoh. Sila minta e-mel tetapan semula kata laluan baharu.",
   "updatePasswordErrorNewPasswordMustDiffer": "Kata laluan baharu mesti berbeza daripada kata laluan semasa anda.",
   "updatePasswordErrorWeakPassword": "Sila pilih kata laluan yang lebih kuat dengan sekurang-kurangnya 6 aksara.",
   "updatePasswordErrorNetwork": "Ralat rangkaian. Sila semak sambungan internet anda dan cuba lagi.",
@@ -273,5 +378,577 @@
   "receiptTotalAmount": "Jumlah Keseluruhan",
   "receiptDownload": "Muat Turun",
   "receiptShare": "Kongsi",
-  "receiptFooter": "Terima kasih kerana menggunakan HomeU!"
+  "receiptFooter": "Terima kasih kerana menggunakan HomeU!",
+  "paymentAmountRm": "RM {amount}",
+  "@paymentAmountRm": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "bookingTitle": "Tempahan",
+  "bookingConflictDetected": "Konflik dikesan dengan tempahan sedia ada.",
+  "bookingFeeNotice": "Membayar yuran tempahan akan mengunci hartanah ini. Baki selebihnya perlu dibayar selepas kelulusan pemilik.",
+  "bookingPayFee": "Bayar Yuran Tempahan (RM {amount})",
+  "@bookingPayFee": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "bookingSelectedProperty": "Hartanah Dipilih",
+  "bookingConflictDetails": "Hartanah telah ditempah bermula {date}. Sila pilih tempoh lebih pendek atau tarikh mula berbeza.",
+  "@bookingConflictDetails": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "bookingDurationTitle": "Tempoh Sewa",
+  "bookingDurationMonths": "{count} bulan",
+  "@bookingDurationMonths": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "bookingStartDateTitle": "Tarikh Mula",
+  "bookingOccupiedUntil": "Hartanah diduduki hingga {date}",
+  "@bookingOccupiedUntil": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "bookingTotalPriceTitle": "Pengiraan Jumlah Harga",
+  "bookingMonthlyPriceLabel": "Harga Bulanan",
+  "bookingDurationSummary": "Tempoh ({months} bulan)",
+  "@bookingDurationSummary": {
+    "placeholders": {
+      "months": {}
+    }
+  },
+  "bookingEstimatedTotalLabel": "Jumlah Anggaran",
+  "paymentSupabaseUnavailable": "Supabase belum dimulakan. Sila cuba lagi kemudian.",
+  "bookingLoginRequired": "Sila log masuk untuk meneruskan tempahan.",
+  "bookingDurationJustBooked": "Maaf, tempoh ini baru ditempah oleh penyewa lain.",
+  "bookingCreateFailed": "Tidak dapat membuat tempahan. Sila cuba lagi.",
+  "bookingCreateError": "Gagal membuat tempahan: {error}",
+  "@bookingCreateError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "statusAll": "Semua",
+  "ownerRequestsTitle": "Permintaan",
+  "ownerRequestsBookingsTab": "Tempahan",
+  "ownerRequestsViewingsTab": "Lawatan",
+  "ownerRequestsRetry": "Cuba Lagi",
+  "ownerRequestsEmpty": "Tiada permintaan \"{filter}\".",
+  "@ownerRequestsEmpty": {
+    "placeholders": {
+      "filter": {}
+    }
+  },
+  "ownerRequestsMoveIn": "Masuk: {date}  •  {months} bulan",
+  "@ownerRequestsMoveIn": {
+    "placeholders": {
+      "date": {},
+      "months": {}
+    }
+  },
+  "ownerRequestsFlexibleDuration": "Fleksibel  •  {months} bulan",
+  "@ownerRequestsFlexibleDuration": {
+    "placeholders": {
+      "months": {}
+    }
+  },
+  "ownerRequestsMonthlyPrice": "RM {price} / bln",
+  "@ownerRequestsMonthlyPrice": {
+    "placeholders": {
+      "price": {}
+    }
+  },
+  "ownerRequestsReview": "Semak",
+  "ownerRequestsViewingsEmpty": "Tiada permintaan lawatan \"{filter}\".",
+  "@ownerRequestsViewingsEmpty": {
+    "placeholders": {
+      "filter": {}
+    }
+  },
+  "ownerRequestsViewingTime": "{date}  •  {time}",
+  "@ownerRequestsViewingTime": {
+    "placeholders": {
+      "date": {},
+      "time": {}
+    }
+  },
+  "ownerRequestsDecline": "Tolak",
+  "ownerRequestsApprove": "Lulus",
+  "ownerRequestsMarkCompleted": "Tandakan Selesai",
+  "ownerGreeting": "Hai, {name}",
+  "@ownerGreeting": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "ownerRecentProperties": "Hartanah Terkini",
+  "ownerNoProperties": "Belum ada hartanah disenaraikan",
+  "ownerAddFirstProperty": "Tambah hartanah pertama anda",
+  "ownerUntitledProperty": "Tanpa Tajuk",
+  "ownerRecentBookingRequests": "Permintaan Tempahan Terkini",
+  "ownerNoBookingRequests": "Tiada permintaan tempahan aktif",
+  "ownerUnknownProperty": "Hartanah Tidak Diketahui",
+  "ownerUnknownTenant": "Penyewa Tidak Diketahui",
+  "ownerRecentViewingRequests": "Permintaan Lawatan Terkini",
+  "ownerNoViewingRequests": "Tiada permintaan lawatan aktif",
+  "ownerTapToReviewViewing": "Ketik untuk semak lawatan",
+  "ownerProjected30Days": "Unjuran (30 Hari)",
+  "ownerOverduePayments": "Bayaran Tertunggak",
+  "ownerInvoiceCollectionRate": "Kadar Kutipan Invois",
+  "monthShortJul": "Jul",
+  "monthShortAug": "Ogos",
+  "monthShortSep": "Sep",
+  "monthShortOct": "Okt",
+  "monthShortNov": "Nov",
+  "monthShortDec": "Dis",
+  "profileBiometricUnavailable": "Pengesahan biometrik tidak tersedia atau belum disediakan pada peranti ini.",
+  "profileBiometricReason": "Sila sahkan untuk mengaktifkan log masuk biometrik",
+  "profileBiometricEnabled": "Log masuk biometrik berjaya diaktifkan.",
+  "profileBiometricSaveFailed": "Gagal mengemas kini pilihan biometrik.",
+  "profileBiometricDisabled": "Log masuk biometrik dinyahaktifkan.",
+  "profileErrorSaveBiometric": "Gagal menyimpan pilihan biometrik.",
+  "profileLogoutTitle": "Log keluar?",
+  "profileLogoutMessage": "Adakah anda pasti mahu log keluar daripada akaun HomeU anda?",
+  "profileLogoutCancel": "Batal",
+  "profileLogoutConfirm": "Log Keluar",
+  "profileFavoritesSubtitle": "Lihat hartanah disimpan anda",
+  "profileBiometricTitle": "Log Masuk Biometrik",
+  "profileBiometricSubtitle": "Buka HomeU dengan biometrik",
+  "adminDashboardLoadError": "Gagal memuat gambaran sistem. Sila semak sambungan anda.",
+  "adminDashboardTitle": "Papan Pemuka Admin",
+  "adminDashboardWelcome": "Selamat datang, Admin",
+  "adminDashboardOverview": "Gambaran Sistem",
+  "adminTotalUsers": "Jumlah Pengguna",
+  "adminTotalOwners": "Pemilik",
+  "adminTotalTenants": "Penyewa",
+  "adminPendingReports": "Laporan Menunggu",
+  "adminManagementTitle": "Pengurusan",
+  "adminReportsReview": "Semakan Laporan",
+  "adminReportsSummary": "{pending} menunggu daripada {total} jumlah laporan",
+  "@adminReportsSummary": {
+    "placeholders": {
+      "pending": {},
+      "total": {}
+    }
+  },
+  "adminManagementTile": "Pengurusan Admin",
+  "adminManagementSubtitle": "Urus pentadbir sistem",
+  "adminAuditLogsTitle": "Log Audit",
+  "adminAuditLogsSubtitle": "Lihat log aktiviti seluruh sistem",
+  "adminCreatedSuccess": "Akaun admin berjaya dicipta.",
+  "adminUpdateDetailsTitle": "Kemaskini Butiran Admin",
+  "adminUpdateDetailsConfirm": "Kemaskini",
+  "adminDetailsUpdated": "Butiran admin dikemas kini.",
+  "adminUpdateError": "Ralat: {error}",
+  "@adminUpdateError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "adminCannotRemoveSelf": "Keselamatan: Anda tidak boleh buang akses admin sendiri.",
+  "adminRemoveTitle": "Buang Admin?",
+  "adminRemoveMessage": "Buang keistimewaan admin daripada {name}? Mereka akan kembali kepada peranan Penyewa.",
+  "@adminRemoveMessage": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "adminRemoveConfirm": "Buang",
+  "adminRemovedSuccess": "Keistimewaan admin dibuang.",
+  "adminRemoveError": "Ralat: {error}",
+  "@adminRemoveError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "adminAddButton": "Tambah Admin",
+  "adminNoAdminsFound": "Tiada admin ditemui.",
+  "adminNavDashboard": "Papan Pemuka",
+  "adminNavReports": "Laporan",
+  "adminNavChat": "Sembang",
+  "adminNavLogs": "Log",
+  "adminNavProfile": "Profil",
+  "commonCancel": "Batal",
+  "commonConfirm": "Sahkan",
+  "commonRefreshTooltip": "Segar Semula",
+  "statusReviewed": "Disemak",
+  "statusDismissed": "Ditolak",
+  "adminReportsTitle": "Semakan Laporan",
+  "adminReportsSearchHint": "Cari laporan, pemilik, penyewa, hartanah...",
+  "adminReportsFilterTooltip": "Tapis laporan",
+  "adminReportsActiveFilterLabel": "Penapis aktif:",
+  "adminReportsNoMatches": "Tiada laporan sepadan dengan penapis semasa.",
+  "adminReportsFilterTitle": "Tapis Laporan",
+  "adminReportsFilterSectionStatus": "Status Laporan",
+  "adminReportsFilterClear": "Kosongkan Penapis",
+  "adminReportsFilterApply": "Gunakan Penapis",
+  "adminReportsUnknownListing": "Senarai tidak diketahui",
+  "adminReportsUnknownReportId": "Tidak diketahui",
+  "adminReportsPropertyIdFallback": "Hartanah #{propertyId}",
+  "@adminReportsPropertyIdFallback": {
+    "placeholders": {
+      "propertyId": {}
+    }
+  },
+  "adminReportsNotAvailable": "N/A",
+  "adminReportsUnknownOwner": "Pemilik tidak diketahui",
+  "adminReportsUnknownReporter": "Pelapor tidak diketahui",
+  "adminReportsUnknownEmail": "-",
+  "adminReportsLoadError": "Gagal memuat laporan: {error}",
+  "@adminReportsLoadError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "adminReportsMissingOwnerOrPropertyChat": "Konteks pemilik atau hartanah untuk sembang tiada.",
+  "adminReportsMissingTenantOrPropertyChat": "Konteks penyewa atau hartanah untuk sembang tiada.",
+  "adminReportsAuditContactOwnerReason": "Membuka sembang pemilik untuk susulan laporan.",
+  "adminReportsAuditContactTenantReason": "Membuka sembang penyewa untuk susulan laporan.",
+  "adminReportsChatOpenError": "Tidak dapat membuka sembang: {error}",
+  "@adminReportsChatOpenError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "adminReportsRecordRiskLevelAction": "Rekod Tahap Risiko",
+  "adminReportsRiskRecorded": "Tahap risiko direkodkan.",
+  "adminReportsRiskRecordError": "Penilaian risiko gagal: {error}",
+  "@adminReportsRiskRecordError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "adminReportsActionCompleted": "{actionLabel} selesai.",
+  "@adminReportsActionCompleted": {
+    "placeholders": {
+      "actionLabel": {}
+    }
+  },
+  "adminReportsUpdateError": "Kemas kini laporan gagal: {error}",
+  "@adminReportsUpdateError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "adminReportsReportTitle": "Laporan #{reportId}",
+  "@adminReportsReportTitle": {
+    "placeholders": {
+      "reportId": {}
+    }
+  },
+  "adminReportsSubmittedOn": "Dihantar pada {date}",
+  "@adminReportsSubmittedOn": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "adminReportsSectionProperty": "Hartanah",
+  "adminReportsSectionOwner": "Pemilik",
+  "adminReportsSectionReporter": "Pelapor",
+  "adminReportsSectionComplaint": "Aduan",
+  "adminReportsFieldPropertyId": "ID Hartanah",
+  "adminReportsFieldTitle": "Tajuk",
+  "adminReportsFieldName": "Nama",
+  "adminReportsFieldEmail": "E-mel",
+  "adminReportsFieldTotalReports": "Jumlah laporan",
+  "adminReportsFieldReason": "Sebab",
+  "adminReportsFieldDescription": "Perihalan",
+  "adminReportsFieldStatus": "Status",
+  "adminReportsRiskSectionTitle": "Penilaian risiko",
+  "adminReportsRiskSectionHint": "Semakan dalaman sahaja. Ini tidak menukar keterlihatan senarai atau status akaun.",
+  "adminReportsReviewedConfirmTitle": "Saya telah menyemak aduan ini.",
+  "adminReportsReviewedConfirmSubtitle": "Penilaian risiko dan kemas kini status dibuka selepas pengesahan ini.",
+  "adminReportsActionsTitle": "Tindakan",
+  "adminReportsActionsHint": "Gunakan sembang untuk susulan, kemudian rekod tahap risiko dalaman atau kemas kini status laporan.",
+  "adminReportsContactOwner": "Hubungi Pemilik",
+  "adminReportsContactReporter": "Hubungi Pelapor",
+  "adminReportsSaveRisk": "Simpan Tahap Risiko",
+  "adminReportsMarkReviewed": "Tandakan Disemak",
+  "adminReportsDismissReport": "Tolak Laporan",
+  "adminReportsOwnerLabel": "Pemilik: {name}",
+  "@adminReportsOwnerLabel": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "adminReportsReporterLabel": "Pelapor: {name}",
+  "@adminReportsReporterLabel": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "adminReportsReasonLabel": "Sebab: {reason}",
+  "@adminReportsReasonLabel": {
+    "placeholders": {
+      "reason": {}
+    }
+  },
+  "adminReportsReasonDialogPrompt": "Berikan sebab dan sahkan tindakan moderasi ini.",
+  "adminReportsReasonDialogLabel": "Sebab admin",
+  "adminReportsReasonDialogHint": "Tambah konteks moderasi yang jelas",
+  "adminReportsReasonDialogConfirm": "Saya sahkan tindakan ini.",
+  "adminReportsRiskLow": "Rendah",
+  "adminReportsRiskMedium": "Sederhana",
+  "adminReportsRiskHigh": "Tinggi",
+  "adminReportsRiskInvalid": "Tidak sah",
+  "adminAuditTitle": "Log Audit Sistem",
+  "adminAuditClearFiltersTooltip": "Kosongkan Penapis",
+  "adminAuditSearchHint": "Cari deskripsi...",
+  "adminAuditAllDates": "Semua Tarikh",
+  "adminAuditDateRange": "{start} - {end}",
+  "@adminAuditDateRange": {
+    "placeholders": {
+      "start": {},
+      "end": {}
+    }
+  },
+  "adminAuditTableFilterHint": "Jadual",
+  "adminAuditActionFilterHint": "Tindakan",
+  "adminAuditEmptyState": "Tiada log audit sepadan dengan kriteria anda.",
+  "adminAuditClearAllFilters": "Kosongkan semua penapis",
+  "adminAuditUnknownTime": "Masa Tidak Diketahui",
+  "adminAuditNoDetails": "No details available",
+  "adminAuditSystemActor": "Sistem / Tanpa Nama",
+  "adminAuditUnknownRole": "tidak diketahui",
+  "adminAuditNotAvailable": "N/A",
+  "adminAuditActorLabel": "Pelaku",
+  "adminAuditTargetTableLabel": "Jadual Sasaran",
+  "adminAuditTargetIdLabel": "ID Sasaran",
+  "adminAuditTableProfiles": "Profil",
+  "adminAuditTableProperties": "Hartanah",
+  "adminAuditTableBookings": "Tempahan",
+  "adminAuditTablePropertyReports": "Laporan Hartanah",
+  "adminAuditTableReports": "Laporan",
+  "adminAuditTableAuditLogs": "Log Audit",
+  "adminAuditActionAdminCreated": "Admin Dicipta",
+  "adminAuditActionAdminUpdated": "Admin Dikemas Kini",
+  "adminAuditActionAdminRemoved": "Admin Dibuang",
+  "adminAuditActionReportContactOwner": "Laporan: Hubungi Pemilik",
+  "adminAuditActionReportContactTenant": "Laporan: Hubungi Penyewa",
+  "adminAuditActionReportRiskLow": "Laporan: Risiko Rendah",
+  "adminAuditActionReportRiskMedium": "Laporan: Risiko Sederhana",
+  "adminAuditActionReportRiskHigh": "Laporan: Risiko Tinggi",
+  "adminAuditActionReportRiskInvalid": "Laporan: Risiko Tidak Sah",
+  "adminAuditActionReportReviewed": "Laporan: Disemak",
+  "adminAuditActionReportDismissed": "Laporan: Ditolak",
+  "adminAuditActionPropertyApproved": "Hartanah Diluluskan",
+  "adminAuditActionPropertyRejected": "Hartanah Ditolak",
+  "adminAuditActionProfileUpdate": "Profil Dikemas Kini",
+  "adminAuditLoadError": "Gagal memuat log: {error}",
+  "@adminAuditLoadError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "propertyReportTitle": "Lapor Hartanah",
+  "propertyReportSubtitle": "Sila pilih sebab untuk melaporkan hartanah ini. Pasukan kami akan menyemaknya tidak lama lagi.",
+  "propertyReportReasonFake": "Iklan palsu / Scam",
+  "propertyReportReasonSuspicious": "Aktiviti mencurigakan",
+  "propertyReportReasonWrongDetails": "Butiran hartanah salah",
+  "propertyReportReasonInappropriate": "Kandungan tidak sesuai",
+  "propertyReportReasonOther": "Lain-lain",
+  "propertyReportDescriptionHint": "Berikan butiran tambahan (pilihan)",
+  "propertyReportCancel": "Batal",
+  "propertyReportSubmit": "Hantar Laporan",
+  "propertyReportSubmitted": "Laporan berjaya dihantar. Terima kasih.",
+  "propertyReportSubmitFailed": "Gagal menghantar laporan. Sila cuba lagi.",
+  "propertyReportServiceUnavailable": "Perkhidmatan laporan tidak tersedia buat masa ini. Sila semak sambungan anda.",
+  "propertyReportLoginRequired": "Sila log masuk untuk menghantar laporan.",
+  "propertyReportTenantOnly": "Hanya penyewa boleh menghantar laporan hartanah.",
+  "propertyReportOwnProperty": "Anda tidak boleh melaporkan hartanah anda sendiri.",
+  "propertyReportInvalidMetadata": "Metadata hartanah tidak sah. Tidak dapat melaporkan.",
+  "propertyFacilitiesTitle": "Kemudahan",
+  "propertyNoFacilities": "Tiada kemudahan disenaraikan.",
+  "propertyOwnerInfoTitle": "Maklumat Pemilik",
+  "propertyOwnerHighRisk": "Risiko Tinggi",
+  "propertyOwnerSuspicious": "Pemilik Mencurigakan",
+  "propertyOwnerSuspended": "Digantung",
+  "propertyOwnerRemoved": "Dibuang",
+  "propertyAvailabilityTitle": "Ketersediaan",
+  "propertyAvailabilityLabel": "Ketersediaan:",
+  "propertyStatusActive": "Aktif",
+  "propertyStatusOccupied": "Diduduki",
+  "propertyStatusInactive": "Tidak Aktif",
+  "propertyReportErrorPermission": "Tidak dapat menghantar laporan kerana polisi kebenaran. Sila hubungi sokongan.",
+  "propertyReportErrorInvalidListing": "Tidak dapat menghantar laporan kerana rujukan iklan tidak sah.",
+  "propertyReportErrorInvalidData": "Tidak dapat menghantar laporan kerana data iklan tidak sah.",
+  "propertyNearbyLabel": "Berdekatan: {landmarks}",
+  "@propertyNearbyLabel": {
+    "placeholders": {
+      "landmarks": {}
+    }
+  },
+  "propertyDetailsTitle": "Butiran Hartanah",
+  "propertyUnavailableAdmin": "Hartanah ini tidak tersedia buat masa ini kerana moderasi.",
+  "propertyUnavailableBooking": "Hartanah ini sedang diduduki dan tidak tersedia untuk tempahan.",
+  "propertyFavoriteLoginRequired": "Sila log masuk untuk menambah ke kegemaran.",
+  "propertyFavoriteTenantOnly": "Hanya penyewa boleh menyimpan kegemaran.",
+  "propertyFavoritePolicyBlocked": "Tidak dapat mengemas kini kegemaran kerana polisi keselamatan.",
+  "propertyFavoriteUpdateFailed": "Gagal mengemas kini kegemaran. Sila cuba lagi.",
+  "propertyHighRiskTag": "Risiko Tinggi",
+  "propertyLocationTitle": "Lokasi",
+  "propertyDescriptionTitle": "Perihalan",
+  "bookingBookNow": "Tempah Sekarang",
+  "bookingHistoryEmpty": "Tiada tempahan ditemui yang sepadan dengan kriteria anda.",
+  "ownerAvailabilityEndAfterStart": "Masa tamat mestilah selepas masa mula.",
+  "ownerAvailabilityPastDate": "Tidak boleh tambah slot untuk tarikh lalu.",
+  "ownerAvailabilityOverlap": "Slot ini bertindih dengan slot sedia ada.",
+  "ownerAvailabilitySlotAdded": "Slot ketersediaan berjaya ditambah.",
+  "ownerAvailabilityAddFailed": "Gagal menambah slot ketersediaan. Sila cuba lagi.",
+  "ownerAvailabilityDeleteFailed": "Gagal memadam slot. Sila cuba lagi.",
+  "ownerAvailabilityDateTime": "{date} pada {time}",
+  "@ownerAvailabilityDateTime": {
+    "placeholders": {
+      "date": {},
+      "time": {}
+    }
+  },
+  "ownerAvailabilityCreateSlot": "Cipta Slot Ketersediaan Baharu",
+  "ownerAvailabilitySelectDate": "Pilih Tarikh",
+  "ownerAvailabilityStartTime": "Masa Mula",
+  "ownerAvailabilityEndTime": "Masa Tamat",
+  "ownerAvailabilityActiveSlots": "Slot Tersedia Anda",
+  "ownerAvailabilityStatusAvailable": "Tersedia",
+  "ownerAvailabilityStatusBooked": "Ditempah",
+  "ownerAvailabilityStatusApproved": "Diluluskan",
+  "ownerAvailabilityDeleteConfirmTitle": "Padam Slot?",
+  "ownerAvailabilityDeleteConfirmMessage": "Adakah anda pasti mahu memadam slot ketersediaan ini?",
+  "ownerAvailabilityEmpty": "Tiada slot ketersediaan ditambah lagi.",
+  "ownerAvailabilityAddSlot": "Tambah Slot",
+  "ownerAvailabilityBooked": "Ditempah",
+  "ownerAvailabilityAvailable": "Tersedia",
+  "ownerAvailabilityTitle": "Ketersediaan Lawatan",
+  "paymentCardIncomplete": "Sila masukkan tarikh luput kad penuh.",
+  "paymentCardInvalidMonth": "Bulan tidak sah (01-12).",
+  "paymentCardExpired": "Kad telah tamat tempoh.",
+  "paymentCardInvalidFormat": "Format luput tidak sah (MM/YY).",
+  "paymentTitle": "Pembayaran",
+  "paymentCompletedLabel": "Pembayaran Selesai",
+  "paymentPayNow": "Bayar Sekarang",
+  "paymentMethodTitle": "Kaedah Pembayaran",
+  "paymentMethodCard": "Kad Kredit/Debit",
+  "paymentMethodBanking": "Perbankan Dalam Talian",
+  "paymentSelectBank": "Pilih Bank",
+  "paymentCardNumberLabel": "Nombor Kad",
+  "paymentCardNumberHint": "XXXX XXXX XXXX XXXX",
+  "paymentExpiryLabel": "Tarikh Luput",
+  "paymentExpiryHint": "MM/YY",
+  "paymentCvvLabel": "CVV",
+  "paymentCvvHint": "XXX",
+  "paymentAmountLabel": "Amaun Untuk Dibayar",
+  "paymentTotalLabel": "Jumlah Harga",
+  "paymentProcessing": "Memproses Pembayaran...",
+  "paymentSuccess": "Pembayaran Berjaya!",
+  "paymentSuccessSubtitle": "Anda telah membayar RM {amount}.",
+  "@paymentSuccessSubtitle": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "paymentBackToHome": "Kembali ke Laman Utama",
+  "paymentError": "Ralat Pembayaran: {message}",
+  "@paymentError": {
+    "placeholders": {
+      "message": {}
+    }
+  },
+  "paymentMethodEwallet": "E-Wallet",
+  "paymentSelectEwallet": "Pilih E-Wallet",
+  "paymentSelectEwalletError": "Sila pilih E-Wallet.",
+  "paymentCardNumberInvalid": "Nombor kad tidak sah.",
+  "paymentCvvInvalid": "CVV tidak sah.",
+  "paymentSummaryTitle": "Ringkasan Pembayaran",
+  "paymentSummaryProperty": "Hartanah",
+  "paymentSummaryStartDate": "Tarikh Mula",
+  "paymentSummaryDuration": "Tempoh",
+  "paymentSummaryMonthlyRent": "Sewa Bulanan",
+  "paymentDurationMonths": "{count} bulan",
+  "@paymentDurationMonths": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "paymentSummaryMethod": "Kaedah",
+  "paymentMethodWithBank": "Perbankan Dalam Talian ({bank})",
+  "@paymentMethodWithBank": {
+    "placeholders": {
+      "bank": {}
+    }
+  },
+  "paymentMethodWithEwallet": "E-Wallet ({wallet})",
+  "@paymentMethodWithEwallet": {
+    "placeholders": {
+      "wallet": {}
+    }
+  },
+  "paymentSummaryStatus": "Status",
+  "paymentRentMonth": "Sewa untuk Bulan {number}",
+  "@paymentRentMonth": {
+    "placeholders": {
+      "number": {}
+    }
+  },
+  "paymentBookingFeeOneMonth": "Yuran Tempahan (1 Bulan)",
+  "paymentSelectBankError": "Sila pilih bank.",
+  "paymentConfirmTitle": "Sahkan Pembayaran",
+  "paymentConfirmMessage": "Adakah anda pasti mahu meneruskan pembayaran?",
+  "paymentSummaryAmount": "Amaun",
+  "paymentSummaryMethodLabel": "Kaedah Pembayaran",
+  "paymentCancel": "Batal",
+  "paymentConfirmPay": "Sahkan & Bayar",
+  "paymentFailed": "Pembayaran gagal. Sila cuba lagi.",
+  "paymentSuccessMessage": "Pembayaran berjaya diproses.",
+  "paymentFailedWithMessage": "Pembayaran gagal: {message}",
+  "@paymentFailedWithMessage": {
+    "placeholders": {
+      "message": {}
+    }
+  },
+  "paymentErrorDetailsAction": "Butiran",
+  "paymentErrorDetailsTitle": "Butiran Ralat",
+  "paymentOk": "OK",
+  "paymentSuccessTitle": "Pembayaran Berjaya",
+  "paymentViewReceipt": "Lihat Resit",
+  "paymentDismiss": "Tutup",
+  "paymentMethodCardShort": "Kad",
+  "paymentLoginRequired": "Sila log masuk untuk membuat pembayaran.",
+  "viewingHistoryPleaseLogin": "Sila log masuk untuk melihat sejarah lawatan anda.",
+  "viewingHistoryTitle": "Sejarah Lawatan",
+  "viewingHistoryErrorWithMessage": "Ralat: {message}",
+  "@viewingHistoryErrorWithMessage": {
+    "placeholders": {
+      "message": {}
+    }
+  },
+  "viewingHistoryCancelTitle": "Batal Lawatan",
+  "viewingHistoryCancelMessage": "Adakah anda pasti mahu membatalkan temujanji lawatan ini?",
+  "viewingHistoryKeepAppointment": "Kekalkan Temujanji",
+  "viewingHistoryConfirmCancellation": "Sahkan Pembatalan",
+  "viewingHistoryCancelledSuccess": "Temujanji lawatan dibatalkan",
+  "viewingHistoryCancelFailed": "Gagal membatalkan lawatan: {error}",
+  "@viewingHistoryCancelFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "viewingHistoryEmptyAll": "Tiada permintaan lawatan lagi.",
+  "viewingHistoryEmptyForStatus": "Tiada permintaan lawatan ditemui untuk status ini.",
+  "viewingHistoryFallbackLocation": "Lokasi tidak tersedia",
+  "viewingHistoryFallbackPrice": "Harga tidak tersedia",
+  "viewingHistoryFallbackDescription": "Butiran hartanah tidak tersedia buat masa ini.",
+  "viewingHistoryFallbackHostRole": "Hos",
+  "viewingHistoryDateLabel": "Tarikh Lawatan",
+  "viewingHistoryTimeLabel": "Masa Lawatan",
+  "viewingHistoryScheduledLabel": "Dijadualkan",
+  "viewingHistoryCancelAction": "Batal",
+  "statusCancelled": "Dibatalkan",
+  "statusRescheduled": "Dijadualkan Semula",
+  "statusSlotTaken": "Slot Diambil",
+  "statusPropertyRented": "Hartanah Disewa"
 }

@@ -1,6 +1,7 @@
 {
   "@@locale": "zh",
   "appTitle": "HomeU",
+  "splashTagline": "找到你的理想居所",
   "navHome": "首页",
   "navFavorites": "收藏",
   "navBookings": "预订",
@@ -145,6 +146,17 @@
   "authHidePassword": "隐藏密码",
   "loginTitle": "欢迎回来",
   "loginSubtitle": "登录以继续你的 HomeU 旅程。",
+  "loginDividerOr": "或",
+  "loginBiometricReason": "验证以访问 HomeU",
+  "loginSessionExpired": "会话已过期，请使用邮箱和密码登录。",
+  "loginBiometricFailed": "生物识别验证失败或已取消。",
+  "loginContinueAs": "以 {name} 继续",
+  "@loginContinueAs": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "loginUseBiometrics": "使用生物识别",
   "loginPasswordHint": "输入你的密码",
   "loginForgotPassword": "忘记密码？",
   "loginNewHere": "新用户？",
@@ -160,6 +172,7 @@
   "registerTitle": "创建你的账号",
   "registerSubtitle": "加入 HomeU，开启你的租房之旅。",
   "registerNameHint": "你的姓名",
+  "registerPhoneHint": "+60 12 345 6789",
   "registerPasswordHint": "创建密码",
   "registerConfirmPassword": "确认密码",
   "registerConfirmPasswordHint": "再次输入密码",
@@ -174,18 +187,18 @@
   "registerErrorProfileUnavailable": "账号已创建，但资料暂时不可用，请稍后重试。",
   "registerErrorUnexpected": "注册时发生未知错误，请稍后重试。",
   "registerErrorNetwork": "网络错误，请检查网络连接后重试。",
-  "registerErrorGeneric": "暂时无法注册，请稍后重试。",
+  "registerErrorGeneric": "暂时无法注册，请稍后再试。",
   "forgotPasswordTitle": "忘记密码",
   "forgotPasswordSubtitle": "请输入你的注册邮箱，我们会发送重置密码链接。",
   "forgotPasswordEmailNote": "请使用真实邮箱，重置链接将发送到你的收件箱。",
   "forgotPasswordEmailAddress": "邮箱地址",
   "forgotPasswordSendResetLink": "发送重置链接",
   "forgotPasswordCheckEmail": "请检查邮箱",
-  "forgotPasswordNoEmailHint": "没收到邮件？请检查垃圾邮箱或稍后重试。",
+  "forgotPasswordNoEmailHint": "没收到邮件？请检查垃圾邮箱或稍后再试。",
   "forgotPasswordSuccessDefault": "重置密码链接已发送到你的邮箱。",
   "forgotPasswordErrorRateLimit": "尝试次数过多，请稍后再试。",
   "forgotPasswordErrorNetwork": "网络错误，请检查网络连接后重试。",
-  "forgotPasswordErrorGeneric": "暂时无法发送重置链接，请稍后重试。",
+  "forgotPasswordErrorGeneric": "暂时无法发送重置链接，请稍后再试。",
   "onboardingSkip": "跳过",
   "onboardingNext": "下一步",
   "onboardingGetStarted": "开始使用",
@@ -221,6 +234,98 @@
   "onboardingViewingConfirmed": "看房已确认",
   "onboardingSecurePayment": "安全支付",
   "onboardingProtected": "已保护",
+  "viewingScheduleTitle": "预约看房",
+  "viewingSelectSlotTitle": "选择可用时段",
+  "viewingSelectSlotSubtitle": "房东只展示可用时段。请选择一个继续。",
+  "viewingNoSlotsTitle": "暂无可用时段",
+  "viewingNoSlotsSubtitle": "房东尚未为该房源设置可用时间。请稍后再试或联系房东。",
+  "viewingGoBack": "返回",
+  "viewingConfirmRequest": "确认预约",
+  "viewingAlreadyScheduled": "你已为该时段预约过看房。请查看你的请求。",
+  "viewingRequestSent": "请求已发送！",
+  "viewingErrorWithMessage": "错误：{message}",
+  "@viewingErrorWithMessage": {
+    "placeholders": {
+      "message": {}
+    }
+  },
+  "bookingDetailsTitle": "预订详情",
+  "bookingPaymentScheduleTitle": "付款计划",
+  "bookingPaymentScheduleEmpty": "暂无生成付款计划。",
+  "bookingMonthLabel": "第 {number} 个月",
+  "@bookingMonthLabel": {
+    "placeholders": {
+      "number": {}
+    }
+  },
+  "bookingMonthWithFee": "第 {number} 个月（预订费）",
+  "@bookingMonthWithFee": {
+    "placeholders": {
+      "number": {}
+    }
+  },
+  "bookingDueLabel": "到期：{date}",
+  "@bookingDueLabel": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "bookingViewReceipt": "查看收据",
+  "bookingAmountRm": "RM {amount}",
+  "@bookingAmountRm": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "bookingPaid": "已支付",
+  "bookingUpcoming": "即将到期",
+  "bookingPayNow": "立即支付",
+  "bookingReceiptNotFound": "未找到该付款的收据。",
+  "bookingReceiptError": "加载收据出错：{message}",
+  "@bookingReceiptError": {
+    "placeholders": {
+      "message": {}
+    }
+  },
+  "reviewRatingTitle": "评价与评分",
+  "reviewRatingSubtitle": "分享你的体验，帮助未来的租客做出更好的决定。",
+  "reviewAverageLabel": "平均评分",
+  "reviewYourRatingLabel": "你的评分",
+  "reviewCommentLabel": "评论",
+  "reviewCommentHint": "告诉我们有关清洁度、房东沟通以及整体体验。",
+  "reviewSubmitLabel": "提交",
+  "reviewSubmitSuccess": "谢谢，你的评价已提交。",
+  "reviewStarLabel": "{count} 星",
+  "@reviewStarLabel": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "compareTitle": "对比房源",
+  "compareClear": "清除",
+  "compareEmptyTitle": "未选择房源",
+  "compareEmptySubtitle": "返回并选择 2 个房源\n开始对比",
+  "compareBackToListings": "返回列表",
+  "comparePriceRangeLabel": "价格区间",
+  "comparePriceRangeValue": "RM {min} - RM {max}",
+  "@comparePriceRangeValue": {
+    "placeholders": {
+      "min": {},
+      "max": {}
+    }
+  },
+  "compareSaveAmount": "节省 RM {amount}",
+  "@compareSaveAmount": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "compareLabelAddress": "地址",
+  "compareLabelType": "类型",
+  "compareLabelRooms": "房间",
+  "compareLabelFurnishing": "家具",
+  "compareLabelOwner": "房东",
+  "compareLabelAvailability": "可用性",
   "updatePasswordSuccessMessage": "你的密码已成功更新。",
   "updatePasswordStrongPasswordTip": "请使用包含字母、数字和符号的高强度密码。",
   "updatePasswordCurrentPasswordLabel": "当前密码",
@@ -273,5 +378,577 @@
   "receiptTotalAmount": "总金额",
   "receiptDownload": "下载",
   "receiptShare": "分享",
-  "receiptFooter": "感谢您使用 HomeU！"
+  "receiptFooter": "感谢您使用 HomeU！",
+  "paymentAmountRm": "RM {amount}",
+  "@paymentAmountRm": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "bookingTitle": "预订",
+  "bookingConflictDetected": "检测到与现有预订冲突。",
+  "bookingFeeNotice": "支付预订费会锁定该房源，剩余款项需在房东批准后支付。",
+  "bookingPayFee": "支付预订费（RM {amount}）",
+  "@bookingPayFee": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "bookingSelectedProperty": "已选房源",
+  "bookingConflictDetails": "该房源从 {date} 起已被预订。请缩短租期或选择其他开始日期。",
+  "@bookingConflictDetails": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "bookingDurationTitle": "租期",
+  "bookingDurationMonths": "{count} 个月",
+  "@bookingDurationMonths": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "bookingStartDateTitle": "开始日期",
+  "bookingOccupiedUntil": "房源已被占用至 {date}",
+  "@bookingOccupiedUntil": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "bookingTotalPriceTitle": "总价计算",
+  "bookingMonthlyPriceLabel": "月租",
+  "bookingDurationSummary": "时长（{months} 个月）",
+  "@bookingDurationSummary": {
+    "placeholders": {
+      "months": {}
+    }
+  },
+  "bookingEstimatedTotalLabel": "预计总价",
+  "paymentSupabaseUnavailable": "Supabase 未初始化，请稍后再试。",
+  "bookingLoginRequired": "请先登录以继续预订。",
+  "bookingDurationJustBooked": "抱歉，该时长刚被其他租客预订。",
+  "bookingCreateFailed": "无法创建预订，请稍后再试。",
+  "bookingCreateError": "创建预订失败：{error}",
+  "@bookingCreateError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "statusAll": "全部",
+  "ownerRequestsTitle": "请求",
+  "ownerRequestsBookingsTab": "预订",
+  "ownerRequestsViewingsTab": "看房",
+  "ownerRequestsRetry": "重试",
+  "ownerRequestsEmpty": "没有“{filter}”请求。",
+  "@ownerRequestsEmpty": {
+    "placeholders": {
+      "filter": {}
+    }
+  },
+  "ownerRequestsMoveIn": "入住：{date}  •  {months} 个月",
+  "@ownerRequestsMoveIn": {
+    "placeholders": {
+      "date": {},
+      "months": {}
+    }
+  },
+  "ownerRequestsFlexibleDuration": "灵活  •  {months} 个月",
+  "@ownerRequestsFlexibleDuration": {
+    "placeholders": {
+      "months": {}
+    }
+  },
+  "ownerRequestsMonthlyPrice": "RM {price} / 月",
+  "@ownerRequestsMonthlyPrice": {
+    "placeholders": {
+      "price": {}
+    }
+  },
+  "ownerRequestsReview": "查看",
+  "ownerRequestsViewingsEmpty": "没有“{filter}”看房请求。",
+  "@ownerRequestsViewingsEmpty": {
+    "placeholders": {
+      "filter": {}
+    }
+  },
+  "ownerRequestsViewingTime": "{date}  •  {time}",
+  "@ownerRequestsViewingTime": {
+    "placeholders": {
+      "date": {},
+      "time": {}
+    }
+  },
+  "ownerRequestsDecline": "拒绝",
+  "ownerRequestsApprove": "批准",
+  "ownerRequestsMarkCompleted": "标记为已完成",
+  "ownerGreeting": "你好，{name}",
+  "@ownerGreeting": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "ownerRecentProperties": "最新房源",
+  "ownerNoProperties": "尚未发布房源",
+  "ownerAddFirstProperty": "添加你的第一套房源",
+  "ownerUntitledProperty": "未命名",
+  "ownerRecentBookingRequests": "最新预订请求",
+  "ownerNoBookingRequests": "暂无活跃的预订请求",
+  "ownerUnknownProperty": "未知房源",
+  "ownerUnknownTenant": "未知租客",
+  "ownerRecentViewingRequests": "最新看房请求",
+  "ownerNoViewingRequests": "暂无活跃的看房请求",
+  "ownerTapToReviewViewing": "点击查看看房",
+  "ownerProjected30Days": "预计（30 天）",
+  "ownerOverduePayments": "逾期款项",
+  "ownerInvoiceCollectionRate": "发票收款率",
+  "monthShortJul": "7月",
+  "monthShortAug": "8月",
+  "monthShortSep": "9月",
+  "monthShortOct": "10月",
+  "monthShortNov": "11月",
+  "monthShortDec": "12月",
+  "profileBiometricUnavailable": "该设备未启用或不支持生物识别认证。",
+  "profileBiometricReason": "请验证以启用生物识别登录",
+  "profileBiometricEnabled": "生物识别登录已启用。",
+  "profileBiometricSaveFailed": "无法更新生物识别偏好。",
+  "profileBiometricDisabled": "生物识别登录已关闭。",
+  "profileErrorSaveBiometric": "无法保存生物识别偏好。",
+  "profileLogoutTitle": "退出登录？",
+  "profileLogoutMessage": "确定要退出你的 HomeU 账号吗？",
+  "profileLogoutCancel": "取消",
+  "profileLogoutConfirm": "退出登录",
+  "profileFavoritesSubtitle": "查看你保存的房源",
+  "profileBiometricTitle": "生物识别登录",
+  "profileBiometricSubtitle": "使用生物识别解锁 HomeU",
+  "adminDashboardLoadError": "无法加载系统概览，请检查网络连接。",
+  "adminDashboardTitle": "管理员仪表盘",
+  "adminDashboardWelcome": "欢迎，管理员",
+  "adminDashboardOverview": "系统概览",
+  "adminTotalUsers": "用户总数",
+  "adminTotalOwners": "房东",
+  "adminTotalTenants": "租客",
+  "adminPendingReports": "待处理举报",
+  "adminManagementTitle": "管理",
+  "adminReportsReview": "举报审核",
+  "adminReportsSummary": "{pending} 条待处理 / 共 {total} 条举报",
+  "@adminReportsSummary": {
+    "placeholders": {
+      "pending": {},
+      "total": {}
+    }
+  },
+  "adminManagementTile": "管理员管理",
+  "adminManagementSubtitle": "管理系统管理员",
+  "adminAuditLogsTitle": "审计日志",
+  "adminAuditLogsSubtitle": "查看全系统活动日志",
+  "adminCreatedSuccess": "管理员账号创建成功。",
+  "adminUpdateDetailsTitle": "更新管理员信息",
+  "adminUpdateDetailsConfirm": "更新",
+  "adminDetailsUpdated": "管理员信息已更新。",
+  "adminUpdateError": "错误：{error}",
+  "@adminUpdateError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "adminCannotRemoveSelf": "安全提示：你不能移除自己的管理员权限。",
+  "adminRemoveTitle": "移除管理员？",
+  "adminRemoveMessage": "要移除 {name} 的管理员权限吗？他们将恢复为租客角色。",
+  "@adminRemoveMessage": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "adminRemoveConfirm": "移除",
+  "adminRemovedSuccess": "管理员权限已移除。",
+  "adminRemoveError": "错误：{error}",
+  "@adminRemoveError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "adminAddButton": "添加管理员",
+  "adminNoAdminsFound": "未找到管理员。",
+  "adminNavDashboard": "仪表盘",
+  "adminNavReports": "举报",
+  "adminNavChat": "聊天",
+  "adminNavLogs": "日志",
+  "adminNavProfile": "个人资料",
+  "commonCancel": "取消",
+  "commonConfirm": "确认",
+  "commonRefreshTooltip": "刷新",
+  "statusReviewed": "已审核",
+  "statusDismissed": "已驳回",
+  "adminReportsTitle": "举报审核",
+  "adminReportsSearchHint": "搜索举报、房东、租客、房源...",
+  "adminReportsFilterTooltip": "筛选举报",
+  "adminReportsActiveFilterLabel": "当前筛选：",
+  "adminReportsNoMatches": "没有举报符合当前筛选条件。",
+  "adminReportsFilterTitle": "筛选举报",
+  "adminReportsFilterSectionStatus": "举报状态",
+  "adminReportsFilterClear": "清除筛选",
+  "adminReportsFilterApply": "应用筛选",
+  "adminReportsUnknownListing": "未知房源",
+  "adminReportsUnknownReportId": "未知",
+  "adminReportsPropertyIdFallback": "房源 #{propertyId}",
+  "@adminReportsPropertyIdFallback": {
+    "placeholders": {
+      "propertyId": {}
+    }
+  },
+  "adminReportsNotAvailable": "暂无",
+  "adminReportsUnknownOwner": "未知房东",
+  "adminReportsUnknownReporter": "未知举报人",
+  "adminReportsUnknownEmail": "-",
+  "adminReportsLoadError": "加载举报失败：{error}",
+  "@adminReportsLoadError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "adminReportsMissingOwnerOrPropertyChat": "缺少房东或房源信息，无法发起聊天。",
+  "adminReportsMissingTenantOrPropertyChat": "缺少租客或房源信息，无法发起聊天。",
+  "adminReportsAuditContactOwnerReason": "已打开与房东的聊天以跟进举报。",
+  "adminReportsAuditContactTenantReason": "已打开与租客的聊天以跟进举报。",
+  "adminReportsChatOpenError": "无法打开聊天：{error}",
+  "@adminReportsChatOpenError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "adminReportsRecordRiskLevelAction": "记录风险等级",
+  "adminReportsRiskRecorded": "风险等级已记录。",
+  "adminReportsRiskRecordError": "风险评估失败：{error}",
+  "@adminReportsRiskRecordError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "adminReportsActionCompleted": "{actionLabel} 已完成。",
+  "@adminReportsActionCompleted": {
+    "placeholders": {
+      "actionLabel": {}
+    }
+  },
+  "adminReportsUpdateError": "更新举报失败：{error}",
+  "@adminReportsUpdateError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "adminReportsReportTitle": "举报 #{reportId}",
+  "@adminReportsReportTitle": {
+    "placeholders": {
+      "reportId": {}
+    }
+  },
+  "adminReportsSubmittedOn": "提交于 {date}",
+  "@adminReportsSubmittedOn": {
+    "placeholders": {
+      "date": {}
+    }
+  },
+  "adminReportsSectionProperty": "房源",
+  "adminReportsSectionOwner": "房东",
+  "adminReportsSectionReporter": "举报人",
+  "adminReportsSectionComplaint": "投诉",
+  "adminReportsFieldPropertyId": "房源 ID",
+  "adminReportsFieldTitle": "标题",
+  "adminReportsFieldName": "姓名",
+  "adminReportsFieldEmail": "邮箱",
+  "adminReportsFieldTotalReports": "举报总数",
+  "adminReportsFieldReason": "原因",
+  "adminReportsFieldDescription": "说明",
+  "adminReportsFieldStatus": "状态",
+  "adminReportsRiskSectionTitle": "风险评估",
+  "adminReportsRiskSectionHint": "仅用于内部审核，不会影响房源展示或账号状态。",
+  "adminReportsReviewedConfirmTitle": "我已审核该投诉。",
+  "adminReportsReviewedConfirmSubtitle": "确认后可进行风险评估和状态更新。",
+  "adminReportsActionsTitle": "操作",
+  "adminReportsActionsHint": "先通过聊天跟进，然后记录内部风险等级或更新举报状态。",
+  "adminReportsContactOwner": "联系房东",
+  "adminReportsContactReporter": "联系举报人",
+  "adminReportsSaveRisk": "保存风险等级",
+  "adminReportsMarkReviewed": "标记已审核",
+  "adminReportsDismissReport": "驳回举报",
+  "adminReportsOwnerLabel": "房东：{name}",
+  "@adminReportsOwnerLabel": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "adminReportsReporterLabel": "举报人：{name}",
+  "@adminReportsReporterLabel": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "adminReportsReasonLabel": "原因：{reason}",
+  "@adminReportsReasonLabel": {
+    "placeholders": {
+      "reason": {}
+    }
+  },
+  "adminReportsReasonDialogPrompt": "请提供原因并确认此审核操作。",
+  "adminReportsReasonDialogLabel": "管理员原因",
+  "adminReportsReasonDialogHint": "添加清晰的审核说明",
+  "adminReportsReasonDialogConfirm": "我确认此操作。",
+  "adminReportsRiskLow": "低",
+  "adminReportsRiskMedium": "中",
+  "adminReportsRiskHigh": "高",
+  "adminReportsRiskInvalid": "无效",
+  "adminAuditTitle": "系统审计日志",
+  "adminAuditClearFiltersTooltip": "清除筛选",
+  "adminAuditSearchHint": "搜索描述...",
+  "adminAuditAllDates": "所有日期",
+  "adminAuditDateRange": "{start} - {end}",
+  "@adminAuditDateRange": {
+    "placeholders": {
+      "start": {},
+      "end": {}
+    }
+  },
+  "adminAuditTableFilterHint": "表",
+  "adminAuditActionFilterHint": "操作",
+  "adminAuditEmptyState": "没有符合条件的审计日志。",
+  "adminAuditClearAllFilters": "清除所有筛选",
+  "adminAuditUnknownTime": "时间未知",
+  "adminAuditNoDetails": "暂无详情",
+  "adminAuditSystemActor": "系统 / 匿名",
+  "adminAuditUnknownRole": "未知",
+  "adminAuditNotAvailable": "暂无",
+  "adminAuditActorLabel": "操作者",
+  "adminAuditTargetTableLabel": "目标表",
+  "adminAuditTargetIdLabel": "目标 ID",
+  "adminAuditTableProfiles": "用户资料",
+  "adminAuditTableProperties": "房源",
+  "adminAuditTableBookings": "预订",
+  "adminAuditTablePropertyReports": "房源举报",
+  "adminAuditTableReports": "举报",
+  "adminAuditTableAuditLogs": "审计日志",
+  "adminAuditActionAdminCreated": "管理员已创建",
+  "adminAuditActionAdminUpdated": "管理员已更新",
+  "adminAuditActionAdminRemoved": "管理员已移除",
+  "adminAuditActionReportContactOwner": "举报：联系房东",
+  "adminAuditActionReportContactTenant": "举报：联系租客",
+  "adminAuditActionReportRiskLow": "举报：低风险",
+  "adminAuditActionReportRiskMedium": "举报：中风险",
+  "adminAuditActionReportRiskHigh": "举报：高风险",
+  "adminAuditActionReportRiskInvalid": "举报：无效风险",
+  "adminAuditActionReportReviewed": "举报：已审核",
+  "adminAuditActionReportDismissed": "举报：已驳回",
+  "adminAuditActionPropertyApproved": "房源已批准",
+  "adminAuditActionPropertyRejected": "房源已拒绝",
+  "adminAuditActionProfileUpdate": "资料已更新",
+  "adminAuditLoadError": "加载日志失败：{error}",
+  "@adminAuditLoadError": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "propertyReportTitle": "举报房源",
+  "propertyReportSubtitle": "请选择举报该房源的原因。我们的团队将尽快审核。",
+  "propertyReportReasonFake": "虚假房源 / 诈骗",
+  "propertyReportReasonSuspicious": "可疑活动",
+  "propertyReportReasonWrongDetails": "房源信息错误",
+  "propertyReportReasonInappropriate": "不当内容",
+  "propertyReportReasonOther": "其他原因",
+  "propertyReportDescriptionHint": "提供更多详情（可选）",
+  "propertyReportCancel": "取消",
+  "propertyReportSubmit": "提交举报",
+  "propertyReportSubmitted": "举报已提交，谢谢。",
+  "propertyReportSubmitFailed": "提交举报失败，请稍后重试。",
+  "propertyReportServiceUnavailable": "举报服务暂时不可用，请检查网络连接。",
+  "propertyReportLoginRequired": "请先登录以提交举报。",
+  "propertyReportTenantOnly": "只有租客可以提交房源举报。",
+  "propertyReportOwnProperty": "你不能举报自己的房源。",
+  "propertyReportInvalidMetadata": "房源元数据无效，无法举报。",
+  "propertyFacilitiesTitle": "设施",
+  "propertyNoFacilities": "暂无设施信息。",
+  "propertyOwnerInfoTitle": "房东信息",
+  "propertyOwnerHighRisk": "高风险",
+  "propertyOwnerSuspicious": "可疑房东",
+  "propertyOwnerSuspended": "已停用",
+  "propertyOwnerRemoved": "已移除",
+  "propertyAvailabilityTitle": "房源状态",
+  "propertyAvailabilityLabel": "房源状态：",
+  "propertyStatusActive": "出租中",
+  "propertyStatusOccupied": "已出租",
+  "propertyStatusInactive": "已下架",
+  "propertyReportErrorPermission": "由于权限限制，无法提交举报。请联系支持团队。",
+  "propertyReportErrorInvalidListing": "由于房源引用无效，无法提交举报。",
+  "propertyReportErrorInvalidData": "由于举报数据无效，无法提交举报。",
+  "propertyNearbyLabel": "周边：{landmarks}",
+  "@propertyNearbyLabel": {
+    "placeholders": {
+      "landmarks": {}
+    }
+  },
+  "propertyDetailsTitle": "房源详情",
+  "propertyUnavailableAdmin": "该房源目前因审核中而无法查看。",
+  "propertyUnavailableBooking": "该房源目前已出租，暂时无法预订。",
+  "propertyFavoriteLoginRequired": "请先登录以添加至收藏。",
+  "propertyFavoriteTenantOnly": "只有租客可以收藏房源。",
+  "propertyFavoritePolicyBlocked": "由于安全策略，无法更新收藏状态。",
+  "propertyFavoriteUpdateFailed": "更新收藏失败，请稍后再试。",
+  "propertyHighRiskTag": "高风险",
+  "propertyLocationTitle": "位置信息",
+  "propertyDescriptionTitle": "房源描述",
+  "bookingBookNow": "立即预订",
+  "bookingHistoryEmpty": "没有符合条件的预订记录。",
+  "ownerAvailabilityEndAfterStart": "结束时间必须晚于开始时间。",
+  "ownerAvailabilityPastDate": "不能为过去日期添加时段。",
+  "ownerAvailabilityOverlap": "该时段与已有时段重叠。",
+  "ownerAvailabilitySlotAdded": "看房时段已成功添加。",
+  "ownerAvailabilityAddFailed": "添加时段失败，请重试。",
+  "ownerAvailabilityDeleteFailed": "删除时段失败，请重试。",
+  "ownerAvailabilityDateTime": "{date} 于 {time}",
+  "@ownerAvailabilityDateTime": {
+    "placeholders": {
+      "date": {},
+      "time": {}
+    }
+  },
+  "ownerAvailabilityCreateSlot": "创建新的看房时段",
+  "ownerAvailabilitySelectDate": "选择日期",
+  "ownerAvailabilityStartTime": "开始时间",
+  "ownerAvailabilityEndTime": "结束时间",
+  "ownerAvailabilityActiveSlots": "你的可用时段",
+  "ownerAvailabilityStatusAvailable": "可用",
+  "ownerAvailabilityStatusBooked": "已预订",
+  "ownerAvailabilityStatusApproved": "已批准",
+  "ownerAvailabilityDeleteConfirmTitle": "删除时段？",
+  "ownerAvailabilityDeleteConfirmMessage": "确定要删除这个可用时段吗？",
+  "ownerAvailabilityEmpty": "尚未添加可用时段。",
+  "ownerAvailabilityAddSlot": "添加时段",
+  "ownerAvailabilityBooked": "已预订",
+  "ownerAvailabilityAvailable": "可用",
+  "ownerAvailabilityTitle": "看房可用时间",
+  "paymentCardIncomplete": "请输入完整的到期日期。",
+  "paymentCardInvalidMonth": "月份无效（01-12）。",
+  "paymentCardExpired": "卡已过期。",
+  "paymentCardInvalidFormat": "到期日期格式无效（MM/YY）。",
+  "paymentTitle": "付款",
+  "paymentCompletedLabel": "付款已完成",
+  "paymentPayNow": "立即支付",
+  "paymentMethodTitle": "支付方式",
+  "paymentMethodCard": "信用卡/借记卡",
+  "paymentMethodBanking": "网上银行",
+  "paymentSelectBank": "选择银行",
+  "paymentCardNumberLabel": "卡号",
+  "paymentCardNumberHint": "XXXX XXXX XXXX XXXX",
+  "paymentExpiryLabel": "到期日期",
+  "paymentExpiryHint": "MM/YY",
+  "paymentCvvLabel": "CVV",
+  "paymentCvvHint": "XXX",
+  "paymentAmountLabel": "需支付金额",
+  "paymentTotalLabel": "总价",
+  "paymentProcessing": "付款处理中...",
+  "paymentSuccess": "付款成功！",
+  "paymentSuccessSubtitle": "你已支付 RM {amount}。",
+  "@paymentSuccessSubtitle": {
+    "placeholders": {
+      "amount": {}
+    }
+  },
+  "paymentBackToHome": "返回首页",
+  "paymentError": "付款错误：{message}",
+  "@paymentError": {
+    "placeholders": {
+      "message": {}
+    }
+  },
+  "paymentMethodEwallet": "电子钱包",
+  "paymentSelectEwallet": "选择电子钱包",
+  "paymentSelectEwalletError": "请选择电子钱包。",
+  "paymentCardNumberInvalid": "卡号无效。",
+  "paymentCvvInvalid": "CVV 无效。",
+  "paymentSummaryTitle": "付款摘要",
+  "paymentSummaryProperty": "房源",
+  "paymentSummaryStartDate": "开始日期",
+  "paymentSummaryDuration": "时长",
+  "paymentSummaryMonthlyRent": "月租",
+  "paymentDurationMonths": "{count} 个月",
+  "@paymentDurationMonths": {
+    "placeholders": {
+      "count": {}
+    }
+  },
+  "paymentSummaryMethod": "方式",
+  "paymentMethodWithBank": "网上银行（{bank}）",
+  "@paymentMethodWithBank": {
+    "placeholders": {
+      "bank": {}
+    }
+  },
+  "paymentMethodWithEwallet": "电子钱包（{wallet}）",
+  "@paymentMethodWithEwallet": {
+    "placeholders": {
+      "wallet": {}
+    }
+  },
+  "paymentSummaryStatus": "状态",
+  "paymentRentMonth": "第 {number} 个月租金",
+  "@paymentRentMonth": {
+    "placeholders": {
+      "number": {}
+    }
+  },
+  "paymentBookingFeeOneMonth": "预订费（1 个月）",
+  "paymentSelectBankError": "请选择银行。",
+  "paymentConfirmTitle": "确认付款",
+  "paymentConfirmMessage": "确定要继续付款吗？",
+  "paymentSummaryAmount": "金额",
+  "paymentSummaryMethodLabel": "支付方式",
+  "paymentCancel": "取消",
+  "paymentConfirmPay": "确认并支付",
+  "paymentFailed": "付款失败，请重试。",
+  "paymentSuccessMessage": "付款已成功处理。",
+  "paymentFailedWithMessage": "付款失败：{message}",
+  "@paymentFailedWithMessage": {
+    "placeholders": {
+      "message": {}
+    }
+  },
+  "paymentErrorDetailsAction": "详情",
+  "paymentErrorDetailsTitle": "错误详情",
+  "paymentOk": "确定",
+  "paymentSuccessTitle": "付款成功",
+  "paymentViewReceipt": "查看收据",
+  "paymentDismiss": "关闭",
+  "paymentMethodCardShort": "卡",
+  "paymentLoginRequired": "请登录后再付款。",
+  "viewingHistoryPleaseLogin": "请登录查看你的看房记录。",
+  "viewingHistoryTitle": "看房记录",
+  "viewingHistoryErrorWithMessage": "错误：{message}",
+  "@viewingHistoryErrorWithMessage": {
+    "placeholders": {
+      "message": {}
+    }
+  },
+  "viewingHistoryCancelTitle": "取消看房",
+  "viewingHistoryCancelMessage": "确定要取消该看房预约吗？",
+  "viewingHistoryKeepAppointment": "保留预约",
+  "viewingHistoryConfirmCancellation": "确认取消",
+  "viewingHistoryCancelledSuccess": "看房预约已取消",
+  "viewingHistoryCancelFailed": "取消看房失败：{error}",
+  "@viewingHistoryCancelFailed": {
+    "placeholders": {
+      "error": {}
+    }
+  },
+  "viewingHistoryEmptyAll": "暂无看房请求。",
+  "viewingHistoryEmptyForStatus": "该状态暂无看房请求。",
+  "viewingHistoryFallbackLocation": "位置不可用",
+  "viewingHistoryFallbackPrice": "价格不可用",
+  "viewingHistoryFallbackDescription": "房源详情暂不可用。",
+  "viewingHistoryFallbackHostRole": "房东",
+  "viewingHistoryDateLabel": "看房日期",
+  "viewingHistoryTimeLabel": "看房时间",
+  "viewingHistoryScheduledLabel": "已预约",
+  "viewingHistoryCancelAction": "取消",
+  "statusCancelled": "已取消",
+  "statusRescheduled": "已改期",
+  "statusSlotTaken": "时段已占用",
+  "statusPropertyRented": "房源已出租"
 }

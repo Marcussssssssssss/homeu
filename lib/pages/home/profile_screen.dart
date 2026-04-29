@@ -81,14 +81,14 @@ class _HomeUProfileScreenState extends State<HomeUProfileScreen> {
       final canAuth = await BiometricAuthService.instance.canAuthenticate();
       if (!canAuth) {
         _showProfileFeedback(
-          'Biometric authentication is not available or not set up on this device.',
+          context.l10n.profileBiometricUnavailable,
         );
         return;
       }
 
       final authenticated = await BiometricAuthService.instance
           .authenticateWithBiometrics(
-            localizedReason: 'Please authenticate to enable biometric login',
+            localizedReason: context.l10n.profileBiometricReason,
           );
 
       if (authenticated) {
@@ -103,16 +103,16 @@ class _HomeUProfileScreenState extends State<HomeUProfileScreen> {
                 : _profileController.profile.email.split('@').first,
             email: _profileController.profile.email,
           );
-          _showProfileFeedback('Biometric login enabled successfully.');
+          _showProfileFeedback(context.l10n.profileBiometricEnabled);
         } else {
-          _showProfileFeedback('Failed to update biometric preference.');
+          _showProfileFeedback(context.l10n.profileBiometricSaveFailed);
         }
       }
     } else {
       final success = await _profileController.updateBiometricPreference(false);
       if (success) {
         await BiometricAuthService.instance.disableAndForgetUser();
-        _showProfileFeedback('Biometric login disabled.');
+        _showProfileFeedback(context.l10n.profileBiometricDisabled);
       }
     }
   }
@@ -455,7 +455,7 @@ class _HomeUProfileScreenState extends State<HomeUProfileScreen> {
       case HomeUProfileController.errorSaveLanguage:
         return context.l10n.profileErrorLanguageSave;
       case HomeUProfileController.errorSaveBiometric:
-        return 'Failed to save biometric preference';
+        return context.l10n.profileErrorSaveBiometric;
       default:
         return context.l10n.profileErrorUpdate;
     }
@@ -467,14 +467,14 @@ class _HomeUProfileScreenState extends State<HomeUProfileScreen> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text(
-            'Log out?',
+            context.l10n.profileLogoutTitle,
             style: TextStyle(
               color: context.homeuPrimaryText,
               fontWeight: FontWeight.w700,
             ),
           ),
           content: Text(
-            'Are you sure you want to log out of your HomeU account?',
+            context.l10n.profileLogoutMessage,
             style: TextStyle(color: context.homeuSecondaryText),
           ),
           shape: RoundedRectangleBorder(
@@ -484,7 +484,7 @@ class _HomeUProfileScreenState extends State<HomeUProfileScreen> {
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
               child: Text(
-                'Cancel',
+                context.l10n.profileLogoutCancel,
                 style: TextStyle(
                   color: context.homeuMutedText,
                   fontWeight: FontWeight.w600,
@@ -493,10 +493,10 @@ class _HomeUProfileScreenState extends State<HomeUProfileScreen> {
             ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(true),
-              child: const Text(
-                'Log Out',
+              child: Text(
+                context.l10n.profileLogoutConfirm,
                 style: TextStyle(
-                  color: Color(0xFFEF4444),
+                  color: context.colors.error,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -659,16 +659,19 @@ class _HomeUProfileScreenState extends State<HomeUProfileScreen> {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFFFF2F2),
+                            color: context.colors.errorContainer,
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: const Color(0xFFFFD2D2)),
+                            border: Border.all(
+                              color: context.colors.errorContainer
+                                  .withValues(alpha: 0.7),
+                            ),
                           ),
                           child: Text(
                             _resolveProfileMessage(
                               _profileController.errorMessage!,
                             ),
-                            style: const TextStyle(
-                              color: Color(0xFFB42318),
+                            style: TextStyle(
+                              color: context.colors.onErrorContainer,
                               fontSize: 12.8,
                               fontWeight: FontWeight.w600,
                             ),
@@ -696,8 +699,8 @@ class _HomeUProfileScreenState extends State<HomeUProfileScreen> {
                               _ProfileActionTile(
                                 key: const Key('open_favorites_button'),
                                 icon: Icons.favorite_border_rounded,
-                                title: 'Favourite',
-                                subtitle: 'View your saved properties',
+                                title: t.navFavorites,
+                                subtitle: t.profileFavoritesSubtitle,
                                 onTap: () {
                                   Navigator.of(context).push(
                                     MaterialPageRoute<void>(
@@ -739,8 +742,8 @@ class _HomeUProfileScreenState extends State<HomeUProfileScreen> {
                               ),
                               _ProfileActionTile(
                                 icon: Icons.fingerprint_rounded,
-                                title: 'Biometric Login',
-                                subtitle: 'Unlock HomeU with biometrics',
+                                title: t.profileBiometricTitle,
+                                subtitle: t.profileBiometricSubtitle,
                                 trailing: Switch(
                                   value: _profileController
                                       .isBiometricLoginEnabled,
@@ -786,7 +789,7 @@ class _HomeUProfileScreenState extends State<HomeUProfileScreen> {
                           onPressed: _showLogoutConfirmation,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: context.homeuAccent,
-                            foregroundColor: Colors.white,
+                            foregroundColor: context.colors.onPrimary,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16),
                             ),
@@ -857,14 +860,14 @@ class _ProfileHeaderCard extends StatelessWidget {
                 child: CircleAvatar(
                   key: const Key('profile_photo'),
                   radius: 42,
-                  backgroundColor: const Color(0x1F1E3A8A),
+                  backgroundColor: context.homeuAccent.withValues(alpha: 0.2),
                   backgroundImage: avatarImage,
                   child: avatarImage != null
                       ? null
-                      : const Icon(
+                      : Icon(
                           Icons.person_rounded,
                           size: 48,
-                          color: Color(0xFF9AB4FF),
+                          color: context.colors.onPrimary,
                         ),
                 ),
               ),
@@ -872,7 +875,7 @@ class _ProfileHeaderCard extends StatelessWidget {
                 right: -2,
                 bottom: -2,
                 child: Material(
-                  color: const Color(0xFF1E3A8A),
+                  color: context.homeuAccent,
                   borderRadius: BorderRadius.circular(16),
                   elevation: 2,
                   child: InkWell(
@@ -884,20 +887,20 @@ class _ProfileHeaderCard extends StatelessWidget {
                       height: 30,
                       child: Center(
                         child: isSaving
-                            ? const SizedBox(
+                            ? SizedBox(
                                 width: 14,
                                 height: 14,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
                                   valueColor: AlwaysStoppedAnimation<Color>(
-                                    Colors.white,
+                                    context.colors.onPrimary,
                                   ),
                                 ),
                               )
-                            : const Icon(
+                            : Icon(
                                 Icons.camera_alt_rounded,
                                 size: 16,
-                                color: Colors.white,
+                                color: context.colors.onPrimary,
                               ),
                       ),
                     ),
@@ -922,15 +925,13 @@ class _ProfileHeaderCard extends StatelessWidget {
             key: const Key('profile_role'),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: const Color(0x1A10B981),
+              color: context.homeuSuccess.withValues(alpha: 0.18),
               borderRadius: BorderRadius.circular(999),
             ),
             child: Text(
               roleLabel,
               style: TextStyle(
-                color: context.isDarkMode
-                    ? const Color(0xFF74E8BE)
-                    : const Color(0xFF0F766E),
+                color: context.homeuSuccess,
                 fontSize: 12.5,
                 fontWeight: FontWeight.w700,
               ),
@@ -1172,7 +1173,7 @@ class _AvatarPickerLeadingIcon extends StatelessWidget {
     );
     final bgColor = context.isDarkMode
         ? context.homeuAccent.withValues(alpha: 0.22)
-        : const Color(0xFFE8EEFF);
+        : context.colors.surfaceContainerHighest;
 
     return Container(
       width: 44,
