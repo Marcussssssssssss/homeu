@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:homeu/core/theme/homeu_app_theme.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:homeu/app/auth/homeu_session.dart';
 import 'package:homeu/app/auth/role_access_widget.dart';
@@ -313,13 +314,20 @@ class _HomeUOwnerAddPropertyScreenState
       return const HomeURoleBlockedScreen(requiredRole: HomeURole.owner);
     }
 
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F8FC),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           widget.propertyId == null ? 'Add Property' : 'Edit Property',
-        ), // UPDATED
-        backgroundColor: const Color(0xFFF6F8FC),
+          style: theme.textTheme.titleLarge?.copyWith(
+            color: colorScheme.onSurface,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
       ),
       body: SafeArea(
@@ -328,10 +336,10 @@ class _HomeUOwnerAddPropertyScreenState
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'List your property with complete details for faster approvals.',
-                style: TextStyle(
-                  color: Color(0xFF50617F),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                 ),
@@ -450,13 +458,19 @@ class _HomeUOwnerAddPropertyScreenState
                                         }
                                       });
                                     },
-                              selectedColor: const Color(0xFFEAF2FF),
-                              checkmarkColor: const Color(0xFF1E3A8A),
-                              labelStyle: const TextStyle(
-                                color: Color(0xFF1F314F),
+                              selectedColor: colorScheme.primary.withValues(
+                                alpha: context.isDarkMode ? 0.3 : 0.12,
+                              ),
+                              checkmarkColor: colorScheme.primary,
+                              labelStyle: TextStyle(
+                                color: colorScheme.onSurface,
                                 fontWeight: FontWeight.w600,
                               ),
-                              side: const BorderSide(color: Color(0x331E3A8A)),
+                              side: BorderSide(
+                                color: colorScheme.outline.withValues(
+                                  alpha: 0.4,
+                                ),
+                              ),
                             ),
                           )
                           .toList(),
@@ -470,10 +484,10 @@ class _HomeUOwnerAddPropertyScreenState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Add multiple images to improve listing visibility.',
-                      style: TextStyle(
-                        color: Color(0xFF667896),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),
@@ -523,8 +537,10 @@ class _HomeUOwnerAddPropertyScreenState
                                         },
                                   child: Container(
                                     padding: const EdgeInsets.all(4),
-                                    decoration: const BoxDecoration(
-                                      color: Color(0xAA000000),
+                                    decoration: BoxDecoration(
+                                      color: colorScheme.scrim.withValues(
+                                        alpha: 0.6,
+                                      ),
                                       shape: BoxShape.circle,
                                     ),
                                     child: const Icon(
@@ -561,8 +577,10 @@ class _HomeUOwnerAddPropertyScreenState
                                       : () => _removeImageAt(index),
                                   child: Container(
                                     padding: const EdgeInsets.all(4),
-                                    decoration: const BoxDecoration(
-                                      color: Color(0xAA000000),
+                                    decoration: BoxDecoration(
+                                      color: colorScheme.scrim.withValues(
+                                        alpha: 0.6,
+                                      ),
                                       shape: BoxShape.circle,
                                     ),
                                     child: const Icon(
@@ -588,12 +606,12 @@ class _HomeUOwnerAddPropertyScreenState
                   key: const Key('select_location_section'),
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF4F8FF),
+                    color: colorScheme.surfaceContainerHighest,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
                       color: _locationError
-                          ? const Color(0xFFC53030)
-                          : const Color(0x331E3A8A),
+                          ? colorScheme.error
+                          : colorScheme.outline.withValues(alpha: 0.4),
                       width: _locationError ? 1.5 : 1.0,
                     ),
                   ),
@@ -604,17 +622,20 @@ class _HomeUOwnerAddPropertyScreenState
                         height: 60,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10),
-                          gradient: const LinearGradient(
+                          gradient: LinearGradient(
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
-                            colors: [Color(0xFFDCE9FF), Color(0xFFD7F5E7)],
+                            colors: [
+                              colorScheme.primaryContainer,
+                              colorScheme.secondaryContainer,
+                            ],
                           ),
                         ),
                         child: Icon(
                           _selectedCoordinates == null
                               ? Icons.map_outlined
                               : Icons.location_pin,
-                          color: const Color(0xFF1E3A8A),
+                          color: colorScheme.primary,
                           size: 28,
                         ),
                       ),
@@ -629,8 +650,8 @@ class _HomeUOwnerAddPropertyScreenState
                                   : 'Coordinates Selected',
                               style: TextStyle(
                                 color: _locationError
-                                    ? const Color(0xFFC53030)
-                                    : const Color(0xFF1F314F),
+                                    ? colorScheme.error
+                                    : colorScheme.onSurface,
                                 fontSize: 13,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -638,8 +659,8 @@ class _HomeUOwnerAddPropertyScreenState
                             if (_selectedCoordinates != null)
                               Text(
                                 '${_selectedCoordinates!.latitude.toStringAsFixed(5)}, ${_selectedCoordinates!.longitude.toStringAsFixed(5)}',
-                                style: const TextStyle(
-                                  color: Color(0xFF667896),
+                                style: TextStyle(
+                                  color: colorScheme.onSurfaceVariant,
                                   fontSize: 11,
                                 ),
                               ),
@@ -687,19 +708,19 @@ class _HomeUOwnerAddPropertyScreenState
                   children: [
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: const Text(
+                      title: Text(
                         'Publish Immediately',
-                        style: TextStyle(
+                        style: theme.textTheme.titleSmall?.copyWith(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF1F314F),
+                          color: colorScheme.onSurface,
                         ),
                       ),
-                      subtitle: const Text(
+                      subtitle: Text(
                         'Listing goes live as soon as it is submitted',
-                        style: TextStyle(
+                        style: theme.textTheme.bodySmall?.copyWith(
                           fontSize: 12,
-                          color: Color(0xFF667896),
+                          color: colorScheme.onSurfaceVariant,
                         ),
                       ),
                       value: _publishImmediately,
@@ -711,7 +732,7 @@ class _HomeUOwnerAddPropertyScreenState
                             },
                     ),
                     if (!_publishImmediately) ...[
-                      const Divider(color: Color(0x1F1E3A8A)),
+                      Divider(color: theme.dividerColor),
                       _DateSelectorTile(
                         label: 'Schedule Go-Live Date',
                         value: _scheduledPublishDate != null
@@ -736,9 +757,9 @@ class _HomeUOwnerAddPropertyScreenState
                             ? null
                             : () => _handleSubmit(status: 'Draft'),
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFF1E3A8A),
-                          side: const BorderSide(
-                            color: Color(0xFF1E3A8A),
+                          foregroundColor: colorScheme.primary,
+                          side: BorderSide(
+                            color: colorScheme.primary,
                             width: 1.5,
                           ),
                           shape: RoundedRectangleBorder(
@@ -763,8 +784,8 @@ class _HomeUOwnerAddPropertyScreenState
                             ? null
                             : () => _handleSubmit(status: 'Active'),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF1E3A8A),
-                          foregroundColor: Colors.white,
+                          backgroundColor: colorScheme.primary,
+                          foregroundColor: colorScheme.onPrimary,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                           ),
@@ -823,14 +844,16 @@ class _SectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: Color(0x141E3A8A),
+            color: context.homeuCardShadow,
             blurRadius: 12,
             offset: Offset(0, 4),
           ),
@@ -841,8 +864,8 @@ class _SectionCard extends StatelessWidget {
         children: [
           Text(
             title,
-            style: const TextStyle(
-              color: Color(0xFF1F314F),
+            style: TextStyle(
+              color: colorScheme.onSurface,
               fontSize: 15,
               fontWeight: FontWeight.w700,
             ),
@@ -876,13 +899,16 @@ class _LabeledTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final inputTheme = theme.inputDecorationTheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: const TextStyle(
-            color: Color(0xFF40526E),
+          style: theme.textTheme.labelLarge?.copyWith(
+            color: colorScheme.onSurfaceVariant,
             fontSize: 13,
             fontWeight: FontWeight.w600,
           ),
@@ -896,22 +922,25 @@ class _LabeledTextField extends StatelessWidget {
           decoration: InputDecoration(
             hintText: hintText,
             errorText: errorText,
-            filled: true,
-            fillColor: const Color(0xFFFBFCFF),
+            filled: inputTheme.filled,
+            fillColor: inputTheme.fillColor,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0x1F1E3A8A)),
+              borderSide:
+                  inputTheme.border?.borderSide ??
+                  BorderSide(color: theme.dividerColor),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0x1F1E3A8A)),
+              borderSide:
+                  inputTheme.enabledBorder?.borderSide ??
+                  BorderSide(color: theme.dividerColor),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Color(0xFF1E3A8A),
-                width: 1.2,
-              ),
+              borderSide:
+                  inputTheme.focusedBorder?.borderSide ??
+                  BorderSide(color: colorScheme.primary, width: 1.2),
             ),
           ),
         ),
@@ -937,13 +966,16 @@ class _LabeledDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final inputTheme = theme.inputDecorationTheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: const TextStyle(
-            color: Color(0xFF40526E),
+          style: theme.textTheme.labelLarge?.copyWith(
+            color: colorScheme.onSurfaceVariant,
             fontSize: 13,
             fontWeight: FontWeight.w600,
           ),
@@ -957,15 +989,25 @@ class _LabeledDropdown extends StatelessWidget {
               .toList(),
           onChanged: onChanged,
           decoration: InputDecoration(
-            filled: true,
-            fillColor: const Color(0xFFFBFCFF),
+            filled: inputTheme.filled,
+            fillColor: inputTheme.fillColor,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0x1F1E3A8A)),
+              borderSide:
+                  inputTheme.border?.borderSide ??
+                  BorderSide(color: theme.dividerColor),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0x1F1E3A8A)),
+              borderSide:
+                  inputTheme.enabledBorder?.borderSide ??
+                  BorderSide(color: theme.dividerColor),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide:
+                  inputTheme.focusedBorder?.borderSide ??
+                  BorderSide(color: colorScheme.primary, width: 1.2),
             ),
           ),
         ),
@@ -981,15 +1023,18 @@ class _UploadTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
-        color: addMode ? const Color(0xFFF4F8FF) : const Color(0xFFEAF2FF),
-        border: Border.all(color: const Color(0x331E3A8A)),
+        color: addMode
+            ? colorScheme.surfaceContainerHighest
+            : colorScheme.primaryContainer.withValues(alpha: 0.55),
+        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.45)),
       ),
       child: Icon(
         addMode ? Icons.add_a_photo_rounded : Icons.image_rounded,
-        color: const Color(0xFF1E3A8A),
+        color: colorScheme.primary,
       ),
     );
   }
@@ -1008,19 +1053,23 @@ class _DateSelectorTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         decoration: BoxDecoration(
-          color: const Color(0xFFFBFCFF),
+          color: theme.inputDecorationTheme.fillColor ?? theme.cardColor,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0x1F1E3A8A)),
+          border: Border.all(
+            color: colorScheme.outline.withValues(alpha: 0.35),
+          ),
         ),
         child: Row(
           children: [
-            const Icon(Icons.event_rounded, color: Color(0xFF1E3A8A)),
+            Icon(Icons.event_rounded, color: colorScheme.primary),
             const SizedBox(width: 8),
             Expanded(
               child: Column(
@@ -1028,8 +1077,8 @@ class _DateSelectorTile extends StatelessWidget {
                 children: [
                   Text(
                     label,
-                    style: const TextStyle(
-                      color: Color(0xFF667896),
+                    style: TextStyle(
+                      color: colorScheme.onSurfaceVariant,
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
                     ),
@@ -1037,8 +1086,8 @@ class _DateSelectorTile extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     value,
-                    style: const TextStyle(
-                      color: Color(0xFF1F314F),
+                    style: TextStyle(
+                      color: colorScheme.onSurface,
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
                     ),

@@ -33,25 +33,26 @@ class _HomeURequestsScreenState extends State<HomeURequestsScreen>
       return const HomeURoleBlockedScreen(requiredRole: HomeURole.tenant);
     }
 
+    final colors = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F8FC),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'Requests',
           style: TextStyle(
-            color: Color(0xFF0F172A),
+            color: colors.onSurface,
             fontWeight: FontWeight.bold,
             fontSize: 24,
           ),
         ),
-        backgroundColor: const Color(0xFFF6F8FC),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         centerTitle: false,
         bottom: TabBar(
           controller: _tabController,
-          labelColor: const Color(0xFF1E3A8A),
-          unselectedLabelColor: const Color(0xFF64748B),
-          indicatorColor: const Color(0xFF1E3A8A),
+          labelColor: colors.primary,
+          unselectedLabelColor: colors.onSurfaceVariant,
+          indicatorColor: colors.primary,
           indicatorWeight: 3,
           labelStyle: const TextStyle(
             fontWeight: FontWeight.bold,

@@ -38,8 +38,9 @@ class BookingHistoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const purpleAccent = Color(0xFF6366F1); // Muted purple-blue
-    const grayBorder = Color(0xFFF1F5F9); // Light gray-100/200
+    final colors = Theme.of(context).colorScheme;
+    final purpleAccent = colors.primary; // use theme primary as accent
+    final grayBorder = context.homeuSoftBorder; // theme-based soft border
 
     final isPropertyRented = propertyStatus?.toLowerCase() == 'rented';
     final isPendingOrApproved = status.toLowerCase() == 'pending' || status.toLowerCase() == 'approved';
@@ -50,7 +51,7 @@ class BookingHistoryCard extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Left Section: Single large image focus
-        _buildImageSection(isRejected),
+        _buildImageSection(context, isRejected),
         const SizedBox(width: 16),
         // Right Section: Info
         Expanded(
@@ -71,18 +72,18 @@ class BookingHistoryCard extends StatelessWidget {
       );
     }
 
-    return GestureDetector(
+      return GestureDetector(
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.homeuCard,
           borderRadius: BorderRadius.circular(24),
           border: Border.all(color: grayBorder, width: 1.5),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: context.homeuCardShadow.withOpacity(0.6),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
@@ -93,22 +94,22 @@ class BookingHistoryCard extends StatelessWidget {
             cardContent,
             Positioned(
               top: 0,
-              right: 0,
+              right: 8,
               child: Container(
-                constraints: const BoxConstraints(maxWidth: 80),
+                constraints: const BoxConstraints(maxWidth: 96),
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: showRentedKillSwitch ? const Color(0xFF94A3B8) : _getStatusColor(status),
+                  color: showRentedKillSwitch ? context.homeuSoftBorder : _getStatusColor(context, status),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
                   child: Text(
                     (showRentedKillSwitch ? 'Cancelled' : status).toUpperCase(),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w800,
-                      color: Colors.white,
+                      color: _getStatusTextColor(context, status),
                       letterSpacing: 0.5,
                     ),
                   ),
@@ -121,29 +122,48 @@ class BookingHistoryCard extends StatelessWidget {
     );
   }
 
-  Color _getStatusColor(String status) {
+  Color _getStatusColor(BuildContext context, String status) {
+    final colors = Theme.of(context).colorScheme;
     switch (status.trim().toLowerCase()) {
       case 'approved':
-        return const Color(0xFF10B981); // Green (Matches Viewing)
+        return colors.secondary; // success green
       case 'pending':
-        return const Color(0xFF3B82F6); // Blue
+        return colors.primary; // primary/blue
       case 'rejected':
-        return const Color(0xFFEF4444); // Red (Matches Viewing)
+        return colors.error; // error red
       case 'cancelled':
       case 'canceled':
-        return const Color(0xFF94A3B8); // Muted Gray
+        return context.homeuSoftBorder; // muted gray
       case 'completed':
-        return const Color(0xFF6366F1); // Indigo (Matches Viewing)
+        return colors.primaryContainer; // use container/variant for completed
       default:
-        return const Color(0xFF1E3A8A);
+        return colors.primary;
     }
   }
 
-  Widget _buildImageSection(bool isRejected) {
+  Color _getStatusTextColor(BuildContext context, String status) {
+    final colors = Theme.of(context).colorScheme;
+    switch (status.trim().toLowerCase()) {
+      case 'approved':
+        return colors.onSecondary;
+      case 'pending':
+        return colors.onPrimary;
+      case 'rejected':
+        return colors.onError;
+      case 'cancelled':
+      case 'canceled':
+        return colors.onSurface;
+      default:
+        return colors.onPrimary;
+    }
+  }
+
+  Widget _buildImageSection(BuildContext context, bool isRejected) {
     const double mainWidth = 110;
     const double mainHeight = 130;
 
     Widget image = _buildImage(
+      context,
       imageUrls.isNotEmpty ? imageUrls[0] : null,
       mainWidth,
       mainHeight,
@@ -167,13 +187,13 @@ class BookingHistoryCard extends StatelessWidget {
     );
   }
 
-  Widget _buildImage(String? url, double width, double height) {
+  Widget _buildImage(BuildContext context, String? url, double width, double height) {
     if (url == null || url.isEmpty) {
       return Container(
         width: width,
         height: height,
-        color: const Color(0xFFF1F5F9),
-        child: const Icon(Icons.image_outlined, color: Color(0xFF94A3B8), size: 24),
+        color: context.homeuRaisedCard,
+        child: Icon(Icons.image_outlined, color: context.homeuMutedText, size: 24),
       );
     }
     return Image.network(
@@ -184,8 +204,8 @@ class BookingHistoryCard extends StatelessWidget {
       errorBuilder: (_, __, ___) => Container(
         width: width,
         height: height,
-        color: const Color(0xFFF1F5F9),
-        child: const Icon(Icons.broken_image_outlined, color: Color(0xFF94A3B8), size: 24),
+        color: context.homeuRaisedCard,
+        child: Icon(Icons.broken_image_outlined, color: context.homeuMutedText, size: 24),
       ),
     );
   }
@@ -199,13 +219,13 @@ class BookingHistoryCard extends StatelessWidget {
       children: [
         // Title (Property Name)
         Padding(
-          padding: const EdgeInsets.only(right: 70), // Leave room for status badge
+          padding: const EdgeInsets.only(right: 88), // Leave room for status badge
           child: Text(
             hotelName,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF0F172A),
+              color: context.homeuPrimaryText,
               height: 1.2,
             ),
             maxLines: 1,
@@ -216,16 +236,16 @@ class BookingHistoryCard extends StatelessWidget {
         // Location with purple pin
         Row(
           children: [
-            Icon(Icons.location_on, size: 16, color: purpleAccent),
+              Icon(Icons.location_on, size: 16, color: purpleAccent),
             const SizedBox(width: 4),
             Expanded(
               child: Text(
                 locationAddress,
-                style: const TextStyle(
-                  fontSize: 13,
-                  color: Color(0xFF64748B),
-                  fontWeight: FontWeight.w500,
-                ),
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: context.homeuSecondaryText,
+                    fontWeight: FontWeight.w500,
+                  ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -249,7 +269,7 @@ class BookingHistoryCard extends StatelessWidget {
 
             if (!shouldShowReceipt && !shouldShowSchedule) return const SizedBox.shrink();
 
-            return Padding(
+                    return Padding(
               padding: const EdgeInsets.only(top: 8),
               child: Wrap(
                 spacing: 8,
@@ -259,44 +279,51 @@ class BookingHistoryCard extends StatelessWidget {
                   if (shouldShowSchedule)
                     GestureDetector(
                       onTap: onPaymentScheduleTap,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: purpleAccent.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(color: purpleAccent.withOpacity(0.2)),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.receipt_long_outlined, size: 14, color: purpleAccent),
-                            const SizedBox(width: 6),
-                            const Text(
-                              'VIEW PAYMENT SCHEDULE',
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w800,
-                                color: Color(0xFF6366F1),
-                                letterSpacing: 0.5,
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 160),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: purpleAccent.withOpacity(0.08),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: purpleAccent.withOpacity(0.18)),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.receipt_long_outlined, size: 14, color: purpleAccent),
+                              const SizedBox(width: 6),
+                              Flexible(
+                                child: Text(
+                                  'VIEW PAYMENT SCHEDULE',
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w800,
+                                    color: purpleAccent,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   if (shouldShowReceipt)
                     Builder(builder: (context) {
-                      final receiptColor = isRefund ? Colors.orange : const Color(0xFF10B981);
-                      
+                       final receiptColor = isRefund ? Colors.orange : context.homeuSuccess;
+
                       return GestureDetector(
                         onTap: onReceiptTap,
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: receiptColor.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: receiptColor.withOpacity(0.2)),
-                          ),
+                           decoration: BoxDecoration(
+                             color: receiptColor.withOpacity(0.12),
+                             borderRadius: BorderRadius.circular(10),
+                             border: Border.all(color: receiptColor.withOpacity(0.22)),
+                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -306,13 +333,17 @@ class BookingHistoryCard extends StatelessWidget {
                                 color: receiptColor,
                               ),
                               const SizedBox(width: 6),
-                              Text(
-                                isRefund ? 'REFUND RECEIPT' : 'RECEIPT',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w800,
-                                  color: receiptColor,
-                                  letterSpacing: 0.5,
+                              Flexible(
+                                child: Text(
+                                  isRefund ? 'REFUND RECEIPT' : 'RECEIPT',
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w800,
+                                    color: receiptColor,
+                                    letterSpacing: 0.5,
+                                  ),
                                 ),
                               ),
                             ],
@@ -326,36 +357,36 @@ class BookingHistoryCard extends StatelessWidget {
           }),
         const SizedBox(height: 16),
         // Booking Stats Row: Move-in, Move-out, and Booking Fee aligned
-        Row(
+            Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Expanded(child: _buildDateColumn('Move-in', checkInDate, dateFormat, dayFormat, purpleAccent)),
+                    Expanded(child: _buildDateColumn(context, 'Move-in', checkInDate, dateFormat, dayFormat, purpleAccent)),
             const SizedBox(width: 8),
-            Expanded(child: _buildDateColumn('Move-out', checkOutDate, dateFormat, dayFormat, purpleAccent)),
+                    Expanded(child: _buildDateColumn(context, 'Move-out', checkOutDate, dateFormat, dayFormat, purpleAccent)),
             const SizedBox(width: 8),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Booking Fee',
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: purpleAccent,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                   Text(
+                     'Booking Fee',
+                     style: TextStyle(
+                       fontSize: 10,
+                       color: purpleAccent,
+                       fontWeight: FontWeight.w600,
+                     ),
+                   ),
                   const SizedBox(height: 2),
                   FittedBox(
                     fit: BoxFit.scaleDown,
                     alignment: Alignment.centerLeft,
                     child: Text(
                       'RM ${totalPrice.toStringAsFixed(0)}',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: purpleAccent,
-                      ),
+                       style: TextStyle(
+                         fontSize: 16,
+                         fontWeight: FontWeight.bold,
+                         color: context.homeuPrice,
+                       ),
                     ),
                   ),
                   const Text('', style: TextStyle(fontSize: 10)), // Placeholder to match date column height
@@ -368,7 +399,7 @@ class BookingHistoryCard extends StatelessWidget {
     );
   }
 
-  Widget _buildDateColumn(
+  Widget _buildDateColumn(BuildContext context,
       String label, DateTime date, DateFormat df, DateFormat ddf, Color accentColor) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -384,15 +415,15 @@ class BookingHistoryCard extends StatelessWidget {
         const SizedBox(height: 2),
         Text(
           df.format(date),
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 13,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF334155),
+            color: context.homeuPrimaryText,
           ),
         ),
         Text(
           ddf.format(date),
-          style: const TextStyle(fontSize: 10, color: Color(0xFF94A3B8)),
+          style: TextStyle(fontSize: 10, color: context.homeuMutedText),
         ),
       ],
     );

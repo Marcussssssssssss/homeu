@@ -139,6 +139,8 @@ class _HomeUOwnerBookingRequestDetailsScreenState
     final totalMoney =
         widget.request.monthlyPrice * widget.request.durationMonths;
 
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF6F8FC),
       appBar: AppBar(
@@ -175,11 +177,10 @@ class _HomeUOwnerBookingRequestDetailsScreenState
                           backgroundColor: const Color(0xFFEAF2FF),
                           backgroundImage:
                               (widget.request.tenantProfileUrl != null &&
-                                  widget.request.tenantProfileUrl!.isNotEmpty)
-                              ? NetworkImage(widget.request.tenantProfileUrl!)
-                              : null,
-                          child:
-                              (widget.request.tenantProfileUrl == null ||
+                                      widget.request.tenantProfileUrl!.isNotEmpty)
+                                  ? NetworkImage(widget.request.tenantProfileUrl!)
+                                  : null,
+                          child: (widget.request.tenantProfileUrl == null ||
                                   widget.request.tenantProfileUrl!.isEmpty)
                               ? const Icon(
                                   Icons.person_rounded,
@@ -211,8 +212,8 @@ class _HomeUOwnerBookingRequestDetailsScreenState
                                   color: isPending
                                       ? Colors.orange.shade50
                                       : isApproved
-                                      ? Colors.green.shade50
-                                      : Colors.red.shade50,
+                                          ? Colors.green.shade50
+                                          : Colors.red.shade50,
                                   borderRadius: BorderRadius.circular(999),
                                 ),
                                 child: Text(
@@ -223,8 +224,8 @@ class _HomeUOwnerBookingRequestDetailsScreenState
                                     color: isPending
                                         ? Colors.orange.shade800
                                         : isApproved
-                                        ? Colors.green.shade800
-                                        : Colors.red.shade800,
+                                            ? Colors.green.shade800
+                                            : Colors.red.shade800,
                                   ),
                                 ),
                               ),
@@ -238,10 +239,10 @@ class _HomeUOwnerBookingRequestDetailsScreenState
                     ElevatedButton.icon(
                       onPressed: _isOpeningChat ? null : _openChat,
                       icon: _isOpeningChat
-                          ? const SizedBox(
+                          ? SizedBox(
                               width: 18,
                               height: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2),
+                              child: const CircularProgressIndicator(strokeWidth: 2),
                             )
                           : const Icon(
                               Icons.chat_bubble_outline_rounded,
@@ -325,10 +326,10 @@ class _HomeUOwnerBookingRequestDetailsScreenState
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'Total Contract Value',
                           style: TextStyle(
-                            color: Colors.white70,
+                            color: Colors.white70.withOpacity(0.84),
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
                           ),
@@ -336,8 +337,8 @@ class _HomeUOwnerBookingRequestDetailsScreenState
                         const SizedBox(height: 4),
                         Text(
                           'For ${widget.request.durationMonths} months',
-                          style: const TextStyle(
-                            color: Colors.white54,
+                          style: TextStyle(
+                            color: colorScheme.onPrimary.withOpacity(0.72),
                             fontSize: 12,
                           ),
                         ),
@@ -345,8 +346,8 @@ class _HomeUOwnerBookingRequestDetailsScreenState
                     ),
                     Text(
                       'RM ${totalMoney.toStringAsFixed(0)}',
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: colorScheme.onPrimary,
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                       ),
@@ -361,11 +362,7 @@ class _HomeUOwnerBookingRequestDetailsScreenState
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     if (_isProcessing)
-                      const Center(
-                        child: CircularProgressIndicator(
-                          color: Color(0xFF1E3A8A),
-                        ),
-                      )
+                      const Center(child: CircularProgressIndicator())
                     else
                       Row(
                         children: [
